@@ -1,6 +1,4 @@
-import { AccountForm } from "@/components/form/account-form";
 import { DoctorForm } from "@/components/form/doctor-form";
-import Image from "next/image";
 
 export default function Home() {
   return (

@@ -3,14 +3,14 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
-// import Profile from "@/components/Profile";
+import Profile from "@/components/Profile";
 
 const UserPatients = ({ params }) => {
   const searchParams = useSearchParams();
   const userName = searchParams.get("name");
 
   const [userPatients, setUserPatients] = useState([]);
-  
+
 
   useEffect(() => {
     const fetchPatients = async () => {
@@ -24,14 +24,12 @@ const UserPatients = ({ params }) => {
   }, [params.id]);
 
   return (
-    // <Profile
-    //   name={userName}
-    //   desc={`Welcome to ${userName}'s personalized profile page. Explore ${userName}'s patients`}
-    //   data={userPatients}
-    // />
-    <>  </>
-
-    );
+    <Profile
+      name={userName}
+      desc={`Welcome to ${userName}'s personalized profile page. Explore ${userName}'s patients`}
+      data={userPatients}
+    />
+  );
 };
 
 export default UserPatients;

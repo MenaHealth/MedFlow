@@ -104,14 +104,6 @@ export function UserOnboarding() {
         }
     }
 
-    async function getUserInfo() {
-        const response = await fetch(`/api/user/${session?.user?.id}`, {
-            method: "GET",
-        });
-        const data = response.json();
-        alert(`user data ${JSON.stringify(data, null, 2)}`);
-    }
-
     // log in -> select account 
     // account type is set
     // doc type is set -> display form

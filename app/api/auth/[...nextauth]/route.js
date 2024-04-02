@@ -9,6 +9,9 @@ const handler = NextAuth({
     GoogleProvider({
       clientId: process.env.GOOGLE_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      httpOptions: {
+        timeout: 40000,
+      },
     })
   ],
   callbacks: {

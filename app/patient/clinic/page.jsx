@@ -84,7 +84,7 @@ export default function ClinicTable() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.filter((row) => {return row.assignedClinic === currentClinic && row.assignedDocId === null}).map((row, index) => (
+            {rows.filter((row) => {return row.assignedClinic === currentClinic && row.assignedDocId == null}).map((row, index) => (
               <TableRow
                 key={index}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from 'react';
-import Link from 'next/link';
+
 import { UserOnboarding } from '@/components/form/UserOnboarding';
 
 const Home = () => {

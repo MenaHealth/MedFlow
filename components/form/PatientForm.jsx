@@ -1,23 +1,23 @@
 import Link from "next/link";
 import { useSession } from 'next-auth/react';
 
-const PatientForm = ({ type, patient, setPatient, submitting, handleSubmit }) => {
+const PatientForm = ({ patient, setPatient, submitting, handleSubmit }) => {
   const { data: session } = useSession();
 
   patient.coordinatorId = session?.user?.id;
 
   return (
-    <section className='w-full max-w-full flex-start flex-col'>
+    <section className='w-full max-w-full flex-start flex-col mx-auto'>
       <h1 className='head_text text-left'>
-        <span className='blue_gradient'>{type} Patient</span>
+        <span className='blue_gradient'>Add Patient</span>
       </h1>
       <p className='desc text-left max-w-md'>
-        {type} and manage patients effectively to stay organized and productive.
+        Add and manage patients effectively to stay organized and productive.
       </p>
 
       <form
         onSubmit={handleSubmit}
-        className='mt-10 w-full max-w-2xl flex flex-col gap-7 glassmorphism'
+        className='mt-10 w-full max-w-2xl flex flex-col gap-7 glassmorphism backdrop-filter'
       >
         <label>
           <span className=' font-semibold text-base text-gray-700'>
@@ -168,16 +168,16 @@ const PatientForm = ({ type, patient, setPatient, submitting, handleSubmit }) =>
         </label>
 
         <div className='flex-end mx-3 mb-5 gap-4'>
-          <Link href='/patient/triage' className='text-gray-500 text-sm'>
+          <Link href='/patient/triage' className='text-black text-sm'>
             Cancel
           </Link>
 
           <button
             type='submit'
             disabled={submitting}
-            className='px-5 py-1.5 text-sm bg-primary-orange rounded-full text-white'
+            className='black_btn'
           >
-            {submitting ? `${type}ing...` : type}
+            {submitting ? `Creating...`: 'Create'}
           </button>
         </div>
       </form>

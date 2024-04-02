@@ -157,7 +157,7 @@ export function UserOnboarding() {
                     <div>Name: {session?.user?.name}</div>
                     <div>Account Type: {session?.user?.accountType}</div>
                     <div>Specialties: {session?.user?.specialties}</div>
-                    {/* // message saying you're all set */}
+                    
                     <div>You are all set!</div>
 
                     {/* <button

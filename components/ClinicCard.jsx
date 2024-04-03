@@ -22,7 +22,7 @@ const ClinicCard = ({ key, clinic, count }) => {;
               {clinic.name}
             </h3>
             <p className='font-inter text-sm text-gray-500'>
-              {count} Patients
+              {count} patients unattended!
             </p>
           </div>
         </div>

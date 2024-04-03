@@ -34,16 +34,18 @@ export function EditCard() {
           console.log(error);
         }
       }
-    return (<div className="prompt_card space-y-2">
-        Hello {session?.user?.name}!
-        <div>Account Type: {session?.user?.accountType}</div>
-        <div>Specialties: {session?.user?.specialties}</div>
+    return (
+        <div className="prompt_card space-y-2">
+            Hello {session?.user?.name}!
+            <div>Account Type: {session?.user?.accountType}</div>
+            <div>Specialties: {session?.user?.specialties.join(", ")}</div>
 
-        <button
-            onClick={() => {
-                updateProfile({ updateAccountType: 'Unspecified', specialties: [] });
-            }}
-            className='black_btn'
-        >Edit Profile</button>
-    </div>)
+            <button
+                onClick={() => {
+                    updateProfile({ updateAccountType: 'Unspecified', specialties: [] });
+                }}
+                className='black_btn'
+            >Edit Profile</button>
+        </div>
+    )
 }

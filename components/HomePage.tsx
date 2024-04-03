@@ -24,7 +24,7 @@ export function HomePage({ provider }: { provider: any }) {
                         }}
                         className='login_btn'
                     >
-                        Log In
+                        Sign In
                     </button>
                 </div>
             </div>

@@ -8,6 +8,7 @@ export const GET = async (request, { params }) => {
         if (request.nextUrl.searchParams.get("assignedDocId")) {
             const query = {assignedDocId : request.nextUrl.searchParams.get("assignedDocId")};
             const patient = await Patient.find(query).populate("coordinatorId").populate("assignedDocId");
+
             return new Response(JSON.stringify(patient), { status: 200 })
         } else if (request.nextUrl.searchParams.get("countClinicPatients")) {
             // count the number of patients in the clinic who are not assigned to a doctor
@@ -69,3 +70,24 @@ export const PATCH = async (request, { params }) => {
         return new Response(`Error Updating Patient: ${error}`, { status: 500 });
     }
 };
+
+export const POST = async (request, { params }) => {
+    try {
+        await connectToDB();
+
+        const { assignedDocId, clinics } = await request.json();
+
+        const patientData = await Patient.find({assignedDocId})
+                                        .populate("coordinatorId")
+                                        .populate("assignedDocId");
+        const clinicCounts = {};
+        for (let clinic of clinics) {
+            const countQuery = {assignedClinic : clinic, assignedDocId: null};
+            const count = await Patient.countDocuments(countQuery);
+            clinicCounts[clinic] = count;
+        }
+        return new Response(JSON.stringify({patientData, clinicCounts}), { status: 200 });
+    } catch (error) {
+        return new Response(`Failed to fetch patients: ${error}`, { status: 500 });
+    }
+}

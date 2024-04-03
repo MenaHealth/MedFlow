@@ -13,34 +13,31 @@ export function PatientDashboard() {
   const [clinicCounts, setClinicCounts] = useState({});
 
 
-
   useEffect(() => {
     setUser(session?.user);
 
-    async function getUserInfo() {
-      const response = await fetch(`/api/patient?assignedDocId=${session?.user?.id}`, {
-        method: "GET",
-        params: { assignedDocId: session?.user?.accountType },
-      });
-      const data = await response.json();
-      setData(data);
-    }
-
-    async function getClinicStats(clinicName) {
+    async function getPatientDashboardInfo() {
+      if (!session?.user) return;
       try {
-        const response = await fetch(`/api/patient?countClinicPatients=${clinicName}`, {
-          method: "GET",
-          params: { assignedDocId: session?.user?.accountType },
+        const response = await fetch(`/api/patient`, {
+          method: "POST",
+          body: JSON.stringify({ 
+            assignedDocId: session?.user?.id,
+            clinics: session?.user?.specialties,
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
         });
-        const data = await response.json();
-        setClinicCounts((prev) => ({ ...prev, [clinicName]: data.count }));
+        const { patientData, clinicCounts } = await response.json();
+        setData(patientData);
+        setClinicCounts(clinicCounts);
       } catch (error) {
         console.log(error);
       }
     }
 
-    getUserInfo();
-    getClinicStats(session?.user.specialties[0]);
+    getPatientDashboardInfo();
   }, [session?.user]);
 
   return (
@@ -51,7 +48,8 @@ export function PatientDashboard() {
 
       <div className='mt-10 grid grid-cols-2 gap-6 py-8'>
         <div>
-          {CLINICS.filter((clinic) => user?.specialties ? clinic === user?.specialties[0] : 'Cardiology').map((clinic) => (
+          {/* // check if clinic is in user specialties */}
+          {CLINICS.filter((clinic) => user?.specialties != null && user?.specialties.includes(clinic)).map((clinic) => (
             <ClinicCard
               key={clinic}
               clinic={{ name: clinic, complaint: user?.specialties ? user?.specialties[0] : 'Cardiology' }}

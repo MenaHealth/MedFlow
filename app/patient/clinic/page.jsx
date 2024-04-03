@@ -8,7 +8,6 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { create } from '@mui/material/styles/createTransitions';
 import { useEffect } from "react";
 import { Button } from '@/components/ui/button';
 import {
@@ -46,6 +45,12 @@ export default function ClinicTable() {
 
   useEffect(() => {
     setAssignedDocId(session?.user?.id);
+    // set current clinic from url search params
+    const urlParams = new URLSearchParams(window.location.search);
+    const clinic = urlParams.get('clinic');
+    if (clinic) {
+      setCurrentClinic(clinic);
+    }
   }, [session?.user]);
 
   return (
@@ -62,6 +67,9 @@ export default function ClinicTable() {
             <DropdownMenuSeparator />
             <DropdownMenuRadioGroup value={currentClinic} onValueChange={async (value) => {
               setCurrentClinic(value);
+              const url = new URL(window.location);
+              url.searchParams.set('clinic', value);
+              window.history.pushState({}, '', url);
             }
             }>
               {CLINICS.map((clinic) => (

@@ -22,7 +22,7 @@ import {
 
 import { CLINICS, PATIENT_STATUSES } from '@/data/data';
 
-export default function BasicTable() {
+export default function PatientTriage() {
 
   const [rows, setRows] = React.useState([]);
   const [users, setUsers] = React.useState([]);
@@ -54,11 +54,10 @@ export default function BasicTable() {
 
   return (
     <>
-      <h2 className='head_text_2 text-left'>
+    <div className="w-full">
+      <h2 className='head_text_2 text-center py-3'>
         <span className='blue_gradient'>Patient Triage</span>
       </h2>
-      {console.log(users.map((user) => (JSON.stringify(user))))}
-
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
@@ -83,7 +82,7 @@ export default function BasicTable() {
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline">{row.status}</Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56">
+                    <DropdownMenuContent className="w-46">
                       <DropdownMenuSeparator />
                       <DropdownMenuRadioGroup value={row.status} onValueChange={async (value) => {
                         try {
@@ -116,7 +115,7 @@ export default function BasicTable() {
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline">{row.coordinatorId?.name ? row.coordinatorId?.name : 'Unassigned'}</Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56">
+                    <DropdownMenuContent className="w-50">
                       <DropdownMenuSeparator />
                       <DropdownMenuRadioGroup value={row.coordinatorId?._id} onValueChange={async (value) => {
                         try {
@@ -218,6 +217,7 @@ export default function BasicTable() {
           </TableBody>
         </Table>
       </TableContainer>
+      </div>
     </>
   );
 }

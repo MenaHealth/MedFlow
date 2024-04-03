@@ -1,15 +1,30 @@
 import Patient from "@/models/patient";
 import { connectToDB } from "@/utils/database";
 
-export const GET = async (request) => {
+export const GET = async (request, { params }) => {
     try {
-        await connectToDB()
+        await connectToDB();
 
-        const patient = await Patient.find({}).populate("coordinatorId").populate("assignedDocId")
-
+        if (request.nextUrl.searchParams.get("assignedDocId")) {
+            const query = {assignedDocId : request.nextUrl.searchParams.get("assignedDocId")};
+            const patient = await Patient.find(query).populate("coordinatorId").populate("assignedDocId");
+            return new Response(JSON.stringify(patient), { status: 200 })
+        } else if (request.nextUrl.searchParams.get("countClinicPatients")) {
+            // count the number of patients in the clinic who are not assigned to a doctor
+            const countQuery = {assignedClinic : request.nextUrl.searchParams.get("countClinicPatients"), assignedDocId: null};
+            const count = await Patient.countDocuments(countQuery);
+            return new Response(JSON.stringify({count}), { status: 200 });
+        } else if (request.nextUrl.searchParams.get("assignedClinic")) {
+            const query = {assignedClinic : request.nextUrl.searchParams.get("assignedClinic")};
+            const patient = await Patient.find(query).populate("coordinatorId").populate("assignedDocId");
+            return new Response(JSON.stringify(patient), { status: 200 });
+        }
+        
+        // return all patients
+        const patient = await Patient.find().populate("coordinatorId").populate("assignedDocId");
         return new Response(JSON.stringify(patient), { status: 200 })
     } catch (error) {
-        return new Response("Failed to fetch all patients", { status: 500 })
+        return new Response(`Failed to fetch all patients: ${error} ${JSON.stringify(request)} ${JSON.stringify(params)}`, { status: 500 })
     }
 }
 

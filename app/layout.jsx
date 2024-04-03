@@ -9,14 +9,14 @@ export const metadata = {
 };
 
 const RootLayout = ({ children }) => (
-  <html lang='en'>
-    <body>
+  <html lang='en' className="h-screen">
+    <body className="h-screen">
       <Provider>
         <div className='main'>
           <div className='gradient' />
         </div>
 
-        <main className='app'>
+        <main className='h-screen app'>
           <Nav />
           {children}
         </main>

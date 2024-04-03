@@ -27,7 +27,7 @@ const Navb = () => {
         <div className="App">
             <header className="App-header">
                 <nav className='navbar'>
-                    {/* logo */}
+                    
                     <a href='#home' className='logo'>Dev. </a>
                     <ul className={`navMenu ${isActive ? 'active' : ''}`}>
                         <li onClick={removeActive}>

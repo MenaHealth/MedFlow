@@ -1,33 +1,36 @@
 "use client";
 
-const PatientCard = ({ key, patient }) => {
+import { useRouter } from "next/navigation";
 
-  const handlePatientClick = () => {
+const ClinicCard = ({ key, clinic, count }) => {;
+  const router = useRouter();
 
+  const handleClinicClick = () => {
+    router.push(`/patient/clinic?clinic=${clinic.name}`);
   };
 
-  if (!patient) return (<h1>Loading...</h1>);
+  if (!clinic) return (<h1>Loading...</h1>);
   return (
     <div className='prompt_card'>
       <div className='flex justify-between items-start gap-5'>
         <div
           className='flex-1 flex justify-start items-center gap-3 cursor-pointer'
-          onClick={handlePatientClick}
+          onClick={handleClinicClick}
         >
           <div className='flex flex-col'>
             <h3 className='font-satoshi font-semibold text-gray-900'>
-              {patient.name}
+              {clinic.name}
             </h3>
             <p className='font-inter text-sm text-gray-500'>
-              {patient.complaint}
+              {count} Patients
             </p>
           </div>
         </div>
       </div>
 
-      <p className='my-4 font-satoshi text-sm text-gray-700'>{patient.assignedClinic}</p>
+      <p className='my-4 font-satoshi text-sm text-gray-700'></p>
     </div>
   );
 };
 
-export default PatientCard;
+export default ClinicCard;

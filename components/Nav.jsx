@@ -19,8 +19,8 @@ const Nav = () => {
   }, []);
 
   return (
-    <nav className='flex justify-between items-center w-full mb-16 pt-3'>
-      <Link href='/' className='flex gap-2 justify-center items-center'>
+    <nav className='w-full flex justify-between items-center mb-16 pt-3'>
+      <Link href='/' className='flex gap-2'>
         <Image
           src='/assets/images/logo.svg'
           alt='logo'
@@ -31,30 +31,35 @@ const Nav = () => {
         <p className='logo_text'>MedFlow</p>
       </Link>
       {/* Desktop Navigation */}
-      <div className='sm:flex hidden'>
-        <div className='flex gap-3 md:gap-5'>
-          <Link href='/patient/clinic' className='black_btn'>
-            Clinics
-          </Link>
-          <Link href='/patient/triage' className='black_btn'>
-            Patient Triage
-          </Link>
-          <Link href='/create-patient' className='black_btn'>
-            Create Patient
-          </Link>
-          <Link href='/med-order' className='black_btn'>
-            Med Order Form
-          </Link>
+      <div className='sm:flex hidden gap-5'>
+        <div className='flex gap-3 md:gap-8'>
+          {session?.user && (
+            <>
+              <Link href='/edit-profile' className='outline_btn'>
+                Edit Profile
+              </Link>
+              <Link href='/patient/clinic' className='outline_btn'>
+                Clinics
+              </Link>
+              <Link href='/patient/triage' className='outline_btn'>
+                Patient Triage
+              </Link>
+              <Link href='/create-patient' className='outline_btn'>
+                Create Patient
+              </Link>
+              <Link href='/med-order' className='outline_btn'>
+                Med Order Form
+              </Link>
+            </>
+          )}
         </div>
         {session?.user ? (
-
           <>
-
             <button type='button' onClick={signOut} className='outline_btn'>
               Sign Out
             </button>
 
-            <Link href='/profile'>
+            <Link href='/'>
               <Image
                 src={session?.user.image}
                 width={37}
@@ -85,53 +90,62 @@ const Nav = () => {
       </div>
 
       {/* Mobile Navigation */}
-      <div className='sm:hidden flex relative'>
+      <div className='sm:hidden flex relative z-20'>
         {session?.user ? (
           <div className='flex'>
-            <Image
-              src={session?.user.image}
-              width={37}
-              height={37}
-              className='rounded-full'
-              alt='profile'
-              onClick={() => setToggleDropdown(!toggleDropdown)}
-            />
+
+            <div className={`hamburger ${toggleDropdown ? 'active' : ''}`} onClick={() => setToggleDropdown(!toggleDropdown)}>
+              <span className='bar'></span>
+              <span className='bar'></span>
+              <span className='bar'></span>
+            </div>
+
 
             {toggleDropdown && (
               <div className='dropdown'>
-                <Link href='/patient/clinic'
-                  className='dropdown_link'
-                  onClick={() => setToggleDropdown(false)}
-                >
-                  Clinics
-                </Link>
-                <Link href='/patient/triage'
-                  className='dropdown_link'
-                  onClick={() => setToggleDropdown(false)}
-                >
-                  Patient Triage
-                </Link>
-                <Link href='/create-patient'
-                  className='dropdown_link'
-                  onClick={() => setToggleDropdown(false)}
-                >
-                  Create Patient
-                </Link>
-                <Link href='/med-order'
-                  className='dropdown_link'
-                  onClick={() => setToggleDropdown(false)}>
-                  Med Order Form
-                </Link>
-                <button
-                  type='button'
-                  onClick={() => {
-                    setToggleDropdown(false);
-                    signOut();
-                  }}
-                  className='mt-5 w-full black_btn'
-                >
-                  Sign Out
-                </button>
+                {session?.user && (
+                  <>
+                    <Link
+                      href='/edit-profile'
+                      className='dropdown_link'
+                      onClick={() => setToggleDropdown(false)}
+                    >
+                      Edit Profile
+                    </Link>
+                    <Link href='/patient/clinic'
+                      className='dropdown_link'
+                      onClick={() => setToggleDropdown(false)}
+                    >
+                      Clinics
+                    </Link>
+                    <Link href='/patient/triage'
+                      className='dropdown_link'
+                      onClick={() => setToggleDropdown(false)}
+                    >
+                      Patient Triage
+                    </Link>
+                    <Link href='/create-patient'
+                      className='dropdown_link'
+                      onClick={() => setToggleDropdown(false)}
+                    >
+                      Create Patient
+                    </Link>
+                    <Link href='/med-order'
+                      className='dropdown_link'
+                      onClick={() => setToggleDropdown(false)}>
+                      Med Order Form
+                    </Link>
+                    <button
+                      type='button'
+                      onClick={() => {
+                        setToggleDropdown(false);
+                        signOut();
+                      }}
+                      className='mt-5 w-full black_btn'
+                    >
+                      Sign Out
+                    </button>
+                  </>)}
               </div>
             )}
           </div>

@@ -11,10 +11,10 @@ const ClinicCard = ({ key, clinic, count }) => {;
 
   if (!clinic) return (<h1>Loading...</h1>);
   return (
-    <div className='prompt_card'>
-      <div className='flex justify-between items-start gap-5'>
+    <div className='prompt_card justify-center'>
+      <div className='flex justify-center items-start gap-5'>
         <div
-          className='flex-1 flex justify-start items-center gap-3 cursor-pointer'
+          className='flex-1 flex justify-center items-center gap-3 cursor-pointer'
           onClick={handleClinicClick}
         >
           <div className='flex flex-col'>

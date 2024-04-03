@@ -3,15 +3,15 @@
 const PatientCard = ({ key, patient }) => {
 
   const handlePatientClick = () => {
-
+    window.location.href = `/patient/${patient._id}`;
   };
 
   if (!patient) return (<h1>Loading...</h1>);
   return (
-    <div className='prompt_card'>
-      <div className='flex justify-between items-start gap-5'>
+    <div className='prompt_card justify-center'>
+      <div className='flex justify-center items-start gap-5'>
         <div
-          className='flex-1 flex justify-start items-center gap-3 cursor-pointer'
+          className='flex-1 flex justify-center items-center gap-3 cursor-pointer'
           onClick={handlePatientClick}
         >
           <div className='flex flex-col'>

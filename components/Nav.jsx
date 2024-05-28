@@ -38,17 +38,17 @@ const Nav = () => {
               <Link href='/edit-profile' className='outline_btn'>
                 Edit Profile
               </Link>
-              <Link href='/patient/clinic' className='outline_btn'>
-                Clinics
-              </Link>
               <Link href='/patient/triage' className='outline_btn'>
-                Patient Triage
+                Patient List
               </Link>
-              <Link href='/create-patient' className='outline_btn'>
-                Create Patient
+              <Link href='/fajr/patient' className='outline_btn'>
+                Patient Form
               </Link>
-              <Link href='/med-order' className='outline_btn'>
-                Med Order Form
+              <Link href='/fajr/lab' className='outline_btn'>
+                Lab Form
+              </Link>
+              <Link href='/patient/660b70c7083d09310b0dc4d2' className='outline_btn'>
+                Chart Template
               </Link>
             </>
           )}
@@ -105,36 +105,6 @@ const Nav = () => {
               <div className='dropdown'>
                 {session?.user && (
                   <>
-                    <Link
-                      href='/edit-profile'
-                      className='dropdown_link'
-                      onClick={() => setToggleDropdown(false)}
-                    >
-                      Edit Profile
-                    </Link>
-                    <Link href='/patient/clinic'
-                      className='dropdown_link'
-                      onClick={() => setToggleDropdown(false)}
-                    >
-                      Clinics
-                    </Link>
-                    <Link href='/patient/triage'
-                      className='dropdown_link'
-                      onClick={() => setToggleDropdown(false)}
-                    >
-                      Patient Triage
-                    </Link>
-                    <Link href='/create-patient'
-                      className='dropdown_link'
-                      onClick={() => setToggleDropdown(false)}
-                    >
-                      Create Patient
-                    </Link>
-                    <Link href='/med-order'
-                      className='dropdown_link'
-                      onClick={() => setToggleDropdown(false)}>
-                      Med Order Form
-                    </Link>
                     <button
                       type='button'
                       onClick={() => {

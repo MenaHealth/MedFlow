@@ -1,22 +1,10 @@
 export const CLINICS = [
-    "Cardiology",
-    "Dermatology",
-    "Endocrinology",
-    "Gastroenterology",
-    "Hematology",
-    "Infectious Disease",
-    "Nephrology",
-    "Neurology",
-    "Oncology",
-    "Pulmonology",
-    "Rheumatology",
-    "Urology",
-    "Triage Office"
+    "Knee Replacement",
 ] as string[];
 
 export const PATIENT_STATUSES = [
-    "New",
-    "Triaged",
-    "Matched",
+    "Preoperative",
+    "Perioperative",
+    "Postoperative",
     "Case Closed"
 ] as string[];

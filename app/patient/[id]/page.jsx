@@ -1,10 +1,11 @@
 "use client"
 
 import PatientChart from "@/components/PatientChart";
+import SurgeryChartForm from "@/components/SurgeryChartForm";
 
 export default function Home({ params }) {
 
     return (
-        <PatientChart id={params.id} />
+        <SurgeryChartForm id={params.id} />
     );
 }

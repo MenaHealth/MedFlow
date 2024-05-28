@@ -42,7 +42,7 @@ export default function PatientChart({ id }: { id: string }) {
                                 <label className="block text-sm font-medium text-gray-700" htmlFor="lastName">
                                     LAST NAME
                                 </label>
-                                <Input id="lastName" placeholder="Last Name" />
+                                <Input id="lastName" placeholder="Last Name"  />
                             </div>
                             <div className="flex-1 pl-2">
                                 <label className="block text-sm font-medium text-gray-700" htmlFor="date">

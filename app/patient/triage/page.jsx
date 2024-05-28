@@ -56,7 +56,7 @@ export default function PatientTriage() {
     <>
     <div className="w-full">
       <h2 className='head_text_2 text-center py-3'>
-        <span className='blue_gradient'>Patient Triage</span>
+        <span className='blue_gradient'>Patient List</span>
       </h2>
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -64,10 +64,10 @@ export default function PatientTriage() {
             <TableRow>
               <TableCell align="center">Name</TableCell>
               <TableCell align="center">Status</TableCell>
-              <TableCell align="center">Coordinator</TableCell>
-              <TableCell align="center">Clinic</TableCell>
-              <TableCell align="center">Doctor</TableCell>
-              <TableCell align="center">Admitted</TableCell>
+              <TableCell align="center">Division</TableCell>
+              <TableCell align="center">Surgery</TableCell>
+              <TableCell align="center">Surgeon</TableCell>
+              <TableCell align="center">Last Surgery Date</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>

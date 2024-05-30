@@ -11,26 +11,26 @@ import {
   } from "@/components/ui/select"
 import Link from "next/link"
 
-export function SelectFormField({ form, fieldName, fieldLabel }: { form: any, fieldName: string, fieldLabel: string }) {
+export function SelectFormField({ form, fieldName, fieldLabel, selectOptions }: { form: any, fieldName: string, fieldLabel: string, selectOptions: string[] }) {
     return (
         <FormField
           control={form.control}
-          name="baselineAmbu"
+          name={fieldName}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Baseline Ambu</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormLabel>{fieldLabel}</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={selectOptions[0]}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Baseline ambu." />
+                    <SelectValue placeholder={fieldName} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="Independent">Independent</SelectItem>
-                  <SelectItem value="Boot">Boot</SelectItem>
-                  <SelectItem value="Crutches">Crutches</SelectItem>
-                  <SelectItem value="Walker">Walker</SelectItem>
-                  <SelectItem value="NonAmbulatory">Non-Ambulatory</SelectItem>
+                  {selectOptions.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <FormMessage />

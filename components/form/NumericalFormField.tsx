@@ -13,13 +13,10 @@ export function NumericalFormField({ form, fieldName, fieldLabel }: { form: any,
                     <FormLabel>{fieldLabel}</FormLabel>
                     <FormControl>
                         <Input
-                            {...field}
+                            {...field.value}
                             type="number"
-                        // onKeyPress={(event) => {
-                        //     if (!/[0-9]/.test(event.key)) {
-                        //     event.preventDefault();
-                        //     }
-                        // }}
+                            min={0}
+                            step={1}
                         />
                     </FormControl>
                     <FormMessage />

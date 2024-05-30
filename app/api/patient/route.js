@@ -4,25 +4,9 @@ import { connectToDB } from "@/utils/database";
 export const GET = async (request, { params }) => {
     try {
         await connectToDB();
-
-        if (request.nextUrl.searchParams.get("assignedDocId")) {
-            const query = {assignedDocId : request.nextUrl.searchParams.get("assignedDocId")};
-            const patient = await Patient.find(query).populate("coordinatorId").populate("assignedDocId");
-
-            return new Response(JSON.stringify(patient), { status: 200 })
-        } else if (request.nextUrl.searchParams.get("countClinicPatients")) {
-            // count the number of patients in the clinic who are not assigned to a doctor
-            const countQuery = {assignedClinic : request.nextUrl.searchParams.get("countClinicPatients"), assignedDocId: null};
-            const count = await Patient.countDocuments(countQuery);
-            return new Response(JSON.stringify({count}), { status: 200 });
-        } else if (request.nextUrl.searchParams.get("assignedClinic")) {
-            const query = {assignedClinic : request.nextUrl.searchParams.get("assignedClinic")};
-            const patient = await Patient.find(query).populate("coordinatorId").populate("assignedDocId");
-            return new Response(JSON.stringify(patient), { status: 200 });
-        }
         
         // return all patients
-        const patient = await Patient.find().populate("coordinatorId").populate("assignedDocId");
+        const patient = await Patient.find();
         return new Response(JSON.stringify(patient), { status: 200 })
     } catch (error) {
         return new Response(`Failed to fetch all patients: ${error} ${JSON.stringify(request)} ${JSON.stringify(params)}`, { status: 500 })
@@ -34,7 +18,9 @@ export const PATCH = async (request, { params }) => {
     const { 
         _id,
         name,
-        status,
+        priority,
+        specialty,
+        hospital,
         assignedClinic,
         assignedDocId,
         coordinatorId,
@@ -49,9 +35,11 @@ export const PATCH = async (request, { params }) => {
             return new Response("Patient not found", { status: 404 });
         }
         let returnId = null;
-        existingPatient.name = name ?? existingPatient.name;
-        existingPatient.status = status ?? existingPatient.status;
-        existingPatient.assignedClinic = assignedClinic ?? existingPatient.assignedClinic;
+
+        existingPatient.priority = priority ?? existingPatient.priority;
+        existingPatient.specialty = specialty ?? existingPatient.specialty;
+        existingPatient.hospital = hospital ?? existingPatient.hospital;
+
         if (assignedDocId) {
             existingPatient.assignedDocId = assignedDocId === "unassign" ? null : assignedDocId;
             await existingPatient.populate("assignedDocId");

@@ -26,7 +26,7 @@ const doctorFormSchema = z.object({
     specialty: z.string(),
     patientAddress: z.string(),
     diagnosis: z.string(),
-    medicationList: z.array(z.object({
+    medx: z.array(z.object({
         medName: z.string(),
         medDosage: z.string(),
         medFrequency: z.string(),
@@ -42,7 +42,7 @@ const defaultValues: Partial<DoctorFormValues> = {
     specialty: "",
     patientAddress: "",
     diagnosis: "",
-    medicationList: [{medName: "", medDosage: "", medFrequency: ""}],
+    medx: [{medName: "", medDosage: "", medFrequency: ""}],
     urgency: "",
 }
 export function DoctorForm() {
@@ -67,7 +67,7 @@ export function DoctorForm() {
                 <TextFormField form={form} fieldName="patientPhoneNumber" fieldLabel="Patient's Phone Number" />
                 <MultiChoiceFormField form={form} fieldName="patientAddress" fieldLabel="Patient's Address" custom={false} choices={["North Gaza", "Gaza City", "Deir Al Balah", "Khan Yunis", "Rafah"]} cols={3} />
                 <TextAreaFormField form={form} fieldName="diagnosis" fieldLabel="Patient Diagnosis" />
-                <MedicationSelection form={form} fieldLabel="Medicine" fieldName="medicationList"  />
+                <MedicationSelection form={form} fieldLabel="Medicine" fieldName="medx"  />
                 <MultiChoiceFormField form={form} fieldName="urgency" fieldLabel="Rate the Urgency" custom={false} choices={["Extremely urgent: vital prognosis at risk", "Urgent: functional prognosis at risk", "Moderately urgent: can wait for few days-weeks", 
                 "Less urgent: can wait", "Not urgent"]} />
                 <Button type="submit">Submit Request</Button>

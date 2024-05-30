@@ -18,84 +18,176 @@ import { TableSelect } from "../TableSelectTemplate"
 import { MedicationPopover } from "../MedicationPopover"
 import { PMHxSelect } from "../PMHxSelection"
 import { PSHxSelect } from "../PSHxSelection"
+import { cn } from "@/lib/utils"
+import { IPatient } from "@/models/patient"
+
 
 const patientFormSchema = z.object({
-    patientName: z.string(),
-    patientAge: z.number(),
+    patientId: z.string(),
+    age: z.number(),
     diagnosis: z.string(),
     icd10: z.string(),
-    dateOfSurgery: z.string(),
+    surgeryDate: z.instanceof(Date),
     occupation: z.string(),
-    baselineAmbu: z.string(),
-    medicationList: z.array(z.object({
+    baselineAmbu: z.enum(['Independent', 'Boot', 'Crutches', 'Walker', 'Non-Ambulatory']),
+    laterality: z.enum(['Bilateral', 'Left', 'Right']),
+    priority: z.enum(['Low', 'Medium', 'High']),
+    hospital: z.enum(['PMC', 'PRCS', 'Hugo Chavez']),
+    medx: z.array(z.object({
         medName: z.string(),
         medDosage: z.string(),
         medFrequency: z.string(),
     })),
-    pmhxList: z.array(z.object({
-        pmhxName: z.string()
-    })),
-    pshxList: z.array(z.object({
-        pshxDate: z.string()
-    })),
-    smokingStatus: z.number(),
-    alcohol: z.number(),
-    otherIllicit: z.string(),
+    pmhx: z.array(z.string()),
+    pshx: z.array(z.string()),
+    smokeCount: z.string(),
+    drinkCount: z.string(),
+    otherDrugs: z.string(),
     allergies: z.string(),
     notes: z.string(),
 });
 
 type PatientFormValues = z.infer<typeof patientFormSchema>
 const defaultValues: Partial<PatientFormValues> = {
-    patientName: "",
-    patientAge: 0,
+    patientId: "",
+    age: 0,
     diagnosis: "",
     icd10: "",
-    dateOfSurgery: new Date().toISOString().split("T")[0],
+    surgeryDate: new Date(),
     occupation: "",
-    baselineAmbu: "",
-    medicationList: [],
-    pmhxList: [],
-    pshxList: [],
-    smokingStatus: 0,
-    alcohol: 0,
-    otherIllicit: "",
+    laterality: "Bilateral",
+    priority: "Low",
+    hospital: "PMC",
+    baselineAmbu: "Independent",
+    medx: [],
+    pmhx: [],
+    pshx: [],
+    smokeCount: "",
+    drinkCount: "",
+    otherDrugs: "",
     allergies: "",
     notes: "",
 }
-export function PatientForm() {
+export function PatientForm({id}: {id: string} = {id: ''}) {
+
+    // set state form values
+    const [patientData, setPatientData] = React.useState<Partial<PatientFormValues>>(defaultValues);
+
+    // update default values if id is not empty
+    React.useEffect(() => {
+    if (id !== '') {
+        // fetch the patient data from the API
+        fetch(`/api/patient/${id}`)
+        .then(response => response.json())
+        .then(data => {
+            // update the form with the data
+            setPatientData(data);
+            // alert data
+            // console.log(JSON.stringify(data, null, 2));
+        })
+        .catch(error => {
+            // show an alert with the error message
+            alert('Error: ' + error.message);
+        });
+    }}, [id]);
+
 
     const form = useForm<PatientFormValues>({
         resolver: zodResolver(patientFormSchema),
         defaultValues,
     });
+
+    // reset the form values if the patientData changes
+    React.useEffect(() => {
+        form.reset(patientData);
+        console.log(JSON.stringify(patientData, null, 2));
+    }, [patientData, form]);
     
     function onSubmit(data: PatientFormValues) {
+        // update the Patient object using the API
+
+        // send a POST request to the /patient/new endpoint with the data
+        // import the IPatient interface from the models/patient.ts file
+
+
+        // send the request
+        fetch('/api/patient/new', {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: {
+            'Content-Type': 'application/json',
+            },
+        })
+        .then(response => {
+            if (response.ok) {
+            // redirect the user to the dashboard
+            window.location.href = '/patient/dashboard';
+            } else {
+            // show an alert with the error message
+            alert('Error: ' + response.statusText);
+            }
+        })
+        .catch(error => {
+            // show an alert with the error message
+            alert('Error: ' + error.message);
+        });
+
+
         // show a popup with the values
-        alert(JSON.stringify(data, null, 2));
+        // alert(JSON.stringify(patientData, null, 2));
     };
 
     return (
         <>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                <TextFormField form={form} fieldName="patientName" fieldLabel="Patient Full Name" />
-                <NumericalFormField form={form} fieldName="patientAge" fieldLabel="Patient Age" />
-                <TextAreaFormField form={form} fieldName="diagnosis" fieldLabel="Patient Diagnosis" />
-                <TextAreaFormField form={form} fieldName="icd10" fieldLabel="ICD-10" />
-                <DatePickerFormField form={form} fieldName="dateOfSurgery" fieldLabel="Date of Surgery" />
-                <TextFormField form={form} fieldName="occupation" fieldLabel="Job/Occupation" />
-                <SelectFormField form={form} fieldName="baselineAmbu" fieldLabel="Baseline Ambu" />
-                <MedicationSelection form={form} fieldName="medicationList" fieldLabel="Medications Needed" />
-                <PMHxSelect form={form} fieldName="pmhxList" fieldLabel="PMHx" fieldCompact="PMHx" PopOverComponent={null} />
-                <PSHxSelect form={form} fieldName="pshxList" fieldLabel="PSHx" fieldCompact="PSHx" PopOverComponent={DatePopover} />
-                <NumericalFormField form={form} fieldName="smokingStatus" fieldLabel="Smoking Status (packs per day)" />
-                <NumericalFormField form={form} fieldName="alcohol" fieldLabel="Avg Drinks per week" />
-                <TextFormField form={form} fieldName="otherIllicit" fieldLabel="Other illicit uses" />
-                <TextFormField form={form} fieldName="allergies" fieldLabel="Allergies" />
-                <TextAreaFormField form={form} fieldName="notes" fieldLabel="Notes" />
+                    <div className="flex space-x-4">
+                        <div className="w-2/3">
+                            <TextFormField form={form} fieldName="patientId" fieldLabel="Patient ID" />
+                        </div>
+                        <div className="w-1/3">
+                            <NumericalFormField form={form} fieldName="age" fieldLabel="Patient Age" />
+                        </div>
+                    </div>
+                    <TextFormField form={form} fieldName="occupation" fieldLabel="Job/Occupation" />
+                    <TextAreaFormField form={form} fieldName="diagnosis" fieldLabel="Patient Diagnosis" />
+                    <TextAreaFormField form={form} fieldName="icd10" fieldLabel="ICD-10" />
+                            <DatePickerFormField form={form} fieldName="surgeryDate" fieldLabel="Date of Surgery" />
+                    <div className="flex space-x-4">
+                        <div className="w-1/2 space-y-3">
+                            <SelectFormField form={form} fieldName="laterality" fieldLabel="Laterality" selectOptions={['Bilateral', 'Left', 'Right']} />
+                            <SelectFormField form={form} fieldName="priority" fieldLabel="Priority" selectOptions={['Low', 'Medium', 'High']} />
+                        </div>
+                        <div className="w-1/2 space-y-3">
+                            <SelectFormField form={form} fieldName="baselineAmbu" fieldLabel="Baseline Ambu" selectOptions={['Independent', 'Boot', 'Crutches', 'Walker', 'Non-Ambulatory']} />
+                            <SelectFormField form={form} fieldName="hospital" fieldLabel="Hospital" selectOptions={['PMC', 'PRCS', 'Hugo Chavez']} />
+                        </div>
+                    </div>
+                    <div className="flex space-x-4">
+                        <div className="w-1/2">
+                            
+                        </div>
+                        <div className="w-1/2">
+                        </div>
+                    </div>
 
-                <Button type="submit">Submit Request</Button>
+
+                    <MedicationSelection form={form} fieldName="medx" fieldLabel="Medications Needed" />
+                    <PMHxSelect form={form} fieldName="pmhx" fieldLabel="PMHx" fieldCompact="PMHx" PopOverComponent={null} />
+                    <PSHxSelect form={form} fieldName="pshx" fieldLabel="PSHx" fieldCompact="PSHx" PopOverComponent={null} />
+                    <div className="flex space-x-4">
+                        <div className="w-1/2">
+                            <TextFormField form={form} fieldName="smokeCount" fieldLabel="Smoking Status (packs per day)" />
+                        </div>
+                        <div className="w-1/2">
+                            <TextFormField form={form} fieldName="drinkCount" fieldLabel="Avg Drinks per week" />
+                        </div>
+                    </div>
+                    <TextFormField form={form} fieldName="otherDrugs" fieldLabel="Other illicit uses" />
+                    <TextFormField form={form} fieldName="allergies" fieldLabel="Allergies" />
+                    <TextAreaFormField form={form} fieldName="notes" fieldLabel="Notes" />
+
+                    <Button type="submit">Submit Request</Button>
                 </form>
             </Form>
         </>

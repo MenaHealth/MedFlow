@@ -22,12 +22,12 @@ export function PSHxSelect({ form, fieldName, fieldLabel, fieldCompact, PopOverC
                         {field.value.map((fieldObj: any, index: number) => (
                             <div className="l:flex-row xl:flex items-center space-x-3" key={index}>
                             <FormLabel>{fieldCompact + " " + (index+1)}</FormLabel>
-                            <FormItem>
+                            <FormItem className="flex-auto">
                                 <FormControl>
                                     <Input className="flex-1" key={"pshx"+index} placeholder='PSHx' onChange={(event) => {
                                         form.setValue(fieldName, field.value.map((pshx: any, i: number) => {
                                             if (i === index) {
-                                                return {...pshx, pshxDate: event.target.value};
+                                                return event.target.value;
                                             }
                                             return pshx;
                                         }));
@@ -41,7 +41,7 @@ export function PSHxSelect({ form, fieldName, fieldLabel, fieldCompact, PopOverC
                             </div>
                         ))}
                         <Button type="button" onClick={
-                            () => form.setValue(fieldName, [...field.value, { pshxDate: new Date().toISOString().split("T")[0] }])
+                            () => form.setValue(fieldName, [...field.value, ""])
                         }>Add PSHx</Button>
                     </div>
                 </>)}

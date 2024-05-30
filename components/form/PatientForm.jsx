@@ -4,8 +4,6 @@ import { useSession } from 'next-auth/react';
 const PatientForm = ({ patient, setPatient, submitting, handleSubmit }) => {
   const { data: session } = useSession();
 
-  patient.coordinatorId = session?.user?.id;
-
   return (
     <section className='w-full max-w-full flex-start flex-col mx-auto'>
       <h1 className='head_text text-left'>
@@ -168,7 +166,7 @@ const PatientForm = ({ patient, setPatient, submitting, handleSubmit }) => {
         </label>
 
         <div className='flex-end mx-3 mb-5 gap-4'>
-          <Link href='/patient/triage' className='text-black text-sm'>
+          <Link href='/patient/dashboard' className='text-black text-sm'>
             Cancel
           </Link>
 

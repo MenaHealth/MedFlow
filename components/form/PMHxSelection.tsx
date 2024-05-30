@@ -21,12 +21,12 @@ export function PMHxSelect({ form, fieldName, fieldLabel, fieldCompact, PopOverC
                     {field.value.map((fieldObj: any, index: number) => (
                         <div className="l:flex-row xl:flex items-center space-x-3" key={index}>
                             <FormLabel>{fieldCompact + " " + (index+1)}</FormLabel>
-                            <FormItem>
+                            <FormItem className="flex-auto">
                                 <FormControl>
-                                    <Input className="flex-1" key={"pmhxName"+index} placeholder='PMHx' onChange={(event) => {
+                                    <Input className="flex-1 w-full" key={"pmhx"+index} placeholder='PMHx' onChange={(event) => {
                                         form.setValue(fieldName, field.value.map((pmhx: any, i: number) => {
                                             if (i === index) {
-                                                return {...pmhx, pmhxName: event.target.value};
+                                                return event.target.value;
                                             }
                                             return pmhx;
                                         }));
@@ -40,7 +40,7 @@ export function PMHxSelect({ form, fieldName, fieldLabel, fieldCompact, PopOverC
                         </div>
                     ))}
                     <Button type="button" onClick={
-                        () => form.setValue(fieldName, [...field.value, {pmhxName: ""}])
+                        () => form.setValue(fieldName, [...field.value, ""])
                         }>Add PMHx</Button>
                 </div>
             </>)}

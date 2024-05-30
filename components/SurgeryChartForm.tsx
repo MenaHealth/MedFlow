@@ -18,26 +18,26 @@ import {
 
 const patientFormSchema = z.object({
     patientName: z.string(),
-    patientAge: z.number(),
+    age: z.number(),
     diagnosis: z.string(),
     icd10: z.string(),
-    dateOfSurgery: z.string(),
+    surgeryDate: z.string(),
     occupation: z.string(),
     baselineAmbu: z.string(),
-    medicationList: z.array(z.object({
+    medx: z.array(z.object({
         medName: z.string(),
         medDosage: z.string(),
         medFrequency: z.string(),
     })),
-    pmhxList: z.array(z.object({
+    pmhx: z.array(z.object({
         pmhxName: z.string()
     })),
-    pshxList: z.array(z.object({
+    pshx: z.array(z.object({
         pshxDate: z.string()
     })),
-    smokingStatus: z.number(),
-    alcohol: z.number(),
-    otherIllicit: z.string(),
+    smokeCount: z.number(),
+    drinkCount: z.number(),
+    otherDrugs: z.string(),
     allergies: z.string(),
     notes: z.string(),
 });
@@ -45,18 +45,18 @@ const patientFormSchema = z.object({
 type PatientFormValues = z.infer<typeof patientFormSchema>
 const defaultValues: Partial<PatientFormValues> = {
     patientName: "",
-    patientAge: 0,
+    age: 0,
     diagnosis: "",
     icd10: "",
-    dateOfSurgery: new Date().toISOString().split("T")[0],
+    surgeryDate: new Date().toISOString().split("T")[0],
     occupation: "",
     baselineAmbu: "",
-    medicationList: [],
-    pmhxList: [],
-    pshxList: [],
-    smokingStatus: 0,
-    alcohol: 0,
-    otherIllicit: "",
+    medx: [],
+    pmhx: [],
+    pshx: [],
+    smokeCount: 0,
+    drinkCount: 0,
+    otherDrugs: "",
     allergies: "",
     notes: "",
 }

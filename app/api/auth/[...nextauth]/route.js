@@ -17,8 +17,6 @@ const handler = NextAuth({
       const sessionUser = await User.findOne({ email: session.user.email });
       session.user.id = sessionUser._id.toString();
       session.user.accountType = sessionUser.accountType;
-      session.user.specialties = sessionUser.specialties;
-
       return session;
     },
     async signIn({ account, profile, user, credentials }) {
@@ -34,7 +32,7 @@ const handler = NextAuth({
             email: profile.email,
             name: profile.name,
             image: profile.picture,
-            accountType: "Unspecified",
+            accountType: "Surgeon",
           });
         }
 

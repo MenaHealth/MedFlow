@@ -128,18 +128,18 @@ export function LabForm() {
                     <PrePostFieldWrapper form={form} fieldName="urinalysis" fieldLabel="Urinalysis" Component={TextFormField} />
 
                     {/* <TextFormField form={form} fieldName="patientName" fieldLabel="Patient Full Name" /> */}
-                    {/* <NumericalFormField form={form} fieldName="patientAge" fieldLabel="Patient Age" />
+                    {/* <NumericalFormField form={form} fieldName="age" fieldLabel="Patient Age" />
                     <TextAreaFormField form={form} fieldName="diagnosis" fieldLabel="Patient Diagnosis" />
                     <TextAreaFormField form={form} fieldName="icd10" fieldLabel="ICD-10" />
-                    <DatePickerFormField form={form} fieldName="dateOfSurgery" fieldLabel="Date of Surgery" />
+                    <DatePickerFormField form={form} fieldName="surgeryDate" fieldLabel="Date of Surgery" />
                     <TextFormField form={form} fieldName="occupation" fieldLabel="Job/Occupation" />
                     <SelectFormField form={form} fieldName="baselineAmbu" fieldLabel="Baseline Ambu" />
-                    <MedicationSelection form={form} fieldName="medicationList" fieldLabel="Medications Needed" />
-                    <PMHxSelect form={form} fieldName="pmhxList" fieldLabel="PMHx" fieldCompact="PMHx" PopOverComponent={null} />
-                    <PSHxSelect form={form} fieldName="pshxList" fieldLabel="PSHx" fieldCompact="PSHx" PopOverComponent={DatePopover} />
-                    <NumericalFormField form={form} fieldName="smokingStatus" fieldLabel="Smoking Status (packs per day)" />
-                    <NumericalFormField form={form} fieldName="alcohol" fieldLabel="Avg Drinks per week" />
-                    <TextFormField form={form} fieldName="otherIllicit" fieldLabel="Other illicit uses" />
+                    <MedicationSelection form={form} fieldName="medx" fieldLabel="Medications Needed" />
+                    <PMHxSelect form={form} fieldName="pmhx" fieldLabel="PMHx" fieldCompact="PMHx" PopOverComponent={null} />
+                    <PSHxSelect form={form} fieldName="pshx" fieldLabel="PSHx" fieldCompact="PSHx" PopOverComponent={DatePopover} />
+                    <NumericalFormField form={form} fieldName="smokeCount" fieldLabel="Smoking Status (packs per day)" />
+                    <NumericalFormField form={form} fieldName="drinkCount" fieldLabel="Avg Drinks per week" />
+                    <TextFormField form={form} fieldName="otherDrugs" fieldLabel="Other illicit uses" />
                     <TextFormField form={form} fieldName="allergies" fieldLabel="Allergies" />
                     <TextAreaFormField form={form} fieldName="notes" fieldLabel="Notes" /> */}
 

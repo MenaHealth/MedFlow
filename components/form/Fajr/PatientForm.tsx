@@ -6,6 +6,9 @@ import { z } from "zod"
 import * as React from "react"
 import { useForm } from "react-hook-form"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+
 import {
     Form,
 } from "@/components/ui/form"
@@ -20,8 +23,9 @@ import { PMHxSelect } from "../PMHxSelection"
 import { PSHxSelect } from "../PSHxSelection"
 import { cn } from "@/lib/utils"
 import { IPatient } from "@/models/patient"
+import { ImagesUpload } from "../ImagesUpload"
 
-
+// https://www.behindthename.com/random/random.php?gender=both&number=2&sets=1&surname=&usage_ara=1
 const patientFormSchema = z.object({
     patientId: z.string(),
     age: z.number(),
@@ -44,6 +48,7 @@ const patientFormSchema = z.object({
     drinkCount: z.string(),
     otherDrugs: z.string(),
     allergies: z.string(),
+    images: z.any(),
     notes: z.string(),
 });
 
@@ -66,6 +71,7 @@ const defaultValues: Partial<PatientFormValues> = {
     drinkCount: "",
     otherDrugs: "",
     allergies: "",
+    images: [],
     notes: "",
 }
 export function PatientForm({id}: {id: string} = {id: ''}) {
@@ -81,9 +87,17 @@ export function PatientForm({id}: {id: string} = {id: ''}) {
         .then(response => response.json())
         .then(data => {
             // update the form with the data
+            data.surgeryDate = new Date(data.surgeryDate);
+            data.medx = data.medx.map((med: any) => {
+                return {
+                    medName: med.medName,
+                    medDosage: med.medDosage,
+                    medFrequency: med.medFrequency,
+                };
+            });
+            // age
+            data.age = parseInt(data.age);
             setPatientData(data);
-            // alert data
-            // console.log(JSON.stringify(data, null, 2));
         })
         .catch(error => {
             // show an alert with the error message
@@ -100,10 +114,11 @@ export function PatientForm({id}: {id: string} = {id: ''}) {
     // reset the form values if the patientData changes
     React.useEffect(() => {
         form.reset(patientData);
-        console.log(JSON.stringify(patientData, null, 2));
+        // console.log(JSON.stringify(patientData, null, 2));
     }, [patientData, form]);
     
     function onSubmit(data: PatientFormValues) {
+        console.log(data.images);
         // update the Patient object using the API
 
         // send a POST request to the /patient/new endpoint with the data
@@ -111,30 +126,30 @@ export function PatientForm({id}: {id: string} = {id: ''}) {
 
 
         // send the request
-        fetch('/api/patient/new', {
-            method: 'POST',
-            body: JSON.stringify(data),
-            headers: {
-            'Content-Type': 'application/json',
-            },
-        })
-        .then(response => {
-            if (response.ok) {
-            // redirect the user to the dashboard
-            window.location.href = '/patient/dashboard';
-            } else {
-            // show an alert with the error message
-            alert('Error: ' + response.statusText);
-            }
-        })
-        .catch(error => {
-            // show an alert with the error message
-            alert('Error: ' + error.message);
-        });
+        // fetch('/api/patient/new', {
+        //     method: 'POST',
+        //     body: JSON.stringify(data),
+        //     headers: {
+        //     'Content-Type': 'application/json',
+        //     },
+        // })
+        // .then(response => {
+        //     if (response.ok) {
+        //     // redirect the user to the dashboard
+        //     window.location.href = '/patient/dashboard';
+        //     } else {
+        //     // show an alert with the error message
+        //     alert('Error: ' + response.statusText);
+        //     }
+        // })
+        // .catch(error => {
+        //     // show an alert with the error message
+        //     alert('Error: ' + error.message);
+        // });
 
 
         // show a popup with the values
-        // alert(JSON.stringify(patientData, null, 2));
+        alert(JSON.stringify(data, null, 2));
     };
 
     return (
@@ -185,6 +200,9 @@ export function PatientForm({id}: {id: string} = {id: ''}) {
                     </div>
                     <TextFormField form={form} fieldName="otherDrugs" fieldLabel="Other illicit uses" />
                     <TextFormField form={form} fieldName="allergies" fieldLabel="Allergies" />
+                    
+                    <ImagesUpload form={form} fieldName='images' fieldLabel='Images'/>
+                    
                     <TextAreaFormField form={form} fieldName="notes" fieldLabel="Notes" />
 
                     <Button type="submit">Submit Request</Button>

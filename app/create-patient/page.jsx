@@ -48,7 +48,7 @@ const CreatePatient = () => {
       });
 
       if (response.ok) {
-        router.push('/patient/dashboard');
+        router.push('/patient-info/dashboard');
       }
     } catch (error) {
       console.log(`error: ${error}`);

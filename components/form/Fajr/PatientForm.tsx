@@ -82,7 +82,7 @@ export function PatientForm({id}: {id: string} = {id: ''}) {
     // update default values if id is not empty
     React.useEffect(() => {
     if (id !== '') {
-        // fetch the patient data from the API
+        // fetch the patient-info data from the API
         fetch(`/api/patient/${id}`)
         .then(response => response.json())
         .then(data => {
@@ -121,12 +121,12 @@ export function PatientForm({id}: {id: string} = {id: ''}) {
         console.log(data.images);
         // update the Patient object using the API
 
-        // send a POST request to the /patient/new endpoint with the data
-        // import the IPatient interface from the models/patient.ts file
+        // send a POST request to the /patient-info/new endpoint with the data
+        // import the IPatient interface from the models/patient-info.ts file
 
 
         // send the request
-        // fetch('/api/patient/new', {
+        // fetch('/api/patient-info/new', {
         //     method: 'POST',
         //     body: JSON.stringify(data),
         //     headers: {
@@ -136,7 +136,7 @@ export function PatientForm({id}: {id: string} = {id: ''}) {
         // .then(response => {
         //     if (response.ok) {
         //     // redirect the user to the dashboard
-        //     window.location.href = '/patient/dashboard';
+        //     window.location.href = '/patient-info/dashboard';
         //     } else {
         //     // show an alert with the error message
         //     alert('Error: ' + response.statusText);

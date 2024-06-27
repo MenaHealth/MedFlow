@@ -88,17 +88,17 @@ export default function SurgeryChartForm({ id }: { id: string }) {
     }
 
     // const handleSubmit = async () => {
-    //     // Perform the patch request to update the patient object in the database
+    //     // Perform the patch request to update the patient-info object in the database
     //     // let assignedClinic = 'Cardiology';// ? 'Dermatology' : 'Cardiology';
-    //     // console.log('Submitting form: ' + patient.assignedClinic);
-    //     const response = await fetch('/api/patient/', {
+    //     // console.log('Submitting form: ' + patient-info.assignedClinic);
+    //     const response = await fetch('/api/patient-info/', {
     //         method: 'PATCH',
     //         headers: {
     //             'Content-Type': 'application/json',
     //         },
     //         body: JSON.stringify({
     //             _id: id,
-    //             assignedClinic: patient.assignedClinic,
+    //             assignedClinic: patient-info.assignedClinic,
     //         }),
     //     });
     //     if (response.ok) {
@@ -106,7 +106,7 @@ export default function SurgeryChartForm({ id }: { id: string }) {
     //         console.log('Patient object updated successfully');
     //     } else {
     //         // Handle error in patch request
-    //         console.error('Failed to update patient object');
+    //         console.error('Failed to update patient-info object');
     //     }
     // };
 

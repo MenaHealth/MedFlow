@@ -8,6 +8,7 @@ interface Prescription {
 }
 
 export interface IPatient extends Document {
+  files: any[];
   patientId: string;
   laterality?: 'Left' | 'Right' | 'Bilateral';
   diagnosis?: string;

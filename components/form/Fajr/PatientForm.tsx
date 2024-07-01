@@ -24,6 +24,7 @@ import { PSHxSelect } from "../PSHxSelection"
 import { cn } from "@/lib/utils"
 import { IPatient } from "@/models/patient"
 import { ImagesUpload } from "../ImagesUpload"
+// import { encode } from '@jsquash/webp';
 
 // https://www.behindthename.com/random/random.php?gender=both&number=2&sets=1&surname=&usage_ara=1
 const patientFormSchema = z.object({
@@ -117,8 +118,29 @@ export function PatientForm({id}: {id: string} = {id: ''}) {
         // console.log(JSON.stringify(patientData, null, 2));
     }, [patientData, form]);
     
-    function onSubmit(data: PatientFormValues) {
+    const onSubmit = async (data: PatientFormValues) => {
         console.log(data.images);
+        const images = data.images;
+        const formData = new FormData();
+        for (let i = 0; i < images.length; i++) {
+          formData.append('file', images[i]);
+        }
+      
+        try {
+          const response = await fetch('/api/patient/uploadPhoto', {
+            method: 'POST',
+            body: formData,
+          });
+      
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+      
+          const result = await response.json();
+          console.log(result);
+        } catch (error) {
+          console.error('Error uploading files:', error);
+        }
         // update the Patient object using the API
 
         // send a POST request to the /patient/new endpoint with the data

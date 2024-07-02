@@ -1,6 +1,6 @@
 import { signIn } from 'next-auth/react';
 
-export function HomePage({ provider }: { provider: any }) {
+export function LoginScreen({ provider }: { provider: any }) {
     return (
         <>
             <div className='w-full h-screen flex-col justify-center items-center'>

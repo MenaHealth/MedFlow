@@ -8,7 +8,6 @@ export const GET = async (request, { params }) => {
         if (!patient) {
             return new Response("Patient Not Found", { status: 404 });
         }
-        console.log('GET', patient);
         return new Response(JSON.stringify(patient), { status: 200 })
 
     } catch (error) {
@@ -32,7 +31,6 @@ export const PATCH = async (request, { params }) => {
             medFrequency: med.medFrequency,
             };
         }) : [];
-        console.log(newPatientData);
         const updatedPatient = await Patient.findByIdAndUpdate(params.id, { $set: newPatientData}, { new: true, runValidators: true });
 
         if (!updatedPatient) {

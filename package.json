@@ -14,7 +14,6 @@
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
     "@hookform/resolvers": "^3.3.4",
-    "@jsquash/webp": "^1.4.0",
     "@mui/icons-material": "^5.15.21",
     "@mui/material": "^5.15.21",
     "@mui/x-data-grid": "^7.6.2",
@@ -35,7 +34,6 @@
     "crypto-js": "^4.2.0",
     "date-fns": "^3.6.0",
     "dotenv": "^16.4.5",
-    "formidable": "^3.5.1",
     "mongodb": "^5.3.0",
     "mongoose": "^7.1.0",
     "mui": "^0.0.1",
@@ -55,7 +53,6 @@
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
-    "@types/formidable": "^3.4.5",
     "@types/multer": "^1.4.11",
     "@types/node": "^20",
     "@types/react": "^18",

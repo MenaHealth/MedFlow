@@ -9,7 +9,7 @@ export const POST = async (request: Request) => {
     let existingPatient = await Patient.findById(patientData._id);
 
     if (existingPatient) {
-      // Update existing patient
+      // Update existing patient-info
       patientData.age = parseInt(patientData.age as any);
       patientData.surgeryDate = new Date(patientData.surgeryDate as any);
       patientData.medx = patientData.medx ? patientData.medx.map((med: any) => {
@@ -25,7 +25,7 @@ export const POST = async (request: Request) => {
       await existingPatient.save();
       return new Response(JSON.stringify(existingPatient), { status: 200 });
     } else {
-      // Create new patient
+      // Create new patient-info
       const newPatient = new Patient(patientData);
       await newPatient.save();
       return new Response(JSON.stringify(newPatient), { status: 201 });

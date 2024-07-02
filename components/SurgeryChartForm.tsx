@@ -40,6 +40,10 @@ const patientFormSchema = z.object({
     otherDrugs: z.string(),
     allergies: z.string(),
     notes: z.string(),
+    files: z.array(z.object({ 
+        hash: z.string(),
+        encryptionKey: z.string(),
+    })),
 });
 
 type PatientFormValues = z.infer<typeof patientFormSchema>

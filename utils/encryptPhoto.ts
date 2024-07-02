@@ -1,0 +1,87 @@
+// import CryptoJS from 'crypto-js';
+
+// export const encryptPhoto = (file: File, encryptionKey: string): Promise<string> => {
+//     return new Promise((resolve, reject) => {
+//         const reader = new FileReader();
+//         reader.onload = () => {
+//             const fileContent = CryptoJS.lib.WordArray.create(reader.result as ArrayBuffer);
+//             const encrypted = CryptoJS.AES.encrypt(fileContent, encryptionKey).toString();
+//             resolve(encrypted);
+//         };
+//         reader.onerror = (error) => reject(error);
+//         reader.readAsArrayBuffer(file);
+//     });
+// };
+
+// export const decryptPhoto = async (encryptedBuffer: ArrayBuffer, encryptionKey: string): Promise<Blob> => {
+//     try {
+//         // Convert encryptionKey from Base64 to WordArray
+//         const key = CryptoJS.enc.Base64.parse(encryptionKey);
+
+//         // Decrypt using CryptoJS
+//         const decryptedData = CryptoJS.AES.decrypt(
+//             { ciphertext: CryptoJS.lib.WordArray.create(encryptedBuffer) }, // Ensure WordArray from ArrayBuffer
+//             key,
+//             { mode: CryptoJS.mode.ECB, padding: CryptoJS.pad.Pkcs7 }
+//         );
+
+//         // Convert decrypted WordArray to ArrayBuffer
+//         const decryptedArrayBuffer = decryptedData.toString(CryptoJS.enc.Latin1);
+//         const decryptedUint8Array = new Uint8Array(decryptedArrayBuffer.length);
+//         for (let i = 0; i < decryptedArrayBuffer.length; i++) {
+//             decryptedUint8Array[i] = decryptedArrayBuffer.charCodeAt(i);
+//         }
+
+//         // Create Blob from Uint8Array
+//         const decryptedBlob = new Blob([decryptedUint8Array], { type: 'image/webp' });
+
+//         return decryptedBlob;
+//     } catch (error) {
+//         console.error('Error decrypting photo:', error);
+//         throw error;
+//     }
+// };
+
+// export const generateEncryptionKey = () => {
+//     const array = new Uint8Array(32);
+//     window.crypto.getRandomValues(array);
+
+//     const numArray = Array.from(array);
+
+//     return btoa(String.fromCharCode.apply(null, numArray));
+// };
+
+export const convertToWebP = (file: File): Promise<File> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const image = new Image();
+            image.src = reader.result as string;
+            image.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = image.width;
+                canvas.height = image.height;
+                const ctx = canvas.getContext('2d');
+                if (!ctx) {
+                    reject(new Error('Failed to create canvas context'));
+                    return;
+                }
+                ctx.drawImage(image, 0, 0);
+                const webpBlob = canvas.toDataURL('image/webp', 0.9);
+                const webpFile = new File([new Blob([webpBlob], { type: 'image/webp' })], file.name.replace('.png', '.webp'), { type: 'image/webp' });
+                resolve(webpFile);
+            };
+        };
+        reader.onerror = (error) => reject(error);
+        reader.readAsDataURL(file);
+    });
+};
+
+// Function to calculate SHA-256 hash of a File object
+export const calculateFileHash = async (file: File): Promise<string> => {
+    const buffer = await file.arrayBuffer();
+    const hashBuffer = await window.crypto.subtle.digest('SHA-256', buffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashHex;
+};

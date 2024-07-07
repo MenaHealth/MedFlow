@@ -84,9 +84,6 @@ export function PatientForm({id}: {id: string} = {id: ''}) {
     // set state form values
     const [patientData, setPatientData] = React.useState<Partial<PatientFormValues>>(defaultValues);
 
-    const [photos, setPhotos] = React.useState<any[]>([]);
-    const [showModal, setShowModal] = React.useState(false);
-
     // update default values if id is not empty
     React.useEffect(() => {
     if (id !== '') {
@@ -126,49 +123,49 @@ export function PatientForm({id}: {id: string} = {id: ''}) {
         // console.log(JSON.stringify(patientData, null, 2));
     }, [patientData, form]);
 
-    const handleIconClick = async () => {
-        const files = form.getValues('files');
-        if (files && files.length > 0) {
-            try {
-                const uploadPromises = files.map((file: { hash: any; encryptionKey: any }) =>
-                    fetch(`/api/patient/photos/${file.hash}`, {
-                        method: 'GET',
-                    }).then(async (response) => {
-                        console.log(response)
-                        if (!response.ok) {
-                            throw new Error(`Failed to upload file with hash: ${file.hash}`);
-                        }
-                        return response.arrayBuffer().then(buffer => ({
-                            buffer,
-                            encryptionKey: file.encryptionKey,
-                        }));
-                    })
-                );
+    // const handleIconClick = async () => {
+    //     const files = form.getValues('files');
+    //     if (files && files.length > 0) {
+    //         try {
+    //             const uploadPromises = files.map((file: { hash: any; encryptionKey: any }) =>
+    //                 fetch(`/api/patient/photos/${file.hash}`, {
+    //                     method: 'GET',
+    //                 }).then(async (response) => {
+    //                     console.log(response)
+    //                     if (!response.ok) {
+    //                         throw new Error(`Failed to upload file with hash: ${file.hash}`);
+    //                     }
+    //                     return response.arrayBuffer().then(buffer => ({
+    //                         buffer,
+    //                         encryptionKey: file.encryptionKey,
+    //                     }));
+    //                 })
+    //             );
 
-                // const encryptedFiles = await Promise.all(uploadPromises);
-                // console.log(encryptedFiles);
+    //             // const encryptedFiles = await Promise.all(uploadPromises);
+    //             // console.log(encryptedFiles);
 
-                // const decryptedFiles = encryptedFiles.map(async ({ buffer, encryptionKey }) => {
-                //     const decryptedBuffer = await decryptPhoto(buffer, encryptionKey);
-                //     return new Blob([decryptedBuffer], { type: 'image/webp' });
-                // });
-                // console.log(decryptedFiles);
+    //             // const decryptedFiles = encryptedFiles.map(async ({ buffer, encryptionKey }) => {
+    //             //     const decryptedBuffer = await decryptPhoto(buffer, encryptionKey);
+    //             //     return new Blob([decryptedBuffer], { type: 'image/webp' });
+    //             // });
+    //             // console.log(decryptedFiles);
 
-                // const results = await Promise.all(decryptedFiles);
-                const results = await Promise.all(uploadPromises);
-                setPhotos(results);
-                setShowModal(true);
-                // console.log('Files decrypted successfully:', results);
-                // Do something with the decrypted files, e.g., display them in the UI
-            } catch (error) {
-                console.error('Error uploading or decrypting files:', error);
-            }
-        }
-    };
+    //             // const results = await Promise.all(decryptedFiles);
+    //             const results = await Promise.all(uploadPromises);
+    //             setPhotos(results);
+    //             setShowModal(true);
+    //             // console.log('Files decrypted successfully:', results);
+    //             // Do something with the decrypted files, e.g., display them in the UI
+    //         } catch (error) {
+    //             console.error('Error uploading or decrypting files:', error);
+    //         }
+    //     }
+    // };
 
-    const closeModal = () => {
-        setShowModal(false);
-    };
+    // const closeModal = () => {
+    //     setShowModal(false);
+    // };
     
     const onSubmit = async (data: PatientFormValues) => {
         console.log(data)
@@ -228,7 +225,7 @@ export function PatientForm({id}: {id: string} = {id: ''}) {
             .then(response => {
                 if (response.ok) {
                 // redirect the user to the dashboard
-                window.location.href = '/patient/dashboard';
+                window.location.href = '/patient-info/dashboard';
                 } else {
                 // show an alert with the error message
                 alert('Error: ' + response.statusText);
@@ -249,7 +246,7 @@ export function PatientForm({id}: {id: string} = {id: ''}) {
             .then(response => {
                 if (response.ok) {
                 // redirect the user to the dashboard
-                window.location.href = '/patient/dashboard';
+                window.location.href = '/patient-info/dashboard';
                 } else {
                 // show an alert with the error message
                 alert('Error: ' + response.statusText);
@@ -315,30 +312,14 @@ export function PatientForm({id}: {id: string} = {id: ''}) {
                     <TextFormField form={form} fieldName="otherDrugs" fieldLabel="Other illicit uses" />
                     
                     <TextFormField form={form} fieldName="allergies" fieldLabel="Allergies" />
-                    
-                    <div style={{ position: 'relative' }}>
-                        <ImagesUpload form={form} fieldName='images' fieldLabel='Images'/>
-                        {
-                            patientData.files.length > 0 && 
-                                <PhotoLibraryOutlinedIcon 
-                                    onClick={handleIconClick}
-                                    style={{
-                                        position: 'absolute',
-                                        top: '0px',
-                                        left: '50px',
-                                    }}
-                                />
-                        }
-                    </div>
+            
+                    <ImagesUpload form={form} fieldName='images' fieldLabel='Images'/>
                     
                     <TextAreaFormField form={form} fieldName="notes" fieldLabel="Notes" />
 
                     <Button type="submit">Submit Request</Button>
                 </form>
             </Form>
-            {showModal && photos && (
-                <PhotoModal photos={photos} />
-            )}
         </>
     );
 }

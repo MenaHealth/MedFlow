@@ -51,7 +51,7 @@
 //     return btoa(String.fromCharCode.apply(null, numArray));
 // };
 
-export const convertToWebP = (file: File): Promise<File> => {
+export const convertToWebP = (file: File): Promise<Blob> => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => {
@@ -67,9 +67,13 @@ export const convertToWebP = (file: File): Promise<File> => {
                     return;
                 }
                 ctx.drawImage(image, 0, 0);
-                const webpBlob = canvas.toDataURL('image/webp', 0.9);
-                const webpFile = new File([new Blob([webpBlob], { type: 'image/webp' })], file.name.replace('.png', '.webp'), { type: 'image/webp' });
-                resolve(webpFile);
+                canvas.toBlob((blob) => {
+                    if (blob) {
+                        resolve(blob);
+                    } else {
+                        reject(new Error('Failed to convert image to WebP'));
+                    }
+                }, 'image/webp', 0.9);
             };
         };
         reader.onerror = (error) => reject(error);

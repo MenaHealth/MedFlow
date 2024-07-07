@@ -166,7 +166,7 @@ const PatientForm = ({ patient, setPatient, submitting, handleSubmit }) => {
         </label>
 
         <div className='flex-end mx-3 mb-5 gap-4'>
-          <Link href='/patient/dashboard' className='text-black text-sm'>
+          <Link href='/patient-info/dashboard' className='text-black text-sm'>
             Cancel
           </Link>
 

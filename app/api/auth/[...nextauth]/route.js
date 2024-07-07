@@ -23,6 +23,20 @@ const handler = NextAuth({
       try {
         await connectToDB();
 
+        const allowedUsers = [
+          "shikharbakhda@gmail.com",
+          'michellenemati18@gmail.com',
+          'ahmadhasan00@gmail.com',
+          'mayalyhayat@gmail.com',
+          'rami.ajjuri@gmail.com',
+          'kessen@umich.edu',
+        ];
+
+        if (!allowedUsers.includes(profile.email)) {
+          return false
+        }
+
+
         // check if user already exists
         const userExists = await User.findOne({ email: profile.email });
 

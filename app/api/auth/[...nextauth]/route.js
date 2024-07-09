@@ -30,6 +30,7 @@ const handler = NextAuth({
           'mayalyhayat@gmail.com',
           'rami.ajjuri@gmail.com',
           'kessen@umich.edu',
+          'kessenmacher7832@gmail.com',
           'azcryan@gmail.com',
         ];
 

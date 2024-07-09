@@ -1,4 +1,4 @@
-// app/notes/page.jsx
+// app/notes/[id]/page.jsx
 "use client";
 
 import React, { useState } from 'react';

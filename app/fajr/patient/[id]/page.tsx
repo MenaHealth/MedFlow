@@ -1,3 +1,5 @@
+// app/fajr/patient/[id]/page.tsx
+// existing_patient_form
 import { PatientForm } from "@/components/form/Fajr/PatientForm"
 
 export default function Home({params}: {params: {id: string}}) {

@@ -1,3 +1,5 @@
+// app/fajr/patient/page.tsx
+// NEW_Patient_FORM
 import { PatientForm } from "@/components/form/Fajr/PatientForm"
 
 export default function Home() {

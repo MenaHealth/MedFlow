@@ -1,4 +1,7 @@
+// app/patient-overview/[id]/page.jsx"
+
 "use client";
+
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -120,7 +123,7 @@ const PatientOverview = () => {
                         <Notes sx={{ fontSize: 40, mb: { sm: 2 }, mr: { xs: 2, sm: 0 } }} />
                         <Button
                             component={Link}
-                            href="/notes"
+                            href={`/notes/${id}`}
                             variant="contained"
                             color="warning"
                             fullWidth

@@ -1,3 +1,4 @@
+// app/create-patient/page.jsx
 "use client";
 
 import { useState } from 'react';

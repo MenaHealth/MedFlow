@@ -1,65 +1,26 @@
-// app/notes/[id]/page.jsx
-"use client";
+// app/notes/[id]/page.tsx
+"use client"
 
-import React, { useState } from 'react';
-import { TextField, Button, List, ListItem, ListItemText, Divider } from '@mui/material';
-import { Publish as PublishIcon } from '@mui/icons-material';
-import PatientSubmenu from "../../../components/PatientSubmenu";
+import React from 'react';
+import NotesForm from "@/components/form/NotesForm";
+import PatientSubmenu from "@/components/PatientSubmenu";
 
-const Notes = () => {
-    const [note, setNote] = useState('');
-    const [notesList, setNotesList] = useState([]);
+interface NotesPageProps {
+    params: {
+        id: string;
+    }
+}
 
-    const handleNoteChange = (event) => {
-        setNote(event.target.value);
-    };
-
-    const publishNote = () => {
-        if (note.trim()) {
-            setNotesList([...notesList, note]);
-            setNote(''); // Clear input after publishing
-        }
-    };
-
+const NotesPage: React.FC<NotesPageProps> = ({ params }) => {
     return (
-        <div className="container mx-auto p-4 flex flex-col md:flex-row">
+        <div className="w-full max-w-4xl mx-auto pb-16"> {/* Added bottom padding to avoid nav bar overlap */}
             <PatientSubmenu />
-            <div className="flex-1 mb-4 md:mb-0 md:mr-4">
-                <h1 className="text-2xl font-bold mb-4">Notes</h1>
-                <TextField
-                    label="Write your note here..."
-                    multiline
-                    rows={4}
-                    variant="outlined"
-                    fullWidth
-                    value={note}
-                    onChange={handleNoteChange}
-                />
-                <Button
-                    variant="contained"
-                    color="primary"
-                    startIcon={<PublishIcon />}
-                    onClick={publishNote}
-                    style={{ marginTop: '10px' }}
-                >
-                    Publish
-                </Button>
-            </div>
-            <div className="flex-1">
-                <h2 className="text-xl font-bold mb-4">Previous Notes</h2>
-                <List component="nav" aria-label="previous notes">
-                    {notesList.map((item, index) => (
-                        <React.Fragment key={index}>
-                            <ListItem>
-                                <ListItemText primary={item} />
-                            </ListItem>
-                            <Divider />
-                        </React.Fragment>
-                    ))}
-                </List>
+            <h1 className="text-3xl font-bold mb-8 text-center">Notes</h1>
+            <div className="border border-gray-300 p-8 bg-white shadow rounded-lg">
+                <NotesForm patientId={params.id} />
             </div>
         </div>
     );
-};
+}
 
-export default Notes;
+export default NotesPage;

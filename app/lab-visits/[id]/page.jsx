@@ -1,4 +1,4 @@
-// app/lab-visits/[id]/page.jsx
+// app/lab-visits/[id]/page.tsx
 import React from 'react';
 import PatientSubmenu from '../../../components/PatientSubmenu';
 

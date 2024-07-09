@@ -1,3 +1,4 @@
+// app/api/patient/[id]/route.js
 import Patient from "@/models/patient";
 import { connectToDB } from "@/utils/database";
 

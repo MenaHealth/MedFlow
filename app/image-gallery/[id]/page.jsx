@@ -4,7 +4,7 @@ import { useParams } from 'next/navigation';
 import { Box, Grid, IconButton } from '@mui/material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-
+import PatientSubmenu from '../../../components/PatientSubmenu';
 const ImageGallery = () => {
     const { id } = useParams();
     const [patientFiles, setPatientFiles] = useState([]);
@@ -71,6 +71,7 @@ const ImageGallery = () => {
 
     return (
         <div className="container mx-auto p-4">
+            <PatientSubmenu />
             <h1 className="text-2xl font-bold mb-4">Image Gallery</h1>
             {photos.length > 0 ? (
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>

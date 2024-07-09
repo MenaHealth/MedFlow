@@ -48,7 +48,8 @@ const PatientSubmenu = () => {
                 className="w-full"
                 sx={{
                     '& .Mui-selected': {
-                        color: '#FF5722', // Orange color for the selected icon
+                        // for some reason the color FF5722 isnt working and is blue in the UI. idk why
+                        color: '#FF5721',
                     }
                 }}
             >

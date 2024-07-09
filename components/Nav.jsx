@@ -55,7 +55,6 @@ const Nav = () => {
                         <button type='button' onClick={signOut} className='outline_btn'>
                             Sign Out
                         </button>
-
                         <Link href='/'>
                             <Image
                                 src={session?.user.image}
@@ -66,7 +65,6 @@ const Nav = () => {
                             />
                         </Link>
                     </>
-
                 ) : (
                     <>
                         {providers &&
@@ -90,29 +88,38 @@ const Nav = () => {
             <div className='sm:hidden flex relative z-20'>
                 {session?.user ? (
                     <div className='flex'>
-
                         <div className={`hamburger ${toggleDropdown ? 'active' : ''}`} onClick={() => setToggleDropdown(!toggleDropdown)}>
                             <span className='bar'></span>
                             <span className='bar'></span>
                             <span className='bar'></span>
                         </div>
 
-
                         {toggleDropdown && (
                             <div className='dropdown'>
-                                {session?.user && (
-                                    <>
-                                        <button
-                                            type='button'
-                                            onClick={() => {
-                                                setToggleDropdown(false);
-                                                signOut();
-                                            }}
-                                            className='mt-5 w-full black_btn'
-                                        >
-                                            Sign Out
-                                        </button>
-                                    </>)}
+                                <>
+                                    <Link href='/patient-info/dashboard' className='outline_btn mobile_link'>
+                                        Patient List
+                                    </Link>
+                                    <Link href='/fajr/patient' className='outline_btn mobile_link'>
+                                        New Patient
+                                    </Link>
+                                    <Link href='/fajr/lab' className='outline_btn mobile_link'>
+                                        New Lab Form
+                                    </Link>
+                                    <Link href='/patient/660b70c7083d09310b0dc4d2' className='outline_btn mobile_link'>
+                                        Chart Template
+                                    </Link>
+                                    <button
+                                        type='button'
+                                        onClick={() => {
+                                            setToggleDropdown(false);
+                                            signOut();
+                                        }}
+                                        className='mt-5 w-full black_btn'
+                                    >
+                                        Sign Out
+                                    </button>
+                                </>
                             </div>
                         )}
                     </div>

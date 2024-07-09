@@ -17,7 +17,16 @@ const NotesForm: React.FC<NotesFormProps> = ({ patientId }) => {
     }, [patientId]);
 
     const fetchNotes = async (patientId: string) => {
-        // API call to get notes
+        try {
+            const response = await fetch(`/api/patient/${patientId}`);
+            const data = await response.json();
+            if (data.notes) {
+                // Assuming 'notes' is a string; adjust if it's stored differently
+                setNotesList(data.notes.split('\n')); // Example: split by newline if multiple notes are in one string
+            }
+        } catch (error) {
+            console.error('Failed to fetch notes:', error);
+        }
     };
 
     const handleNoteChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,9 +35,18 @@ const NotesForm: React.FC<NotesFormProps> = ({ patientId }) => {
 
     const publishNote = async () => {
         if (note.trim()) {
-            // API call to save the note
-            const updatedNotes = await saveNote(patientId, note);
-            setNotesList(updatedNotes);
+            // Example: Post to add a new note, this needs a backend endpoint
+            const response = await fetch(`/api/patient/${patientId}/add-note`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ note }),
+            });
+            if (response.ok) {
+                const updatedNotes = await response.json();
+                setNotesList(updatedNotes); // Update based on what the API returns
+            }
             setNote('');  // Clear input after publishing
         }
     };

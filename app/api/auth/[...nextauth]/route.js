@@ -1,8 +1,9 @@
+// app/api/auth/[...nextauth]/route.js
 import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 
 import User from '@/models/user';
-import { connectToDB } from '@/utils/database';
+import dbConnect from '@/utils/database'; // Correct import statement
 
 const handler = NextAuth({
   providers: [
@@ -14,6 +15,7 @@ const handler = NextAuth({
   callbacks: {
     async session({ session }) {
       // store the user id from MongoDB to session
+      await dbConnect(); // Make sure the database is connected
       const sessionUser = await User.findOne({ email: session.user.email });
       session.user.id = sessionUser._id.toString();
       session.user.accountType = sessionUser.accountType;
@@ -21,7 +23,7 @@ const handler = NextAuth({
     },
     async signIn({ account, profile, user, credentials }) {
       try {
-        await connectToDB();
+        await dbConnect(); // Make sure the database is connected
 
         const allowedUsers = [
           "shikharbakhda@gmail.com",
@@ -38,11 +40,10 @@ const handler = NextAuth({
           return false
         }
 
-
-        // check if user already exists
+        // Check if user already exists
         const userExists = await User.findOne({ email: profile.email });
 
-        // if not, create a new document and save user in MongoDB
+        // If not, create a new document and save user in MongoDB
         if (!userExists) {
           await User.create({
             email: profile.email,
@@ -61,4 +62,4 @@ const handler = NextAuth({
   }
 })
 
-export { handler as GET, handler as POST }
+export { handler as GET, handler as POST };

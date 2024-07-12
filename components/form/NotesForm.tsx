@@ -5,49 +5,49 @@ import { Publish as PublishIcon } from '@mui/icons-material';
 
 interface NotesFormProps {
     patientId: string;
+    username: string;
 }
 
-const NotesForm: React.FC<NotesFormProps> = ({ patientId }) => {
+const NotesForm: React.FC<NotesFormProps> = ({ patientId, username }) => {
     const [note, setNote] = useState<string>('');
     const [notesList, setNotesList] = useState<string[]>([]);
 
     useEffect(() => {
-        // Fetch notes when component mounts
         fetchNotes(patientId);
     }, [patientId]);
 
     const fetchNotes = async (patientId: string) => {
         try {
-            const response = await fetch(`/api/patient/${patientId}`);
-            const data = await response.json();
-            if (data.notes) {
-                // Assuming 'notes' is a string; adjust if it's stored differently
-                setNotesList(data.notes.split('\n')); // Example: split by newline if multiple notes are in one string
+            const response = await fetch(`/api/patient/notes/${patientId}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
+            const data = await response.json();
+            setNotesList(data);
         } catch (error) {
             console.error('Failed to fetch notes:', error);
         }
     };
 
-    const handleNoteChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setNote(event.target.value);
-    };
-
     const publishNote = async () => {
         if (note.trim()) {
-            // Example: Post to add a new note, this needs a backend endpoint
-            const response = await fetch(`/api/patient/${patientId}/add-note`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ note }),
-            });
-            if (response.ok) {
-                const updatedNotes = await response.json();
-                setNotesList(updatedNotes); // Update based on what the API returns
+            try {
+                const response = await fetch(`/api/patient/notes/${patientId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ content: note, username: username }),
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const newNote = await response.json();
+                setNotesList(prevNotes => [...prevNotes, newNote]);
+                setNote('');  // Clear input after publishing
+            } catch (error) {
+                console.error('Failed to publish note:', error);
             }
-            setNote('');  // Clear input after publishing
         }
     };
 
@@ -61,7 +61,7 @@ const NotesForm: React.FC<NotesFormProps> = ({ patientId }) => {
                     variant="outlined"
                     fullWidth
                     value={note}
-                    onChange={handleNoteChange}
+                    onChange={(e) => setNote(e.target.value)}
                 />
                 <Button
                     variant="contained"
@@ -79,7 +79,7 @@ const NotesForm: React.FC<NotesFormProps> = ({ patientId }) => {
                     {notesList.map((item, index) => (
                         <React.Fragment key={index}>
                             <ListItem>
-                                <ListItemText primary={item} />
+                                <ListItemText primary={item.content} />
                             </ListItem>
                             <Divider />
                         </React.Fragment>

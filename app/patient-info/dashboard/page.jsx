@@ -1,3 +1,4 @@
+// app/patient-info/dashboard/page.jsx
 "use client";
 
 import * as React from 'react';

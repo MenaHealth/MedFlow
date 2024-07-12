@@ -54,25 +54,25 @@ const PatientSubmenu = () => {
                 }}
             >
                 <BottomNavigationAction
-                    label=""
+                    // label=""
                     icon={<MedicalInformation />}
                     component={Link}
                     href={id ? `/fajr/patient/${id}` : '#'}
                 />
                 <BottomNavigationAction
-                    label=""
+                    // label=""
                     icon={<CalendarMonth />}
                     component={Link}
                     href={`/lab-visits/${id}`}
                 />
                 <BottomNavigationAction
-                    label=""
+                    // label=""
                     icon={<Notes />}
                     component={Link}
                     href={`/notes/${id}`}
                 />
                 <BottomNavigationAction
-                    label=""
+                    // label=""
                     icon={<Collections />}
                     component={Link}
                     href={`/image-gallery/${id}`}

@@ -1,6 +1,6 @@
 // components/form/NotesForm.tsx
 import React, { useState, useEffect } from 'react';
-import { TextField, Button, List, ListItem, ListItemText, Divider } from '@mui/material';
+import { TextField, Button, List, ListItem, ListItemText, Divider, Typography } from '@mui/material';
 import { Publish as PublishIcon } from '@mui/icons-material';
 
 interface NotesFormProps {
@@ -8,9 +8,16 @@ interface NotesFormProps {
     username: string;
 }
 
+interface Note {
+    _id: string;
+    content: string;
+    username: string;
+    date: string;
+}
+
 const NotesForm: React.FC<NotesFormProps> = ({ patientId, username }) => {
     const [note, setNote] = useState<string>('');
-    const [notesList, setNotesList] = useState<string[]>([]);
+    const [notesList, setNotesList] = useState<Note[]>([]);
 
     useEffect(() => {
         fetchNotes(patientId);
@@ -77,11 +84,26 @@ const NotesForm: React.FC<NotesFormProps> = ({ patientId, username }) => {
                 <h2 className="text-xl font-bold mb-4">Previous Notes</h2>
                 <List component="nav" aria-label="previous notes">
                     {notesList.map((item, index) => (
-                        <React.Fragment key={index}>
-                            <ListItem>
-                                <ListItemText primary={item.content} />
+                        <React.Fragment key={item._id}>
+                            <ListItem alignItems="flex-start">
+                                <ListItemText
+                                    primary={item.content}
+                                    secondary={
+                                        <React.Fragment>
+                                            <Typography
+                                                sx={{ display: 'inline' }}
+                                                component="span"
+                                                variant="body2"
+                                                color="text.primary"
+                                            >
+                                                {item.username}
+                                            </Typography>
+                                            {" — "}{new Date(item.date).toLocaleString()}
+                                        </React.Fragment>
+                                    }
+                                />
                             </ListItem>
-                            <Divider />
+                            <Divider variant="inset" component="li" />
                         </React.Fragment>
                     ))}
                 </List>

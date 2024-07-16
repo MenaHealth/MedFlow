@@ -2,15 +2,20 @@
 "use client";
 
 import * as React from 'react';
+import { useEffect } from "react";
+
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import Paper from '@mui/material/Paper';
-import { useEffect } from "react";
+
 import { Button } from '@/components/ui/button';
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,7 +24,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { ChevronDownIcon } from '@radix-ui/react-icons';
+
 
 import { CLINICS, PRIORITIES, SPECIALTIES } from '@/data/data';
 import Link from 'next/link';
@@ -82,24 +87,35 @@ export default function PatientTriage() {
   }, [sortOrder, prioritySort]);
 
   return (
-    <>
-      <div className="w-full">
-        <h2 className='head_text_2 text-center py-3'>
-          <span className='blue_gradient'>Patient List</span>
-        </h2>
-        <div className="flex flex-wrap gap-2 mb-4">
-          {sortOrder !== 'newest' && (
-              <div className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                Date: {sortOrder === 'oldest' ? 'Oldest first' : 'Newest first'}
-              </div>
-          )}
-          {prioritySort !== 'all' && (
-              <div className="bg-green-100 text-green-800 px-2 py-1 rounded">
-                Priority: {prioritySort}
-              </div>
-          )}
-        </div>
-        <TableContainer component={Paper}>
+      <>
+        <div className="w-full relative">
+          <div className="absolute left-[10%] flex items-center top-2.5"> {/* Adjust the top value here */}
+            <PersonAddIcon
+                className="text-5xl rounded-full shadow p-3 bg-white hover:shadow-lg transition-shadow duration-300"
+                style={{
+                  color: 'currentColor',
+                  transition: 'color 0.15s ease-in-out',
+                }}
+                onMouseOver={(e) => e.currentTarget.style.color = '#FF5722'}
+                onMouseOut={(e) => e.currentTarget.style.color = 'currentColor'}
+            />
+          </div>
+          <h2 className='head_text_2 text-center py-3'>
+            <span className='blue_gradient'>Patient List</span>
+          </h2>
+          <div className="flex flex-wrap gap-2 mb-4">
+            {sortOrder !== 'newest' && (
+                <div className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                  Date: {sortOrder === 'oldest' ? 'Oldest first' : 'Newest first'}
+                </div>
+            )}
+            {prioritySort !== 'all' && (
+                <div className="bg-green-100 text-green-800 px-2 py-1 rounded">
+                  Priority: {prioritySort}
+                </div>
+            )}
+          </div>
+          <TableContainer component={Paper}>
 
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
@@ -112,7 +128,7 @@ export default function PatientTriage() {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="h-8 w-full justify-start">
                       Priority
-                      <ChevronDownIcon className="ml-2 h-4 w-4" />
+                      <KeyboardArrowDownIcon className="ml-2 h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
@@ -132,7 +148,7 @@ export default function PatientTriage() {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="h-8 w-full justify-start">
                       Surgery Date
-                      <ChevronDownIcon className="ml-2 h-4 w-4" />
+                      <KeyboardArrowDownIcon className="ml-2 h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">

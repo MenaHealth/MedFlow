@@ -19,6 +19,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { ChevronDownIcon } from '@radix-ui/react-icons';
 
 import { CLINICS, PRIORITIES, SPECIALTIES } from '@/data/data';
 import Link from 'next/link';
@@ -27,6 +28,8 @@ export default function PatientTriage() {
 
   const [rows, setRows] = React.useState([]);
   const [users, setUsers] = React.useState([]);
+  const [sortOrder, setSortOrder] = React.useState('newest');
+  const [prioritySort, setPrioritySort] = React.useState('all');
 
   const fetchRows = async () => {
     try {
@@ -48,28 +51,98 @@ export default function PatientTriage() {
     }
   }
 
+  const sortAndFilterRows = (rows, dateOrder, priorityFilter) => {
+    let sortedRows = [...rows].sort((a, b) => {
+      const dateA = new Date(a.surgeryDate);
+      const dateB = new Date(b.surgeryDate);
+      return dateOrder === 'newest' ? dateB - dateA : dateA - dateB;
+    });
+
+    if (priorityFilter !== 'all') {
+      sortedRows = sortedRows.filter(row => row.priority === priorityFilter);
+    }
+
+    return sortedRows;
+  };
+
   useEffect(() => {
-    fetchRows();
+    const fetchAndSortRows = async () => {
+      try {
+        const response = await fetch('/api/patient/');
+        const data = await response.json();
+        const sortedAndFilteredData = sortAndFilterRows(data, sortOrder, prioritySort);
+        setRows(sortedAndFilteredData);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchAndSortRows();
     fetchUsers();
-  }, []);
+  }, [sortOrder, prioritySort]);
 
   return (
     <>
-    <div className="w-full">
-      <h2 className='head_text_2 text-center py-3'>
-        <span className='blue_gradient'>Patient List</span>
-      </h2>
-      <TableContainer component={Paper}>
+      <div className="w-full">
+        <h2 className='head_text_2 text-center py-3'>
+          <span className='blue_gradient'>Patient List</span>
+        </h2>
+        <div className="flex flex-wrap gap-2 mb-4">
+          {sortOrder !== 'newest' && (
+              <div className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                Date: {sortOrder === 'oldest' ? 'Oldest first' : 'Newest first'}
+              </div>
+          )}
+          {prioritySort !== 'all' && (
+              <div className="bg-green-100 text-green-800 px-2 py-1 rounded">
+                Priority: {prioritySort}
+              </div>
+          )}
+        </div>
+        <TableContainer component={Paper}>
+
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
             <TableRow>
               <TableCell align="center">Patient ID</TableCell>
               <TableCell align="center">Laterality</TableCell>
               <TableCell align="center">Diagnosis</TableCell>
-              <TableCell align="center">Priority</TableCell>
+              <TableCell align="center">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-8 w-full justify-start">
+                      Priority
+                      <ChevronDownIcon className="ml-2 h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuRadioGroup value={prioritySort} onValueChange={setPrioritySort}>
+                      <DropdownMenuRadioItem value="all">All</DropdownMenuRadioItem>
+                      {PRIORITIES.map((priority) => (
+                          <DropdownMenuRadioItem key={priority} value={priority}>{priority}</DropdownMenuRadioItem>
+                      ))}
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TableCell>
               <TableCell align="center">Hospital</TableCell>
               <TableCell align="center">Specialty</TableCell>
-              <TableCell align="center">Surgery Date</TableCell>
+              <TableCell align="center">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-8 w-full justify-start">
+                      Surgery Date
+                      <ChevronDownIcon className="ml-2 h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuRadioGroup value={sortOrder} onValueChange={setSortOrder}>
+                      <DropdownMenuRadioItem value="newest">Newest first</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="oldest">Oldest first</DropdownMenuRadioItem>
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>

@@ -89,20 +89,23 @@ export default function PatientTriage() {
   return (
       <>
         <div className="w-full relative">
-          <div className="absolute left-[10%] flex items-center top-2.5"> {/* Adjust the top value here */}
-            <PersonAddIcon
-                className="text-5xl rounded-full shadow p-3 bg-white hover:shadow-lg transition-shadow duration-300"
-                style={{
-                  color: 'currentColor',
-                  transition: 'color 0.15s ease-in-out',
-                }}
-                onMouseOver={(e) => e.currentTarget.style.color = '#FF5722'}
-                onMouseOut={(e) => e.currentTarget.style.color = 'currentColor'}
-            />
+          <div className="flex justify-between items-center py-3">
+            <Link href="/fajr/patient" className="flex items-center justify-center no-underline">
+              <PersonAddIcon
+                  className="text-5xl rounded-full shadow p-3 bg-white hover:shadow-lg transition-shadow duration-300"
+                  style={{
+                    color: 'currentColor',
+                    transition: 'color 0.15s ease-in-out',
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.color = '#FF5722'}
+                  onMouseOut={(e) => e.currentTarget.style.color = 'currentColor'}
+              />
+            </Link>
+            <h2 className='flex-1 text-center font-bold' style={{ fontSize: '24px' }}> {/* Adjusted font size and added bold */}
+              <span className='blue_gradient'>Patient List</span>
+            </h2>
+            <div style={{ width: 48 }}> {/* Placeholder to balance the header visually */}</div>
           </div>
-          <h2 className='head_text_2 text-center py-3'>
-            <span className='blue_gradient'>Patient List</span>
-          </h2>
           <div className="flex flex-wrap gap-2 mb-4">
             {sortOrder !== 'newest' && (
                 <div className="bg-blue-100 text-blue-800 px-2 py-1 rounded">

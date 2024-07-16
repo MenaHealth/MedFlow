@@ -11,9 +11,9 @@ const s3Client = new S3Client({
     },
 });
 
-export const POST = async (req: NextRequest) => {
+export async function POST(request: NextRequest) {
     try {
-        const formData = await req.formData();
+        const formData = await request.formData();
         const encryptedFiles = Array.from(formData.getAll('file') as unknown as FileList);
 
         const uploadPromises = encryptedFiles.map(async (encryptedFile: File) => {
@@ -37,16 +37,4 @@ export const POST = async (req: NextRequest) => {
         console.error('Error uploading files:', error);
         return NextResponse.json({ error: 'Failed to upload files' }, { status: 500 });
     }
-};
-
-export const handler = {
-    POST,
-    onError: (err: any, req: NextRequest, res: NextResponse) => {
-        const error = err as Error;
-        console.error('Handler error:', error.stack);
-        return NextResponse.json({ error: error.message }, { status: 500 });
-    },
-    onNoMatch: (req: NextRequest, res: NextResponse) => {
-        return NextResponse.json({ error: 'Method Not Allowed' }, { status: 405 });
-    },
-};
+}

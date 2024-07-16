@@ -1,55 +1,58 @@
-// import CryptoJS from 'crypto-js';
+import CryptoJS from 'crypto-js';
 
-// export const encryptPhoto = (file: File, encryptionKey: string): Promise<string> => {
-//     return new Promise((resolve, reject) => {
-//         const reader = new FileReader();
-//         reader.onload = () => {
-//             const fileContent = CryptoJS.lib.WordArray.create(reader.result as ArrayBuffer);
-//             const encrypted = CryptoJS.AES.encrypt(fileContent, encryptionKey).toString();
-//             resolve(encrypted);
-//         };
-//         reader.onerror = (error) => reject(error);
-//         reader.readAsArrayBuffer(file);
-//     });
-// };
+export const encryptPhoto = (file: File, encryptionKey: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const fileContent = CryptoJS.lib.WordArray.create(reader.result as ArrayBuffer);
+            const encrypted = CryptoJS.AES.encrypt(fileContent, encryptionKey).toString();
+            resolve(encrypted);
+        };
+        reader.onerror = (error) => reject(error);
+        reader.readAsArrayBuffer(file);
+    });
+};
 
-// export const decryptPhoto = async (encryptedBuffer: ArrayBuffer, encryptionKey: string): Promise<Blob> => {
-//     try {
-//         // Convert encryptionKey from Base64 to WordArray
-//         const key = CryptoJS.enc.Base64.parse(encryptionKey);
+export const decryptPhoto = async (encryptedBase64: string, encryptionKey: string): Promise<Blob> => {
+    try {
+        // Convert encryptionKey to WordArray
+        // const key = CryptoJS.enc.Base64.parse(encryptionKey);
 
-//         // Decrypt using CryptoJS
-//         const decryptedData = CryptoJS.AES.decrypt(
-//             { ciphertext: CryptoJS.lib.WordArray.create(encryptedBuffer) }, // Ensure WordArray from ArrayBuffer
-//             key,
-//             { mode: CryptoJS.mode.ECB, padding: CryptoJS.pad.Pkcs7 }
-//         );
+        // Decrypt using CryptoJS
+        const decryptedData = CryptoJS.AES.decrypt(encryptedBase64, encryptionKey);
 
-//         // Convert decrypted WordArray to ArrayBuffer
-//         const decryptedArrayBuffer = decryptedData.toString(CryptoJS.enc.Latin1);
-//         const decryptedUint8Array = new Uint8Array(decryptedArrayBuffer.length);
-//         for (let i = 0; i < decryptedArrayBuffer.length; i++) {
-//             decryptedUint8Array[i] = decryptedArrayBuffer.charCodeAt(i);
-//         }
+        // Convert decrypted WordArray to ArrayBuffer
+        const decryptedArrayBuffer = decryptedData.toString(CryptoJS.enc.Base64url);
+        console.log("Decrypted Array Buffer (Latin1):", decryptedArrayBuffer);
 
-//         // Create Blob from Uint8Array
-//         const decryptedBlob = new Blob([decryptedUint8Array], { type: 'image/webp' });
+        const decryptedUint8Array = new Uint8Array(decryptedArrayBuffer.length);
+        for (let i = 0; i < decryptedArrayBuffer.length; i++) {
+            decryptedUint8Array[i] = decryptedArrayBuffer.charCodeAt(i);
+        }
 
-//         return decryptedBlob;
-//     } catch (error) {
-//         console.error('Error decrypting photo:', error);
-//         throw error;
-//     }
-// };
+        console.log("Decrypted Uint8Array:", decryptedUint8Array);
 
-// export const generateEncryptionKey = () => {
-//     const array = new Uint8Array(32);
-//     window.crypto.getRandomValues(array);
+        // Create Blob from Uint8Array
+        const decryptedBlob = new Blob([decryptedUint8Array], { type: 'image/webp' });
+        console.log("Decrypted Blob:", decryptedBlob);
 
-//     const numArray = Array.from(array);
+        return decryptedBlob;
+    } catch (error) {
+        console.error('Error decrypting photo:', error);
+        throw error;
+    }
+};
 
-//     return btoa(String.fromCharCode.apply(null, numArray));
-// };
+
+
+export const generateEncryptionKey = () => {
+    const array = new Uint8Array(32);
+    window.crypto.getRandomValues(array);
+
+    const numArray = Array.from(array);
+
+    return btoa(String.fromCharCode.apply(null, numArray));
+};
 
 export const convertToWebP = (file: File): Promise<Blob> => {
     return new Promise((resolve, reject) => {

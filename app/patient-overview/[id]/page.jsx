@@ -8,20 +8,45 @@ import MedicalInformation from '@mui/icons-material/MedicalInformation';
 import CalendarMonth from '@mui/icons-material/CalendarMonth';
 import Notes from '@mui/icons-material/Notes';
 import Collections from '@mui/icons-material/Collections';
+import { useParams } from 'next/navigation';
 
-const Home = () => {
+const PatientOverview = () => {
     const theme = useTheme();
     const [isClient, setIsClient] = useState(false);
+    const { id } = useParams();
 
     useEffect(() => {
         setIsClient(true);
     }, []);
 
+    // useEffect(() => {
+    //     if (id !== '') {
+    //         // fetch the patient-info data from the API
+    //         fetch(`/api/patient/${id}`)
+    //         .then(response => response.json())
+    //         .then(data => {
+    //             // update the form with the data
+    //             data.surgeryDate = new Date(data.surgeryDate);
+    //             data.medx = data.medx.map((med) => {
+    //                 return {
+    //                     medName: med.medName,
+    //                     medDosage: med.medDosage,
+    //                     medFrequency: med.medFrequency,
+    //                 };
+    //             });
+    //             // age
+    //             data.age = parseInt(data.age);
+    //             setPatientData(data);
+    //             console.log(data)
+    //         })
+    //         .catch(error => {
+    //             // show an alert with the error message
+    //             alert('Error: ' + error.message);
+    //         });
+    //     }}, [id]);
+
     return (
         <Container maxWidth="md" sx={{ mt: 4 }}>
-            {/*<Typography variant="h2" component="h1" gutterBottom>*/}
-            {/*    Home Screen*/}
-            {/*</Typography>*/}
             <Grid container spacing={4}>
                 <Grid item xs={12} sm={6}>
                     <Box
@@ -40,11 +65,12 @@ const Home = () => {
                         <MedicalInformation sx={{ fontSize: 40, mb: { sm: 2 }, mr: { xs: 2, sm: 0 } }} />
                         <Button
                             component={Link}
-                            href="/patient-info/dashboard"
+                            href={id ? `/fajr/patient/${id}` : '#'}
                             variant="contained"
                             color="primary"
                             fullWidth
                             sx={{ p: 2 }}
+                            disabled={!id} // Disable button if id is not set
                         >
                             Patient Info
                         </Button>
@@ -121,7 +147,7 @@ const Home = () => {
                         <Collections sx={{ fontSize: 40, mb: { sm: 2 }, mr: { xs: 2, sm: 0 } }} />
                         <Button
                             component={Link}
-                            href="/image-gallery"
+                            href={`/image-gallery/${id}`}
                             variant="contained"
                             color="error"
                             fullWidth
@@ -136,4 +162,4 @@ const Home = () => {
     );
 };
 
-export default Home;
+export default PatientOverview;

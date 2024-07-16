@@ -8,6 +8,8 @@ interface Prescription {
 }
 
 export interface IPatient extends Document {
+  _id?: string;
+  files: any[];
   patientId: string;
   laterality?: 'Left' | 'Right' | 'Bilateral';
   diagnosis?: string;
@@ -34,6 +36,10 @@ export interface IPatient extends Document {
 
 const PatientSchema = new Schema<IPatient>({
   patientId: { type: String, required: true, unique: true },
+  files: { type: [{
+    hash: { type: String },
+    encryptionKey: { type: String },
+  }] },
   laterality: { type: String, enum: ['Left', 'Right', 'Bilateral'] },
   diagnosis: { type: String },
   diagnosisCat: { type: String, enum: [''] },

@@ -78,7 +78,7 @@ export default function PatientTriage() {
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
               >
                 <TableCell align="center">
-                  <Link href={`/fajr/patient/${row._id}`}>{row.patientId}</Link>
+                  <Link href={`/patient-overview/${row._id}`}>{row.patientId}</Link>
                 </TableCell>
                 <TableCell align="center">{row.laterality}</TableCell>
                 <TableCell align="center">{row.diagnosis}</TableCell>

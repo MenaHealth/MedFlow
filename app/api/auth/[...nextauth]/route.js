@@ -30,6 +30,7 @@ const handler = NextAuth({
           'mayalyhayat@gmail.com',
           'rami.ajjuri@gmail.com',
           'kessen@umich.edu',
+          'azcryan@gmail.com',
         ];
 
         if (!allowedUsers.includes(profile.email)) {

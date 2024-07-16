@@ -7,7 +7,7 @@ const HomePage = () => {
     const router = useRouter();
 
     useEffect(() => {
-        router.replace('/home');
+        router.replace('/patient-info/dashboard');
     }, [router]);
 
     return null;

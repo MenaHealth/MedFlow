@@ -3,13 +3,11 @@ import { connectToDB } from "@/utils/database";
 
 export const GET = async (request, { params }) => {
     try {
-        await connectToDB()
-
+        await connectToDB();
         const patient = await Patient.findById(params.id)
         if (!patient) {
             return new Response("Patient Not Found", { status: 404 });
         }
-
         return new Response(JSON.stringify(patient), { status: 200 })
 
     } catch (error) {
@@ -17,26 +15,32 @@ export const GET = async (request, { params }) => {
     }
 }
 
-
-// FIXME
 export const PATCH = async (request, { params }) => {
-    const { prompt, tag } = await request.json();
+    const newPatientData = await request.json();
 
     try {
         await connectToDB();
 
-        // Find the existing prompt by ID
-        const existingPrompt = await Patient.findById(params.id);
+        // Update existing patient
+        newPatientData.age = parseInt(newPatientData.age);
+        newPatientData.surgeryDate = new Date(newPatientData.surgeryDate);
+        newPatientData.medx = newPatientData.medx ? newPatientData.medx.map((med) => {
+            return {
+            medName: med.medName,
+            medDosage: med.medDosage,
+            medFrequency: med.medFrequency,
+            };
+        }) : [];
+        const updatedPatient = await Patient.findByIdAndUpdate(params.id, { $set: newPatientData}, { new: true, runValidators: true });
 
-        if (!existingPrompt) {
-            return new Response("Prompt not found", { status: 404 });
+        if (!updatedPatient) {
+            return new Response(`Patient with ID ${patientId} not found`, { status: 404 });
         }
 
-        await existingPrompt.save();
-
-        return new Response("Successfully updated the Prompts", { status: 200 });
+        return new Response(JSON.stringify(updatedPatient), { status: 200 });
     } catch (error) {
-        return new Response("Error Updating Prompt", { status: 500 });
+        console.error('Failed to update patient:', error);
+        return new Response(`Failed to update patient: ${error}`, { status: 500 });
     }
 };
 

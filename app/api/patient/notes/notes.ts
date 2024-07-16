@@ -15,8 +15,12 @@ router.post('/add', async (req, res) => {
         });
         await newNote.save();
         res.status(201).json(newNote);
-    } catch (error) {
-        res.status(400).json({ message: error.message });
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            res.status(400).json({ message: error.message });
+        } else {
+            res.status(400).json({ message: "An unknown error occurred." });
+        }
     }
 });
 
@@ -26,8 +30,12 @@ router.get('/:patientId', async (req, res) => {
         const { patientId } = req.params;
         const notes = await Note.find({ patientId }).sort({ date: -1 });
         res.json(notes);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            res.status(500).json({ message: error.message });
+        } else {
+            res.status(500).json({ message: "An unknown error occurred." });
+        }
     }
 });
 

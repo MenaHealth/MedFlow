@@ -162,6 +162,9 @@ export default function PatientTriage() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>
+              <TableCell align="center">Surgical Candidate</TableCell>
+              <TableCell align="center">Surgeon</TableCell>
+              <TableCell align="center">Additional Notes</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>

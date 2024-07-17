@@ -5,6 +5,7 @@ import { Box, Grid, IconButton, Button } from '@mui/material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { generateEncryptionKey, encryptPhoto, calculateFileHash, convertToWebP, decryptPhoto } from '@/utils/encryptPhoto';
+import Image from 'next/image';
 
 const DEFAULT_FORM_VALUES = {
     patientId: "",
@@ -174,7 +175,7 @@ const ImageGallery = () => {
                                 <IconButton onClick={handlePrevClick} sx={{ position: 'absolute', left: '-40px', top: '50%', transform: 'translateY(-50%)' }}>
                                     <ChevronLeftIcon />
                                 </IconButton>
-                                <img
+                                <image
                                     src={photos[currentPhotoIndex].url}
                                     alt={`Photo ${currentPhotoIndex + 1}`}
                                     className="max-w-full h-auto mx-auto"
@@ -189,7 +190,7 @@ const ImageGallery = () => {
                                     {photos.map((photo, index) => (
                                         <Grid item key={index}>
                                             <IconButton onClick={() => handleThumbnailClick(index)}>
-                                                <img
+                                                <Image
                                                     src={photo.url}
                                                     alt={`Thumbnail ${index + 1}`}
                                                     className="w-16 h-16 object-cover rounded"

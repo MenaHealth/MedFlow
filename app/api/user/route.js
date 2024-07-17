@@ -1,11 +1,11 @@
-// app/api/user/route.js
 import User from '@/models/user';
-import dbConnect from "@/utils/database";
+import { connectToDB } from "@/utils/database";
 
 
 export const GET = async (request, { params }) => {
+
     try {
-        await dbConnect();  // Correct function call
+        await connectToDB();
 
         const users = await User.find().sort({ name: 1 });
         return new Response(JSON.stringify(users), { status: 200 });

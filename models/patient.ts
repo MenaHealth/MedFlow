@@ -1,4 +1,3 @@
-// models/patient.ts
 import { Schema, model, models, Document, Types } from 'mongoose';
 import { SPECIALTIES } from '@/data/data';
 

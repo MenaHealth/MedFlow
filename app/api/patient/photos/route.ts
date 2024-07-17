@@ -1,4 +1,3 @@
-// app/api/patient/photos/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { fromArrayBuffer } from '@smithy/util-buffer-from';
@@ -11,9 +10,9 @@ const s3Client = new S3Client({
     },
 });
 
-export async function POST(request: NextRequest) {
+export const POST = async (req: NextRequest) => {
     try {
-        const formData = await request.formData();
+        const formData = await req.formData();
         const encryptedFiles = Array.from(formData.getAll('file') as unknown as FileList);
 
         const uploadPromises = encryptedFiles.map(async (encryptedFile: File) => {
@@ -37,4 +36,4 @@ export async function POST(request: NextRequest) {
         console.error('Error uploading files:', error);
         return NextResponse.json({ error: 'Failed to upload files' }, { status: 500 });
     }
-}
+};

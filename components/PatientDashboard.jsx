@@ -1,3 +1,4 @@
+// components/PatientDashboard.jsx
 import { CLINICS } from "@/data/data";
 import PatientCard from "./PatientCard";
 import ClinicCard from "./ClinicCard";

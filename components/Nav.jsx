@@ -35,18 +35,18 @@ const Nav = () => {
                 <div className='flex gap-3 md:gap-8'>
                     {session?.user && (
                         <>
-                            <Link href='/patient-info/dashboard' className='outline_btn'>
-                                Patient List
-                            </Link>
+                            {/*<Link href='/patient-info/dashboard' className='outline_btn'>*/}
+                            {/*    Patient List*/}
+                            {/*</Link>*/}
                             <Link href='/fajr/patient' className='outline_btn'>
                                 New Patient
                             </Link>
                             <Link href='/fajr/lab' className='outline_btn'>
                                 New Lab Form
                             </Link>
-                            <Link href='/patient/660b70c7083d09310b0dc4d2' className='outline_btn'>
-                                Chart Template
-                            </Link>
+                            {/*<Link href='/patient/660b70c7083d09310b0dc4d2' className='outline_btn'>*/}
+                            {/*    Chart Template*/}
+                            {/*</Link>*/}
                         </>
                     )}
                 </div>

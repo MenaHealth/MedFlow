@@ -1,16 +1,18 @@
-// app/api/user/[id]/route.js
 import User from '@/models/user';
-// import { connectToDB } from "@/utils/database";
-import dbConnect from "@/utils/database";
+import { connectToDB } from "@/utils/database";
 
 
 export const GET = async (request, { params }) => {
+
     try {
-        await dbConnect(); // Correct function call
+        await connectToDB();
+
         const existingUser = await User.findById(params.id);
+
         if (!existingUser) {
             return new Response("User not found", { status: 404 });
         }
+
         return new Response(JSON.stringify(existingUser), { status: 200 });
     } catch (error) {
         return new Response(`Error Getting User ${error}`, { status: 500 });

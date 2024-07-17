@@ -1,17 +1,14 @@
 import Patient, { IPatient } from "@/models/patient";
-import dbConnect from "@/utils/database";  // Correct import statement
+import { connectToDB } from "@/utils/database";
 
 export const POST = async (request: Request) => {
   const patientData: IPatient = await request.json();
   console.log(patientData);
 
   try {
-    await dbConnect();  // Correct function call
-
-    // The following code is commented out, but it could be uncommented and adjusted
-    // if you need to handle both updating existing patients and creating new ones.
-
+    await connectToDB();
     // let existingPatient = await Patient.findById(patientData._id);
+
     // if (existingPatient) {
     //   // Update existing patient
     //   patientData.age = parseInt(patientData.age as any);
@@ -24,15 +21,15 @@ export const POST = async (request: Request) => {
     //     };
     //   }) : [];
     //   existingPatient.set(patientData);
-
+      
     //   // Update other properties as needed
     //   await existingPatient.save();
     //   return new Response(JSON.stringify(existingPatient), { status: 200 });
     // } else {
-    // Create new patient
-    const newPatient = new Patient(patientData);
-    await newPatient.save();
-    return new Response(JSON.stringify(newPatient), { status: 201 });
+      // Create new patient
+      const newPatient = new Patient(patientData);
+      await newPatient.save();
+      return new Response(JSON.stringify(newPatient), { status: 201 });
     // }
   } catch (error) {
     return new Response(`Failed to create patient: ${error}`, { status: 500 });

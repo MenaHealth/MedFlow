@@ -168,3 +168,5 @@ export function PatientForm({id}: {id: string} = {id: ''}) {
         </>
     );
 }
+
+export default PatientForm;

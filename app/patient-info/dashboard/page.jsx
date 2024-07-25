@@ -125,143 +125,143 @@ export default function PatientTriage() {
           </div>
           <TableContainer component={Paper}>
 
-        <Table sx={{ minWidth: 650 }} aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              <TableCell align="center">Patient ID</TableCell>
-              <TableCell align="center">Laterality</TableCell>
-              <TableCell align="center">Diagnosis</TableCell>
-              <TableCell align="center">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8 w-full justify-start">
-                      Priority
-                      <KeyboardArrowDownIcon className="ml-2 h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuRadioGroup value={prioritySort} onValueChange={setPrioritySort}>
-                      <DropdownMenuRadioItem value="all">All</DropdownMenuRadioItem>
-                      {PRIORITIES.map((priority) => (
-                          <DropdownMenuRadioItem key={priority} value={priority}>{priority}</DropdownMenuRadioItem>
-                      ))}
-                    </DropdownMenuRadioGroup>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-              <TableCell align="center">Hospital</TableCell>
-              <TableCell align="center">Specialty</TableCell>
-              <TableCell align="center">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8 w-full justify-start">
-                      Surgery Date
-                      <KeyboardArrowDownIcon className="ml-2 h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuRadioGroup value={sortOrder} onValueChange={setSortOrder}>
-                      <DropdownMenuRadioItem value="newest">Newest first</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="oldest">Oldest first</DropdownMenuRadioItem>
-                    </DropdownMenuRadioGroup>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-              <TableCell align="center">Surgical Candidate</TableCell>
-              <TableCell align="center">Surgeon</TableCell>
-              <TableCell align="center">Additional Notes</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {rows.map((row, index) => (
-              <TableRow
-                key={index}
-                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-              >
-                <TableCell align="center">
-                  <Link href={`/patient-overview/${row._id}`}>{row.patientId}</Link>
-                </TableCell>
-                <TableCell align="center">{row.laterality}</TableCell>
-                <TableCell align="center">{row.diagnosis}</TableCell>
+            <Table sx={{ minWidth: 650 }} aria-label="simple table">
+              <TableHead>
+                <TableRow>
+                  <TableCell align="center">Patient ID</TableCell>
+                  <TableCell align="center">Laterality</TableCell>
+                  <TableCell align="center">Diagnosis</TableCell>
+                  <TableCell align="center">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-full justify-start">
+                          Priority
+                          <KeyboardArrowDownIcon className="ml-2 h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuRadioGroup value={prioritySort} onValueChange={setPrioritySort}>
+                          <DropdownMenuRadioItem value="all">All</DropdownMenuRadioItem>
+                          {PRIORITIES.map((priority) => (
+                              <DropdownMenuRadioItem key={priority} value={priority}>{priority}</DropdownMenuRadioItem>
+                          ))}
+                        </DropdownMenuRadioGroup>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                  <TableCell align="center">Hospital</TableCell>
+                  <TableCell align="center">Specialty</TableCell>
+                  <TableCell align="center">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-full justify-start">
+                          Surgery Date
+                          <KeyboardArrowDownIcon className="ml-2 h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuRadioGroup value={sortOrder} onValueChange={setSortOrder}>
+                          <DropdownMenuRadioItem value="newest">Newest first</DropdownMenuRadioItem>
+                          <DropdownMenuRadioItem value="oldest">Oldest first</DropdownMenuRadioItem>
+                        </DropdownMenuRadioGroup>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                  <TableCell align="center">Surgical Candidate</TableCell>
+                  <TableCell align="center">Surgeon</TableCell>
+                  <TableCell align="center">Additional Notes</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {rows.map((row, index) => (
+                    <TableRow
+                        key={index}
+                        sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                    >
+                      <TableCell align="center">
+                        <Link href={`/patient-overview/${row._id}`}>{row.patientId}</Link>
+                      </TableCell>
+                      <TableCell align="center">{row.laterality}</TableCell>
+                      <TableCell align="center">{row.diagnosis}</TableCell>
 
-                {/* priority */}
-                <TableCell align="center">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline">{row.priority}</Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-46">
-                      <DropdownMenuSeparator />
-                      <DropdownMenuRadioGroup value={row.priority} onValueChange={async (value) => {
-                        try {
-                          await fetch('/api/patient/', {
-                            method: 'PATCH',
-                            headers: {
-                              'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                              _id: rows[index]["_id"],
-                              priority: value,
-                            }),
-                          });
-                          const updatedRows = [...rows];
-                          updatedRows[index].priority = value;
-                          setRows(updatedRows);
-                        } catch (error) {
-                          console.log(error);
-                        }
-                      }}>
-                        {PRIORITIES.map((priority) => (
-                          <DropdownMenuRadioItem key={priority} value={priority}>{priority}</DropdownMenuRadioItem>
-                        ))}
-                      </DropdownMenuRadioGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
+                      {/* priority */}
+                      <TableCell align="center">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline">{row.priority}</Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-46">
+                            <DropdownMenuSeparator />
+                            <DropdownMenuRadioGroup value={row.priority} onValueChange={async (value) => {
+                              try {
+                                await fetch('/api/patient/', {
+                                  method: 'PATCH',
+                                  headers: {
+                                    'Content-Type': 'application/json',
+                                  },
+                                  body: JSON.stringify({
+                                    _id: rows[index]["_id"],
+                                    priority: value,
+                                  }),
+                                });
+                                const updatedRows = [...rows];
+                                updatedRows[index].priority = value;
+                                setRows(updatedRows);
+                              } catch (error) {
+                                console.log(error);
+                              }
+                            }}>
+                              {PRIORITIES.map((priority) => (
+                                  <DropdownMenuRadioItem key={priority} value={priority}>{priority}</DropdownMenuRadioItem>
+                              ))}
+                            </DropdownMenuRadioGroup>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
 
-                <TableCell align="center">{row.hospital}</TableCell>
+                      <TableCell align="center">{row.hospital}</TableCell>
 
-                {/* specialty */}
-                <TableCell align="center">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline">{row.specialty}</Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-46">
-                      <DropdownMenuSeparator />
-                      <DropdownMenuRadioGroup value={row.specialty} onValueChange={async (value) => {
-                        try {
-                          await fetch('/api/patient/', {
-                            method: 'PATCH',
-                            headers: {
-                              'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                              _id: rows[index]["_id"],
-                              specialty: value,
-                            }),
-                          });
-                          const updatedRows = [...rows];
-                          updatedRows[index].specialty = value;
-                          setRows(updatedRows);
-                        } catch (error) {
-                          console.log(error);
-                        }
-                      }}>
-                        {SPECIALTIES.map((specialty) => (
-                          <DropdownMenuRadioItem key={specialty} value={specialty}>{specialty}</DropdownMenuRadioItem>
-                        ))}
-                      </DropdownMenuRadioGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-                <TableCell align="center">{new Date(row.surgeryDate).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' })}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      </div>
-    </>
+                      {/* specialty */}
+                      <TableCell align="center">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline">{row.specialty}</Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-46">
+                            <DropdownMenuSeparator />
+                            <DropdownMenuRadioGroup value={row.specialty} onValueChange={async (value) => {
+                              try {
+                                await fetch('/api/patient/', {
+                                  method: 'PATCH',
+                                  headers: {
+                                    'Content-Type': 'application/json',
+                                  },
+                                  body: JSON.stringify({
+                                    _id: rows[index]["_id"],
+                                    specialty: value,
+                                  }),
+                                });
+                                const updatedRows = [...rows];
+                                updatedRows[index].specialty = value;
+                                setRows(updatedRows);
+                              } catch (error) {
+                                console.log(error);
+                              }
+                            }}>
+                              {SPECIALTIES.map((specialty) => (
+                                  <DropdownMenuRadioItem key={specialty} value={specialty}>{specialty}</DropdownMenuRadioItem>
+                              ))}
+                            </DropdownMenuRadioGroup>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                      <TableCell align="center">{new Date(row.surgeryDate).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' })}</TableCell>
+                    </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </div>
+      </>
   );
 }

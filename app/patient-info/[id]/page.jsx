@@ -1,3 +1,4 @@
+// app/patient-info/[id]/page.tsx
 "use client"
 
 import PatientChart from "@/components/PatientChart";

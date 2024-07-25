@@ -1,3 +1,4 @@
+// app/api/patient/new/route.ts
 import Patient, { IPatient } from "@/models/patient";
 import { connectToDB } from "@/utils/database";
 
@@ -7,6 +8,8 @@ export const POST = async (request: Request) => {
 
   try {
     await connectToDB();
+
+    // Uncomment this section if you want to check for an existing patient and update it.
     // let existingPatient = await Patient.findById(patientData._id);
 
     // if (existingPatient) {

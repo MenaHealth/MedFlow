@@ -1,15 +1,15 @@
+// app/api/patient/route.js
 import Patient from "@/models/patient";
-import { connectToDB } from "@/utils/database";
+// import { connectToDB } from "@/utils/database";
+import dbConnect from "@/utils/database";
 
 export const GET = async (request, { params }) => {
     try {
-        await connectToDB();
-        
-        // return all patients
+        await dbConnect(); // Correct function call
         const patient = await Patient.find();
-        return new Response(JSON.stringify(patient), { status: 200 })
+        return new Response(JSON.stringify(patient), { status: 200 });
     } catch (error) {
-        return new Response(`Failed to fetch all patients: ${error} ${JSON.stringify(request)} ${JSON.stringify(params)}`, { status: 500 })
+        return new Response(`Failed to fetch all patients: ${error}`, { status: 500 });
     }
 }
 

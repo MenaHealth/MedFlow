@@ -17,11 +17,8 @@
 /build
 
 # misc
-.DS_Store
+.DS_Store Z
 *.pem
-
-#Jetbrains config
-.idea/workspace.xml
 
 # debug
 npm-debug.log*

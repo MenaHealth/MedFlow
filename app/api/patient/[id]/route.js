@@ -1,15 +1,16 @@
+// app/api/patient/[id]/route.js
 import Patient from "@/models/patient";
-import { connectToDB } from "@/utils/database";
+// import { connectToDB } from "@/utils/database";
+import dbConnect from "@/utils/database";
 
 export const GET = async (request, { params }) => {
     try {
-        await connectToDB();
-        const patient = await Patient.findById(params.id)
+        await dbConnect(); // Correct function call
+        const patient = await Patient.findById(params.id);
         if (!patient) {
             return new Response("Patient Not Found", { status: 404 });
         }
-        return new Response(JSON.stringify(patient), { status: 200 })
-
+        return new Response(JSON.stringify(patient), { status: 200 });
     } catch (error) {
         return new Response("Internal Server Error", { status: 500 });
     }

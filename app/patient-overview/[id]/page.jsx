@@ -93,7 +93,7 @@ const PatientOverview = () => {
                         <CalendarMonth sx={{ fontSize: 40, mb: { sm: 2 }, mr: { xs: 2, sm: 0 } }} />
                         <Button
                             component={Link}
-                            href="/lab-visits"
+                            href={`/lab-visits/${id}`}
                             variant="contained"
                             color="success"
                             fullWidth
@@ -120,7 +120,7 @@ const PatientOverview = () => {
                         <Notes sx={{ fontSize: 40, mb: { sm: 2 }, mr: { xs: 2, sm: 0 } }} />
                         <Button
                             component={Link}
-                            href="/notes"
+                            href={`/notes/${id}`}
                             variant="contained"
                             color="warning"
                             fullWidth

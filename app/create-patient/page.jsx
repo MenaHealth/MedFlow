@@ -1,10 +1,11 @@
+// app/create-patient/page.jsx
 "use client";
 
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
-import PatientForm from '@/components/form/PatientForm';
+import PatientForm from '@/components/form/Fajr/PatientForm';
 import { CLINICS } from '@/data/data';
 
 const CreatePatient = () => {
@@ -16,7 +17,7 @@ const CreatePatient = () => {
     name: 'Patient ' + Math.floor(Math.random() * 100),
     complaint: 'Fever',
     status: 'New',
-    assignedClinic: CLINICS[Math.floor(Math.random() * 100) % CLINICS.length],
+    assignedClinic: CLINICS[Math.floor(Math.random() * CLINICS.length)],
     contactNo: '1234567890',
     location: 'Gaza',
     admittedDate: new Date().toISOString().substr(0, 10),
@@ -36,7 +37,6 @@ const CreatePatient = () => {
           govtId: patient.govtId,
           complaint: patient.complaint,
           contactNo: patient.contactNo,
-
           status: patient.status,
           coordinatorId: session?.user?.id,
           assignedClinic: patient.assignedClinic,
@@ -58,15 +58,16 @@ const CreatePatient = () => {
   };
 
   return (
-    <>
-    <PatientForm
-      type="Create"
-      patient={patient}
-      setPatient={setPatient}
-      submitting={submitting}
-      handleSubmit={createPatient}
-    />
-    </>
+      <>
+        <PatientForm
+            id=""
+            type="Create"
+            patient={patient}
+            setPatient={setPatient}
+            submitting={submitting}
+            handleSubmit={createPatient}
+        />
+      </>
   );
 };
 

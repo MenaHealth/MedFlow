@@ -14,6 +14,10 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import Paper from '@mui/material/Paper';
 
+import EditIcon from '@mui/icons-material/Edit';
+import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
+import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
+
 import { Button } from '@/components/ui/button';
 
 import {
@@ -35,6 +39,8 @@ export default function PatientTriage() {
   const [users, setUsers] = React.useState([]);
   const [sortOrder, setSortOrder] = React.useState('newest');
   const [prioritySort, setPrioritySort] = React.useState('all');
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [nameFilter, setNameFilter] = React.useState('all');
 
   const fetchRows = async () => {
     try {
@@ -56,16 +62,27 @@ export default function PatientTriage() {
     }
   }
 
-  const sortAndFilterRows = (rows, dateOrder, priorityFilter) => {
-    let sortedRows = [...rows].sort((a, b) => {
+  const sortAndFilterRows = (rows, dateOrder, priorityFilter, nameFilter, searchTerm) => {
+    let filteredRows = rows.filter(row => {
+      if (searchTerm) {
+        return row.patientId.toLowerCase().includes(searchTerm.toLowerCase());
+      }
+      return true;
+    });
+
+    if (nameFilter !== 'all') {
+      filteredRows = filteredRows.filter(row => row.patientId === nameFilter);
+    }
+
+    if (priorityFilter !== 'all') {
+      filteredRows = filteredRows.filter(row => row.priority === priorityFilter);
+    }
+
+    let sortedRows = [...filteredRows].sort((a, b) => {
       const dateA = new Date(a.surgeryDate);
       const dateB = new Date(b.surgeryDate);
       return dateOrder === 'newest' ? dateB - dateA : dateA - dateB;
     });
-
-    if (priorityFilter !== 'all') {
-      sortedRows = sortedRows.filter(row => row.priority === priorityFilter);
-    }
 
     return sortedRows;
   };
@@ -75,7 +92,7 @@ export default function PatientTriage() {
       try {
         const response = await fetch('/api/patient/');
         const data = await response.json();
-        const sortedAndFilteredData = sortAndFilterRows(data, sortOrder, prioritySort);
+        const sortedAndFilteredData = sortAndFilterRows(data, sortOrder, prioritySort, nameFilter, searchTerm);
         setRows(sortedAndFilteredData);
       } catch (error) {
         console.log(error);
@@ -84,7 +101,7 @@ export default function PatientTriage() {
 
     fetchAndSortRows();
     fetchUsers();
-  }, [sortOrder, prioritySort]);
+  }, [sortOrder, prioritySort, nameFilter, searchTerm]);
 
   return (
       <>
@@ -113,22 +130,71 @@ export default function PatientTriage() {
           </div>
           <div className="flex flex-wrap gap-2 mb-4">
             {sortOrder !== 'newest' && (
-                <div className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                <div className="bg-blue-100 text-blue-800 px-2 py-1 rounded flex items-center">
+                  <EditIcon className="mr-2 cursor-pointer" onClick={() => console.log('Edit date filter')} />
                   Date: {sortOrder === 'oldest' ? 'Oldest first' : 'Newest first'}
+                  <RemoveCircleIcon className="ml-2 cursor-pointer" onClick={() => setSortOrder('newest')} />
                 </div>
             )}
             {prioritySort !== 'all' && (
-                <div className="bg-green-100 text-green-800 px-2 py-1 rounded">
+                <div className="bg-green-100 text-green-800 px-2 py-1 rounded flex items-center">
+                  <EditIcon className="mr-2 cursor-pointer" onClick={() => console.log('Edit priority filter')} />
                   Priority: {prioritySort}
+                  <RemoveCircleIcon className="ml-2 cursor-pointer" onClick={() => setPrioritySort('all')} />
                 </div>
             )}
+            {searchTerm !== '' && (
+                <div className="bg-purple-100 text-purple-800 px-2 py-1 rounded flex items-center">
+                  <EditIcon className="mr-2 cursor-pointer" onClick={() => console.log('Edit patient name filter')} />
+                  Patient Name: {searchTerm}
+                  <RemoveCircleIcon className="ml-2 cursor-pointer" onClick={() => setSearchTerm('')} />
+                </div>
+            )}
+            <div className="bg-red-100 text-red-800 px-2 py-1 rounded cursor-pointer" onClick={() => {
+              setSortOrder('newest');
+              setPrioritySort('all');
+              setSearchTerm('');
+            }}>
+              <DeleteSweepIcon className="mr-2" />
+              Clear all filters
+            </div>
           </div>
           <TableContainer component={Paper}>
 
             <Table sx={{ minWidth: 650 }} aria-label="simple table">
               <TableHead>
                 <TableRow>
-                  <TableCell align="center">Patient ID</TableCell>
+                  <TableCell align="center">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-full justify-start">
+                          Patient Name
+                          <KeyboardArrowDownIcon className="ml-2 h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent key="patient-name-dropdown" align="end" className="w-72">
+                        <div key="search-input-wrapper">
+                          <input
+                              type="search"
+                              placeholder="Search by patient name"
+                              value={searchTerm}
+                              onChange={(e) => {
+                                e.stopPropagation();
+                                setSearchTerm(e.target.value);
+                              }}
+                              className="px-2 py-1 w-full border rounded"
+                          />
+                        </div>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuRadioGroup value={nameFilter} onValueChange={setNameFilter}>
+                          <DropdownMenuRadioItem value="all">All</DropdownMenuRadioItem>
+                          {rows.map((row) => (
+                              <DropdownMenuRadioItem key={row.patientId} value={row.patientId}>{row.patientId}</DropdownMenuRadioItem>
+                          ))}
+                        </DropdownMenuRadioGroup>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
                   <TableCell align="center">Laterality</TableCell>
                   <TableCell align="center">Diagnosis</TableCell>
                   <TableCell align="center">

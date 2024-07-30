@@ -162,7 +162,7 @@ export function PatientForm({id}: {id: string} = {id: ''}) {
                     <TextFormField form={form} fieldName="otherDrugs" fieldLabel="Other illicit uses" />
                     <TextFormField form={form} fieldName="allergies" fieldLabel="Allergies" />
                     <TextAreaFormField form={form} fieldName="notes" fieldLabel="Notes" />
-                    <Button type="submit">Submit Request</Button>
+                    <Button type="submit">Submit Patient</Button>
                 </form>
             </Form>
         </>

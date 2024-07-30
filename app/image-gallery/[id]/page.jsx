@@ -7,6 +7,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { ClipLoader } from 'react-spinners'; // Import the loading spinner
 import { generateEncryptionKey, encryptPhoto, calculateFileHash, convertToWebP, decryptPhoto } from '@/utils/encryptPhoto';
 import Image from 'next/image';
+import PatientSubmenu from "../../../components/PatientSubmenu";
 
 const DEFAULT_FORM_VALUES = {
     patientId: "",
@@ -189,6 +190,7 @@ const ImageGallery = () => {
         <>
             <h1 className="text-2xl font-bold mb-4" style={{ transform: 'translateX(5rem)' }}>Image Gallery</h1>
             <div className="container mx-auto p-4 flex flex-row justify-between">
+                <PatientSubmenu />
                 <div style={{ minWidth: '75%' }}>
                     {isLoading ? (
                         <div className="flex justify-center items-center h-full">

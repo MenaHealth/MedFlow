@@ -105,7 +105,7 @@ const ImageGallery = () => {
         event.preventDefault();
         let encryptedImages = [];
         try {
-            let convertedFiles = await Promise.all(selectedFiles.map(file => convertToWebP(file))); 
+            let convertedFiles = await Promise.all(selectedFiles.map(file => convertToWebP(file)));
             const fileHashes = await Promise.all(convertedFiles.map(file => calculateFileHash(file)));
 
             const formData = new FormData();
@@ -138,26 +138,26 @@ const ImageGallery = () => {
             method: 'PATCH',
             body: JSON.stringify({ ...DEFAULT_FORM_VALUES, patientId: id, files: currentPhotos.length > 0 ? [...currentPhotos, ...encryptedImages] : encryptedImages }),
             headers: {
-            'Content-Type': 'application/json',
+                'Content-Type': 'application/json',
             },
         })
-        .then(response => {
-            if (response.ok) {
-                setPatientFiles((prev) => [...prev, ...encryptedImages]);
-                // Reset the file input and selected files
-                if (fileInputRef.current) {
-                    fileInputRef.current.value = "";
+            .then(response => {
+                if (response.ok) {
+                    setPatientFiles((prev) => [...prev, ...encryptedImages]);
+                    // Reset the file input and selected files
+                    if (fileInputRef.current) {
+                        fileInputRef.current.value = "";
+                    }
+                    setSelectedFiles([]);
+                } else {
+                    // show an alert with the error message
+                    alert('Error: ' + response.statusText);
                 }
-                setSelectedFiles([]);
-            } else {
-            // show an alert with the error message
-            alert('Error: ' + response.statusText);
-            }
-        })
-        .catch(error => {
-            // show an alert with the error message
-            alert('Error: ' + error.message);
-        });
+            })
+            .catch(error => {
+                // show an alert with the error message
+                alert('Error: ' + error.message);
+            });
     };
 
     if (isLoading) {
@@ -170,14 +170,16 @@ const ImageGallery = () => {
             <div className="container mx-auto p-4 flex flex-row justify-between">
                 <div style={{ minWidth: '75%'}}>
                     {photos.length > 0 ? (
-                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <>
                             <Box sx={{ position: 'relative', mb: 4, width: '100%', maxWidth: '600px' }}>
                                 <IconButton onClick={handlePrevClick} sx={{ position: 'absolute', left: '-40px', top: '50%', transform: 'translateY(-50%)' }}>
                                     <ChevronLeftIcon />
                                 </IconButton>
-                                <image
+                                <Image
                                     src={photos[currentPhotoIndex].url}
                                     alt={`Photo ${currentPhotoIndex + 1}`}
+                                    width={600} // Adjust the width as needed
+                                    height={600} // Adjust the height as needed
                                     className="max-w-full h-auto mx-auto"
                                     style={{ maxWidth: '100%', maxHeight: '600px', display: 'block' }}
                                 />
@@ -193,6 +195,8 @@ const ImageGallery = () => {
                                                 <Image
                                                     src={photo.url}
                                                     alt={`Thumbnail ${index + 1}`}
+                                                    width={64} // Adjust the width as needed
+                                                    height={64} // Adjust the height as needed
                                                     className="w-16 h-16 object-cover rounded"
                                                 />
                                             </IconButton>
@@ -200,7 +204,7 @@ const ImageGallery = () => {
                                     ))}
                                 </Grid>
                             )}
-                        </Box>
+                        </>
                     ) : (
                         <p className="text-center text-gray-500 mt-8">This user has no associated files.</p>
                     )}

@@ -1,6 +1,5 @@
 // app/api/patient/[id]/route.js
 import Patient from "@/models/patient";
-// import { connectToDB } from "@/utils/database";
 import dbConnect from "@/utils/database";
 
 export const GET = async (request, { params }) => {
@@ -20,22 +19,22 @@ export const PATCH = async (request, { params }) => {
     const newPatientData = await request.json();
 
     try {
-        await connectToDB();
+        await dbConnect(); // Correct function call
 
         // Update existing patient
         newPatientData.age = parseInt(newPatientData.age);
         newPatientData.surgeryDate = new Date(newPatientData.surgeryDate);
         newPatientData.medx = newPatientData.medx ? newPatientData.medx.map((med) => {
             return {
-            medName: med.medName,
-            medDosage: med.medDosage,
-            medFrequency: med.medFrequency,
+                medName: med.medName,
+                medDosage: med.medDosage,
+                medFrequency: med.medFrequency,
             };
         }) : [];
         const updatedPatient = await Patient.findByIdAndUpdate(params.id, { $set: newPatientData}, { new: true, runValidators: true });
 
         if (!updatedPatient) {
-            return new Response(`Patient with ID ${patientId} not found`, { status: 404 });
+            return new Response(`Patient with ID ${params.id} not found`, { status: 404 });
         }
 
         return new Response(JSON.stringify(updatedPatient), { status: 200 });
@@ -45,10 +44,9 @@ export const PATCH = async (request, { params }) => {
     }
 };
 
-// FIXME
 export const DELETE = async (request, { params }) => {
     try {
-        await connectToDB();
+        await dbConnect(); // Correct function call
 
         // Find the prompt by ID and remove it
         await User.findByIdAndRemove(params.id);

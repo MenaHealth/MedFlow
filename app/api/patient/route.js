@@ -24,10 +24,11 @@ export const PATCH = async (request, { params }) => {
         assignedClinic,
         assignedDocId,
         coordinatorId,
+        status
     } = await request.json();
 
     try {
-        await connectToDB();
+        await dbConnect();
 
         const existingPatient = await Patient.findById(_id);
 
@@ -39,6 +40,7 @@ export const PATCH = async (request, { params }) => {
         existingPatient.priority = priority ?? existingPatient.priority;
         existingPatient.specialty = specialty ?? existingPatient.specialty;
         existingPatient.hospital = hospital ?? existingPatient.hospital;
+        existingPatient.status = status ?? existingPatient.status;
 
         if (assignedDocId) {
             existingPatient.assignedDocId = assignedDocId === "unassign" ? null : assignedDocId;
@@ -50,8 +52,11 @@ export const PATCH = async (request, { params }) => {
             await existingPatient.populate("coordinatorId");
             returnId = existingPatient.coordinatorId;
         }
-
-        await existingPatient.save();
+        try {
+            await existingPatient.save();
+        } catch (e) {
+            console.log(e)
+        }
 
         return new Response(JSON.stringify(returnId), { status: 200 });
     } catch (error) {

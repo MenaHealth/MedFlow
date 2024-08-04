@@ -10,10 +10,18 @@ export const PATIENT_STATUSES = [
 ] as string[];
 
 export const PRIORITIES = [
-    "Low",
-    "Medium",
-    "High",
+    "Routine",
+    "Moderate",
+    "Urgent",
+    "Emergency"
 ] as string[];
+
+export const STATUS = [
+    "Not Started",
+    "Triaged",
+    "In-Progress",
+    "Completed"
+]
 
 export const SPECIALTIES = [
     'Podiatry',

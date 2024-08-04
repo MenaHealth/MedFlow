@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 
-import { CLINICS, PRIORITIES, SPECIALTIES } from '@/data/data';
+import { CLINICS, PRIORITIES, SPECIALTIES, STATUS } from '@/data/data';
 import Link from 'next/link';
 
 export default function PatientTriage() {
@@ -129,8 +129,15 @@ export default function PatientTriage() {
               <TableHead>
                 <TableRow>
                   <TableCell align="center">Patient ID</TableCell>
-                  <TableCell align="center">Laterality</TableCell>
-                  <TableCell align="center">Diagnosis</TableCell>
+                  <TableCell align="center">Patient Name</TableCell>
+                  <TableCell align="center">Age</TableCell>
+                  <TableCell align="center">Phone #</TableCell>
+                  <TableCell align="center">Location</TableCell>
+                  <TableCell align="center">Language Spoken</TableCell>
+                  <TableCell align="center">Chief Complaint</TableCell>
+
+
+                  <TableCell align="center">Status</TableCell>
                   <TableCell align="center">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -149,27 +156,10 @@ export default function PatientTriage() {
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
-                  <TableCell align="center">Hospital</TableCell>
                   <TableCell align="center">Specialty</TableCell>
-                  <TableCell align="center">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-full justify-start">
-                          Surgery Date
-                          <KeyboardArrowDownIcon className="ml-2 h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuRadioGroup value={sortOrder} onValueChange={setSortOrder}>
-                          <DropdownMenuRadioItem value="newest">Newest first</DropdownMenuRadioItem>
-                          <DropdownMenuRadioItem value="oldest">Oldest first</DropdownMenuRadioItem>
-                        </DropdownMenuRadioGroup>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                  <TableCell align="center">Surgical Candidate</TableCell>
-                  <TableCell align="center">Surgeon</TableCell>
                   <TableCell align="center">Additional Notes</TableCell>
+                  <TableCell align="center">Triaged By</TableCell>
+                  <TableCell align="center">Doctor Assigned</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -181,8 +171,48 @@ export default function PatientTriage() {
                       <TableCell align="center">
                         <Link href={`/patient-overview/${row._id}`}>{row.patientId}</Link>
                       </TableCell>
-                      <TableCell align="center">{row.laterality}</TableCell>
-                      <TableCell align="center">{row.diagnosis}</TableCell>
+
+                      <TableCell align="center">{row.name}</TableCell>
+                      <TableCell align="center">{row.age || ''}</TableCell>
+                      <TableCell align="center">{row.phone}</TableCell>
+                      <TableCell align="center">{row.location}</TableCell>
+                      <TableCell align="center">{row.language}</TableCell>
+                      <TableCell align="center">{row.complaint}</TableCell>
+
+                      {/* Status */}
+                      <TableCell align="center">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="outline">{row.status ?? 'Not Started'}</Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-46">
+                              <DropdownMenuSeparator />
+                              <DropdownMenuRadioGroup value={row.status} onValueChange={async (value) => {
+                                try {
+                                  await fetch('/api/patient/', {
+                                    method: 'PATCH',
+                                    headers: {
+                                      'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({
+                                      _id: rows[index]["_id"],
+                                      status: value,
+                                    }),
+                                  });
+                                  const updatedRows = [...rows];
+                                  updatedRows[index].status = value;
+                                  setRows(updatedRows);
+                                } catch (error) {
+                                  console.log(error);
+                                }
+                              }}>
+                                {STATUS.map((status) => (
+                                    <DropdownMenuRadioItem key={status} value={status}>{status}</DropdownMenuRadioItem>
+                                ))}
+                              </DropdownMenuRadioGroup>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                      </TableCell>
 
                       {/* priority */}
                       <TableCell align="center">
@@ -219,8 +249,6 @@ export default function PatientTriage() {
                         </DropdownMenu>
                       </TableCell>
 
-                      <TableCell align="center">{row.hospital}</TableCell>
-
                       {/* specialty */}
                       <TableCell align="center">
                         <DropdownMenu>
@@ -255,7 +283,9 @@ export default function PatientTriage() {
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
-                      <TableCell align="center">{new Date(row.surgeryDate).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' })}</TableCell>
+                      <TableCell align="center">{row.notes}</TableCell>
+                      <TableCell align="center">{row.triagedBy}</TableCell>
+                      <TableCell align="center">{row.doctor}</TableCell>
                     </TableRow>
                 ))}
               </TableBody>

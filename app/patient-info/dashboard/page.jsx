@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from 'react';
-import { useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -15,6 +15,8 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import Paper from '@mui/material/Paper';
 
 import { Button } from '@/components/ui/button';
+import Tooltip from './Tooltip';
+import './dashboard.css';
 
 import {
   DropdownMenu,
@@ -86,6 +88,8 @@ export default function PatientTriage() {
     fetchUsers();
   }, [sortOrder, prioritySort]);
 
+  console.log(rows)
+
   return (
       <>
         <div className="w-full relative">
@@ -131,7 +135,6 @@ export default function PatientTriage() {
                   <TableCell align="center">Patient ID</TableCell>
                   <TableCell align="center">Patient Name</TableCell>
                   <TableCell align="center">Age</TableCell>
-                  <TableCell align="center">Phone #</TableCell>
                   <TableCell align="center">Location</TableCell>
                   <TableCell align="center">Language Spoken</TableCell>
                   <TableCell align="center">Chief Complaint</TableCell>
@@ -168,14 +171,26 @@ export default function PatientTriage() {
                         key={index}
                         sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                     >
-                      <TableCell align="center">
-                        <Link href={`/patient-overview/${row._id}`}>{row.patientId}</Link>
+                      <TableCell 
+                        align="center" 
+                        style={{
+                          maxWidth: '120px', 
+                          overflow: 'hidden', 
+                          textOverflow: 'ellipsis', 
+                          whiteSpace: 'nowrap',
+                          overflow: 'visible'
+                        }}
+                      >
+                        <Tooltip tooltipText={row.patientId}>
+                          <a href={`/patient-overview/${row._id}`} className="block overflow-hidden text-ellipsis">
+                            {row.patientId}
+                          </a>
+                        </Tooltip>
                       </TableCell>
 
-                      <TableCell align="center">{row.name}</TableCell>
+                      <TableCell align="center" style={{ minWidth: '150px' }}>{row.name}</TableCell>
                       <TableCell align="center">{row.age || ''}</TableCell>
-                      <TableCell align="center">{row.phone}</TableCell>
-                      <TableCell align="center">{row.location}</TableCell>
+                      <TableCell align="center" style={{ minWidth: '150px' }}>{row.location}</TableCell>
                       <TableCell align="center">{row.language}</TableCell>
                       <TableCell align="center">{row.complaint}</TableCell>
 

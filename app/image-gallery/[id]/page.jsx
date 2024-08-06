@@ -1,3 +1,4 @@
+// app/image-gallery/[id]/page.jsx
 "use client";
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'next/navigation';
@@ -209,95 +210,97 @@ const ImageGallery = () => {
             <div className="container mx-auto p-4 flex flex-row justify-between">
                 <div style={{ minWidth: '75%', display: 'flex', justifyContent: 'center' }}>
                 <PatientSubmenu />
-                <div style={{ minWidth: '75%' }}>
-                    {isLoading ? (
-                        <div className="flex justify-center items-center h-full">
-                            <ClipLoader size={50} color={"#123abc"} loading={isLoading} />
-                        </div>
-                    ) : (
-                        <>
-                            {photos.length > 0 ? (
-                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                <Box sx={{ position: 'relative', mb: 4, width: '100%', maxWidth: '600px' }}>
-                                    <TransformWrapper
-                                        initialScale={1}
-                                        alignmentAnimation={{ sizeX: 0, sizeY: 0 }}
-                                    >
-                                        {({ zoomIn, zoomOut }) => (
-                                            <div className="relative">
-                                                <TransformComponent>
-                                                    <Image
-                                                        src={photos[currentPhotoIndex].url ?? ''}
-                                                        alt={`Photo ${currentPhotoIndex + 1}`}
-                                                        className="max-w-full h-auto mx-auto cursor-pointer"
-                                                        width={400}
-                                                        height={400}
-                                                    />
-                                                </TransformComponent>
-                                                <div className={`absolute bottom-3 left-5 flex gap-5 text-lg rounded-md border border-white bg-gray-800 p-2 ${clickZoomIn ? 'animate-pop' : ''} ${clickZoomOut ? 'animate-pop' : ''}`}>
-                                                    <button
-                                                        className="border-none bg-transparent text-white"
-                                                        onClick={() => {
-                                                            setClickZoomOut(true);
-                                                            zoomOut();
-                                                        }}
-                                                        onAnimationEnd={() => setClickZoomOut(false)}
-                                                    >
-                                                        <FiMinus />
-                                                    </button>
-                                                    <button
-                                                        className="border-none bg-transparent text-white"
-                                                        onClick={() => {
-                                                            setClickZoomIn(true);
-                                                            zoomIn();
-                                                        }}
-                                                        onAnimationEnd={() => setClickZoomIn(false)}
-                                                    >
-                                                        <FiPlus />
-                                                    </button>
+                    <div style={{ minWidth: '75%' }}>
+                        {isLoading ? (
+                            <div className="flex justify-center items-center h-full">
+                                <ClipLoader size={50} color={"#123abc"} loading={isLoading} />
+                            </div>
+                        ) : (
+                            <>
+                                {photos.length > 0 ? (
+                                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                    <Box sx={{ position: 'relative', mb: 4, width: '100%', maxWidth: '600px' }}>
+                                        <TransformWrapper
+                                            initialScale={1}
+                                            alignmentAnimation={{ sizeX: 0, sizeY: 0 }}
+                                        >
+                                            {({ zoomIn, zoomOut }) => (
+                                                <div className="relative">
+                                                    <TransformComponent>
+                                                        <Image
+                                                            src={photos[currentPhotoIndex].url ?? ''}
+                                                            alt={`Photo ${currentPhotoIndex + 1}`}
+                                                            className="max-w-full h-auto mx-auto cursor-pointer"
+                                                            width={400}
+                                                            height={400}
+                                                        />
+                                                    </TransformComponent>
+                                                    <div className={`absolute bottom-3 left-5 flex gap-5 text-lg rounded-md border border-white bg-gray-800 p-2 ${clickZoomIn ? 'animate-pop' : ''} ${clickZoomOut ? 'animate-pop' : ''}`}>
+                                                        <button
+                                                            className="border-none bg-transparent text-white"
+                                                            onClick={() => {
+                                                                setClickZoomOut(true);
+                                                                zoomOut();
+                                                            }}
+                                                            onAnimationEnd={() => setClickZoomOut(false)}
+                                                        >
+                                                            <FiMinus />
+                                                        </button>
+                                                        <button
+                                                            className="border-none bg-transparent text-white"
+                                                            onClick={() => {
+                                                                setClickZoomIn(true);
+                                                                zoomIn();
+                                                            }}
+                                                            onAnimationEnd={() => setClickZoomIn(false)}
+                                                        >
+                                                            <FiPlus />
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        )}
-                                    </TransformWrapper>
-                                </Box>
-                                {photos.length > 1 && (
-                                    <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
-                                        <IconButton onClick={handlePrevClick} sx={{ flex: '0 0 auto' }}>
-                                            <ChevronLeftIcon />
-                                        </IconButton>
-                                        <Box ref={carouselRef} sx={{ display: 'flex', overflowX: 'auto', maxWidth: '300px', flex: '1 1 auto' }}>
-                                            {photos.map((photo, index) => (
-                                                <IconButton
-                                                    key={index}
-                                                    data-index={index}
-                                                    onClick={() => handleThumbnailClick(index)}
-                                                    sx={{ minWidth: '75px', minHeight: '75px', padding: '10px' }}
-                                                >
-                                                    <Image
-                                                        src={photo.url ?? ''}
-                                                        alt={`Thumbnail ${index + 1}`}
-                                                        className="object-cover rounded"
-                                                        width={75}
-                                                        height={75}
-                                                        style={{
-                                                            border: currentPhotoIndex === index ? '2px solid gray' : 'none',
-                                                        }}
-                                                    />
-                                                </IconButton>
-                                            ))}
-                                        </Box>
-                                        <IconButton onClick={handleNextClick} sx={{ flex: '0 0 auto' }}>
-                                            <ChevronRightIcon />
-                                        </IconButton>
+                                            )}
+                                        </TransformWrapper>
                                     </Box>
+                                    {photos.length > 1 && (
+                                        <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+                                            <IconButton onClick={handlePrevClick} sx={{ flex: '0 0 auto' }}>
+                                                <ChevronLeftIcon />
+                                            </IconButton>
+                                            <Box ref={carouselRef} sx={{ display: 'flex', overflowX: 'auto', maxWidth: '300px', flex: '1 1 auto' }}>
+                                                {photos.map((photo, index) => (
+                                                    <IconButton
+                                                        key={index}
+                                                        data-index={index}
+                                                        onClick={() => handleThumbnailClick(index)}
+                                                        sx={{ minWidth: '75px', minHeight: '75px', padding: '10px' }}
+                                                    >
+                                                        <Image
+                                                            src={photo.url ?? ''}
+                                                            alt={`Thumbnail ${index + 1}`}
+                                                            className="object-cover rounded"
+                                                            width={75}
+                                                            height={75}
+                                                            style={{
+                                                                border: currentPhotoIndex === index ? '2px solid gray' : 'none',
+                                                            }}
+                                                        />
+                                                    </IconButton>
+                                                ))}
+                                            </Box>
+                                            <IconButton onClick={handleNextClick} sx={{ flex: '0 0 auto' }}>
+                                                <ChevronRightIcon />
+                                            </IconButton>
+                                        </Box>
+                                    )}
+                                </Box>
+                                ) : (
+                                    <p className="text-center text-gray-500 mt-8">This user has no associated files.</p>
                                 )}
-                            </Box>
-                            ) : (
-                                <p className="text-center text-gray-500 mt-8">This user has no associated files.</p>
-                            )}
-                        </>
-                    )}
+                            </>
+                        )}
+                    </div>
                 </div>
+
                 <div>
                     <h1 className="text-2xl font-bold mb-4 mt-4">Upload Files</h1>
                     <form onSubmit={handleFormSubmit} className='flex flex-col'>

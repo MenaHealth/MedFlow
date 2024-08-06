@@ -5,9 +5,10 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { TextFormField } from "@/components/form/TextFormField"
 import { z } from "zod"
 import * as React from "react"
-import { useForm, FormProvider } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 
+import { Form } from "@/components/ui/form"
 import { NumericalFormField } from "../NumericalFormField"
 import { TextAreaFormField } from "../TextAreaFormField"
 import { MedicationSelection } from "../MedicationSelection"
@@ -15,6 +16,8 @@ import { DatePickerFormField } from "../DatePickerFormField"
 import { SelectFormField } from "../SelectFormField"
 import { PMHxSelect } from "../PMHxSelection"
 import { PSHxSelect } from "../PSHxSelection"
+
+import { v4 as uuidv4 } from 'uuid'; 
 
 const patientFormSchema = z.object({
     patientId: z.string(),
@@ -46,8 +49,6 @@ const patientFormSchema = z.object({
     notes: z.string(),
     files: z.any(),
     status: z.string(),
-    triagedBy: z.string(),
-    doctor: z.string()
 });
 
 type PatientFormValues = z.infer<typeof patientFormSchema>
@@ -75,7 +76,7 @@ const defaultValues: Partial<PatientFormValues> = {
     otherDrugs: "",
     allergies: "",
     notes: "",
-    status: 'Not started'
+    status: 'Not Started'
 }
 
 export function PatientForm({ id }: { id: string } = { id: '' }) {
@@ -101,17 +102,21 @@ export function PatientForm({ id }: { id: string } = { id: '' }) {
         }
     }, [id]);
 
-    const formMethods = useForm<PatientFormValues>({
+    const form = useForm<PatientFormValues>({
         resolver: zodResolver(patientFormSchema),
         defaultValues,
     });
 
     React.useEffect(() => {
-        formMethods.reset(patientData);
-    }, [patientData, formMethods]);
+        form.reset(patientData);
+    }, [patientData, form]);
 
     const onSubmit = async (data: PatientFormValues) => {
         console.log('Form submitted:', data);
+
+        if (!data.patientId) {
+            data.patientId = uuidv4();
+        }
 
         const response = await fetch('/api/patient/new', {
             method: 'POST',
@@ -131,59 +136,66 @@ export function PatientForm({ id }: { id: string } = { id: '' }) {
     };
 
     return (
-        <FormProvider {...formMethods}>
-            <form onSubmit={formMethods.handleSubmit(onSubmit)} className="space-y-8">
+        <Form {...form}>
+            <form 
+                onSubmit={(e) => {
+                    form.handleSubmit(onSubmit, (errors) => {
+                        console.log('Form errors:', errors);
+                    })(e);
+                }} 
+                className="space-y-8"
+            >
                 <div className="flex space-x-4">
                     <div className="w-1/3">
-                        <TextFormField form={formMethods} fieldName="patientId" fieldLabel="Patient ID" />
+                        <TextFormField form={form} fieldName="name" fieldLabel="Patient Name" />
                     </div>
                     <div className="w-1/3">
-                        <TextFormField form={formMethods} fieldName="phone" fieldLabel="Phone Number" />
+                        <TextFormField form={form} fieldName="phone" fieldLabel="Phone Number" />
                     </div>
                     <div className="w-1/3">
-                        <NumericalFormField form={formMethods} fieldName="age" fieldLabel="Patient Age" />
+                        <NumericalFormField form={form} fieldName="age" fieldLabel="Patient Age" />
                     </div>
                 </div>
                 <div className="flex space-x-4">
                     <div className="w-1/3">
-                        <TextFormField form={formMethods} fieldName="location" fieldLabel="Location" />
+                        <TextFormField form={form} fieldName="location" fieldLabel="Location" />
                     </div>
                     <div className="w-1/3">
-                        <TextFormField form={formMethods} fieldName="language" fieldLabel="Spoken Language" />
+                        <TextFormField form={form} fieldName="language" fieldLabel="Spoken Language" />
                     </div>
                 </div>
-                <TextFormField form={formMethods} fieldName="occupation" fieldLabel="Job/Occupation" />
-                <TextFormField form={formMethods} fieldName="complaint" fieldLabel="Chief Complaint" />
-                <TextAreaFormField form={formMethods} fieldName="diagnosis" fieldLabel="Patient Diagnosis" />
-                <TextAreaFormField form={formMethods} fieldName="icd10" fieldLabel="ICD-10" />
-                <DatePickerFormField form={formMethods} fieldName="surgeryDate" fieldLabel="Date of Surgery" />
+                <TextFormField form={form} fieldName="occupation" fieldLabel="Job/Occupation" />
+                <TextFormField form={form} fieldName="complaint" fieldLabel="Chief Complaint" />
+                <TextAreaFormField form={form} fieldName="diagnosis" fieldLabel="Patient Diagnosis" />
+                <TextAreaFormField form={form} fieldName="icd10" fieldLabel="ICD-10" />
+                <DatePickerFormField form={form} fieldName="surgeryDate" fieldLabel="Date of Surgery" />
                 <div className="flex space-x-4">
                     <div className="w-1/2 space-y-3">
-                        <SelectFormField form={formMethods} fieldName="laterality" fieldLabel="Laterality" selectOptions={['Bilateral', 'Left', 'Right']} />
-                        <SelectFormField form={formMethods} fieldName="priority" fieldLabel="Priority" selectOptions={['Routine', 'Moderate', 'Urgent', 'Emergency']} />
+                        <SelectFormField form={form} fieldName="laterality" fieldLabel="Laterality" selectOptions={['Bilateral', 'Left', 'Right']} />
+                        <SelectFormField form={form} fieldName="priority" fieldLabel="Priority" selectOptions={['Routine', 'Moderate', 'Urgent', 'Emergency']} />
                     </div>
                     <div className="w-1/2 space-y-3">
-                        <SelectFormField form={formMethods} fieldName="baselineAmbu" fieldLabel="Baseline Ambu" selectOptions={['Independent', 'Boot', 'Crutches', 'Walker', 'Non-Ambulatory']} />
-                        <SelectFormField form={formMethods} fieldName="hospital" fieldLabel="Hospital" selectOptions={['PMC', 'PRCS', 'Hugo Chavez']} />
+                        <SelectFormField form={form} fieldName="baselineAmbu" fieldLabel="Baseline Ambu" selectOptions={['Independent', 'Boot', 'Crutches', 'Walker', 'Non-Ambulatory']} />
+                        <SelectFormField form={form} fieldName="hospital" fieldLabel="Hospital" selectOptions={['PMC', 'PRCS', 'Hugo Chavez']} />
                     </div>
                 </div>
-                <MedicationSelection form={formMethods} fieldName="medx" fieldLabel="Medications Needed" />
-                <PMHxSelect form={formMethods} fieldName="pmhx" fieldLabel="PMHx" fieldCompact="PMHx" PopOverComponent={null} />
-                <PSHxSelect form={formMethods} fieldName="pshx" fieldLabel="PSHx" fieldCompact="PSHx" PopOverComponent={null} />
+                <MedicationSelection form={form} fieldName="medx" fieldLabel="Medications Needed" />
+                <PMHxSelect form={form} fieldName="pmhx" fieldLabel="PMHx" fieldCompact="PMHx" PopOverComponent={null} />
+                <PSHxSelect form={form} fieldName="pshx" fieldLabel="PSHx" fieldCompact="PSHx" PopOverComponent={null} />
                 <div className="flex space-x-4">
                     <div className="w-1/2">
-                        <TextFormField form={formMethods} fieldName="smokeCount" fieldLabel="Smoking Status (packs per day)" />
+                        <TextFormField form={form} fieldName="smokeCount" fieldLabel="Smoking Status (packs per day)" />
                     </div>
                     <div className="w-1/2">
-                        <TextFormField form={formMethods} fieldName="drinkCount" fieldLabel="Avg Drinks per week" />
+                        <TextFormField form={form} fieldName="drinkCount" fieldLabel="Avg Drinks per week" />
                     </div>
                 </div>
-                <TextFormField form={formMethods} fieldName="otherDrugs" fieldLabel="Other illicit uses" />
-                <TextFormField form={formMethods} fieldName="allergies" fieldLabel="Allergies" />
-                <TextAreaFormField form={formMethods} fieldName="notes" fieldLabel="Notes" />
+                <TextFormField form={form} fieldName="otherDrugs" fieldLabel="Other illicit uses" />
+                <TextFormField form={form} fieldName="allergies" fieldLabel="Allergies" />
+                <TextAreaFormField form={form} fieldName="notes" fieldLabel="Notes" />
                 <Button type="submit">Submit Request</Button>
             </form>
-        </FormProvider>
+        </Form>
     );
 }
 

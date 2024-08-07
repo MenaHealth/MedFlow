@@ -13,8 +13,10 @@ import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { FiMinus, FiPlus } from 'react-icons/fi';
 
 const DEFAULT_FORM_VALUES = {
+    patientName:"",
     patientId: "",
     age: 0,
+    chiefComplaint: "",
     diagnosis: "",
     icd10: "",
     surgeryDate: new Date(),

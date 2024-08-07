@@ -10,9 +10,11 @@ interface Prescription {
 
 export interface IPatient extends Document {
   _id?: string;
+  patientName: string;
   files: any[];
   patientId: string;
   laterality?: 'Left' | 'Right' | 'Bilateral';
+  chiefComplaint?: string;
   diagnosis?: string;
   diagnosisCat?: string;
   hospital?: 'PMC' | 'PRCS' | 'Hugo Chavez';

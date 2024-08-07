@@ -11,9 +11,8 @@ import { TextAreaFormField } from "@/components/form/TextAreaFormField";
 import { PhoneFormField } from "@/components/form/PhoneFormField";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { v4 as uuidv4 } from "uuid"; // Import uuid library
+import { v4 as uuidv4 } from "uuid";
 
-// Define the schema for the form using Zod
 const newPatientFormSchema = z.object({
     firstName: z.string().min(1, "First name is required"),
     lastName: z.string().min(1, "Last name is required"),
@@ -23,7 +22,6 @@ const newPatientFormSchema = z.object({
     chiefComplaint: z.string().min(1, "Chief complaint is required"),
 });
 
-// Define TypeScript types for form values
 type NewPatientFormValues = z.infer<typeof newPatientFormSchema>;
 
 type NewPatientProps = {
@@ -31,7 +29,6 @@ type NewPatientProps = {
     submitting: boolean;
 };
 
-// Default values for the form
 const defaultValues: Partial<NewPatientFormValues> = {
     firstName: "",
     lastName: "",
@@ -41,15 +38,12 @@ const defaultValues: Partial<NewPatientFormValues> = {
     chiefComplaint: "",
 };
 
-// Create the NewPatient component
 export function NewPatient({ handleSubmit, submitting }: NewPatientProps) {
-    // Set up form handling using react-hook-form and Zod validation
     const form = useForm<NewPatientFormValues>({
         resolver: zodResolver(newPatientFormSchema),
         defaultValues,
     });
 
-    // Handle form submission
     const onSubmit = (data: NewPatientFormValues) => {
         const patientId = uuidv4(); // Generate a unique patient ID
         handleSubmit({ ...data, patientId });

@@ -12,6 +12,8 @@ export interface IPatient extends Document {
   _id?: string;
   files: any[];
   patientId: string;
+  firstName: string; // New field
+  lastName: string;  // New field
   laterality?: 'Left' | 'Right' | 'Bilateral';
   diagnosis?: string;
   diagnosisCat?: string;
@@ -37,10 +39,12 @@ export interface IPatient extends Document {
 
 const PatientSchema = new Schema<IPatient>({
   patientId: { type: String, required: true, unique: true },
+  firstName: { type: String, required: true }, // New field
+  lastName: { type: String, required: true },  // New field
   files: { type: [{
-    hash: { type: String },
-    encryptionKey: { type: String },
-  }] },
+      hash: { type: String },
+      encryptionKey: { type: String },
+    }] },
   laterality: { type: String, enum: ['Left', 'Right', 'Bilateral'] },
   diagnosis: { type: String },
   diagnosisCat: { type: String, enum: [''] },

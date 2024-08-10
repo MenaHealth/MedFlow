@@ -21,7 +21,6 @@ export const PATCH = async (request, { params }) => {
     try {
         await dbConnect(); // Correct function call
 
-        // Update existing patient
         newPatientData.age = parseInt(newPatientData.age);
         newPatientData.surgeryDate = new Date(newPatientData.surgeryDate);
         newPatientData.medx = newPatientData.medx ? newPatientData.medx.map((med) => {

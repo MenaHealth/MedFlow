@@ -1,0 +1,34 @@
+/* Tailwind CSS */
+.group:hover .group-hover\:block {
+    display: block;
+  }
+  
+  .hidden {
+    display: none;
+  }
+  
+  .block {
+    display: block;
+  }
+  
+  .relative {
+    position: relative;
+  }
+  
+  .absolute {
+    position: absolute;
+  }
+  
+  /* .transform {
+    transform: translateX(-50%);
+  } */
+  
+  .z-50 {
+    z-index: 50;
+  }
+  
+  /* Tailwind CSS */
+.overflow-visible {
+    overflow: visible;
+  }
+  

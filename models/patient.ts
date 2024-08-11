@@ -18,10 +18,15 @@ export interface IPatient extends Document {
   diagnosis?: string;
   diagnosisCat?: string;
   hospital?: 'PMC' | 'PRCS' | 'Hugo Chavez';
-  priority?: 'Low' | 'Medium' | 'High';
+  priority?: 'Routine' | 'Moderate' | 'Urgent' | 'Emergency';
   specialty?: typeof SPECIALTIES[number];
-  status?: 'Active' | 'Inactive';
+  status?: 'Not Started' | 'Triaged' | 'In-Progress' | 'Completed';
   age?: number;
+  name?: string;
+  phone?: string;
+  location?: string;
+  language?: string;
+  complaint?: string;
   icd10?: string;
   surgeryDate?: Date;
   occupation?: string;
@@ -33,6 +38,8 @@ export interface IPatient extends Document {
   drinkCount?: string;
   otherDrugs?: string;
   allergies?: string;
+  triagedBy?: string;
+  doctor?: string;
   notes?: string;
   visits?: Types.ObjectId[];
 }
@@ -49,10 +56,15 @@ const PatientSchema = new Schema<IPatient>({
   diagnosis: { type: String },
   diagnosisCat: { type: String, enum: [''] },
   hospital: { type: String, enum: ['PMC', 'PRCS', 'Hugo Chavez'] },
-  priority: { type: String, enum: ['Low', 'Medium', 'High'] },
+  priority: { type: String, enum: ['Routine', 'Moderate', 'Urgent', 'Emergency'] },
   specialty: { type: String, enum: SPECIALTIES },
-  status: { type: String, enum: ['Active', 'Inactive'] },
+  status: { type: String, enum: ['Not Started', 'Triaged', 'In-Progress', 'Completed'] },
   age: { type: Number },
+  name: { type: String },
+  phone: { type: String },
+  location: { type: String },
+  language: { type: String },
+  complaint: { type: String },
   icd10: { type: String },
   surgeryDate: { type: Date },
   occupation: { type: String },
@@ -71,6 +83,8 @@ const PatientSchema = new Schema<IPatient>({
   drinkCount: { type: String },
   otherDrugs: { type: String },
   allergies: { type: String },
+  triagedBy: { type: String },
+  doctor: { type: String },
   notes: { type: String },
   visits: [{ type: Types.ObjectId, ref: 'Visit' }],
 });

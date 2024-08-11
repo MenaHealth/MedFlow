@@ -31,6 +31,7 @@ const DEFAULT_FORM_VALUES = {
     otherDrugs: "",
     allergies: "",
     notes: "",
+    status: 'Not started'
 };
 
 const ImageGallery = () => {

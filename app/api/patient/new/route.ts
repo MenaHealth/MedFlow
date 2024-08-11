@@ -3,17 +3,19 @@ import Patient, { IPatient } from "@/models/patient";
 import dbConnect from "@/utils/database";  // Correct import statement
 
 export const POST = async (request: Request) => {
-  const patientData: IPatient = await request.json();
-  console.log(patientData);
-
   try {
+    const patientData: IPatient = await request.json();
+    console.log('Received patient data:', patientData);
+
     await dbConnect();
 
-    // Create new patient
     const newPatient = new Patient(patientData);
     await newPatient.save();
+    console.log('Patient created successfully:', newPatient);
+
     return new Response(JSON.stringify(newPatient), { status: 201 });
-  } catch (error) {
-    return new Response(`Failed to create patient: ${error}`, { status: 500 });
+  } catch (error: any) {
+    console.error('Error creating patient:', error);
+    return new Response(`Failed to create patient: ${error.message}`, { status: 500 });
   }
 };

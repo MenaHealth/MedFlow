@@ -4,15 +4,19 @@
 import * as React from 'react';
 import { useEffect, useState, useRef } from "react";
 
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import Paper from '@mui/material/Paper';
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import Paper from "@mui/material/Paper";
+
+import EditIcon from "@mui/icons-material/Edit";
+import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
+import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 
 import { Button } from '@/components/ui/button';
 import Tooltip from './Tooltip';
@@ -25,49 +29,69 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 
 
 import { CLINICS, PRIORITIES, SPECIALTIES, STATUS } from '@/data/data';
 import Link from 'next/link';
 
 export default function PatientTriage() {
-
   const [rows, setRows] = React.useState([]);
   const [users, setUsers] = React.useState([]);
-  const [sortOrder, setSortOrder] = React.useState('newest');
-  const [prioritySort, setPrioritySort] = React.useState('all');
+  const [sortOrder, setSortOrder] = React.useState("newest");
+  const [prioritySort, setPrioritySort] = React.useState("all");
+  const [searchTerm, setSearchTerm] = React.useState("");
+  const [nameFilter, setNameFilter] = React.useState("all");
 
   const fetchRows = async () => {
     try {
-      const response = await fetch('/api/patient/');
+      const response = await fetch("/api/patient/");
       const data = await response.json();
       setRows(data);
     } catch (error) {
       console.log(error);
     }
-  }
+  };
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch('/api/user/');
+      const response = await fetch("/api/user/");
       const data = await response.json();
       setUsers(data);
     } catch (error) {
       console.log(error);
     }
-  }
+  };
 
-  const sortAndFilterRows = (rows, dateOrder, priorityFilter) => {
-    let sortedRows = [...rows].sort((a, b) => {
-      const dateA = new Date(a.surgeryDate);
-      const dateB = new Date(b.surgeryDate);
-      return dateOrder === 'newest' ? dateB - dateA : dateA - dateB;
+  const sortAndFilterRows = (
+      rows,
+      dateOrder,
+      priorityFilter,
+      nameFilter,
+      searchTerm
+  ) => {
+    let filteredRows = rows.filter((row) => {
+      if (searchTerm) {
+        return row.patientId.toLowerCase().includes(searchTerm.toLowerCase());
+      }
+      return true;
     });
 
-    if (priorityFilter !== 'all') {
-      sortedRows = sortedRows.filter(row => row.priority === priorityFilter);
+    if (nameFilter !== "all") {
+      filteredRows = filteredRows.filter((row) => row.patientId === nameFilter);
     }
+
+    if (priorityFilter !== "all") {
+      filteredRows = filteredRows.filter(
+          (row) => row.priority === priorityFilter
+      );
+    }
+
+    let sortedRows = [...filteredRows].sort((a, b) => {
+      const dateA = new Date(a.surgeryDate);
+      const dateB = new Date(b.surgeryDate);
+      return dateOrder === "newest" ? dateB - dateA : dateA - dateB;
+    });
 
     return sortedRows;
   };
@@ -75,9 +99,15 @@ export default function PatientTriage() {
   useEffect(() => {
     const fetchAndSortRows = async () => {
       try {
-        const response = await fetch('/api/patient/');
+        const response = await fetch("/api/patient/");
         const data = await response.json();
-        const sortedAndFilteredData = sortAndFilterRows(data, sortOrder, prioritySort);
+        const sortedAndFilteredData = sortAndFilterRows(
+            data,
+            sortOrder,
+            prioritySort,
+            nameFilter,
+            searchTerm
+        );
         setRows(sortedAndFilteredData);
       } catch (error) {
         console.log(error);
@@ -86,49 +116,97 @@ export default function PatientTriage() {
 
     fetchAndSortRows();
     fetchUsers();
-  }, [sortOrder, prioritySort]);
-
-  console.log(rows)
+  }, [sortOrder, prioritySort, nameFilter, searchTerm]);
 
   return (
       <>
         <div className="w-full relative">
           <div className="flex justify-between items-center py-3">
-            <Link href="/fajr/patient" className="flex items-center justify-center no-underline">
+            {/* Update the href to point to /create-patient */}
+            <Link
+                href="/create-patient"
+                className="flex items-center justify-center no-underline"
+            >
               <div className="relative group">
                 <PersonAddIcon
                     className="text-5xl rounded-full shadow p-3 bg-white group-hover:shadow-lg transition-all duration-300"
                     style={{
-                      color: 'currentColor',
-                      transition: 'color 0.15s ease-in-out',
+                      color: "currentColor",
+                      transition: "color 0.15s ease-in-out",
                     }}
-                    onMouseOver={(e) => e.currentTarget.style.color = '#FF5722'}
-                    onMouseOut={(e) => e.currentTarget.style.color = 'currentColor'}
+                    onMouseOver={(e) => (e.currentTarget.style.color = "#FF5722")}
+                    onMouseOut={(e) => (e.currentTarget.style.color = "currentColor")}
                 />
                 <span className="absolute left-full ml-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap bg-white px-2 py-1 rounded shadow-lg">
-              Add New Patient
-            </span>
+                Add New Patient
+              </span>
               </div>
             </Link>
-            <h2 className='flex-1 text-center font-bold' style={{ fontSize: '24px' }}> {/* Adjusted font size and added bold */}
-              <span className='blue_gradient'>Patient List</span>
+            <h2
+                className="flex-1 text-center font-bold"
+                style={{ fontSize: "24px" }}
+            >
+              {/* Adjusted font size and added bold */}
+              <span className="blue_gradient">Patient List</span>
             </h2>
-            <div style={{ width: 48 }}> {/* Placeholder to balance the header visually */}</div>
+            <div style={{ width: 48 }}>
+              {" "}
+              {/* Placeholder to balance the header visually */}
+            </div>
           </div>
           <div className="flex flex-wrap gap-2 mb-4">
-            {sortOrder !== 'newest' && (
-                <div className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                  Date: {sortOrder === 'oldest' ? 'Oldest first' : 'Newest first'}
+            {sortOrder !== "newest" && (
+                <div className="bg-blue-100 text-blue-800 px-2 py-1 rounded flex items-center">
+                  <EditIcon
+                      className="mr-2 cursor-pointer"
+                      onClick={() => console.log("Edit date filter")}
+                  />
+                  Date: {sortOrder === "oldest" ? "Oldest first" : "Newest first"}
+                  <RemoveCircleIcon
+                      className="ml-2 cursor-pointer"
+                      onClick={() => setSortOrder("newest")}
+                  />
                 </div>
             )}
-            {prioritySort !== 'all' && (
-                <div className="bg-green-100 text-green-800 px-2 py-1 rounded">
+            {prioritySort !== "all" && (
+                <div className="bg-green-100 text-green-800 px-2 py-1 rounded flex items-center">
+                  <EditIcon
+                      className="mr-2 cursor-pointer"
+                      onClick={() => console.log("Edit priority filter")}
+                  />
                   Priority: {prioritySort}
+                  <RemoveCircleIcon
+                      className="ml-2 cursor-pointer"
+                      onClick={() => setPrioritySort("all")}
+                  />
                 </div>
             )}
+            {searchTerm !== "" && (
+                <div className="bg-purple-100 text-purple-800 px-2 py-1 rounded flex items-center">
+                  <EditIcon
+                      className="mr-2 cursor-pointer"
+                      onClick={() => console.log("Edit patient name filter")}
+                  />
+                  Patient Name: {searchTerm}
+                  <RemoveCircleIcon
+                      className="ml-2 cursor-pointer"
+                      onClick={() => setSearchTerm("")}
+                  />
+                </div>
+            )}
+            <div
+                className="bg-red-100 text-red-800 px-2 py-1 rounded cursor-pointer"
+                onClick={() => {
+                  setSortOrder("newest");
+                  setPrioritySort("all");
+                  setSearchTerm("");
+                }}
+            >
+              <DeleteSweepIcon className="mr-2" />
+              Clear all filters
+            </div>
           </div>
           <TableContainer component={Paper}>
-
             <Table sx={{ minWidth: 650 }} aria-label="simple table">
               <TableHead>
                 <TableRow>
@@ -144,7 +222,10 @@ export default function PatientTriage() {
                   <TableCell align="center">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-full justify-start">
+                        <Button
+                            variant="ghost"
+                            className="h-8 w-full justify-start"
+                        >
                           Priority
                           <KeyboardArrowDownIcon className="ml-2 h-4 w-4" />
                         </Button>

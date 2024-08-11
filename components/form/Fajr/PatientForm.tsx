@@ -16,16 +16,10 @@ import { DatePickerFormField } from "../DatePickerFormField"
 import { SelectFormField } from "../SelectFormField"
 import { PMHxSelect } from "../PMHxSelection"
 import { PSHxSelect } from "../PSHxSelection"
-
-import { v4 as uuidv4 } from 'uuid'; 
+import { convertToWebP, calculateFileHash } from "../../../utils/encryptPhoto";
 
 const patientFormSchema = z.object({
     patientId: z.string(),
-    name: z.string(),
-    phone: z.string(),
-    location: z.string(),
-    language: z.string(),
-    complaint: z.string(),
     age: z.number(),
     diagnosis: z.string(),
     icd10: z.string(),
@@ -33,7 +27,7 @@ const patientFormSchema = z.object({
     occupation: z.string(),
     baselineAmbu: z.enum(['Independent', 'Boot', 'Crutches', 'Walker', 'Non-Ambulatory']),
     laterality: z.enum(['Bilateral', 'Left', 'Right']),
-    priority: z.enum(['Routine', 'Moderate', 'Urgent', 'Emergency']),
+    priority: z.enum(['Low', 'Medium', 'High']),
     hospital: z.enum(['PMC', 'PRCS', 'Hugo Chavez']),
     medx: z.array(z.object({
         medName: z.string(),
@@ -48,24 +42,18 @@ const patientFormSchema = z.object({
     allergies: z.string(),
     notes: z.string(),
     files: z.any(),
-    status: z.string(),
 });
 
 type PatientFormValues = z.infer<typeof patientFormSchema>
 const defaultValues: Partial<PatientFormValues> = {
     patientId: "",
-    name: "",
-    phone: "",
-    location: "",
-    language: "",
-    complaint: "",
     age: 0,
     diagnosis: "",
     icd10: "",
     surgeryDate: new Date(),
     occupation: "",
     laterality: "Bilateral",
-    priority: "Routine",
+    priority: "Low",
     hospital: "PMC",
     baselineAmbu: "Independent",
     medx: [],
@@ -76,10 +64,10 @@ const defaultValues: Partial<PatientFormValues> = {
     otherDrugs: "",
     allergies: "",
     notes: "",
-    status: 'Not Started'
 }
 
-export function PatientForm({ id }: { id: string } = { id: '' }) {
+export function PatientForm({id}: {id: string} = {id: ''}) {
+
     const [patientData, setPatientData] = React.useState<Partial<PatientFormValues>>(defaultValues);
 
     React.useEffect(() => {
@@ -88,13 +76,16 @@ export function PatientForm({ id }: { id: string } = { id: '' }) {
                 .then(response => response.json())
                 .then(data => {
                     data.surgeryDate = new Date(data.surgeryDate);
-                    data.medx = data.medx.map((med: any) => ({
-                        medName: med.medName,
-                        medDosage: med.medDosage,
-                        medFrequency: med.medFrequency,
-                    }));
+                    data.medx = data.medx.map((med: any) => {
+                        return {
+                            medName: med.medName,
+                            medDosage: med.medDosage,
+                            medFrequency: med.medFrequency,
+                        };
+                    });
                     data.age = parseInt(data.age);
                     setPatientData(data);
+                    console.log(data);
                 })
                 .catch(error => {
                     alert('Error: ' + error.message);
@@ -114,10 +105,6 @@ export function PatientForm({ id }: { id: string } = { id: '' }) {
     const onSubmit = async (data: PatientFormValues) => {
         console.log('Form submitted:', data);
 
-        if (!data.patientId) {
-            data.patientId = uuidv4();
-        }
-
         const response = await fetch('/api/patient/new', {
             method: 'POST',
             body: JSON.stringify(data),
@@ -136,66 +123,49 @@ export function PatientForm({ id }: { id: string } = { id: '' }) {
     };
 
     return (
-        <Form {...form}>
-            <form 
-                onSubmit={(e) => {
-                    form.handleSubmit(onSubmit, (errors) => {
-                        console.log('Form errors:', errors);
-                    })(e);
-                }} 
-                className="space-y-8"
-            >
-                <div className="flex space-x-4">
-                    <div className="w-1/3">
-                        <TextFormField form={form} fieldName="name" fieldLabel="Patient Name" />
+        <>
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                    <div className="flex space-x-4">
+                        <div className="w-2/3">
+                            <TextFormField form={form} fieldName="patientId" fieldLabel="Patient ID" />
+                        </div>
+                        <div className="w-1/3">
+                            <NumericalFormField form={form} fieldName="age" fieldLabel="Patient Age" />
+                        </div>
                     </div>
-                    <div className="w-1/3">
-                        <TextFormField form={form} fieldName="phone" fieldLabel="Phone Number" />
+                    <TextFormField form={form} fieldName="occupation" fieldLabel="Job/Occupation" />
+                    <TextAreaFormField form={form} fieldName="diagnosis" fieldLabel="Patient Diagnosis" />
+                    <TextAreaFormField form={form} fieldName="icd10" fieldLabel="ICD-10" />
+                    <DatePickerFormField form={form} fieldName="surgeryDate" fieldLabel="Date of Surgery" />
+                    <div className="flex space-x-4">
+                        <div className="w-1/2 space-y-3">
+                            <SelectFormField form={form} fieldName="laterality" fieldLabel="Laterality" selectOptions={['Bilateral', 'Left', 'Right']} />
+                            <SelectFormField form={form} fieldName="priority" fieldLabel="Priority" selectOptions={['Low', 'Medium', 'High']} />
+                        </div>
+                        <div className="w-1/2 space-y-3">
+                            <SelectFormField form={form} fieldName="baselineAmbu" fieldLabel="Baseline Ambu" selectOptions={['Independent', 'Boot', 'Crutches', 'Walker', 'Non-Ambulatory']} />
+                            <SelectFormField form={form} fieldName="hospital" fieldLabel="Hospital" selectOptions={['PMC', 'PRCS', 'Hugo Chavez']} />
+                        </div>
                     </div>
-                    <div className="w-1/3">
-                        <NumericalFormField form={form} fieldName="age" fieldLabel="Patient Age" />
+                    <MedicationSelection form={form} fieldName="medx" fieldLabel="Medications Needed" />
+                    <PMHxSelect form={form} fieldName="pmhx" fieldLabel="PMHx" fieldCompact="PMHx" PopOverComponent={null} />
+                    <PSHxSelect form={form} fieldName="pshx" fieldLabel="PSHx" fieldCompact="PSHx" PopOverComponent={null} />
+                    <div className="flex space-x-4">
+                        <div className="w-1/2">
+                            <TextFormField form={form} fieldName="smokeCount" fieldLabel="Smoking Status (packs per day)" />
+                        </div>
+                        <div className="w-1/2">
+                            <TextFormField form={form} fieldName="drinkCount" fieldLabel="Avg Drinks per week" />
+                        </div>
                     </div>
-                </div>
-                <div className="flex space-x-4">
-                    <div className="w-1/3">
-                        <TextFormField form={form} fieldName="location" fieldLabel="Location" />
-                    </div>
-                    <div className="w-1/3">
-                        <TextFormField form={form} fieldName="language" fieldLabel="Spoken Language" />
-                    </div>
-                </div>
-                <TextFormField form={form} fieldName="occupation" fieldLabel="Job/Occupation" />
-                <TextFormField form={form} fieldName="complaint" fieldLabel="Chief Complaint" />
-                <TextAreaFormField form={form} fieldName="diagnosis" fieldLabel="Patient Diagnosis" />
-                <TextAreaFormField form={form} fieldName="icd10" fieldLabel="ICD-10" />
-                <DatePickerFormField form={form} fieldName="surgeryDate" fieldLabel="Date of Surgery" />
-                <div className="flex space-x-4">
-                    <div className="w-1/2 space-y-3">
-                        <SelectFormField form={form} fieldName="laterality" fieldLabel="Laterality" selectOptions={['Bilateral', 'Left', 'Right']} />
-                        <SelectFormField form={form} fieldName="priority" fieldLabel="Priority" selectOptions={['Routine', 'Moderate', 'Urgent', 'Emergency']} />
-                    </div>
-                    <div className="w-1/2 space-y-3">
-                        <SelectFormField form={form} fieldName="baselineAmbu" fieldLabel="Baseline Ambu" selectOptions={['Independent', 'Boot', 'Crutches', 'Walker', 'Non-Ambulatory']} />
-                        <SelectFormField form={form} fieldName="hospital" fieldLabel="Hospital" selectOptions={['PMC', 'PRCS', 'Hugo Chavez']} />
-                    </div>
-                </div>
-                <MedicationSelection form={form} fieldName="medx" fieldLabel="Medications Needed" />
-                <PMHxSelect form={form} fieldName="pmhx" fieldLabel="PMHx" fieldCompact="PMHx" PopOverComponent={null} />
-                <PSHxSelect form={form} fieldName="pshx" fieldLabel="PSHx" fieldCompact="PSHx" PopOverComponent={null} />
-                <div className="flex space-x-4">
-                    <div className="w-1/2">
-                        <TextFormField form={form} fieldName="smokeCount" fieldLabel="Smoking Status (packs per day)" />
-                    </div>
-                    <div className="w-1/2">
-                        <TextFormField form={form} fieldName="drinkCount" fieldLabel="Avg Drinks per week" />
-                    </div>
-                </div>
-                <TextFormField form={form} fieldName="otherDrugs" fieldLabel="Other illicit uses" />
-                <TextFormField form={form} fieldName="allergies" fieldLabel="Allergies" />
-                <TextAreaFormField form={form} fieldName="notes" fieldLabel="Notes" />
-                <Button type="submit">Submit Request</Button>
-            </form>
-        </Form>
+                    <TextFormField form={form} fieldName="otherDrugs" fieldLabel="Other illicit uses" />
+                    <TextFormField form={form} fieldName="allergies" fieldLabel="Allergies" />
+                    <TextAreaFormField form={form} fieldName="notes" fieldLabel="Notes" />
+                    <Button type="submit">Submit Patient</Button>
+                </form>
+            </Form>
+        </>
     );
 }
 

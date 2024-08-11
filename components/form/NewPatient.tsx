@@ -19,6 +19,7 @@ const newPatientFormSchema = z.object({
     age: z.number().min(0, "Age must be a positive number"),
     phoneNumber: z.string().regex(/^\d+$/, "Phone number must contain only digits"),
     location: z.string().min(1, "Location is required"),
+    language: z.string().min(1, "Language is required"),
     chiefComplaint: z.string().min(1, "Chief complaint is required"),
 });
 
@@ -35,6 +36,7 @@ const defaultValues: Partial<NewPatientFormValues> = {
     age: 0,
     phoneNumber: "",
     location: "",
+    language: "",
     chiefComplaint: "",
 };
 
@@ -68,9 +70,16 @@ export function NewPatient({ handleSubmit, submitting }: NewPatientProps) {
                         <PhoneFormField form={form} fieldName="phoneNumber" fieldLabel="Phone Number" />
                     </div>
                 </div>
-                <TextFormField form={form} fieldName="location" fieldLabel="Location" />
+                <div className="flex flex-col md:flex-row md:space-x-4">
+                    <div className="w-full md:w-1/2">
+                        <TextFormField form={form} fieldName="language" fieldLabel="Language" />
+                    </div>
+                    <div className="w-full md:w-1/2">
+                        <TextFormField form={form} fieldName="location" fieldLabel="Location" />
+                    </div>
+                </div>
                 <TextAreaFormField form={form} fieldName="chiefComplaint" fieldLabel="Chief Complaint" />
-                <div className="flex justify-center"> {/* Centering the button */}
+                <div className="flex justify-center">
                     <Button type="submit" disabled={submitting}>
                         {submitting ? "Submitting..." : "Submit New Patient"}
                     </Button>

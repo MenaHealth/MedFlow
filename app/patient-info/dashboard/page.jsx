@@ -210,7 +210,7 @@ export default function PatientTriage() {
             <Table sx={{ minWidth: 650 }} aria-label="simple table">
               <TableHead>
                 <TableRow>
-                  <TableCell align="center">Patient ID</TableCell>
+                  <TableCell align="left">Patient ID</TableCell>
                   <TableCell align="center">Patient Name</TableCell>
                   <TableCell align="center">Age</TableCell>
                   <TableCell align="center">Location</TableCell>
@@ -253,7 +253,7 @@ export default function PatientTriage() {
                         sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                     >
                       <TableCell 
-                        align="center" 
+                        align="left"
                         style={{
                           maxWidth: '120px', 
                           overflow: 'hidden', 

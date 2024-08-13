@@ -11,7 +11,8 @@ import { PhoneFormField } from "@/components/form/PhoneFormField";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { v4 as uuidv4 } from "uuid";
-import { SPECIALTIES } from '@/data/data';
+import MyLocationIcon from "@mui/icons-material/MyLocation";
+import PuffLoader from "react-spinners/PuffLoader";
 
 const newPatientFormSchema = z.object({
     firstName: z.string().min(1, "First name is required"),
@@ -34,7 +35,7 @@ const defaultValues: Partial<NewPatientFormValues> = {
     firstName: "",
     lastName: "",
     phoneNumber: "",
-    age: 0,
+    age: undefined,
     location: "",
     language: "",
     chiefComplaint: "",
@@ -45,6 +46,30 @@ export function NewPatient({ handleSubmit, submitting }: NewPatientProps) {
         resolver: zodResolver(newPatientFormSchema),
         defaultValues,
     });
+
+    const [loading, setLoading] = React.useState(false);
+
+    const getLocation = () => {
+        setLoading(true); // Start loading
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                const { latitude, longitude } = position.coords;
+                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`);
+                const data = await response.json();
+                if (data && data.display_name) {
+                    form.setValue("location", data.display_name);
+                    setLoading(false); // Stop loading after setting the location
+                } else {
+                    setLoading(false); // Stop loading if no data
+                }
+            }, () => {
+                setLoading(false); // Stop loading on error
+            });
+        } else {
+            alert("Geolocation is not supported by this browser.");
+            setLoading(false); // Stop loading if geolocation is not supported
+        }
+    };
 
     const onSubmit = (data: NewPatientFormValues) => {
         console.log("Submitting data:", data);
@@ -71,21 +96,36 @@ export function NewPatient({ handleSubmit, submitting }: NewPatientProps) {
                     </div>
                 </div>
                 <div className="flex flex-col md:flex-row md:space-x-4">
-                    <div className="w-full md:w-1/2">
+                    <div className="w-full md:w-1/4">
                         <NumericalFormField form={form} fieldName="age" fieldLabel="Age" />
                     </div>
-                    <div className="w-full md:w-1/2">
+                    <div className="w-full md:w-3/8">
                         <PhoneFormField form={form} fieldName="phoneNumber" fieldLabel="Phone Number" />
                     </div>
-                </div>
-                <div className="flex flex-col md:flex-row md:space-x-4">
-                    <div className="w-full md:w-1/2">
+                    <div className="w-full md:w-3/8">
                         <TextFormField form={form} fieldName="language" fieldLabel="Language" />
                     </div>
-                    <div className="w-full md:w-1/2">
-                        <TextFormField form={form} fieldName="location" fieldLabel="Location" />
+                </div>
+
+                <div className="flex w-full space-x-2">
+                    <div className="flex-grow">
+                        <TextFormField form={form} fieldName="location" fieldLabel="Location" className="w-full" />
+                    </div>
+                    <div className="flex items-end">
+                        {loading ? (
+                            <PuffLoader size={30} color="#FF5722" />
+                        ) : (
+                            <button
+                                type="button"
+                                onClick={getLocation}
+                                className="text-white bg-black hover:bg-gray-700 focus:outline-none p-2 rounded h-10 w-10 flex items-center justify-center"
+                            >
+                                <MyLocationIcon style={{ fontSize: '1.5rem' }} />
+                            </button>
+                        )}
                     </div>
                 </div>
+
                 <TextAreaFormField form={form} fieldName="chiefComplaint" fieldLabel="Chief Complaint" />
                 <div className="flex justify-center">
                     <Button type="submit" disabled={submitting}>

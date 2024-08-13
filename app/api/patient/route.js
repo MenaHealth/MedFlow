@@ -5,7 +5,7 @@ import dbConnect from "@/utils/database";
 
 export const GET = async (request, { params }) => {
     try {
-        await dbConnect(); // Correct function call
+        await dbConnect();
         const patient = await Patient.find();
         return new Response(JSON.stringify(patient), { status: 200 });
     } catch (error) {

@@ -4,7 +4,7 @@ import dbConnect from "@/utils/database";
 
 export const GET = async (request, { params }) => {
     try {
-        await dbConnect(); // Correct function call
+        await dbConnect();
         const patient = await Patient.findById(params.id);
         if (!patient) {
             return new Response("Patient Not Found", { status: 404 });
@@ -19,9 +19,8 @@ export const PATCH = async (request, { params }) => {
     const newPatientData = await request.json();
 
     try {
-        await dbConnect(); // Correct function call
+        await dbConnect();
 
-        // Update existing patient
         newPatientData.age = parseInt(newPatientData.age);
         newPatientData.surgeryDate = new Date(newPatientData.surgeryDate);
         newPatientData.medx = newPatientData.medx ? newPatientData.medx.map((med) => {

@@ -1,4 +1,3 @@
-// components/form/NewPatient.tsx
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import { v4 as uuidv4 } from "uuid";
 import { SPECIALTIES } from '@/data/data';
 
-// This schema only includes the fields that will be editable in the form
 const newPatientFormSchema = z.object({
     firstName: z.string().min(1, "First name is required"),
     lastName: z.string().min(1, "Last name is required"),
@@ -27,32 +25,8 @@ const newPatientFormSchema = z.object({
 
 type NewPatientFormValues = z.infer<typeof newPatientFormSchema>;
 
-// This type includes all fields from the Patient model
-type FullPatientData = NewPatientFormValues & {
-    patientId: string;
-    laterality?: 'Not Selected' | 'Left' | 'Right' | 'Bilateral';
-    diagnosis?: string;
-    diagnosisCat?: string;
-    hospital?: 'Not Selected' | 'PMC' | 'PRCS' | 'Hugo Chavez';
-    priority?: 'Not Selected' | 'Routine' | 'Moderate' | 'Urgent' | 'Emergency';
-    specialty?: typeof SPECIALTIES[number];
-    status?: 'Not Selected' | 'Not Started' | 'Triaged' | 'In-Progress' | 'Completed';
-    icd10?: string;
-    surgeryDate?: Date | null;
-    occupation?: string;
-    baselineAmbu?: 'Not Selected' | 'Independent' | 'Boot' | 'Crutches' | 'Walker' | 'Non-Ambulatory';
-    pmhx?: string[];
-    pshx?: string[];
-    medx?: Array<{ medName: string; medDosage: string; medFrequency: string }>;
-    smokeCount?: string;
-    drinkCount?: string;
-    otherDrugs?: string;
-    allergies?: string;
-    notes?: string;
-};
-
 type NewPatientProps = {
-    handleSubmit: (formData: FullPatientData) => void;
+    handleSubmit: (formData: Partial<NewPatientFormValues> & { patientId: string }) => void;
     submitting: boolean;
 };
 
@@ -76,27 +50,9 @@ export function NewPatient({ handleSubmit, submitting }: NewPatientProps) {
         console.log("Submitting data:", data);
         const patientId = uuidv4();
 
-        const fullPatientData: FullPatientData = {
+        const fullPatientData = {
             ...data,
             patientId,
-            laterality: undefined,
-            hospital: undefined,
-            priority: undefined,
-            specialty: SPECIALTIES[0],
-            status: undefined,
-            baselineAmbu: undefined,
-            pmhx: [],
-            pshx: [],
-            medx: [],
-            diagnosisCat: '',
-            icd10: '',
-            surgeryDate: null,
-            occupation: '',
-            smokeCount: '',
-            drinkCount: '',
-            otherDrugs: '',
-            allergies: '',
-            notes: '',
         };
 
         console.log("Full patient data:", fullPatientData);

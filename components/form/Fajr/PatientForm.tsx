@@ -26,7 +26,7 @@ const patientFormSchema = z.object({
     baselineAmbu: z.enum(["Independent", "Boot", "Crutches", "Walker", "Non-Ambulatory"]).optional(),
     laterality: z.enum(["Bilateral", "Left", "Right"]).optional(),
     priority: z.enum(["Low", "Medium", "High"]).optional(),
-    hospital: z.enum(["PMC", "PRCS", "Hugo Chavez"]).optional(),
+    hospital: z.enum(["Not Selected", "PMC", "PRCS", "Hugo Chavez"]).optional(),
     medx: z
         .array(
             z.object({
@@ -60,7 +60,7 @@ const defaultValues: Partial<PatientFormValues> = {
     occupation: "",
     laterality: "Bilateral",
     priority: "Low",
-    hospital: "PMC",
+    hospital: "Not Selected",
     baselineAmbu: "Independent",
     medx: [],
     pmhx: [],
@@ -154,7 +154,7 @@ export function PatientForm({ id }: { id: string } = { id: "" }) {
                         </div>
                         <div className="w-1/2 space-y-3">
                             <SelectFormField form={form} fieldName="baselineAmbu" fieldLabel="Baseline Ambu" selectOptions={['Independent', 'Boot', 'Crutches', 'Walker', 'Non-Ambulatory']} />
-                            <SelectFormField form={form} fieldName="hospital" fieldLabel="Hospital" selectOptions={['PMC', 'PRCS', 'Hugo Chavez']} />
+                            <SelectFormField form={form} fieldName="hospital" fieldLabel="Hospital" selectOptions={['Not Selected', 'PMC', 'PRCS', 'Hugo Chavez']} />
                         </div>
                     </div>
                     <MedicationSelection form={form} fieldName="medx" fieldLabel="Medications Needed" />

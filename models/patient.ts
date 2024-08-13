@@ -9,17 +9,17 @@
   }
 
   export interface IPatient extends Document {
+    files: any[];
     _id?: string;
     patientId: string;
     firstName: string;
     lastName: string;
     phoneNumber? : string;
-    age?: number;
+    age?: string;
     location?: string;
     language?: string;
     chiefComplaint?: string;
     coordinatorId?: string;
-    files: any[];
     laterality?: 'Not Selected' | 'Left' | 'Right' | 'Bilateral';
     diagnosis?: string;
     diagnosisCat?: string;
@@ -50,20 +50,21 @@
   // models/patient.ts
 
   const PatientSchema = new Schema<IPatient>({
+    files: [{ type: Object }],
     patientId: { type: String, required: true, unique: true },
-    firstName: { type: String, required: true },
-    lastName: { type: String, required: true },
+    firstName: { type: String },
+    lastName: { type: String },
     phoneNumber: { type: String, required: true },
-    age: { type: Number },
+    age: { type: String, required: true },
     location: { type: String, required: true },
-    language: { type: String },
+    language: { type: String, required: true },
     chiefComplaint: { type: String, required: true },
     laterality: { type: String, enum: ['Not Selected', 'Left', 'Right', 'Bilateral'], default: 'Not Selected' },
     diagnosis: { type: String },
     diagnosisCat: { type: String },
     hospital: { type: String, enum: ['Not Selected', 'PMC', 'PRCS', 'Hugo Chavez'], default: 'Not Selected' },
     priority: { type: String, enum: ['Not Selected', 'Routine', 'Moderate', 'Urgent', 'Emergency'], default: 'Not Selected' },
-    specialty: { type: String, enum: SPECIALTIES },
+    specialty: { type: String, enum: ['Not Selected', 'Podiatry', 'Sports', 'Vascular', 'General', 'Urology', 'OBGYN', 'Opthalmology', 'ENT', 'Joints', 'Pediatrics', 'Spine/Neurosurgery', 'Internal Medicine'], default: 'Not Selected' },
     status: { type: String, enum: ['Not Selected', 'Not Started', 'Triaged', 'In-Progress', 'Completed'], default: 'Not Started' },
     icd10: { type: String },
     surgeryDate: { type: Date },
@@ -82,7 +83,6 @@
     allergies: { type: String },
     notes: { type: String },
     visits: [{ type: Schema.Types.ObjectId, ref: 'Visit' }],
-    files: [{ type: Object }],
   });
   const Patient = models.Patient || model<IPatient>('Patient', PatientSchema);
 

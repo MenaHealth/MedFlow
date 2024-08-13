@@ -69,7 +69,7 @@
     icd10: { type: String },
     surgeryDate: { type: Date },
     occupation: { type: String },
-    baselineAmbu: { type: String, enum: ['Not Selected', 'Independent', 'Boot', 'Crutches', 'Walker', 'Non-Ambulatory'], default: 'Not Selected' },
+    baselineAmbu: { type: String, enum: ['Not Selected', 'Independent', 'Boot', 'Crutches', 'Walker', 'Non-Ambulatory'] },
     pmhx: { type: [String], default: [] },
     pshx: { type: [String], default: [] },
     medx: [{

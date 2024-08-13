@@ -12,12 +12,14 @@ import { PhoneFormField } from "@/components/form/PhoneFormField";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { v4 as uuidv4 } from "uuid";
+import { SPECIALTIES } from '@/data/data';
 
+// This schema only includes the fields that will be editable in the form
 const newPatientFormSchema = z.object({
     firstName: z.string().min(1, "First name is required"),
     lastName: z.string().min(1, "Last name is required"),
-    age: z.number().min(0, "Age must be a positive number"),
     phoneNumber: z.string().regex(/^\d+$/, "Phone number must contain only digits"),
+    age: z.number().min(0, "Age must be a positive number"),
     location: z.string().min(1, "Location is required"),
     language: z.string().min(1, "Language is required"),
     chiefComplaint: z.string().min(1, "Chief complaint is required"),
@@ -25,16 +27,40 @@ const newPatientFormSchema = z.object({
 
 type NewPatientFormValues = z.infer<typeof newPatientFormSchema>;
 
+// This type includes all fields from the Patient model
+type FullPatientData = NewPatientFormValues & {
+    patientId: string;
+    laterality?: 'Not Selected' | 'Left' | 'Right' | 'Bilateral';
+    diagnosis?: string;
+    diagnosisCat?: string;
+    hospital?: 'Not Selected' | 'PMC' | 'PRCS' | 'Hugo Chavez';
+    priority?: 'Not Selected' | 'Routine' | 'Moderate' | 'Urgent' | 'Emergency';
+    specialty?: typeof SPECIALTIES[number];
+    status?: 'Not Selected' | 'Not Started' | 'Triaged' | 'In-Progress' | 'Completed';
+    icd10?: string;
+    surgeryDate?: Date | null;
+    occupation?: string;
+    baselineAmbu?: 'Not Selected' | 'Independent' | 'Boot' | 'Crutches' | 'Walker' | 'Non-Ambulatory';
+    pmhx?: string[];
+    pshx?: string[];
+    medx?: Array<{ medName: string; medDosage: string; medFrequency: string }>;
+    smokeCount?: string;
+    drinkCount?: string;
+    otherDrugs?: string;
+    allergies?: string;
+    notes?: string;
+};
+
 type NewPatientProps = {
-    handleSubmit: (formData: NewPatientFormValues & { patientId: string }) => void;
+    handleSubmit: (formData: FullPatientData) => void;
     submitting: boolean;
 };
 
 const defaultValues: Partial<NewPatientFormValues> = {
     firstName: "",
     lastName: "",
-    age: 0,
     phoneNumber: "",
+    age: 0,
     location: "",
     language: "",
     chiefComplaint: "",
@@ -47,8 +73,34 @@ export function NewPatient({ handleSubmit, submitting }: NewPatientProps) {
     });
 
     const onSubmit = (data: NewPatientFormValues) => {
-        const patientId = uuidv4(); // Generate a unique patient ID
-        handleSubmit({ ...data, patientId });
+        console.log("Submitting data:", data);
+        const patientId = uuidv4();
+
+        const fullPatientData: FullPatientData = {
+            ...data,
+            patientId,
+            laterality: undefined,
+            hospital: undefined,
+            priority: undefined,
+            specialty: SPECIALTIES[0],
+            status: undefined,
+            baselineAmbu: undefined,
+            pmhx: [],
+            pshx: [],
+            medx: [],
+            diagnosisCat: '',
+            icd10: '',
+            surgeryDate: null,
+            occupation: '',
+            smokeCount: '',
+            drinkCount: '',
+            otherDrugs: '',
+            allergies: '',
+            notes: '',
+        };
+
+        console.log("Full patient data:", fullPatientData);
+        handleSubmit(fullPatientData);
     };
 
     return (

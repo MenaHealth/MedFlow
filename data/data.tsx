@@ -3,6 +3,7 @@ export const CLINICS = [
 ] as string[];
 
 export const PATIENT_STATUSES = [
+    "Not Selected",
     "Preoperative",
     "Perioperative",
     "Postoperative",
@@ -10,6 +11,7 @@ export const PATIENT_STATUSES = [
 ] as string[];
 
 export const PRIORITIES = [
+    "Not Selected",
     "Routine",
     "Moderate",
     "Urgent",
@@ -24,6 +26,7 @@ export const STATUS = [
 ]
 
 export const SPECIALTIES = [
+    'Not Selected',
     'Podiatry',
     'Sports',
     'Vascular',

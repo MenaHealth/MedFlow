@@ -22,21 +22,12 @@ const CreatePatient = () => {
 
   const createPatient = async (formData) => {
     setIsSubmitting(true);
-    setError(null); // Reset error state
+    setError(null);
 
     try {
       const response = await fetch("/api/patient/new", {
         method: "POST",
-        body: JSON.stringify({
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          patientId: formData.patientId,
-          age: formData.age,
-          phoneNumber: formData.phoneNumber,
-          location: formData.location,
-          chiefComplaint: formData.chiefComplaint,
-          coordinatorId: session?.user?.id,
-        }),
+        body: JSON.stringify(formData),
         headers: {
           "Content-Type": "application/json",
         },
@@ -44,7 +35,7 @@ const CreatePatient = () => {
 
       if (response.ok) {
         const data = await response.json();
-        setPatientId(data._id); // Assuming the response includes the patient ID
+        setPatientId(data._id);
         setPatientName({ firstName: formData.firstName, lastName: formData.lastName });
         setShowModal(true);
       } else {

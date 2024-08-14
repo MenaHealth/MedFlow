@@ -4,14 +4,14 @@
 import * as React from 'react';
 import { useEffect, useState, useRef } from "react";
 
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import Paper from "@mui/material/Paper";
 
 import EditIcon from "@mui/icons-material/Edit";
@@ -206,12 +206,12 @@ export default function PatientTriage() {
               Clear all filters
             </div>
           </div>
-          <TableContainer component={Paper}>
+          <TableContainer component={Paper} style={{ maxHeight: '80vh', overflowY: 'auto' }}>
             <Table sx={{ minWidth: 650 }} aria-label="simple table">
-              <TableHead>
+              <TableHead className="MuiTableHead-root">
                 <TableRow>
                   <TableCell align="left">Patient ID</TableCell>
-                  <TableCell align="center">Patient Name</TableCell>
+                  <TableCell align="center">Last Name</TableCell>
                   <TableCell align="center">Age</TableCell>
                   <TableCell align="center">Location</TableCell>
                   <TableCell align="center">Language Spoken</TableCell>
@@ -269,11 +269,11 @@ export default function PatientTriage() {
                         </Tooltip>
                       </TableCell>
 
-                      <TableCell align="center" style={{ minWidth: '150px' }}>{row.name}</TableCell>
+                      <TableCell align="center" style={{ minWidth: '150px' }}>{row.lastName}</TableCell>
                       <TableCell align="center">{row.age || ''}</TableCell>
                       <TableCell align="center" style={{ minWidth: '150px' }}>{row.location}</TableCell>
                       <TableCell align="center">{row.language}</TableCell>
-                      <TableCell align="center">{row.complaint}</TableCell>
+                      <TableCell align="center">{row.chiefComplaint}</TableCell>
 
                       {/* Status */}
                       <TableCell align="center">

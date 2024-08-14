@@ -14,7 +14,7 @@
     patientId: string;
     firstName: string;
     lastName: string;
-    phoneNumber? : string;
+    phone?: string;
     age?: string;
     location?: string;
     language?: string;
@@ -28,7 +28,6 @@
     specialty?: typeof SPECIALTIES[number];
     status?: 'Not Selected' | 'Not Started' | 'Triaged' | 'In-Progress' | 'Completed';
     name?: string; // can get rid of
-    phone?: string; // i used phoneNumber in newPatient.tsx so maybe get rid of this or replace it idk
     complaint?: string;
     icd10?: string;
     surgeryDate?: Date;
@@ -54,7 +53,7 @@
     patientId: { type: String, required: true, unique: true },
     firstName: { type: String },
     lastName: { type: String },
-    phoneNumber: { type: String, required: true },
+    phone: { type: String },
     age: { type: String, required: true },
     location: { type: String, required: true },
     language: { type: String, required: true },

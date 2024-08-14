@@ -17,11 +17,11 @@ import PuffLoader from "react-spinners/PuffLoader";
 const newPatientFormSchema = z.object({
     firstName: z.string().min(1, "First name is required"),
     lastName: z.string().min(1, "Last name is required"),
-    phoneNumber: z.string().regex(/^\d+$/, "Phone number must contain only digits"),
-    age: z.number().min(0, "Age must be a positive number"),
+    phone: z.string().min(1, "Phone number is required"),
+    age: z.number().min(0, "Please enter in a number greater than 0"),
     location: z.string().min(1, "Location is required"),
     language: z.string().min(1, "Language is required"),
-    chiefComplaint: z.string().min(1, "Chief complaint is required"),
+    chiefComplaint: z.string().min(1, "Please enter the main reason you seek medical care"),
 });
 
 type NewPatientFormValues = z.infer<typeof newPatientFormSchema>;
@@ -34,7 +34,7 @@ type NewPatientProps = {
 const defaultValues: Partial<NewPatientFormValues> = {
     firstName: "",
     lastName: "",
-    phoneNumber: "",
+    phone: "",
     age: undefined,
     location: "",
     language: "",
@@ -54,16 +54,31 @@ export function NewPatient({ handleSubmit, submitting }: NewPatientProps) {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(async (position) => {
                 const { latitude, longitude } = position.coords;
-                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`);
-                const data = await response.json();
-                if (data && data.display_name) {
-                    form.setValue("location", data.display_name);
-                    setLoading(false); // Stop loading after setting the location
-                } else {
-                    setLoading(false); // Stop loading if no data
+                try {
+                    const response = await fetch('/api/patient/location', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ latitude, longitude }),
+                    });
+
+                    const data = await response.json();
+
+                    if (data.location) {
+                        form.setValue("location", data.location);
+                    } else {
+                        alert("Location not found");
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch location data:", error);
+                    alert("Failed to fetch location data");
+                } finally {
+                    setLoading(false);
                 }
             }, () => {
                 setLoading(false); // Stop loading on error
+                alert("Failed to retrieve your location");
             });
         } else {
             alert("Geolocation is not supported by this browser.");
@@ -100,7 +115,7 @@ export function NewPatient({ handleSubmit, submitting }: NewPatientProps) {
                         <NumericalFormField form={form} fieldName="age" fieldLabel="Age" />
                     </div>
                     <div className="w-full md:w-3/8">
-                        <PhoneFormField form={form} fieldName="phoneNumber" fieldLabel="Phone Number" />
+                        <PhoneFormField form={form} fieldName="phone" fieldLabel="Phone Number" />
                     </div>
                     <div className="w-full md:w-3/8">
                         <TextFormField form={form} fieldName="language" fieldLabel="Language" />

@@ -14,7 +14,8 @@ export function NumericalFormField({ form, fieldName, fieldLabel }: { form: any;
                         <Input
                             {...field}
                             onChange={e => field.onChange(parseInt(e.target.value) || 0)} // Parse the input value as integer
-                            type="number"
+                            type="tel" // Changed from "number" to "tel" to get the number keyboard showing up on mobile devices
+                            pattern="\d*"
                             min={0}
                             step={1}
                             className="w-full"

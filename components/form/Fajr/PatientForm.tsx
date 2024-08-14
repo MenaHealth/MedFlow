@@ -15,11 +15,15 @@ import { DatePickerFormField } from "../DatePickerFormField";
 import { SelectFormField } from "../SelectFormField";
 import { PMHxSelect } from "../PMHxSelection";
 import { PSHxSelect } from "../PSHxSelection";
-import {PhoneFormField} from "@/components/form/PhoneFormField";
+import { PhoneFormField } from "@/components/form/PhoneFormField";
 
 const patientFormSchema = z.object({
-    patientId: z.string(),
-    age: z.number().min(0, "Age must be a positive number").optional(),
+    // patientId: z.string(),
+    // chiefComplaint: z.string().optional(),
+    // language: z.string().optional(),
+    // location: z.string().optional(),
+    // age: z.number().min(0, "Age must be a positive number").optional(),
+    // phone: z.string().optional(),
     diagnosis: z.string().optional(),
     icd10: z.string().optional(),
     surgeryDate: z.instanceof(Date).optional(),
@@ -45,17 +49,25 @@ const patientFormSchema = z.object({
     allergies: z.string().optional(),
     notes: z.string().optional(),
     files: z.any().optional(),
-    chiefComplaint: z.string().optional(),
-    phoneNumber: z.string().optional(),
-    language: z.string().optional(),
-    location: z.string().optional(),
 });
 
-type PatientFormValues = z.infer<typeof patientFormSchema>;
+type PatientFormValues = z.infer<typeof patientFormSchema> & {
+    firstName?: string;
+    lastName?: string;
+    language?: string;
+    location?: string;
+    age?: number;
+    phone?: string;
+    chiefComplaint?: string;
+};
 
 const defaultValues: Partial<PatientFormValues> = {
-    patientId: "",
-    age: undefined,
+    // patientId: "",
+    // chiefComplaint: "",
+    // language: "",
+    // location: "",
+    // age: undefined,
+    // phone: "",
     diagnosis: "",
     icd10: "",
     surgeryDate: undefined,
@@ -72,10 +84,6 @@ const defaultValues: Partial<PatientFormValues> = {
     otherDrugs: "",
     allergies: "",
     notes: "",
-    chiefComplaint: "",
-    phoneNumber: "",
-    language: "",
-    location: "",
 };
 
 export function PatientForm({ id }: { id: string } = { id: "" }) {
@@ -133,41 +141,45 @@ export function PatientForm({ id }: { id: string } = { id: "" }) {
 
     return (
         <>
+            <div className="space-y-4 mb-8">
+                <div className="flex flex-col md:flex-row md:space-x-4">
+                    <div className="w-full md:w-1/2">
+                        <label className="font-medium">First Name</label>
+                        <div>{patientData.firstName}</div>
+                    </div>
+                    <div className="w-full md:w-1/2">
+                        <label className="font-medium">Last Name</label>
+                        <div>{patientData.lastName}</div>
+                    </div>
+                </div>
+                <div className="flex flex-col md:flex-row md:space-x-4">
+                    <div className="w-full md:w-1/2">
+                        <label className="font-medium">Language</label>
+                        <div>{patientData.language}</div>
+                    </div>
+                    <div className="w-full md:w-1/2">
+                        <label className="font-medium">Location</label>
+                        <div>{patientData.location}</div>
+                    </div>
+                </div>
+                <div className="flex flex-col md:flex-row md:space-x-4">
+                    <div className="w-full md:w-1/2">
+                        <label className="font-medium">Age</label>
+                        <div>{patientData.age}</div>
+                    </div>
+                    <div className="w-full md:w-1/2">
+                        <label className="font-medium">Phone Number</label>
+                        <div>{patientData.phone}</div>
+                    </div>
+                </div>
+                <div>
+                    <label className="font-medium">Chief Complaint</label>
+                    <div>{patientData.chiefComplaint}</div>
+                </div>
+            </div>
+
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                    <div className="flex flex-col md:flex-row md:space-x-4">
-                        <div className="w-full md:w-1/2">
-                            <TextFormField form={form} fieldName="firstName" fieldLabel="First Name" />
-                        </div>
-                        <div className="w-full md:w-1/2">
-                            <TextFormField form={form} fieldName="lastName" fieldLabel="Last Name" />
-                        </div>
-                    </div>
-                    <div className="flex flex-col md:flex-row md:space-x-4">
-                        <div className="w-full md:w-1/2">
-                            <TextFormField form={form} fieldName="language" fieldLabel="Language" />
-                        </div>
-                        <div className="w-full md:w-1/2">
-                            <TextFormField form={form} fieldName="location" fieldLabel="Location" />
-                        </div>
-                    </div>
-                    <div className="flex flex-col md:flex-row md:space-x-4">
-                        <div className="w-full md:w-1/2">
-                            <NumericalFormField form={form} fieldName="age" fieldLabel="Age" />
-                        </div>
-                        <div className="w-full md:w-1/2">
-                            <PhoneFormField form={form} fieldName="phoneNumber" fieldLabel="Phone Number" />
-                        </div>
-                    </div>
-                    <TextFormField form={form} fieldName="chiefComplaint" fieldLabel="Chief Complaint" /> {/* New Field */}
-                    {/*<div className="flex space-x-4">*/}
-                    {/*    <div className="w-2/3">*/}
-                    {/*        <TextFormField form={form} fieldName="patientId" fieldLabel="Patient ID" />*/}
-                    {/*    </div>*/}
-                    {/*    <div className="w-1/3">*/}
-                    {/*        <NumericalFormField form={form} fieldName="age" fieldLabel="Patient Age" />*/}
-                    {/*    </div>*/}
-                    {/*</div>*/}
                     <TextFormField form={form} fieldName="occupation" fieldLabel="Job/Occupation" />
                     <TextAreaFormField form={form} fieldName="diagnosis" fieldLabel="Patient Diagnosis" />
                     <TextAreaFormField form={form} fieldName="icd10" fieldLabel="ICD-10" />

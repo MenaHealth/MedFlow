@@ -4,7 +4,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { BounceLoader } from "react-spinners";
+import {BarLoader, BounceLoader} from "react-spinners";
 import NewPatient from "@/components/form/NewPatient";
 import ConfirmationModal from "@/components/ConfirmationModal";
 import ErrorModal from "@/components/ErrorModal"; // Import the ErrorModal component
@@ -72,7 +72,7 @@ const CreatePatient = () => {
         <div className="border border-gray-300 p-8 bg-white shadow rounded-lg">
           {submitting ? (
               <div className="flex justify-center">
-                <BounceLoader color="#FF5722" />
+                <BarLoader color="#FF5722" />
               </div>
           ) : (
               <NewPatient handleSubmit={createPatient} submitting={submitting} />

@@ -11,17 +11,35 @@ export default function SignupForm({ onOpenLoginModal }: SignupFormProps) {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [verifyPassword, setVerifyPassword] = useState('');
     const [accountType, setAccountType] = useState('Patient');
     const [error, setError] = useState<string | null>(null);
+    const [emailTouched, setEmailTouched] = useState(false);
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Adjusted regex for general email validation
+    const passwordRegex = /^(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/; // Regex for password validation (minimum 8 characters, at least one symbol)
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Check if passwords match
+        if (password !== verifyPassword) {
+            setError("Passwords do not match.");
+            return;
+        }
+
+        if (!passwordRegex.test(password)) {
+            setError("Password must be at least 8 characters long and include at least one symbol.");
+            return;
+        }
+
         try {
             // Implement your signup logic here
             console.log('User data:', { name, email, password, accountType });
             setName('');
             setEmail('');
             setPassword('');
+            setVerifyPassword('');
             setAccountType('Patient');
         } catch (error: any) {
             setError(error.message);
@@ -30,85 +48,114 @@ export default function SignupForm({ onOpenLoginModal }: SignupFormProps) {
 
     return (
         <div className="flex flex-col items-center justify-center">
-            <div className="w-full max-w-md p-6 bg-white rounded shadow-md">
-                <h1 className="text-2xl font-bold text-center mb-2">Sign Up</h1>
-                <p className="text-center mb-4">Fill out the required information below to get started.</p>
+            <h1 className="text-2xl font-bold text-center mb-2">Sign Up</h1>
+            <p className="text-center mb-4">Fill out the required information below to get started.</p>
 
-                <div className="flex justify-center mb-4">
-                    <button
-                        className={`text-lg font-semibold ${accountType === 'Patient' ? 'underline text-[#FF5722]' : 'text-gray-600'}`}
-                        onClick={() => setAccountType('Patient')}
-                    >
-                        Patient
-                    </button>
-                    <span className="mx-4">|</span>
-                    <button
-                        className={`text-lg font-semibold ${accountType === 'Surgeon' ? 'underline text-[#FF5722]' : 'text-gray-600'}`}
-                        onClick={() => setAccountType('Surgeon')}
-                    >
-                        Doctor
-                    </button>
+            <div className="flex justify-center mb-4">
+                <button
+                    className={`text-lg font-semibold ${accountType === 'Patient' ? 'underline text-[#FF5722]' : 'text-gray-600'}`}
+                    onClick={() => setAccountType('Patient')}
+                >
+                    Patient
+                </button>
+                <span className="mx-4">|</span>
+                <button
+                    className={`text-lg font-semibold ${accountType === 'Doctor' ? 'underline text-[#FF5722]' : 'text-gray-600'}`}
+                    onClick={() => setAccountType('Doctor')}
+                >
+                    Doctor
+                </button>
+            </div>
+
+            {error && <p className="text-red-500 mb-4">{error}</p>}
+            <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
+                <div>
+                    <label htmlFor="name" className="text-gray-700 font-bold">
+                        {accountType === 'Patient' ? 'First Name:' : 'Last Name:'}
+                    </label>
+                    <input
+                        type="text"
+                        id="name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        required
+                        className="border rounded px-3 py-2 focus:outline-none focus:ring focus:ring-blue-300 w-full"
+                    />
+                </div>
+                <div>
+                    <label htmlFor="email" className="text-gray-700 font-bold">
+                        Email:
+                    </label>
+                    <input
+                        type="email"
+                        id="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        onBlur={() => setEmailTouched(true)}  // Set touched when the field loses focus
+                        required
+                        className="border rounded px-3 py-2 focus:outline-none focus:ring focus:ring-blue-300 w-full"
+                    />
+                    {emailTouched && !emailRegex.test(email) && (
+                        <p className="text-red-500 text-sm mt-1">Please enter a valid email address.</p>
+                    )}
                 </div>
 
-                {error && <p className="text-red-500 mb-4">{error}</p>}
-                <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
-                    <div>
-                        <label htmlFor="name" className="text-gray-700 font-bold">
-                            Name:
-                        </label>
-                        <input
-                            type="text"
-                            id="name"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            required
-                            className="border rounded px-3 py-2 focus:outline-none focus:ring focus:ring-blue-300 w-full"
-                        />
-                    </div>
-                    <div>
-                        <label htmlFor="email" className="text-gray-700 font-bold">
-                            Email:
-                        </label>
-                        <input
-                            type="email"
-                            id="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                            className="border rounded px-3 py-2 focus:outline-none focus:ring focus:ring-blue-300 w-full"
-                        />
-                    </div>
-                    <div>
-                        <label htmlFor="password" className="text-gray-700 font-bold">
-                            Password:
-                        </label>
-                        <input
-                            type="password"
-                            id="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                            className="border rounded px-3 py-2 focus:outline-none focus:ring focus:ring-blue-300 w-full"
-                        />
-                    </div>
-                    <button
-                        type="submit"
-                        className="bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
-                    >
-                        Sign Up
-                    </button>
-                </form>
+                {/* Show Password Field only if Name and Email are filled and Email is valid */}
+                {name && emailRegex.test(email) && (
+                    <>
+                        <div>
+                            <label htmlFor="password" className="text-gray-700 font-bold">
+                                Password:
+                            </label>
+                            <input
+                                type="password"
+                                id="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                                className="border rounded px-3 py-2 focus:outline-none focus:ring focus:ring-blue-300 w-full"
+                            />
+                            <p className="text-gray-500 text-sm mt-1">
+                                Password must be at least 8 characters long and include at least one symbol.
+                            </p>
+                        </div>
 
-                <p className="mt-4 text-center">
-                    Already Have an Account?{' '}
-                    <span
-                        onClick={onOpenLoginModal}
-                        className="text-[#FF5722] cursor-pointer hover:underline"
-                    >
-                        Log in
-                    </span>
-                </p>
-            </div>
+                        {/* Show Verify Password Field only after 8 or more characters in Password */}
+                        {password.length >= 8 && (
+                            <div>
+                                <label htmlFor="verify-password" className="text-gray-700 font-bold">
+                                    Verify Password:
+                                </label>
+                                <input
+                                    type="password"
+                                    id="verify-password"
+                                    value={verifyPassword}
+                                    onChange={(e) => setVerifyPassword(e.target.value)}
+                                    required
+                                    className="border rounded px-3 py-2 focus:outline-none focus:ring focus:ring-blue-300 w-full"
+                                />
+                            </div>
+                        )}
+                    </>
+                )}
+
+                <button
+                    type="submit"
+                    className="bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
+                >
+                    Sign Up
+                </button>
+            </form>
+
+            <p className="mt-4 text-center">
+                Already Have an Account?{' '}
+                <span
+                    onClick={onOpenLoginModal}
+                    className="text-[#FF5722] cursor-pointer hover:underline"
+                >
+                    Log in
+                </span>
+            </p>
         </div>
     );
 }

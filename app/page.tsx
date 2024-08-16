@@ -1,16 +1,36 @@
-"use client";
+// app/page.tsx
+'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
+import LoginForm from '@/components/form/LoginForm';
 
-const HomePage = () => {
-    const router = useRouter();
+export default function HomePage() {
+    const handleGoogleLogin = async () => {
+        await signIn('google', { callbackUrl: '/dashboard' });
+    };
 
-    useEffect(() => {
-        router.replace('/patient-info/dashboard');
-    }, [router]);
+    return (
+        <div>
+            <h1>Login</h1>
+            <LoginForm />
+            <button onClick={handleGoogleLogin}>Login with Google</button>
+        </div>
+    );
+}
 
-    return null;
-};
 
-export default HomePage;
+
+// import { useEffect } from 'react';
+// import { useRouter } from 'next/navigation';
+//
+// const HomePage = () => {
+//     const router = useRouter();
+//
+//     useEffect(() => {
+//         router.replace('/patient-info/dashboard');
+//     }, [router]);
+//
+//     return null;
+// };
+//
+// export default HomePage;

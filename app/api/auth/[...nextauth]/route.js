@@ -1,21 +1,50 @@
 // app/api/auth/[...nextauth]/route.js
 import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
+import CredentialsProvider from 'next-auth/providers/credentials';
+import { getStrategy } from '@/lib/passport';
 
 import User from '@/models/user';
-import dbConnect from '@/utils/database'; // Correct import statement
+import dbConnect from '@/utils/database';
 
 const handler = NextAuth({
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    })
+    }),
+    CredentialsProvider({
+      name: 'Credentials',
+      credentials: {
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' },
+      },
+      async authorize(credentials, req) {
+        const { email, password } = credentials;
+        const strategy = getStrategy();
+
+        return new Promise((resolve, reject) => {
+          strategy.authenticate(
+              { email, password },
+              { session: req.session },
+              (error, user) => {
+                if (error) {
+                  reject(error);
+                } else if (!user) {
+                  reject(null);
+                } else {
+                  resolve(user);
+                }
+              }
+          );
+        });
+      },
+    }),
   ],
   callbacks: {
     async session({ session }) {
       // store the user id from MongoDB to session
-      await dbConnect(); // Make sure the database is connected
+      await dbConnect();
       const sessionUser = await User.findOne({ email: session.user.email });
       session.user.id = sessionUser._id.toString();
       session.user.accountType = sessionUser.accountType;
@@ -23,21 +52,14 @@ const handler = NextAuth({
     },
     async signIn({ account, profile, user, credentials }) {
       try {
-        await dbConnect(); // Make sure the database is connected
+        await dbConnect();
 
         const allowedUsers = [
-          "shikharbakhda@gmail.com",
-          'michellenemati18@gmail.com',
-          'ahmadhasan00@gmail.com',
-          'mayalyhayat@gmail.com',
-          'rami.ajjuri@gmail.com',
-          'kessen@umich.edu',
-          'kessenmacher7832@gmail.com',
-          'azcryan@gmail.com',
+          // Your list of allowed users
         ];
 
         if (!allowedUsers.includes(profile.email)) {
-          return false
+          return false;
         }
 
         // Check if user already exists
@@ -49,17 +71,17 @@ const handler = NextAuth({
             email: profile.email,
             name: profile.name,
             image: profile.picture,
-            accountType: "Surgeon",
+            accountType: 'Surgeon',
           });
         }
 
-        return true
+        return true;
       } catch (error) {
-        console.log("Error checking if user exists: ", error.message);
-        return false
+        console.log('Error checking if user exists: ', error.message);
+        return false;
       }
     },
-  }
-})
+  },
+});
 
 export { handler as GET, handler as POST };

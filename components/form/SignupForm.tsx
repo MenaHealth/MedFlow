@@ -16,13 +16,15 @@ export default function SignupForm({ onOpenLoginModal }: SignupFormProps) {
     const [error, setError] = useState<string | null>(null);
     const [emailTouched, setEmailTouched] = useState(false);
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Adjusted regex for general email validation
-    const passwordRegex = /^(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/; // Regex for password validation (minimum 8 characters, at least one symbol)
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalMessage, setModalMessage] = useState('');
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const passwordRegex = /^(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Check if passwords match
         if (password !== verifyPassword) {
             setError("Passwords do not match.");
             return;
@@ -34,15 +36,47 @@ export default function SignupForm({ onOpenLoginModal }: SignupFormProps) {
         }
 
         try {
-            // Implement your signup logic here
-            console.log('User data:', { name, email, password, accountType });
+            const response = await fetch('/api/auth/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name,
+                    email,
+                    password,
+                    accountType,
+                }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                setError(errorData.message || 'An error occurred during signup.');
+                setModalMessage('Signup failed. Please try again.');
+                setIsModalOpen(true);
+                return;
+            }
+
+            // Reset form on successful signup
             setName('');
             setEmail('');
             setPassword('');
             setVerifyPassword('');
             setAccountType('Patient');
+            setError(null);
+            setModalMessage('Account created successfully!');
+            setIsModalOpen(true);
         } catch (error: any) {
-            setError(error.message);
+            setError('An unexpected error occurred.');
+            setModalMessage('An unexpected error occurred. Please try again.');
+            setIsModalOpen(true);
+        }
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+        if (!error) {
+            onOpenLoginModal(); // Optionally open the login modal after successful signup
         }
     };
 
@@ -91,7 +125,7 @@ export default function SignupForm({ onOpenLoginModal }: SignupFormProps) {
                         id="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        onBlur={() => setEmailTouched(true)}  // Set touched when the field loses focus
+                        onBlur={() => setEmailTouched(true)}
                         required
                         className="border rounded px-3 py-2 focus:outline-none focus:ring focus:ring-blue-300 w-full"
                     />
@@ -100,7 +134,6 @@ export default function SignupForm({ onOpenLoginModal }: SignupFormProps) {
                     )}
                 </div>
 
-                {/* Show Password Field only if Name and Email are filled and Email is valid */}
                 {name && emailRegex.test(email) && (
                     <>
                         <div>
@@ -120,7 +153,6 @@ export default function SignupForm({ onOpenLoginModal }: SignupFormProps) {
                             </p>
                         </div>
 
-                        {/* Show Verify Password Field only after 8 or more characters in Password */}
                         {password.length >= 8 && (
                             <div>
                                 <label htmlFor="verify-password" className="text-gray-700 font-bold">
@@ -156,6 +188,21 @@ export default function SignupForm({ onOpenLoginModal }: SignupFormProps) {
                     Log in
                 </span>
             </p>
+
+            {/* Modal */}
+            {isModalOpen && (
+                <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75">
+                    <div className="bg-white p-6 rounded-lg shadow-lg">
+                        <h2 className="text-xl font-semibold text-center mb-4">{modalMessage}</h2>
+                        <button
+                            onClick={closeModal}
+                            className="bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
+                        >
+                            OK
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

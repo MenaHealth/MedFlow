@@ -59,6 +59,8 @@ type PatientFormValues = z.infer<typeof patientFormSchema> & {
     age?: number;
     phone?: string;
     chiefComplaint?: string;
+    password?: string;
+    email?: string;
 };
 
 const defaultValues: Partial<PatientFormValues> = {

@@ -1,5 +1,3 @@
-"use client";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as React from "react";
 import { useForm } from "react-hook-form";
@@ -22,13 +20,17 @@ const newPatientFormSchema = z.object({
     location: z.string().min(1, "Location is required"),
     language: z.string().min(1, "Language is required"),
     chiefComplaint: z.string().min(1, "Please enter the main reason you seek medical care"),
+    email: z.string().email(),
+    // Don't include password
 });
 
 type NewPatientFormValues = z.infer<typeof newPatientFormSchema>;
 
 type NewPatientProps = {
-    handleSubmit: (formData: Partial<NewPatientFormValues> & { patientId: string }) => void;
+    handleSubmit: (formData: Partial<NewPatientFormValues> & { patientId: string; password: string }) => void;
     submitting: boolean;
+    email: string;
+    password: string;
 };
 
 const defaultValues: Partial<NewPatientFormValues> = {
@@ -39,12 +41,16 @@ const defaultValues: Partial<NewPatientFormValues> = {
     location: "",
     language: "",
     chiefComplaint: "",
+    email: undefined,
 };
 
-export function NewPatient({ handleSubmit, submitting }: NewPatientProps) {
+export function NewPatient({ handleSubmit, submitting, email, password }: NewPatientProps) {
     const form = useForm<NewPatientFormValues>({
         resolver: zodResolver(newPatientFormSchema),
-        defaultValues,
+        defaultValues: {
+            ...defaultValues,
+            email,
+        },
     });
 
     const [loading, setLoading] = React.useState(false);
@@ -93,6 +99,7 @@ export function NewPatient({ handleSubmit, submitting }: NewPatientProps) {
         const fullPatientData = {
             ...data,
             patientId,
+            password,  // Include password in the submission data
         };
 
         console.log("Full patient data:", fullPatientData);
@@ -110,6 +117,7 @@ export function NewPatient({ handleSubmit, submitting }: NewPatientProps) {
                         <TextFormField form={form} fieldName="lastName" fieldLabel="Last Name" />
                     </div>
                 </div>
+                <TextFormField form={form} fieldName="email" fieldLabel="Email" />
                 <div className="flex flex-col md:flex-row md:space-x-4">
                     <div className="w-full md:w-1/4">
                         <NumericalFormField form={form} fieldName="age" fieldLabel="Age" />
@@ -140,6 +148,8 @@ export function NewPatient({ handleSubmit, submitting }: NewPatientProps) {
                         )}
                     </div>
                 </div>
+
+
 
                 <TextAreaFormField form={form} fieldName="chiefComplaint" fieldLabel="Chief Complaint" />
                 <div className="flex justify-center">

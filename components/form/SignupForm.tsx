@@ -1,4 +1,3 @@
-// components/form/SignupForm.tsx
 'use client';
 
 import { useState } from 'react';
@@ -12,7 +11,7 @@ export default function SignupForm({ onOpenLoginModal }: SignupFormProps) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [verifyPassword, setVerifyPassword] = useState('');
-    const [accountType, setAccountType] = useState('Patient');
+    const [accountType, setAccountType] = useState<'Patient' | 'Doctor'>('Patient'); // Keep the account type selection
     const [error, setError] = useState<string | null>(null);
     const [emailTouched, setEmailTouched] = useState(false);
 
@@ -45,7 +44,7 @@ export default function SignupForm({ onOpenLoginModal }: SignupFormProps) {
                     name,
                     email,
                     password,
-                    accountType,
+                    accountType, // Pass the account type to the API
                 }),
             });
 
@@ -85,6 +84,7 @@ export default function SignupForm({ onOpenLoginModal }: SignupFormProps) {
             <h1 className="text-2xl font-bold text-center mb-2">Sign Up</h1>
             <p className="text-center mb-4">Fill out the required information below to get started.</p>
 
+            {/* Account Type Selection */}
             <div className="flex justify-center mb-4">
                 <button
                     className={`text-lg font-semibold ${accountType === 'Patient' ? 'underline text-[#FF5722]' : 'text-gray-600'}`}
@@ -105,7 +105,7 @@ export default function SignupForm({ onOpenLoginModal }: SignupFormProps) {
             <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
                 <div>
                     <label htmlFor="name" className="text-gray-700 font-bold">
-                        {accountType === 'Patient' ? 'First Name:' : 'Last Name:'}
+                        {accountType === 'Patient' ? 'First Name:' : 'Name:'}
                     </label>
                     <input
                         type="text"

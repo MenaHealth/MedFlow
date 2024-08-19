@@ -1,6 +1,8 @@
+// components/form/SignupForm.tsx
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation'; // Correct import
 
 interface SignupFormProps {
     onOpenLoginModal: () => void;
@@ -11,12 +13,11 @@ export default function SignupForm({ onOpenLoginModal }: SignupFormProps) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [verifyPassword, setVerifyPassword] = useState('');
-    const [accountType, setAccountType] = useState<'Patient' | 'Doctor'>('Patient'); // Keep the account type selection
+    const [accountType, setAccountType] = useState<'Patient' | 'Doctor'>('Patient');
     const [error, setError] = useState<string | null>(null);
     const [emailTouched, setEmailTouched] = useState(false);
 
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [modalMessage, setModalMessage] = useState('');
+    const router = useRouter(); // Initialize router for navigation
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const passwordRegex = /^(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
@@ -44,38 +45,36 @@ export default function SignupForm({ onOpenLoginModal }: SignupFormProps) {
                     name,
                     email,
                     password,
-                    accountType, // Pass the account type to the API
+                    accountType,
                 }),
             });
 
             if (!response.ok) {
                 const errorData = await response.json();
                 setError(errorData.message || 'An error occurred during signup.');
-                setModalMessage('Signup failed. Please try again.');
-                setIsModalOpen(true);
                 return;
             }
 
-            // Reset form on successful signup
-            setName('');
-            setEmail('');
-            setPassword('');
-            setVerifyPassword('');
-            setAccountType('Patient');
-            setError(null);
-            setModalMessage('Account created successfully!');
-            setIsModalOpen(true);
+            const data = await response.json();
+            const patientId = data._id; // Assuming the backend returns the new patient's ID
+
+            // Automatically log the user in
+            await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email,
+                    password,
+                }),
+            });
+
+            // Redirect to the create-patient route
+            router.push(`/create-patient/${patientId}`);
+
         } catch (error: any) {
             setError('An unexpected error occurred.');
-            setModalMessage('An unexpected error occurred. Please try again.');
-            setIsModalOpen(true);
-        }
-    };
-
-    const closeModal = () => {
-        setIsModalOpen(false);
-        if (!error) {
-            onOpenLoginModal(); // Optionally open the login modal after successful signup
         }
     };
 
@@ -178,31 +177,6 @@ export default function SignupForm({ onOpenLoginModal }: SignupFormProps) {
                     Sign Up
                 </button>
             </form>
-
-            <p className="mt-4 text-center">
-                Already Have an Account?{' '}
-                <span
-                    onClick={onOpenLoginModal}
-                    className="text-[#FF5722] cursor-pointer hover:underline"
-                >
-                    Log in
-                </span>
-            </p>
-
-            {/* Modal */}
-            {isModalOpen && (
-                <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75">
-                    <div className="bg-white p-6 rounded-lg shadow-lg">
-                        <h2 className="text-xl font-semibold text-center mb-4">{modalMessage}</h2>
-                        <button
-                            onClick={closeModal}
-                            className="bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
-                        >
-                            OK
-                        </button>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }

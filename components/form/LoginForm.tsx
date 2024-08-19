@@ -7,7 +7,7 @@ import { signIn } from 'next-auth/react';
 export default function LoginForm() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [accountType, setAccountType] = useState('Patient');
+    const [accountType, setAccountType] = useState<'Patient' | 'Doctor'>('Patient'); // Define accountType state
     const [error, setError] = useState<string | null>(null);
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -16,13 +16,14 @@ export default function LoginForm() {
             redirect: false,
             email,
             password,
+            accountType, // Pass accountType to the signIn call
         });
 
         if (result?.error) {
             setError(result.error);
         } else {
             console.log('Logged in successfully');
-            window.location.href = '/dashboard';
+            window.location.href = '/create-patient';
         }
     };
 
@@ -41,8 +42,8 @@ export default function LoginForm() {
                     </button>
                     <span className="mx-4">|</span>
                     <button
-                        className={`text-lg font-semibold ${accountType === 'Surgeon' ? 'underline text-[#FF5722]' : 'text-gray-600'}`}
-                        onClick={() => setAccountType('Surgeon')}
+                        className={`text-lg font-semibold ${accountType === 'Doctor' ? 'underline text-[#FF5722]' : 'text-gray-600'}`}
+                        onClick={() => setAccountType('Doctor')}
                     >
                         Doctor
                     </button>

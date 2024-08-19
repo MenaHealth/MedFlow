@@ -1,3 +1,4 @@
+// components/form/NewPatientForm.tsx
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as React from "react";
 import { useForm } from "react-hook-form";
@@ -29,26 +30,27 @@ type NewPatientFormValues = z.infer<typeof newPatientFormSchema>;
 type NewPatientProps = {
     handleSubmit: (formData: Partial<NewPatientFormValues> & { patientId: string; password: string }) => void;
     submitting: boolean;
+    firstName: string;
     email: string;
     password: string;
 };
 
-const defaultValues: Partial<NewPatientFormValues> = {
-    firstName: "",
-    lastName: "",
-    phone: "",
-    age: undefined,
-    location: "",
-    language: "",
-    chiefComplaint: "",
-    email: undefined,
+type NewPatientFormValues = z.infer<typeof newPatientFormSchema>;
+
+type NewPatientFormProps = {
+    handleSubmit: (formData: NewPatientFormValues) => void;
+    submitting: boolean;
+    email: string;
+    firstName: string;
+    password: string;
 };
 
-export function NewPatient({ handleSubmit, submitting, email, password }: NewPatientProps) {
+export function NewPatientForm({ handleSubmit, submitting, email, firstName, lastName }: NewPatientFormProps) {
     const form = useForm<NewPatientFormValues>({
         resolver: zodResolver(newPatientFormSchema),
         defaultValues: {
-            ...defaultValues,
+            firstName,
+            lastName,
             email,
         },
     });
@@ -162,4 +164,4 @@ export function NewPatient({ handleSubmit, submitting, email, password }: NewPat
     );
 }
 
-export default NewPatient;
+export default NewPatientForm;

@@ -9,7 +9,6 @@ import { TextAreaFormField } from "@/components/form/TextAreaFormField";
 import { PhoneFormField } from "@/components/form/PhoneFormField";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { v4 as uuidv4 } from "uuid";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
 import PuffLoader from "react-spinners/PuffLoader";
 
@@ -27,16 +26,6 @@ const newPatientFormSchema = z.object({
 
 type NewPatientFormValues = z.infer<typeof newPatientFormSchema>;
 
-type NewPatientProps = {
-    handleSubmit: (formData: Partial<NewPatientFormValues> & { patientId: string; password: string }) => void;
-    submitting: boolean;
-    firstName: string;
-    email: string;
-    password: string;
-};
-
-type NewPatientFormValues = z.infer<typeof newPatientFormSchema>;
-
 type NewPatientFormProps = {
     handleSubmit: (formData: NewPatientFormValues) => void;
     submitting: boolean;
@@ -45,13 +34,18 @@ type NewPatientFormProps = {
     password: string;
 };
 
-export function NewPatientForm({ handleSubmit, submitting, email, firstName, lastName }: NewPatientFormProps) {
+export function NewPatientForm({ handleSubmit, submitting, email, firstName }: NewPatientFormProps) {
     const form = useForm<NewPatientFormValues>({
         resolver: zodResolver(newPatientFormSchema),
         defaultValues: {
             firstName,
-            lastName,
             email,
+            lastName: '',
+            phone: '',
+            age: 0,
+            location: '',
+            language: '',
+            chiefComplaint: '',
         },
     });
 
@@ -96,16 +90,7 @@ export function NewPatientForm({ handleSubmit, submitting, email, firstName, las
 
     const onSubmit = (data: NewPatientFormValues) => {
         console.log("Submitting data:", data);
-        const patientId = uuidv4();
-
-        const fullPatientData = {
-            ...data,
-            patientId,
-            password,  // Include password in the submission data
-        };
-
-        console.log("Full patient data:", fullPatientData);
-        handleSubmit(fullPatientData);
+        handleSubmit(data); // No need to add patientId here
     };
 
     return (
@@ -150,8 +135,6 @@ export function NewPatientForm({ handleSubmit, submitting, email, firstName, las
                         )}
                     </div>
                 </div>
-
-
 
                 <TextAreaFormField form={form} fieldName="chiefComplaint" fieldLabel="Chief Complaint" />
                 <div className="flex justify-center">

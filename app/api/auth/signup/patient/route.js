@@ -3,7 +3,6 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import Patient from '@/models/patient';
 import dbConnect from '@/utils/database';
-import { v4 as uuidv4 } from 'uuid';
 
 export async function POST(request) {
     await dbConnect();
@@ -20,12 +19,11 @@ export async function POST(request) {
             firstName,
             email,
             password: await bcrypt.hash(password, 10),
-            patientId: uuidv4(), // Generate a UUID V4 patient ID
         });
 
         await newPatient.save();
 
-        return NextResponse.json({ patientId: newPatient.patientId, message: 'Patient created successfully' }, { status: 201 });
+        return NextResponse.json({ message: 'Patient created successfully' }, { status: 201 });
     } catch (error) {
         console.error('Signup error:', error);
         return NextResponse.json({ message: 'Server error' }, { status: 500 });

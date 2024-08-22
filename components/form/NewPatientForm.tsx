@@ -16,12 +16,12 @@ const newPatientFormSchema = z.object({
     firstName: z.string().min(1, "First name is required"),
     lastName: z.string().min(1, "Last name is required"),
     phone: z.string().min(1, "Phone number is required"),
-    age: z.number().min(0, "Please enter in a number greater than 0"),
+    age: z.number().min(0, "Please enter a number greater than 0"),
     location: z.string().min(1, "Location is required"),
     language: z.string().min(1, "Language is required"),
     chiefComplaint: z.string().min(1, "Please enter the main reason you seek medical care"),
     email: z.string().email(),
-    // Don't include password
+    password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 type NewPatientFormValues = z.infer<typeof newPatientFormSchema>;
@@ -29,23 +29,21 @@ type NewPatientFormValues = z.infer<typeof newPatientFormSchema>;
 type NewPatientFormProps = {
     handleSubmit: (formData: NewPatientFormValues) => void;
     submitting: boolean;
-    email: string;
-    firstName: string;
-    password: string;
 };
 
-export function NewPatientForm({ handleSubmit, submitting, email, firstName }: NewPatientFormProps) {
+export function NewPatientForm({ handleSubmit, submitting }: NewPatientFormProps) {
     const form = useForm<NewPatientFormValues>({
         resolver: zodResolver(newPatientFormSchema),
         defaultValues: {
-            firstName,
-            email,
+            firstName: '',
+            email: '',
             lastName: '',
             phone: '',
             age: 0,
             location: '',
             language: '',
             chiefComplaint: '',
+            password: '',
         },
     });
 
@@ -90,7 +88,7 @@ export function NewPatientForm({ handleSubmit, submitting, email, firstName }: N
 
     const onSubmit = (data: NewPatientFormValues) => {
         console.log("Submitting data:", data);
-        handleSubmit(data); // No need to add patientId here
+        handleSubmit(data);
     };
 
     return (
@@ -137,6 +135,7 @@ export function NewPatientForm({ handleSubmit, submitting, email, firstName }: N
                 </div>
 
                 <TextAreaFormField form={form} fieldName="chiefComplaint" fieldLabel="Chief Complaint" />
+                <TextFormField form={form} fieldName="password" fieldLabel="Password" />
                 <div className="flex justify-center">
                     <Button type="submit" disabled={submitting}>
                         {submitting ? "Submitting..." : "Submit New Patient"}

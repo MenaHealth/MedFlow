@@ -1,4 +1,4 @@
-// components/form/Fajr/PatientForm.tsx
+// components/form/Fajr/Patient_form.tsx
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";

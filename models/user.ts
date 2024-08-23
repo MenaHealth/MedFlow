@@ -5,7 +5,7 @@ import bcrypt from 'bcryptjs';
 interface IUser extends Document {
   name: string;
   email: string;
-  accountType: 'Surgeon' | 'Patient' | 'Nurse' | 'Admin';
+  accountType: 'Doctor' | 'Triage' | 'Admin';
   password: string;
   specialties?: string[];
   image?: string;
@@ -24,7 +24,7 @@ const UserSchema = new Schema<IUser>({
   accountType: {
     type: String,
     required: [true, 'Account type is required!'],
-    enum: ['Surgeon', 'Patient', 'Nurse', 'Admin'],
+    enum: ['Doctor', 'Triage', 'Admin'],
   },
   password: {
     type: String,

@@ -1,9 +1,9 @@
-// app/auth/signup/page.tsx
+// app/auth/auth/page.tsx
 'use client';
 
 import { useState } from 'react';
-import SignupForm from '@/components/form/SignupForm';
-import LoginForm from '@/components/form/LoginForm';
+import SignupForm from '@/components/auth/SignupForm';
+import LoginForm from '@/components/auth/LoginForm';
 
 export default function SignupPage() {
     const [showLoginModal, setShowLoginModal] = useState(false);

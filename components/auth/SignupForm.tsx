@@ -55,7 +55,7 @@ export default function SignupForm({ onOpenLoginModal }: SignupFormProps) {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                setError(errorData.message || 'An error occurred during signup.');
+                setError(errorData.message || 'An error occurred during auth.');
                 setIsLoading(false);
                 return;
             }

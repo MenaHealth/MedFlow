@@ -1,4 +1,4 @@
-// components/form/Fajr/PatientForm.tsx
+// components/form/Fajr/Patient_form.tsx
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -59,6 +59,8 @@ type PatientFormValues = z.infer<typeof patientFormSchema> & {
     age?: number;
     phone?: string;
     chiefComplaint?: string;
+    password?: string;
+    email?: string;
 };
 
 const defaultValues: Partial<PatientFormValues> = {

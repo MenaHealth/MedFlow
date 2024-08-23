@@ -259,7 +259,6 @@ export default function PatientTriage() {
                           overflow: 'hidden', 
                           textOverflow: 'ellipsis', 
                           whiteSpace: 'nowrap',
-                          overflow: 'visible'
                         }}
                       >
                         <Tooltip tooltipText={row.patientId}>

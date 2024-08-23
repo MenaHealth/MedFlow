@@ -20,7 +20,6 @@
     language?: string;
     chiefComplaint?: string;
     coordinatorId?: string;
-    password: string;
     email: string;
     laterality?: 'Not Selected' | 'Left' | 'Right' | 'Bilateral';
     diagnosis?: string;
@@ -59,7 +58,6 @@
     location: { type: String },
     language: { type: String },
     chiefComplaint: { type: String },
-    password: { type: String },
     email: { type: String },
     laterality: { type: String, enum: ['Not Selected', 'Left', 'Right', 'Bilateral'], default: 'Not Selected' },
     diagnosis: { type: String },

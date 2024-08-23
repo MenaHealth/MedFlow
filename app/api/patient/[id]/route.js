@@ -1,11 +1,11 @@
-// app/api/patient/[id]/route.js
+// app/api/patient/new/route.ts
 import Patient from "@/models/patient";
 import dbConnect from "@/utils/database";
 
 export const GET = async (request, { params }) => {
     try {
         await dbConnect();
-        const patient = await Patient.findById(params.id);
+        const patient = await Patient.findOne({ patientId: params.id });
         if (!patient) {
             return new Response("Patient Not Found", { status: 404 });
         }
@@ -21,16 +21,33 @@ export const PATCH = async (request, { params }) => {
     try {
         await dbConnect();
 
-        newPatientData.age = parseInt(newPatientData.age);
-        newPatientData.surgeryDate = new Date(newPatientData.surgeryDate);
-        newPatientData.medx = newPatientData.medx ? newPatientData.medx.map((med) => {
-            return {
-                medName: med.medName,
-                medDosage: med.medDosage,
-                medFrequency: med.medFrequency,
-            };
-        }) : [];
-        const updatedPatient = await Patient.findByIdAndUpdate(params.id, { $set: newPatientData}, { new: true, runValidators: true });
+        // Handle surgeryDate only if provided
+        if (newPatientData.surgeryDate) {
+            const surgeryDate = new Date(newPatientData.surgeryDate);
+            if (!isNaN(surgeryDate.getTime())) {
+                newPatientData.surgeryDate = surgeryDate;
+            } else {
+                throw new Error("Invalid surgery date provided");
+            }
+        }
+
+        // Handle medx only if provided
+        if (newPatientData.medx) {
+            newPatientData.medx = newPatientData.medx.map((med) => {
+                return {
+                    medName: med.medName,
+                    medDosage: med.medDosage,
+                    medFrequency: med.medFrequency,
+                };
+            });
+        }
+
+        // Convert age to a number if it's provided
+        if (newPatientData.age) {
+            newPatientData.age = parseInt(newPatientData.age);
+        }
+
+        const updatedPatient = await Patient.findOneAndUpdate({ patientId: params.id }, { $set: newPatientData }, { new: true, runValidators: true });
 
         if (!updatedPatient) {
             return new Response(`Patient with ID ${params.id} not found`, { status: 404 });
@@ -39,17 +56,14 @@ export const PATCH = async (request, { params }) => {
         return new Response(JSON.stringify(updatedPatient), { status: 200 });
     } catch (error) {
         console.error('Failed to update patient:', error);
-        return new Response(`Failed to update patient: ${error}`, { status: 500 });
+        return new Response(`Failed to update patient: ${error.message}`, { status: 500 });
     }
 };
 
 export const DELETE = async (request, { params }) => {
     try {
-        await dbConnect(); // Correct function call
-
-        // Find the prompt by ID and remove it
-        await User.findByIdAndRemove(params.id);
-
+        await dbConnect();
+        await Patient.findOneAndRemove({ patientId: params.id });
         return new Response("Prompt deleted successfully", { status: 200 });
     } catch (error) {
         return new Response("Error deleting prompt", { status: 500 });

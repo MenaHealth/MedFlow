@@ -1,4 +1,4 @@
-// app/api/auth/signup/patient/route.js
+// app/api/auth/auth/patient/route.js
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import Patient from '@/models/patient';

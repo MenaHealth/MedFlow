@@ -9,15 +9,18 @@ body {
 }
 
 .container {
-    margin: 40px auto;
+    position: absolute;
+    top: 20%; /* Adjust this value to move the SVG higher or lower */
+    left: 50%;
+    transform: translateX(-50%);
     text-align: center;
     overflow: hidden;
 }
 
-.heart-rate     {
-    width: 75%;
-    height: auto;
+.heart-rate {
     position: relative;
+    width: 100%;
+    height: 100%;
     margin: 0 auto;
 }
 
@@ -39,7 +42,7 @@ body {
     top: 0;
     right: -120%;
     animation: heartRateOut 2.5s linear infinite;
-    ackground: rgba(255, 255, 255, 1); /* Adjust to white */
+    ackground: rgba(255, 255, 255, 1);
     background: linear-gradient(to right, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 80%, rgba(255, 255, 255, 0) 100%);
 }
 

@@ -1,200 +1,169 @@
-// components/form/SignupForm.tsx
-'use client';
+import { useContext, useState } from 'react';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { TextFormField } from "@/components/form/TextFormField";
+import { Button } from "@/components/ui/button";
+import { Form } from "@/components/ui/form";
+import { ToastContext } from '@/components/ui/toast';
+import { useRouter } from "next/navigation";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import BarLoader from 'react-spinners/BarLoader';
+const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+const passwordRegex = /^(?=.*[0-9]).{8,}$/;
 
-interface SignupFormProps {
-    onOpenLoginModal: () => void;
+const signupSchema = z.object({
+    email: z.string().regex(emailRegex, "Invalid email address"),
+    password: z.string().regex(passwordRegex, "Password requires 7+ letters and at least one number"),
+    confirmPassword: z.string(),
+    name: z.string().min(1, "last name is required"),
+}).refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+});
+
+type SignupFormValues = z.infer<typeof signupSchema>;
+
+interface Props {
+    accountType: 'Doctor' | 'TriageSpecialist';
 }
 
-export default function SignupForm({ onOpenLoginModal }: SignupFormProps) {
-    const [firstName, setFirstName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [verifyPassword, setVerifyPassword] = useState('');
-    const [accountType, setAccountType] = useState<'Patient' | 'Doctor'>('Patient');
-    const [error, setError] = useState<string | null>(null);
-    const [emailTouched, setEmailTouched] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
+const SignupForm = ({ accountType }: Props) => {
+    const form = useForm<SignupFormValues>({
+        resolver: zodResolver(signupSchema),
+        defaultValues: {
+            email: '',
+            password: '',
+            confirmPassword: '',
+            name: '',
+        },
+    });
 
+    const { setToast } = useContext(ToastContext);
+    if (!setToast) {
+        console.error('Toast context not available');
+    }
     const router = useRouter();
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const passwordRegex = /^(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+    const [submitting, setSubmitting] = useState(false);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsLoading(true);
+    const onError = (errors: any) => {
+        console.log('Form validation errors:', errors);
+        const errorMessages = [];
 
-        if (password !== verifyPassword) {
-            setError("Passwords do not match.");
-            setIsLoading(false);
-            return;
+        if (errors.email) {
+            if (errors.email.type === 'regex') {
+                errorMessages.push('Please enter a valid email address.');
+            } else {
+                errorMessages.push('Please enter an email address.');
+            }
         }
 
-        if (!passwordRegex.test(password)) {
-            setError("Password must be at least 8 characters long and include at least one symbol.");
-            setIsLoading(false);
-            return;
+        if (errors.password) {
+            if (errors.password.type === 'regex') {
+                errorMessages.push('Password requires 7+ letters and at least one number.');
+            } else {
+                errorMessages.push('Please enter a password.');
+            }
         }
 
-        try {
-            const response = await fetch('/api/auth/signup/patient', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    firstName,
-                    email,
-                    password,
-                }),
+        if (errors.confirmPassword) {
+            errorMessages.push('Please ensure your passwords match.');
+        }
+
+        if (errors.name) {
+            errorMessages.push('Please enter your last name.');
+        }
+
+        if (errorMessages.length > 0) {
+            setToast({
+                title: 'Form Validation Errors',
+                description: errorMessages.join('\n'),
+                variant: 'destructive'
             });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                setError(errorData.message || 'An error occurred during auth.');
-                setIsLoading(false);
-                return;
-            }
-
-            const data = await response.json();
-            console.log('Response data:', data);
-
-            const patientId = data.patientId;
-
-            if (!patientId) {
-                throw new Error('Failed to retrieve patient ID.');
-            }
-
-            await fetch('/api/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email,
-                    password,
-                    accountType: 'Patient',
-                }),
+        } else {
+            setToast({
+                title: 'Form Validation Error',
+                description: 'Please correct the errors in the form.',
+                variant: 'destructive'
             });
-
-            router.push(`/create-patient/${patientId}`);
-        } catch (error: any) {
-            setError('An unexpected error occurred.');
-        } finally {
-            setIsLoading(false);
         }
     };
 
+    const onSubmit = async (data: SignupFormValues) => {
+        console.log('Form is valid, attempting submission');
+        setSubmitting(true);
+
+        try {
+            console.log('Attempting to fetch');
+            const response = await fetch(`/api/auth/signup/${accountType.toLowerCase()}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+            console.log('Fetch response:', response);
+            if (response.ok) {
+                setToast({ title: `${accountType} signed up successfully`, description: `You have successfully signed up as a ${accountType}.`, variant: 'success' });
+                router.push('/auth/login'); // Redirect to login page
+            } else {
+                const result = await response.json();
+                setToast({ title: 'Signup Error', description: result.message, variant: 'destructive' });
+            }
+        } catch (error) {
+            console.error('Submission error:', error);
+            setToast({ title: 'Signup Error', description: 'An unexpected error occurred. Please try again.', variant: 'destructive' });
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    console.log('Form state:', form.formState);
     return (
-        <div className="flex flex-col items-center justify-center">
-            {isLoading && (
-                <BarLoader color="#FF5722" width={100} />
-            )}
-            {!isLoading && (
-                <>
-                    <h1 className="text-2xl font-bold text-center mb-2">Sign Up</h1>
-                    <p className="text-center mb-4">Fill out the required information below to get started.</p>
-
-                    {/* Account Type Selection */}
-                    <div className="flex justify-center mb-4">
-                        <button
-                            className={`text-lg font-semibold ${accountType === 'Patient' ? 'underline text-[#FF5722]' : 'text-gray-600'}`}
-                            onClick={() => setAccountType('Patient')}
-                        >
-                            Patient
-                        </button>
-                        <span className="mx-4">|</span>
-                        <button
-                            className={`text-lg font-semibold ${accountType === 'Doctor' ? 'underline text-[#FF5722]' : 'text-gray-600'}`}
-                            onClick={() => setAccountType('Doctor')}
-                        >
-                            Doctor
-                        </button>
-                    </div>
-
-                    {error && <p className="text-red-500 mb-4">{error}</p>}
-                    <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
-                        <div>
-                            <label htmlFor="firstName" className="text-gray-700 font-bold">
-                                {accountType === 'Patient' ? 'First Name:' : 'Name:'}
-                            </label>
-                            <input
-                                type="text"
-                                id="firstName"
-                                value={firstName}
-                                onChange={(e) => setFirstName(e.target.value)}
-                                required
-                                className="border rounded px-3 py-2 focus:outline-none focus:ring focus:ring-blue-300 w-full"
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor="email" className="text-gray-700 font-bold">
-                                Email:
-                            </label>
-                            <input
-                                type="email"
-                                id="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                onBlur={() => setEmailTouched(true)}
-                                required
-                                className="border rounded px-3 py-2 focus:outline-none focus:ring focus:ring-blue-300 w-full"
-                            />
-                            {emailTouched && !emailRegex.test(email) && (
-                                <p className="text-red-500 text-sm mt-1">Please enter a valid email address.</p>
-                            )}
-                        </div>
-
-                        {firstName && emailRegex.test(email) && (
-                            <>
-                                <div>
-                                    <label htmlFor="password" className="text-gray-700 font-bold">
-                                        Password:
-                                    </label>
-                                    <input
-                                        type="password"
-                                        id="password"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        required
-                                        className="border rounded px-3 py-2 focus:outline-none focus:ring focus:ring-blue-300 w-full"
-                                    />
-                                    <p className="text-gray-500 text-sm mt-1">
-                                        Password must be at least 8 characters long and include at least one symbol.
-                                    </p>
-                                </div>
-
-                                {password.length >= 8 && (
-                                    <div>
-                                        <label htmlFor="verify-password" className="text-gray-700 font-bold">
-                                            Verify Password:
-                                        </label>
-                                        <input
-                                            type="password"
-                                            id="verify-password"
-                                            value={verifyPassword}
-                                            onChange={(e) => setVerifyPassword(e.target.value)}
-                                            required
-                                            className="border rounded px-3 py-2 focus:outline-none focus:ring focus:ring-blue-300 w-full"
-                                        />
-                                    </div>
-                                )}
-                            </>
-                        )}
-
-                        <button
+        <div className="w-full max-w-md">
+            <h2 className="text-lg font-bold mb-4">Sign up as a {accountType}</h2>
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-4">
+                    <TextFormField
+                        form={form}
+                        fieldName="email"
+                        fieldLabel="Email"
+                        error={form.formState.errors.email?.message}
+                    />
+                    <TextFormField
+                        form={form}
+                        fieldName="password"
+                        fieldLabel="Password"
+                        type="password"
+                        error={form.formState.errors.password?.message}
+                        description="Password requires 7+ letters and at least one number"
+                    />
+                    <TextFormField
+                        form={form}
+                        fieldName="confirmPassword"
+                        fieldLabel="Confirm Password"
+                        type="password"
+                        error={form.formState.errors.confirmPassword?.message}
+                    />
+                    <TextFormField
+                        form={form}
+                        fieldName="name"
+                        fieldLabel="Last Name"
+                        error={form.formState.errors.name?.message}
+                    />
+                    <div className="flex justify-between items-center mt-6">
+                        <Button
                             type="submit"
-                            className="bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
+                            disabled={submitting}
+                            onClick={() => console.log('Submit button clicked')}
                         >
-                            Sign Up
-                        </button>
-                    </form>
-                </>
-            )}
+                            {submitting ? "Submitting..." : "Sign Up"}
+                        </Button>
+                    </div>
+                </form>
+            </Form>
         </div>
     );
 }
+
+export default SignupForm;

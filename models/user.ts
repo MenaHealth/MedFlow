@@ -3,6 +3,7 @@ import { Schema, model, models, Document, CallbackError } from 'mongoose'; // Ad
 import bcrypt from 'bcryptjs';
 
 interface IUser extends Document {
+  userID: string;
   name: string;
   email: string;
   accountType: 'Doctor' | 'Triage' | 'Admin';
@@ -12,6 +13,10 @@ interface IUser extends Document {
 }
 
 const UserSchema = new Schema<IUser>({
+  userID: {
+    type: "String",
+    required: [true, 'userID is required!'],
+  },
   name: {
     type: String,
     required: [true, 'Name is required!'],

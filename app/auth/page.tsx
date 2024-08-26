@@ -2,12 +2,17 @@
 'use client';
 
 import React, { useState } from 'react';
-import DoctorSignupForm from '@/components/auth/DoctorSignupForm';
-import LoginForm from '@/components/auth/LoginForm';
+import SignupForm from '@/components/auth/SignupForm';
 import './authPage.css';
 
 const AuthPage = () => {
     const [showLoginModal, setShowLoginModal] = useState(false);
+
+    const [accountType, setAccountType] = useState<'Doctor' | 'TriageSpecialist'>('Doctor');
+
+    const handleAccountTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setAccountType(event.target.value as 'Doctor' | 'TriageSpecialist');
+    };
 
     const openLoginModal = () => setShowLoginModal(true);
     const closeLoginModal = () => setShowLoginModal(false);
@@ -43,27 +48,35 @@ const AuthPage = () => {
             </div>
 
             <div className="login-card w-full max-w-md p-6 rounded shadow-md relative z-10 bg-white bg-opacity-30 backdrop-filter backdrop-blur-lg">
-                <DoctorSignupForm />
-            </div>
-
-            {/* Login Modal */}
-            {showLoginModal && (
-                <div
-                    id="modal-background"
-                    className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
-                    onClick={handleOutsideClick}
-                >
-                    <div className="relative bg-white p-6 rounded shadow-md">
-                        <button
-                            onClick={closeLoginModal}
-                            className="absolute top-2 right-2 text-gray-600 hover:text-gray-900"
-                        >
-                            ✕
-                        </button>
-                        <LoginForm />
+                <div>
+                    <div className="flex justify-center mb-4">
+                        <div className="flex items-center mr-4">
+                            <input
+                                type="radio"
+                                id="doctor"
+                                value="Doctor"
+                                checked={accountType === 'Doctor'}
+                                onChange={handleAccountTypeChange}
+                                className="mr-2"
+                            />
+                            <label htmlFor="doctor">Doctor</label>
+                        </div>
+                        <div className="flex items-center">
+                            <input
+                                type="radio"
+                                id="triage-specialist"
+                                value="TriageSpecialist"
+                                checked={accountType === 'TriageSpecialist'}
+                                onChange={handleAccountTypeChange}
+                                className="mr-2"
+                            />
+                            <label htmlFor="triage-specialist">Triage Specialist</label>
+                        </div>
                     </div>
+                    <SignupForm accountType={accountType} />
                 </div>
-            )}
+                {/*<SignupForm />*/}
+            </div>
         </div>
     );
 };

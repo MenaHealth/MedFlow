@@ -1,3 +1,4 @@
+// components/ui/toast.tsx
 "use client"
 
 import * as React from "react"
@@ -8,7 +9,18 @@ import { createContext, useState } from 'react';
 
 import { cn } from "@/lib/utils"
 
-const ToastContext = createContext();
+type Toast = {
+    title: string;
+    description?: string;
+    variant: 'default' | 'destructive' | 'success';
+};
+
+type ToastContextValue = {
+    toast: Toast | null;
+    setToast: (toast: Toast | null) => void;
+};
+
+const ToastContext = createContext<ToastContextValue | null>(null);
 
 const ToastProvider = ({ children }: any) => {
     const [toast, setToast] = useState(null);

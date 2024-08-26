@@ -2,6 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --darkOrange: #59200F;
+  --lightOrange: #F2B763;
+  /*## the logo orange*/
+  --orange: #FF5722;
+  --lightYellow: #fbf9c1;
+  --yellow: #F7F065;
+  --blue: #66c1f8;
+  --lightBlue: #94d1f7;
+  --purple: #9150e8;
+  --lightPurple: #9e66e8;
+  /*the primary color (darkBlue) i've been using for body/<p> text*/
+  --darkBlue: #120f0b;
+  --lightGray: #d2d1d1;
+  --gray: #a8a8a8;
+  --darkGrey: #7a7a7a;
+  --white: #ffffff;
+}
 
 .main {
   width: 100vw;
@@ -220,7 +238,7 @@ a {
   }
 
   .bar {
-        background-color: #120f0b;
+          background-color: #120f0b;
         width: 20px;
         height: 3px;
         display: block;
@@ -337,4 +355,21 @@ a {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+
+/* components/ui/form.css */
+.form-item .relative {
+  position: relative;
+}
+
+.form-item .relative input:focus + label,
+.form-item .relative input:not(:placeholder-shown) + label {
+  font-size: 0.75rem;
+  top: -0.5rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.form-item .relative input {
+  padding-top: 1rem;
 }

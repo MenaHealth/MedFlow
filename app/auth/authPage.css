@@ -94,13 +94,12 @@ body {
 }
 
 
-
 .ball1 {
     --initial-left: 10%;
     --ball-size: 1.2rem;
     --initial-top: 30%;
     --final-top: 50%;
-    --animation-duration: 10s;
+    --animation-duration: 14s;
 }
 
 .ball2 {
@@ -116,18 +115,26 @@ body {
     --ball-size: 1.2rem;
     --initial-top: 70%;
     --final-top: 50%;
-    --animation-duration: 11s;
+    --animation-duration: 17s;
+}
+
+.ball4{
+    --initial-left: 35%;
+    --ball-size: 1.2rem;
+    --initial-top: 15%;
+    --final-top: 50%;
+    --animation-duration: 12s;
+}
+
+.ball5{
+    --initial-left: 75%;
+    --ball-size: 1.2rem;
+    --initial-top: 55%;
+    --final-top: 50%;
+    --animation-duration: 11.5s;
 }
 
 
-
-.ball2 {
-
-}
-
-.ball3 {
-
-}
 
 @keyframes meet-and-move {
     0% {
@@ -135,13 +142,15 @@ body {
         left: 0%;
         top: var(--initial-top);
     }
-    50% {
+    45% {
         background-color: var(--darkBlue);
         left: 50%;
         top: 50%;
     }
-    51% {
+    55% {
         background-color: var(--orange);
+        left: 50%;
+        top: 50%;
     }
     100% {
         background-color: var(--orange);

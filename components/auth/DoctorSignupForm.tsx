@@ -14,7 +14,7 @@ const passwordRegex = /^(?=.*[0-9]).{8,}$/;
 
 const doctorSignupSchema = z.object({
     email: z.string().regex(emailRegex, "Invalid email address"),
-    password: z.string().regex(passwordRegex, "Password must be at least 8 characters and contain at least one number"),
+    password: z.string().regex(passwordRegex, "Password requires 7+ letters and at least one number"),
     confirmPassword: z.string(),
     name: z.string().min(1, "last name is required"),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -36,6 +36,7 @@ const DoctorSignupForm = () => {
     });
 
     const { setToast } = useContext(ToastContext);
+    const router = useRouter();
 
     useEffect(() => {
         if (form.formState.errors) {
@@ -58,36 +59,24 @@ const DoctorSignupForm = () => {
         setSubmitting(true);
 
         try {
-            const result = await form.handleSubmit(
-                async (data) => {
-                    // Form is valid, submit the data
-                    const response = await fetch('/api/auth/signup/doctor', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            ...data,
-                            accountType: 'Doctor',
-                        }),
-                    });
-
-                    if (response.ok) {
-                        setToast({ title: 'Doctor signed up successfully', description: 'You have successfully signed up as a doctor.', variant: 'success' });
-                        router.push('/auth/login'); // Redirect to login page
-                    } else {
-                        const result = await response.json();
-                        setToast({ title: 'Signup Error', description: result.message, variant: 'destructive' });
-                    }
+            const response = await fetch('/api/auth/signup/doctor', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
                 },
-                async (errors) => {
-                    // Form is invalid, display error messages
-                    const errorMessages = Object.values(errors).map((error) => error.message);
-                    if (errorMessages.length > 0) {
-                        setToast({ title: 'Validation Error', description: errorMessages.join(', '), variant: 'destructive' });
-                    }
-                }
-            );
+                body: JSON.stringify({
+                    ...data,
+                    accountType: 'Doctor',
+                }),
+            });
+
+            if (response.ok) {
+                setToast({ title: 'Doctor signed up successfully', description: 'You have successfully signed up as a doctor.', variant: 'success' });
+                router.push('/auth/login'); // Redirect to login page
+            } else {
+                const result = await response.json();
+                setToast({ title: 'Signup Error', description: result.message, variant: 'destructive' });
+            }
         } catch (error) {
             setToast({ title: 'Signup Error', description: 'An unexpected error occurred. Please try again.', variant: 'destructive' });
         } finally {
@@ -112,16 +101,16 @@ const DoctorSignupForm = () => {
                         fieldLabel="Password"
                         type="password"
                         error={form.formState.errors.password && form.formState.errors.password.message}
-                        description="Password must be at least 8 characters and contain at least one special character (!, @, #, $, %, ^, &, *)"
+                        description="Password requires 7+ letters and at least one number (!, @, #, $, %, ^, &, *)"
                     />
-                    <p className="text-sm text-gray-500 mb-2"> Password must be at least 8 characters and contain at least one special character</p>
+                    <p className="text-sm text-gray-500 mb-2"> Password requires 7+ letters and at least one number</p>
                     <TextFormField
                         form={form}
                         fieldName="confirmPassword"
                         fieldLabel="Confirm Password"
                         type="password"
                         error={form.formState.errors.confirmPassword && form.formState.errors.confirmPassword.message}
-                        description="Password must be at least 8 characters and contain at least one special character (!, @, #, $, %, ^, &, *)"
+                        description="Password requires 7+ letters and at least one number (!, @, #, $, %, ^, &, *)"
                     />
                     <TextFormField
                         form={form}

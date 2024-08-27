@@ -153,11 +153,10 @@ const SignupForm = ({ accountType }: Props) => {
                         fieldLabel="Last Name"
                         error={form.formState.errors.name?.message}
                     />
-                    <div className="flex justify-between items-center mt-6">
+                    <div className="flex justify-center mt-6">
                         <Button
                             type="submit"
                             disabled={submitting}
-                            onClick={() => console.log('Submit button clicked')}
                         >
                             {submitting ? "Submitting..." : "Sign Up"}
                         </Button>

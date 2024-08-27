@@ -68,7 +68,7 @@ const AuthPage = () => {
                         </RadioCard.Item>
                     </RadioCard.Root>
                 </div>
-                <div className="login-card w-full max-w-md p-8 rounded-lg shadow-lg bg-white bg-opacity-80 backdrop-filter backdrop-blur-md">
+                <div className="login-card w-full max-w-md p-8 rounded-lg shadow-lg bg-white bg-opacity-10 backdrop-filter backdrop-blur-md">
                     <SignupForm accountType={accountType} />
                 </div>
             </div>

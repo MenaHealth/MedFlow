@@ -76,7 +76,7 @@ const SignupForm = ({ accountType }: Props) => {
 
         if (errorMessages.length > 0) {
             setToast({
-                title: 'Form Validation Errors',
+                title: '!',
                 description: errorMessages.join('\n'),
                 variant: 'destructive'
             });
@@ -134,7 +134,7 @@ const SignupForm = ({ accountType }: Props) => {
                         fieldLabel="Password"
                         type="password"
                         error={form.formState.errors.password?.message}
-                        tooltip="At least 7 letters and 1 number"
+                        tooltip="At least 1 number and 8 characters"
                         showTooltip={showTooltip}
                         onFocus={() => setShowTooltip(true)}
                         onBlur={() => setShowTooltip(false)}

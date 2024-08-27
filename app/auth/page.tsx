@@ -51,12 +51,12 @@ const AuthPage = () => {
                 >
                     <RadioCard.Item value="Login" className="w-full mb-2 p-2">
                         <Flex direction="column" width="100%" className="justify-center items-center h-full">
-                            <Text size="sm" weight="medium">Login</Text>
+                            <Text size="sm" weight="normal">Login</Text>
                         </Flex>
                     </RadioCard.Item>
                     <RadioCard.Item value="Signup" className="w-full p-2">
                         <Flex direction="column" width="100%" className="justify-center items-center h-full">
-                            <Text size="sm" weight="medium">Sign Up</Text>
+                            <Text size="sm" weight="normal">Sign Up</Text>
                         </Flex>
                     </RadioCard.Item>
                 </RadioCard.Root>
@@ -76,12 +76,12 @@ const AuthPage = () => {
                                 >
                                     <RadioCard.Item value="Doctor" className="w-1/2 p-2">
                                         <Flex direction="column" width="100%" className="justify-center items-center h-full">
-                                            <Text size="sm" weight="medium">Doctor</Text>
+                                            <Text size="sm" weight="normal">Doctor</Text>
                                         </Flex>
                                     </RadioCard.Item>
                                     <RadioCard.Item value="Triage" className="w-1/2 p-2">
                                         <Flex direction="column" width="100%" className="justify-center items-center h-full">
-                                            <Text size="sm" weight="medium">Triage Specialist</Text>
+                                            <Text size="sm" weight="normal">Triage Specialist</Text>
                                         </Flex>
                                     </RadioCard.Item>
                                 </RadioCard.Root>

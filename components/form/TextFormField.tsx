@@ -23,6 +23,7 @@ export function TextFormField({
     showTooltip?: boolean;
     onFocus?: () => void;
     onBlur?: () => void;
+    error?: string;
 }) {
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const [isFocused, setIsFocused] = useState(false);

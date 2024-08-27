@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils"
 type Toast = {
     title: string;
     description?: string;
-    variant: 'default' | 'destructive' | 'success';
+    variant: "default" | "destructive" | "success" | "error";
 };
 
 type ToastContextValue = {
@@ -23,7 +23,7 @@ type ToastContextValue = {
 const ToastContext = createContext<ToastContextValue | null>(null);
 
 const ToastProvider = ({ children }: any) => {
-    const [toast, setToast] = useState(null);
+    const [toast, setToast] = useState<Toast | null>(null);
 
     return (
         <ToastContext.Provider value={{ toast, setToast }}>
@@ -80,7 +80,11 @@ const Toast = React.forwardRef<
     React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> &
     VariantProps<typeof toastVariants>
 >(({ className, variant, ...props }, ref) => {
-    const { setToast } = useContext(ToastContext);
+    const context = useContext(ToastContext);
+    if (!context) {
+        throw new Error('Toast context not available');
+    }
+    const { setToast } = context;
 
     return (
         <ToastPrimitives.Root

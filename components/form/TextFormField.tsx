@@ -51,7 +51,9 @@ export function TextFormField({
                             type={inputType}
                             onFocus={handleFocus}
                             onBlur={handleBlur}
-                            className={`w-full pt-4 pb-2 pl-2 pr-10`}
+                            className={`w-full pt-4 pb-2 pl-2 pr-10 ${
+                                isFocused || field.value ? 'bg-white' : ''
+                            }`}
                         />
                         <label
                             className={`absolute transition-all ${

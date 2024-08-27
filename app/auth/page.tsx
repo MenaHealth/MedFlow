@@ -8,10 +8,10 @@ import './authPage.css';
 const AuthPage = () => {
     const [showLoginModal, setShowLoginModal] = useState(false);
 
-    const [accountType, setAccountType] = useState<'Doctor' | 'TriageSpecialist'>('Doctor');
+    const [accountType, setAccountType] = useState<'Doctor' | 'Triage'>('Doctor');
 
     const handleAccountTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setAccountType(event.target.value as 'Doctor' | 'TriageSpecialist');
+        setAccountType(event.target.value as 'Doctor' | 'Triage');
     };
 
     const openLoginModal = () => setShowLoginModal(true);
@@ -65,8 +65,8 @@ const AuthPage = () => {
                             <input
                                 type="radio"
                                 id="triage-specialist"
-                                value="TriageSpecialist"
-                                checked={accountType === 'TriageSpecialist'}
+                                value="Triage"
+                                checked={accountType === 'Triage'}
                                 onChange={handleAccountTypeChange}
                                 className="mr-2"
                             />

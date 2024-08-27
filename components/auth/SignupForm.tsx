@@ -15,16 +15,15 @@ const signupSchema = z.object({
     email: z.string().regex(emailRegex, "Invalid email address"),
     password: z.string().regex(passwordRegex, "Password requires 7+ letters and at least one number"),
     confirmPassword: z.string(),
-    name: z.string().min(1, "last name is required"),
+    name: z.string().min(1, "Last name is required"),
 }).refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
     path: ["confirmPassword"],
 });
 
 type SignupFormValues = z.infer<typeof signupSchema>;
-
 interface Props {
-    accountType: 'Doctor' | 'TriageSpecialist';
+    accountType: 'Doctor' | 'Triage';
 }
 
 const SignupForm = ({ accountType }: Props) => {
@@ -45,6 +44,7 @@ const SignupForm = ({ accountType }: Props) => {
     const router = useRouter();
 
     const [submitting, setSubmitting] = useState(false);
+    const [showTooltip, setShowTooltip] = useState(false);
 
     const onError = (errors: any) => {
         console.log('Form validation errors:', errors);
@@ -94,15 +94,14 @@ const SignupForm = ({ accountType }: Props) => {
         setSubmitting(true);
 
         try {
-            console.log('Attempting to fetch');
-            const response = await fetch(`/api/auth/signup/${accountType.toLowerCase()}`, {
+            const response = await fetch('/api/auth/signup', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(data),
+                body: JSON.stringify({ ...data, accountType }),
             });
-            console.log('Fetch response:', response);
+
             if (response.ok) {
                 setToast({ title: `${accountType} signed up successfully`, description: `You have successfully signed up as a ${accountType}.`, variant: 'success' });
                 router.push('/auth/login'); // Redirect to login page
@@ -118,7 +117,6 @@ const SignupForm = ({ accountType }: Props) => {
         }
     };
 
-    console.log('Form state:', form.formState);
     return (
         <div className="w-full max-w-md">
             <h2 className="text-lg font-bold mb-4">Sign up as a {accountType}</h2>
@@ -136,7 +134,11 @@ const SignupForm = ({ accountType }: Props) => {
                         fieldLabel="Password"
                         type="password"
                         error={form.formState.errors.password?.message}
-                        description="Password requires 7+ letters and at least one number"
+                        tooltip="At least 7 letters and 1 number"
+                        showTooltip={showTooltip}
+                        onFocus={() => setShowTooltip(true)}
+                        onBlur={() => setShowTooltip(false)}
+                        onChange={() => setShowTooltip(true)}
                     />
                     <TextFormField
                         form={form}

@@ -75,7 +75,7 @@ export function TextFormField({
                             </button>
                         )}
                         {showTooltip && tooltip && (
-                            <div className="absolute left-0 top-full mt-2 w-full bg-gray-700 text-white text-sm p-2 rounded shadow-lg z-10">
+                            <div className="absolute left-0 bottom-full mt-2 w-full bg-gray-700 text-white text-sm p-2 rounded shadow-lg z-10">
                                 {tooltip}
                             </div>
                         )}

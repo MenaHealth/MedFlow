@@ -13,6 +13,14 @@ body {
     top: -15%;
 }
 
+.opacity-20 {
+    opacity: 0.2;
+}
+
+.opacity-100 {
+    opacity: 1;
+}
+
 .focused {
     background-color: #fff;
 }

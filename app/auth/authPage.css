@@ -9,12 +9,16 @@ body {
     overflow-x: hidden;
 }
 
+.opacity-50 {
+    opacity: 0.5;
+}
+
 .opacity-20 {
     opacity: 0.2;
 }
 
-.opacity-100 {
-    opacity: 1;
+.opacity-80 {
+    opacity: 0.8;
 }
 
 .focused {
@@ -95,6 +99,7 @@ body {
     border-radius: 50%;
     z-index: 1;
     animation: meet-and-move var(--animation-duration) infinite ease-in-out;
+    transition: opacity 0.4s ease-in-out;
 }
 
 
@@ -145,6 +150,10 @@ body {
         background-color: var(--darkBlue);
         left: 0%;
         top: var(--initial-top);
+        opacity: 0%;
+    }
+    10% {
+       opacity: 100%;
     }
     45% {
         background-color: var(--darkBlue);
@@ -156,9 +165,13 @@ body {
         left: 50%;
         top: 50%;
     }
+    90%{
+        opacity: 100%;
+    }
     100% {
         background-color: var(--orange);
         left: 90%;
         top: var(--final-top);
+        opacity: 0%;
     }
 }

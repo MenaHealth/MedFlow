@@ -1,6 +1,6 @@
 // app/api/auth/signup/route.js
+
 import { NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs';
 import User from '@/models/user';
 import dbConnect from '@/utils/database';
 import { v4 as uuidv4 } from 'uuid';
@@ -21,7 +21,7 @@ export async function POST(request) {
             accountType,
             name,
             email,
-            password: await bcrypt.hash(password, 10),
+            password, // Remove the bcrypt.hash here
         });
 
         await newUser.save();

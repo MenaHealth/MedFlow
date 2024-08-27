@@ -7,7 +7,6 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { useEffect, useState } from "react";
 import Patient from "@/models/patient";
 import { zodResolver } from "@hookform/resolvers/zod"
-import { TextFormField } from "@/components/form/TextFormField"
 import { z } from "zod"
 import * as React from "react"
 import { useForm } from "react-hook-form"
@@ -146,12 +145,6 @@ export default function SurgeryChartForm({ id }: { id: string }) {
     return (
         <>
             {patient && (
-
-                // {/*  <Form {...form}>
-                //     <form onSubmit={form.handleSubmit(alertForm)} className="space-y-8">
-                //         <TextFormField form={form} fieldName="patientName" fieldLabel="Patient Full Name" />
-                //         <Button type="submit">Submit Request</Button>
-                //     </form> */}
                 <form className="max-w-5xl mx-auto p-6 bg-white shadow rounded-lg">
                     <div className="border-b pb-4">
                         <div className="flex justify-between items-center mb-2">

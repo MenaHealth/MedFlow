@@ -150,10 +150,6 @@ body {
         background-color: var(--darkBlue);
         left: 0%;
         top: var(--initial-top);
-        opacity: 0%;
-    }
-    10% {
-       opacity: 100%;
     }
     45% {
         background-color: var(--darkBlue);
@@ -165,13 +161,9 @@ body {
         left: 50%;
         top: 50%;
     }
-    90%{
-        opacity: 100%;
-    }
     100% {
         background-color: var(--orange);
         left: 90%;
         top: var(--final-top);
-        opacity: 0%;
     }
 }

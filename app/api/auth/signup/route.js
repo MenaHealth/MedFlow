@@ -21,7 +21,7 @@ export async function POST(request) {
             accountType,
             name,
             email,
-            password, // Remove the bcrypt.hash here
+            password,
         });
 
         await newUser.save();

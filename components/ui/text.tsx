@@ -1,20 +1,38 @@
 // components/ui/text.tsx
-import React from 'react';
+import * as React from "react"
+import {cn} from "@/lib/utils";
 
-interface TextProps {
-    children: React.ReactNode;
-    className?: string;
-    weight?: 'bold' | 'normal';
+export interface TextProps extends React.HTMLAttributes<HTMLDivElement> {
+    size?: "xs" | "sm" | "md" | "lg" | "xl";
+    weight?: "normal" | "bold";
 }
 
-const Text = ({ children, className, weight = 'normal' }: TextProps) => {
-    return (
-        <p
-            className={`${className} ${weight === 'bold' ? 'font-bold' : 'font-normal'}`}
-        >
-            {children}
-        </p>
-    );
-};
+const Text = React.forwardRef<HTMLDivElement, TextProps>(
+    ({ size, weight, children, ...props }, ref) => {
+        return (
+            <div
+                ref={ref}
+                className={cn(
+                    "text-foreground-primary",
+                    {
+                        "text-xs": size === "xs",
+                        "text-sm": size === "sm",
+                        "text-md": size === "md",
+                        "text-lg": size === "lg",
+                        "text-xl": size === "xl",
+                        "font-normal": weight === "normal",
+                        "font-bold": weight === "bold",
+                    },
+                    props.className
+                )}
+                {...props}
+            >
+                {children}
+            </div>
+        );
+    }
+);
+
+Text.displayName = 'Text';
 
 export default Text;

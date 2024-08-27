@@ -1,8 +1,8 @@
-// components/form/TextFormField.tsx
+// components/form/TextAreaFormField.tsx
 import { FormField, FormItem } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
-export function TextFormField({form, fieldName, fieldLabel, className, type}: {form: any, fieldName: string, fieldLabel: string, className?: string, type?: string}) {
+export function TextAreaFormField({ form, fieldName, fieldLabel, className }: { form: any, fieldName: string, fieldLabel: string, className?: string }) {
     return (
         <FormField
             control={form.control}
@@ -10,14 +10,13 @@ export function TextFormField({form, fieldName, fieldLabel, className, type}: {f
             render={({ field: { value, ...field } }) => (
                 <FormItem className={className}>
                     <div className="relative">
-                        <Input
+                        <Textarea
                             {...field}
-                            type={type}
-                            className="w-full pt-4"
+                            className="w-full"
                         />
                         <label className={`absolute transition-all ${value !== '' ? 'text-xs -top-2' : 'text-sm top-1/2 -translate-y-1/2'} left-2`}>{fieldLabel}</label>
                     </div>
                 </FormItem>
-            )}/>
+            )} />
     );
-};
+}

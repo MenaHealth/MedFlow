@@ -7,6 +7,7 @@ interface FlexProps {
     direction?: 'row' | 'column';
     justify?: 'start' | 'center' | 'end';
     align?: 'start' | 'center' | 'end';
+    width?: string;
 }
 
 const Flex = ({
@@ -15,10 +16,11 @@ const Flex = ({
                   direction = 'row',
                   justify = 'start',
                   align = 'start',
+                  width,
               }: FlexProps) => {
     return (
         <div
-            className={`${className} flex ${direction === 'row' ? 'flex-row' : 'flex-col'} justify-${justify} items-${align}`}
+            className={`${className} flex ${direction === 'row' ? 'flex-row' : 'flex-col'} justify-${justify} items-${align} ${width ? `w-${width}` : ''}`}
         >
             {children}
         </div>

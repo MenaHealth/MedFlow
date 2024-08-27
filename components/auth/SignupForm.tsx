@@ -5,8 +5,8 @@ import { z } from "zod";
 import { TextFormField } from "@/components/form/TextFormField";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import { ToastContext } from '@/components/ui/toast';
 import { useRouter } from "next/navigation";
+import useToast from "@/components/hooks/useToast";
 
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const passwordRegex = /^(?=.*[0-9]).{8,}$/;
@@ -37,10 +37,7 @@ const SignupForm = ({ accountType }: Props) => {
         },
     });
 
-    const { setToast } = useContext(ToastContext);
-    if (!setToast) {
-        console.error('Toast context not available');
-    }
+    const { setToast } = useToast();
     const router = useRouter();
 
     const [submitting, setSubmitting] = useState(false);
@@ -138,7 +135,7 @@ const SignupForm = ({ accountType }: Props) => {
                         showTooltip={showTooltip}
                         onFocus={() => setShowTooltip(true)}
                         onBlur={() => setShowTooltip(false)}
-                        onChange={() => setShowTooltip(true)}
+                        // onChange={() => setShowTooltip(true)}
                     />
                     <TextFormField
                         form={form}

@@ -9,10 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { useContext, useState } from "react";
 import { ToastContext } from '@/components/ui/toast';
+import useToast from '../hooks/useToast';
 
 const loginSchema = z.object({
     email: z.string().nonempty("Email is required.").email("Please enter a valid email address."),
-    password: z.string().nonempty("Password is required.").min(6, "Password must be at least 6 characters."),
+    password: z.string().nonempty("Password is required.").min(8, ""),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -26,7 +27,7 @@ export function LoginForm() {
         },
     });
 
-    const { setToast } = useContext(ToastContext);
+    const { setToast } = useToast();
     const [submitting, setSubmitting] = useState(false);
 
     const onError = (errors: any) => {
@@ -49,10 +50,17 @@ export function LoginForm() {
         }
 
         if (errorMessages.length > 0) {
-            setToast({
+            setToast?.({
                 title: '!',
                 description: errorMessages.join('\n'),
                 variant: 'destructive',
+            });
+        }
+        if (errorMessages.length > 0) {
+            setToast?.({
+                title: '❌',
+                description: errorMessages.join('\n'),
+                variant: 'error',
             });
         }
     };
@@ -70,17 +78,17 @@ export function LoginForm() {
             });
 
             if (response.ok) {
-                setToast({ title: 'Login Successful', description: 'You have successfully logged in.', variant: 'default' });
+                setToast?.({ title: '✓', description: 'You have successfully logged in.', variant: 'default' });
                 // Optionally, redirect to a protected route
             } else if (response.status === 401) {
                 // 401 Unauthorized means incorrect login credentials
-                setToast({ title: 'Login Error', description: 'Incorrect login credentials.', variant: 'error' });
+                setToast?.({ title: 'Login Error', description: 'Incorrect login credentials.', variant: 'destructive' });
             } else {
                 const result = await response.json();
-                setToast({ title: 'Login Error', description: result.message, variant: 'error' });
+                setToast?.({ title: 'Login Error', description: result.message, variant: 'error' });
             }
         } catch (error) {
-            setToast({ title: 'Login Error', description: 'An unexpected error occurred. Please try again.', variant: 'error' });
+            setToast?.({ title: 'Login Error', description: 'An unexpected error occurred. Please try again.', variant: 'error' });
         } finally {
             setSubmitting(false);
         }
@@ -88,7 +96,6 @@ export function LoginForm() {
 
     return (
         <div className="w-full max-w-md">
-            <h2 className="text-lg font-bold mb-4">Login</h2>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-4">
                     <TextFormField

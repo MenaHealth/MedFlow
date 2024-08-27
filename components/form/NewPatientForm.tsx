@@ -21,7 +21,6 @@ const newPatientFormSchema = z.object({
     language: z.string().min(1, "Language is required"),
     chiefComplaint: z.string().min(1, "Please enter the main reason you seek medical care"),
     email: z.string().email(),
-    password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 type NewPatientFormValues = z.infer<typeof newPatientFormSchema>;
@@ -43,7 +42,6 @@ export function NewPatientForm({ handleSubmit, submitting }: NewPatientFormProps
             location: '',
             language: '',
             chiefComplaint: '',
-            password: '',
         },
     });
 
@@ -135,7 +133,6 @@ export function NewPatientForm({ handleSubmit, submitting }: NewPatientFormProps
                 </div>
 
                 <TextAreaFormField form={form} fieldName="chiefComplaint" fieldLabel="Chief Complaint" />
-                <TextFormField form={form} fieldName="password" fieldLabel="Password" />
                 <div className="flex justify-center">
                     <Button type="submit" disabled={submitting}>
                         {submitting ? "Submitting..." : "Submit New Patient"}

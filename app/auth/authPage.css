@@ -6,19 +6,41 @@ body {
     margin: 0;
     padding: 0;
     font-family: sans-serif;
+    overflow-x: hidden;
+}
+
+.opacity-50 {
+    opacity: 0.5;
+}
+
+.opacity-20 {
+    opacity: 0.2;
+}
+
+.opacity-80 {
+    opacity: 0.8;
+}
+
+.focused {
+    background-color: #fff;
 }
 
 .container {
-    margin: 40px auto;
-    text-align: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
     overflow: hidden;
 }
 
-.heart-rate     {
-    width: 75%;
-    height: auto;
+.heart-rate {
     position: relative;
+    width: 100%;
+    height: 100%;
     margin: 0 auto;
+    top: 49vh;
 }
 
 .fade-in {
@@ -39,7 +61,7 @@ body {
     top: 0;
     right: -120%;
     animation: heartRateOut 2.5s linear infinite;
-    ackground: rgba(255, 255, 255, 1); /* Adjust to white */
+    ackground: rgba(255, 255, 255, 1);
     background: linear-gradient(to right, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 80%, rgba(255, 255, 255, 0) 100%);
 }
 
@@ -64,5 +86,84 @@ body {
     }
     100% {
         left: 0;
+    }
+}
+
+
+.ball {
+    position: absolute;
+    top: -10%;
+    width: var(--ball-size);
+    height: var(--ball-size);
+    background-color: black;
+    border-radius: 50%;
+    z-index: 1;
+    animation: meet-and-move var(--animation-duration) infinite ease-in-out;
+    transition: opacity 0.4s ease-in-out;
+}
+
+
+.ball1 {
+    --initial-left: 10%;
+    --ball-size: 1.2rem;
+    --initial-top: 30%;
+    --final-top: 50%;
+    --animation-duration: 14s;
+}
+
+.ball2 {
+    --initial-left: 50%;
+    --ball-size: 1.2rem;
+    --initial-top: 50%;
+    --final-top: 50%;
+    --animation-duration: 9s;
+}
+
+.ball3 {
+    --initial-left: 100%;
+    --ball-size: 1.2rem;
+    --initial-top: 70%;
+    --final-top: 50%;
+    --animation-duration: 17s;
+}
+
+.ball4{
+    --initial-left: 35%;
+    --ball-size: 1.2rem;
+    --initial-top: 15%;
+    --final-top: 50%;
+    --animation-duration: 12s;
+}
+
+.ball5{
+    --initial-left: 75%;
+    --ball-size: 1.2rem;
+    --initial-top: 55%;
+    --final-top: 50%;
+    --animation-duration: 11.5s;
+}
+
+
+
+@keyframes meet-and-move {
+    0% {
+        background-color: var(--darkBlue);
+        left: 0%;
+        top: var(--initial-top);
+    }
+    45% {
+        background-color: var(--darkBlue);
+        left: 50%;
+        top: 50%;
+    }
+    55% {
+        background-color: var(--orange);
+        left: 50%;
+        top: 50%;
+    }
+    100% {
+        background-color: var(--orange);
+        left: 90%;
+        top: var(--final-top);
     }
 }

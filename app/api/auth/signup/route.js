@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 export async function POST(request) {
     await dbConnect();
 
-    const { name, email, password, accountType } = await request.json();
+    const { name, email, password, accountType, securityQuestions } = await request.json();
 
     try {
         const existingUser = await User.findOne({ email });
@@ -22,7 +22,10 @@ export async function POST(request) {
             name,
             email,
             password,
+            securityQuestions,
         });
+
+        console.log('New user object:', newUser);
 
         await newUser.save();
 

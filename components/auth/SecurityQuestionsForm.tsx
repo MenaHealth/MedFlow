@@ -21,7 +21,7 @@ const securityQuestionsSchema = z.object({
 export type SecurityQuestionsFormValues = z.infer<typeof securityQuestionsSchema>;
 
 interface Props {
-    onSubmit: (data: SecurityQuestionsFormValues) => void;
+    onSubmit: (data: { securityQuestions: Array<{ question: string, answer: string }> }) => void;
     onBack: () => void;
 }
 
@@ -39,6 +39,17 @@ const SecurityQuestionsForm = ({ onSubmit, onBack }: Props) => {
         },
     });
 
+    const handleSubmit = (data: SecurityQuestionsFormValues) => {
+        const formattedData = {
+            securityQuestions: [
+                { question: data.question1, answer: data.answer1 },
+                { question: data.question2, answer: data.answer2 },
+                { question: data.question3, answer: data.answer3 },
+            ]
+        };
+        onSubmit(formattedData);
+    };
+
     const selectedQuestions = [form.getValues('question1'), form.getValues('question2'), form.getValues('question3')];
 
     const allFieldsFilled = Object.values(form.watch()).every(value => value);
@@ -53,7 +64,7 @@ const SecurityQuestionsForm = ({ onSubmit, onBack }: Props) => {
 
     return (
         <div className="max-w-md mx-auto">
-            <form onSubmit={form.handleSubmit(onSubmit, handleError)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(handleSubmit, handleError)} className="space-y-4">
                 <div>
                     <DropdownMenu>
                         <DropdownMenuTrigger className="w-full">

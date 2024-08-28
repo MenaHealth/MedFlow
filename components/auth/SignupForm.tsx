@@ -145,14 +145,18 @@ const SignupForm = ({ accountType }: Props) => {
         }
     };
 
-    const handleSecurityQuestionsSubmit = async (securityQuestionsData: SecurityQuestionsFormValues) => {
+    const handleSecurityQuestionsSubmit = async (securityQuestionsData: { securityQuestions: Array<{ question: string, answer: string }> }) => {
         try {
             const response = await fetch('/api/auth/signup', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ ...userData, securityQuestions: securityQuestionsData, accountType }),
+                body: JSON.stringify({
+                    ...userData,
+                    securityQuestions: securityQuestionsData.securityQuestions,
+                    accountType
+                }),
             });
 
             if (response.ok) {

@@ -25,10 +25,6 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
         const patientId = params.id;
         const { content, username } = await request.json();
         const newNote = new Note({
-            procedureName,
-            date,
-            physician,
-            diagnosis,
             content,
             username,
             patientId

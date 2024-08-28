@@ -29,7 +29,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/dropdownMenu";
 
 
 import { CLINICS, PRIORITIES, SPECIALTIES, STATUS } from '@/data/data';

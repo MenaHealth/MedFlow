@@ -24,6 +24,7 @@ export function TextFormField({
     onFocus?: () => void;
     onBlur?: () => void;
     error?: string;
+    disabled?: boolean;
 }) {
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const [isFocused, setIsFocused] = useState(false);

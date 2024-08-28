@@ -1,6 +1,7 @@
 // models/user.ts
-import { Schema, model, models, Document, CallbackError } from 'mongoose'; // Added CallbackError import
+import { Schema, model, models, Document, CallbackError } from 'mongoose';
 import bcrypt from 'bcryptjs';
+import { SecurityQuestion } from '@/utils/securityQuestions.enum';
 
 interface IUser extends Document {
   userID: string;
@@ -10,6 +11,10 @@ interface IUser extends Document {
   password: string;
   specialties?: string[];
   image?: string;
+  securityQuestions: {
+    question: SecurityQuestion; // Use SecurityQuestion enum
+    answer: string;
+  }[];
 }
 
 const UserSchema = new Schema<IUser>({
@@ -38,6 +43,17 @@ const UserSchema = new Schema<IUser>({
   image: {
     type: String,
   },
+  securityQuestions: [{
+    question: {
+      type: String,
+      enum: Object.values(SecurityQuestion), // Use SecurityQuestion enum values
+      required: [true, 'Question is required!'],
+    },
+    answer: {
+      type: String,
+      required: [true, 'Answer is required!'],
+    },
+  }],
 });
 
 UserSchema.pre('save', async function (next) {
@@ -48,6 +64,14 @@ UserSchema.pre('save', async function (next) {
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(user.password, salt);
     user.password = hash;
+
+    // Hash security question answers
+    for (const question of user.securityQuestions) {
+      const salt = await bcrypt.genSalt(10);
+      const hash = await bcrypt.hash(question.answer, salt);
+      question.answer = hash;
+    }
+
     next();
   } catch (error) {
     return next(error as CallbackError); // Cast error to CallbackError

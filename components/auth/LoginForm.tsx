@@ -4,7 +4,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { TextFormField } from "@/components/form/TextFormField";
+import { TextFormField } from "@/components/ui/TextFormField";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { useContext, useState } from "react";

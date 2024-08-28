@@ -24,7 +24,7 @@ const AuthPage = () => {
     return (
         <div className="h-screen p-4 bg-white flex flex-col items-center justify-center relative">
             <div className="absolute top-0 left-0 w-full h-full bg-transparent z-0">
-                <section className="container top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                <section className="container absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
                     <div className="content">
                         <div className={`ball ball1 ${ballsOpacity}`}></div>
                         <div className={`ball ball2 ${ballsOpacity}`}></div>

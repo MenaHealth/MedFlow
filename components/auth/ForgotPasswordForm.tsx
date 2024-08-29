@@ -1,3 +1,4 @@
+// components/auth/ForgotPasswordForm.tsx
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -8,9 +9,21 @@ import { useState } from "react";
 import useToast from '../hooks/useToast';
 import { ClipLoader } from 'react-spinners';
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const forgotPasswordSchema = z.object({
-    email: z.string().nonempty("Email is required.").email("Please enter a valid email address."),
+    email: z
+        .string()
+        .nonempty("Email is required.")
+        .regex(emailRegex, "Please enter a valid email address."),
     securityAnswer: z.string().nonempty("Security answer is required."),
+    newPassword: z
+        .string()
+        .min(8, "Password requires 7+ letters and at least one number"),
+    confirmNewPassword: z.string(),
+}).refine((data) => data.newPassword === data.confirmNewPassword, {
+    message: "Passwords do not match",
+    path: ["confirmNewPassword"],
 });
 
 type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
@@ -21,6 +34,8 @@ export function ForgotPasswordForm() {
         defaultValues: {
             email: '',
             securityAnswer: '',
+            newPassword: '',
+            confirmNewPassword: ''
         },
     });
 
@@ -29,6 +44,7 @@ export function ForgotPasswordForm() {
     const [step, setStep] = useState(1);
     const [securityQuestion, setSecurityQuestion] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [showTooltip, setShowTooltip] = useState(false);
 
     // Step 1: Fetch the security question for the email
     const fetchSecurityQuestion = async (email: string) => {
@@ -142,34 +158,97 @@ export function ForgotPasswordForm() {
         if (step === 3) {
             try {
                 setSubmitting(true);
-                const response = await fetch('/api/auth/forgot-password/reset', {
+                // The form.handleSubmit will automatically trigger validation
+                // and call onError if there are any issues, so we don't need to do it here
+
+                // Submit the form
+                const response = await fetch('/api/auth/forgot-password/reset-password', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(data),
+                    body: JSON.stringify({
+                        ...data,
+                        newPassword: data.newPassword,
+                        confirmNewPassword: data.confirmNewPassword,
+                    }),
                 });
 
-                const result = await response.json();
-
-                if (result.success) {
-                    setToast('Password reset successfully!');
-                    // Optionally redirect the user to the login page
+                // Handle the response
+                if (response.ok) {
+                    setToast({
+                        title: 'Success',
+                        description: 'Password has been reset successfully.',
+                        variant: 'success'
+                    });
+                    // Optionally, redirect the user to a different page
                 } else {
-                    setToast('Invalid security answer');
+                    const result = await response.json();
+                    setToast({
+                        title: 'Error',
+                        description: result.message || 'Failed to reset password.',
+                        variant: 'destructive'
+                    });
                 }
             } catch (error) {
                 console.error('Error resetting password:', error);
+                setToast({
+                    title: 'Error',
+                    description: 'An unexpected error occurred. Please try again.',
+                    variant: 'destructive'
+                });
             } finally {
                 setSubmitting(false);
             }
         }
     };
 
+
+    const onError = (errors: any) => {
+        if (errors.email) {
+            setToast({
+                title: 'Error',
+                description: errors.email.message || 'Please enter a valid email address.',
+                variant: 'destructive'
+            });
+            return;
+        }
+
+        if (errors.securityAnswer) {
+            setToast({
+                title: '!',
+                description: errors.securityAnswer.message || 'Security answer is required.',
+                variant: 'destructive'
+            });
+            return;
+        }
+
+        if (errors.newPassword) {
+            setToast({
+                title: 'Error',
+                description: errors.newPassword.message || 'Password requires 7+ letters and at least one number.',
+                variant: 'destructive'
+            });
+            return;
+        }
+
+        if (errors.confirmNewPassword) {
+            setToast({
+                title: 'Error',
+                description: errors.confirmNewPassword.message || 'Passwords do not match.',
+                variant: 'destructive'
+            });
+            return;
+        }
+    };
+
+
+
+
     return (
         <div className="w-full max-w-md">
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-4">
                     {step === 1 && (
                         <div>
                             <TextFormField
@@ -207,16 +286,28 @@ export function ForgotPasswordForm() {
                         <div>
                             <TextFormField
                                 form={form}
-                                fieldName="securityAnswer"
-                                fieldLabel="Security answer"
-                                error={form.formState.errors.securityAnswer?.message}
+                                fieldName="newPassword"
+                                fieldLabel="New Password"
+                                type="password"
+                                error={form.formState.errors.newPassword?.message}
+                                tooltip="At least 1 number and 8 characters"
+                                showTooltip={showTooltip}
+                                onFocus={() => setShowTooltip(true)}
+                                onBlur={() => setShowTooltip(false)}
+                            />
+                            <TextFormField
+                                form={form}
+                                fieldName="confirmNewPassword"
+                                fieldLabel="Confirm New Password"
+                                type="password"
+                                error={form.formState.errors.confirmNewPassword?.message}
                             />
                             <div className="flex justify-center mt-6">
                                 <Button
                                     type="submit"
                                     disabled={submitting}
                                 >
-                                    {submitting ? "Submitting..." : "Reset password"}
+                                    {submitting ? "Submitting..." : "Reset Password"}
                                 </Button>
                             </div>
                         </div>

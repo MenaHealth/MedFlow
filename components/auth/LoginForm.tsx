@@ -98,9 +98,6 @@ export function LoginForm() {
 
     return (
         <div className="w-full max-w-md">
-            <p className="text-sm text-gray-600">
-                <a href="#" onClick={() => setShowForgotPassword(true)}>Forgot password?</a>
-            </p>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-4">
                     <TextFormField
@@ -135,6 +132,10 @@ export function LoginForm() {
                 </div>
 
             )}
+
+            <p className="text-sm text-gray-600">
+                <a href="#" onClick={() => setShowForgotPassword(true)}>Forgot password?</a>
+            </p>
         </div>
     );
 }

@@ -90,6 +90,11 @@
   @apply relative z-10 justify-between items-center flex-col max-w-7xl mx-auto sm:px-16 px-6;
 }
 
+.app:not(.dashboard-page) {
+  padding: 1rem;
+  max-width: max-content;
+}
+
 .black_btn {
   @apply rounded-full border border-black bg-black py-1.5 px-5 text-white transition-all hover:bg-white hover:text-black text-center text-sm  flex items-center justify-center;
 }

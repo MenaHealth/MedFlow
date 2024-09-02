@@ -120,7 +120,7 @@ export default function PatientTriage() {
 
   return (
       <>
-        <div className="w-full relative">
+        <div className="w-full relative dashboard-page">
           <div className="flex justify-between items-center py-3">
             {/* Update the href to point to /create-patient */}
             <Link

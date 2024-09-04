@@ -4,6 +4,7 @@
 import React, { useState } from 'react';
 import SignupForm from '@/components/auth/SignupForm';
 import LoginForm from '@/components/auth/LoginForm';
+import ForgotPasswordForm from '@/components/auth/ForgotPasswordForm';
 import './authPage.css';
 import { RadioCard } from '@/components/ui/radio-card';
 import Flex from "@/components/ui/flex";
@@ -12,9 +13,15 @@ import Text from "@/components/ui/text";
 const AuthPage = () => {
     const [authType, setAuthType] = useState<'Login' | 'Signup'>('Login');
     const [accountType, setAccountType] = useState<'Doctor' | 'Triage'>('Doctor');
+    const [showForgotPassword, setShowForgotPassword] = useState(false);
 
     const handleAccountTypeChange = (value: 'Doctor' | 'Triage') => {
         setAccountType(value);
+    };
+
+    const handleForgotPasswordClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+        e.preventDefault();
+        setShowForgotPassword(true);
     };
 
     // Determine the appropriate opacity classes based on the form state
@@ -65,6 +72,14 @@ const AuthPage = () => {
                     {authType === 'Login' ? (
                         <div className="login-card w-full p-8 rounded-lg shadow-lg bg-white bg-opacity-10 backdrop-filter backdrop-blur-md">
                             <LoginForm />
+                            {showForgotPassword && (
+                                <div className="forgot-password-card w-full p-8 rounded-lg shadow-lg bg-white bg-opacity-10 backdrop-filter backdrop-blur-md">
+                                    <ForgotPasswordForm />
+                                    <button className="text-sm text-gray-600 hover:text-gray-800" onClick={() => setShowForgotPassword(false)}>
+                                        Back to login
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     ) : (
                         <div className="signup-card w-full p-8 rounded-lg shadow-lg bg-white bg-opacity-10 backdrop-filter backdrop-blur-md">

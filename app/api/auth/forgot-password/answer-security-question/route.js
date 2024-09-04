@@ -1,7 +1,7 @@
 // app/api/auth/forgot-password/answer-security-question/route.js
 import User from '@/models/user';
 import dbConnect from '@/utils/database';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 export async function POST(request) {
     await dbConnect();

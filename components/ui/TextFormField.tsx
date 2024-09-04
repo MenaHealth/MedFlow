@@ -70,6 +70,7 @@ export function TextFormField({
                                 onMouseEnter={() => setIsPasswordVisible(true)}
                                 onMouseLeave={() => setIsPasswordVisible(false)}
                                 className="absolute right-2 top-1/2 transform -translate-y-1/2"
+                                tabIndex={-1}
                             >
                                 {isPasswordVisible ? (
                                     <EyeOpenIcon className="h-5 w-5 text-gray-500" />

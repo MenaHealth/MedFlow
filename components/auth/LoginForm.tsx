@@ -10,6 +10,7 @@ import { Form } from "@/components/ui/form";
 import { useContext, useState } from "react";
 import { ToastContext } from '@/components/ui/toast';
 import useToast from '../hooks/useToast';
+import ForgotPasswordForm from "@/components/auth/ForgotPasswordForm";
 
 const loginSchema = z.object({
     email: z.string().nonempty("Email is required.").email("Please enter a valid email address."),
@@ -29,6 +30,7 @@ export function LoginForm() {
 
     const { setToast } = useToast();
     const [submitting, setSubmitting] = useState(false);
+    const [showForgotPassword, setShowForgotPassword] = useState(false);
 
     const onError = (errors: any) => {
         const errorMessages = [];
@@ -121,6 +123,19 @@ export function LoginForm() {
                     </div>
                 </form>
             </Form>
+            {showForgotPassword && (
+                <div className="forgot-password-card w-full p-8 rounded-lg shadow-lg bg-white bg-opacity-10 backdrop-filter backdrop-blur-md">
+                    <ForgotPasswordForm />
+                    <button className="text-sm text-gray-600 hover:text-gray-800" onClick={() => setShowForgotPassword(false)}>
+                        Back to login
+                    </button>
+                </div>
+
+            )}
+
+            <p className="text-sm text-gray-600">
+                <a href="#" onClick={() => setShowForgotPassword(true)}>Forgot password?</a>
+            </p>
         </div>
     );
 }

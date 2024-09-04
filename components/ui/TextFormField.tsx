@@ -14,7 +14,7 @@ export function TextFormField({
                                   onFocus,
                                   onBlur,
                               }: {
-    form: any;å
+    form: any;
     fieldName: string;
     fieldLabel: string;
     className?: string;

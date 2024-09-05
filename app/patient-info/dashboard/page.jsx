@@ -29,7 +29,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/dropdownMenu";
 
 
 import { CLINICS, PRIORITIES, SPECIALTIES, STATUS } from '@/data/data';
@@ -120,7 +120,7 @@ export default function PatientTriage() {
 
   return (
       <>
-        <div className="w-full relative">
+        <div className="w-full relative dashboard-page">
           <div className="flex justify-between items-center py-3">
             {/* Update the href to point to /create-patient */}
             <Link
@@ -259,7 +259,6 @@ export default function PatientTriage() {
                           overflow: 'hidden', 
                           textOverflow: 'ellipsis', 
                           whiteSpace: 'nowrap',
-                          overflow: 'visible'
                         }}
                       >
                         <Tooltip tooltipText={row.patientId}>

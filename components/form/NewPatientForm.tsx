@@ -1,16 +1,14 @@
-"use client";
-
+// components/form/NewPatientForm.tsx
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { TextFormField } from "@/components/form/TextFormField";
+import { TextFormField } from "@/components/ui/TextFormField";
 import { NumericalFormField } from "@/components/form/NumericalFormField";
-import { TextAreaFormField } from "@/components/form/TextAreaFormField";
+import { TextAreaFormField } from "@/components/ui/TextAreaFormField";
 import { PhoneFormField } from "@/components/form/PhoneFormField";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { v4 as uuidv4 } from "uuid";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
 import PuffLoader from "react-spinners/PuffLoader";
 
@@ -18,33 +16,33 @@ const newPatientFormSchema = z.object({
     firstName: z.string().min(1, "First name is required"),
     lastName: z.string().min(1, "Last name is required"),
     phone: z.string().min(1, "Phone number is required"),
-    age: z.number().min(0, "Please enter in a number greater than 0"),
+    age: z.number().min(0, "Please enter a number greater than 0"),
     location: z.string().min(1, "Location is required"),
     language: z.string().min(1, "Language is required"),
     chiefComplaint: z.string().min(1, "Please enter the main reason you seek medical care"),
+    email: z.string().email(),
 });
 
 type NewPatientFormValues = z.infer<typeof newPatientFormSchema>;
 
-type NewPatientProps = {
-    handleSubmit: (formData: Partial<NewPatientFormValues> & { patientId: string }) => void;
+type NewPatientFormProps = {
+    handleSubmit: (formData: NewPatientFormValues) => void;
     submitting: boolean;
 };
 
-const defaultValues: Partial<NewPatientFormValues> = {
-    firstName: "",
-    lastName: "",
-    phone: "",
-    age: undefined,
-    location: "",
-    language: "",
-    chiefComplaint: "",
-};
-
-export function NewPatient({ handleSubmit, submitting }: NewPatientProps) {
+export function NewPatientForm({ handleSubmit, submitting }: NewPatientFormProps) {
     const form = useForm<NewPatientFormValues>({
         resolver: zodResolver(newPatientFormSchema),
-        defaultValues,
+        defaultValues: {
+            firstName: '',
+            email: '',
+            lastName: '',
+            phone: '',
+            age: 0,
+            location: '',
+            language: '',
+            chiefComplaint: '',
+        },
     });
 
     const [loading, setLoading] = React.useState(false);
@@ -88,15 +86,7 @@ export function NewPatient({ handleSubmit, submitting }: NewPatientProps) {
 
     const onSubmit = (data: NewPatientFormValues) => {
         console.log("Submitting data:", data);
-        const patientId = uuidv4();
-
-        const fullPatientData = {
-            ...data,
-            patientId,
-        };
-
-        console.log("Full patient data:", fullPatientData);
-        handleSubmit(fullPatientData);
+        handleSubmit(data);
     };
 
     return (
@@ -110,6 +100,7 @@ export function NewPatient({ handleSubmit, submitting }: NewPatientProps) {
                         <TextFormField form={form} fieldName="lastName" fieldLabel="Last Name" />
                     </div>
                 </div>
+                <TextFormField form={form} fieldName="email" fieldLabel="Email" />
                 <div className="flex flex-col md:flex-row md:space-x-4">
                     <div className="w-full md:w-1/4">
                         <NumericalFormField form={form} fieldName="age" fieldLabel="Age" />
@@ -152,4 +143,4 @@ export function NewPatient({ handleSubmit, submitting }: NewPatientProps) {
     );
 }
 
-export default NewPatient;
+export default NewPatientForm;

@@ -1,7 +1,7 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { TextFormField } from "@/components/form/TextFormField"
+import { TextFormField } from "@/components/ui/TextFormField"
 import { z } from "zod"
 import * as React from "react"
 import { useForm } from "react-hook-form"
@@ -10,7 +10,7 @@ import {
     Form,
 } from "@/components/ui/form"
 import { NumericalFormField } from "../NumericalFormField"
-import { TextAreaFormField } from "../TextAreaFormField"
+import { TextAreaFormField } from "../../ui/TextAreaFormField"
 import { MedicationSelection } from "../MedicationSelection"
 import { DatePickerFormField, DatePopover } from "../DatePickerFormField"
 import { SelectFormField } from "../SelectFormField"

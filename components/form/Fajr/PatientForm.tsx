@@ -1,11 +1,21 @@
+// components/form/Fajr/PatientForm.tsx
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { TextFormField } from "@/components/form/TextFormField";
 import { z } from "zod";
 import * as React from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { TextFormField } from "@/components/form/TextFormField"; 
+import { Form } from "@/components/ui/form";
+import { NumericalFormField } from "../NumericalFormField";
+import { TextAreaFormField } from "../TextAreaFormField";
+import { MedicationSelection } from "../MedicationSelection";
+import { DatePickerFormField } from "../DatePickerFormField";
+import { SelectFormField } from "../SelectFormField";
+import { PMHxSelect } from "../PMHxSelection";
+import { PSHxSelect } from "../PSHxSelection";
+import { PhoneFormField } from "@/components/form/PhoneFormField";
 
 const patientFormSchema = z.object({
     diagnosis: z.string().optional(),
@@ -31,24 +41,42 @@ const patientFormSchema = z.object({
     allergies: z.string().optional(),
     notes: z.string().optional(),
     files: z.any().optional(),
-    firstName: z.string().optional(),
-    lastName: z.string().optional(),
-    location: z.string().optional(),
-    age: z.number().optional(),
-    phone: z.string().optional(),
-    chiefComplaint: z.string().optional(),
-    gender: z.string().optional(),
-    address: z.string().optional(),
-    city: z.string().optional(),
-    familyMedHx: z.string().optional(),
-    currentPrescriptions: z.string().optional(),
-    zipCode: z.string().optional(),
-    language: z.string().optional(), 
 });
 
-type PatientFormValues = z.infer<typeof patientFormSchema>;
+type PatientFormValues = z.infer<typeof patientFormSchema> & {
+    firstName?: string;
+    lastName?: string;
+    language?: string;
+    location?: string;
+    age?: number;
+    phone?: string;
+    chiefComplaint?: string;
+};
 
-const defaultValues: Partial<PatientFormValues> = {};
+const defaultValues: Partial<PatientFormValues> = {
+    // patientId: "",
+    // chiefComplaint: "",
+    // language: "",
+    // location: "",
+    // age: undefined,
+    // phone: "",
+    diagnosis: "",
+    icd10: "",
+    surgeryDate: undefined,
+    occupation: "",
+    laterality: "Not Selected",
+    priority: "Not Selected",
+    hospital: undefined,
+    baselineAmbu: "Not Selected",
+    medx: [],
+    pmhx: [],
+    pshx: [],
+    smokeCount: "",
+    drinkCount: "",
+    otherDrugs: "",
+    allergies: "",
+    notes: "",
+};
 
 export function PatientForm({ id }: { id: string } = { id: "" }) {
     const [patientData, setPatientData] = React.useState<Partial<PatientFormValues>>(defaultValues);

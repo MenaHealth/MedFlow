@@ -1,10 +1,11 @@
+// app/api/patient/[id]/route.js
 import Patient from "@/models/patient";
 import dbConnect from "@/utils/database";
 
 export const GET = async (request, { params }) => {
     try {
         await dbConnect();
-        const patient = await Patient.findById(params.id);
+        const patient = await Patient.findOne({ patientId: params.id });
         if (!patient) {
             return new Response("Patient Not Found", { status: 404 });
         }
@@ -29,8 +30,7 @@ export const PATCH = async (request, { params }) => {
                 medFrequency: med.medFrequency,
             };
         }) : [];
-        
-        const updatedPatient = await Patient.findByIdAndUpdate(params.id, { $set: newPatientData }, { new: true, runValidators: true });
+        const updatedPatient = await Patient.findByIdAndUpdate(params.id, { $set: newPatientData}, { new: true, runValidators: true });
 
         if (!updatedPatient) {
             return new Response(`Patient with ID ${params.id} not found`, { status: 404 });
@@ -39,18 +39,18 @@ export const PATCH = async (request, { params }) => {
         return new Response(JSON.stringify(updatedPatient), { status: 200 });
     } catch (error) {
         console.error('Failed to update patient:', error);
-        return new Response(`Failed to update patient: ${error}`, { status: 500 });
+        return new Response(`Failed to update patient: ${error.message}`, { status: 500 });
     }
 };
 
 export const DELETE = async (request, { params }) => {
     try {
-        await dbConnect();
+        await dbConnect(); // Correct function call
 
-        // Corrected to delete the patient, not a user
-        await Patient.findByIdAndRemove(params.id);
+        // Find the prompt by ID and remove it
+        await User.findByIdAndRemove(params.id);
 
-        return new Response("Patient deleted successfully", { status: 200 });
+        return new Response("Prompt deleted successfully", { status: 200 });
     } catch (error) {
         return new Response("Error deleting patient", { status: 500 });
     }

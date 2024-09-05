@@ -17,7 +17,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/dropdownMenu";
 import { useSession } from 'next-auth/react';
 import { CLINICS, PATIENT_STATUSES } from '@/data/data';
 

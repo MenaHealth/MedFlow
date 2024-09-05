@@ -38,7 +38,7 @@ const RXForm: React.FC = () => {
                     </Typography>
                     <form>
                         <TextField
-                            label="Full Name (الاسم الكامل)"
+                            label="Full Name"
                             name="fullName"
                             variant="outlined"
                             fullWidth
@@ -47,7 +47,7 @@ const RXForm: React.FC = () => {
                             style={{ marginBottom: '10px' }}
                         />
                         <TextField
-                            label="Phone Number (رقم الهاتف)"
+                            label="Phone Number"
                             name="phoneNumber"
                             variant="outlined"
                             fullWidth
@@ -56,7 +56,7 @@ const RXForm: React.FC = () => {
                             style={{ marginBottom: '10px' }}
                         />
                         <TextField
-                            label="Age (العمر)"
+                            label="Age"
                             name="age"
                             variant="outlined"
                             fullWidth
@@ -65,7 +65,7 @@ const RXForm: React.FC = () => {
                             style={{ marginBottom: '10px' }}
                         />
                         <TextField
-                            label="Address / Area Located (العنوان)"
+                            label="Address / Area Located"
                             name="address"
                             variant="outlined"
                             fullWidth
@@ -83,7 +83,7 @@ const RXForm: React.FC = () => {
                             style={{ marginBottom: '10px' }}
                         />
                         <TextField
-                            label="Referring Dr(دكتور محيل)"
+                            label="Referring Dr"
                             name="referringDr"
                             variant="outlined"
                             fullWidth
@@ -92,7 +92,7 @@ const RXForm: React.FC = () => {
                             style={{ marginBottom: '10px' }}
                         />
                         <TextField
-                            label="Prescribing Dr(طبيب واصف)"
+                            label="Prescribing Dr"
                             name="prescribingDr"
                             variant="outlined"
                             fullWidth
@@ -101,7 +101,7 @@ const RXForm: React.FC = () => {
                             style={{ marginBottom: '10px' }}
                         />
                         <TextField
-                            label="Diagnosis(تشخيص)"
+                            label="Diagnosis"
                             name="diagnosis"
                             variant="outlined"
                             fullWidth
@@ -112,7 +112,7 @@ const RXForm: React.FC = () => {
                             style={{ marginBottom: '10px' }}
                         />
                         <TextField
-                            label="Medications Needed (الأدوية المطلوبة)"
+                            label="Medications Needed"
                             name="medicationsNeeded"
                             variant="outlined"
                             fullWidth
@@ -123,7 +123,7 @@ const RXForm: React.FC = () => {
                             style={{ marginBottom: '10px' }}
                         />
                         <TextField
-                            label="Pharmacy Location (من أي صيدلية سيتم استلام الدواء؟)"
+                            label="Pharmacy Location"
                             name="pharmacyLocation"
                             variant="outlined"
                             fullWidth

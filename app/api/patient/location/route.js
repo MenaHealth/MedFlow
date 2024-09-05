@@ -1,5 +1,5 @@
 // app/api/patient/location/route.js
-// used in the NewPatient.tsx form
+// used in the NewPatientForm.tsx form
 
 export async function POST(req) {
     try {

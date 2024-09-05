@@ -3,21 +3,18 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
-import {BarLoader, BounceLoader} from "react-spinners";
-import NewPatient from "@/components/form/NewPatient";
+import { BarLoader } from "react-spinners";
+import NewPatientForm from "@/components/form/NewPatientForm";
 import ConfirmationModal from "@/components/ConfirmationModal";
-import ErrorModal from "@/components/ErrorModal"; // Import the ErrorModal component
+import ErrorModal from "@/components/ErrorModal";
 
 const CreatePatient = () => {
   const router = useRouter();
-  const { data: session } = useSession();
 
   const [submitting, setIsSubmitting] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
-  const [patientId, setPatientId] = useState("");
-  const [patientName, setPatientName] = useState({ firstName: "", lastName: "" });
+  const [patientData, setPatientData] = useState(null);
   const [error, setError] = useState(null);
 
   const createPatient = async (formData) => {
@@ -25,7 +22,7 @@ const CreatePatient = () => {
     setError(null);
 
     try {
-      const response = await fetch("/api/patient/new", {
+      const response = await fetch(`/api/patient/new`, {
         method: "POST",
         body: JSON.stringify(formData),
         headers: {
@@ -35,19 +32,18 @@ const CreatePatient = () => {
 
       if (response.ok) {
         const data = await response.json();
-        setPatientId(data._id);
-        setPatientName({ firstName: formData.firstName, lastName: formData.lastName });
+        setPatientData({ firstName: formData.firstName, lastName: formData.lastName });
         setShowModal(true);
+        router.push(`/create-patient/${data._id}`);  // Redirect with the new patient ID
       } else {
         const errorMessage = await response.text();
         setError(`Failed to create patient: ${errorMessage}`);
-        console.error("Failed to create patient:", errorMessage);
-        setShowErrorModal(true); // Show the error modal
+        setShowErrorModal(true);
       }
     } catch (error) {
-      console.log(`Error: ${error}`);
+      console.error("Error creating patient:", error);
       setError(`An error occurred: ${error.message}`);
-      setShowErrorModal(true); // Show the error modal
+      setShowErrorModal(true);
     } finally {
       setIsSubmitting(false);
     }
@@ -55,15 +51,11 @@ const CreatePatient = () => {
 
   const handleModalClose = () => {
     setShowModal(false);
-    router.push("/patient-info/dashboard"); // Navigate after modal is closed
+    router.push("/patient-info/dashboard");
   };
 
   const handleErrorModalClose = () => {
     setShowErrorModal(false);
-  };
-
-  const goToHome = () => {
-    router.push("/"); // Change this to your home route
   };
 
   return (
@@ -75,15 +67,16 @@ const CreatePatient = () => {
                 <BarLoader color="#FF5722" />
               </div>
           ) : (
-              <NewPatient handleSubmit={createPatient} submitting={submitting} />
+              <NewPatientForm
+                  handleSubmit={createPatient}
+                  submitting={submitting}
+              />
           )}
         </div>
         {showModal && (
             <ConfirmationModal
-                patientId={patientId}
-                patientName={patientName}
+                patientName={{ firstName: patientData?.firstName, lastName: patientData?.lastName }}
                 onClose={handleModalClose}
-                onHome={goToHome}
             />
         )}
         {showErrorModal && (

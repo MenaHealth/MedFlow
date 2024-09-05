@@ -15,8 +15,7 @@ export const POST = async (request: Request) => {
     console.log('Patient created successfully:', newPatient);
 
     return new Response(JSON.stringify(newPatient), { status: 201 });
-  }
-  catch (error: any) {
+  } catch (error: any) {
     console.error('Error creating patient:', error);
     return new Response(`Failed to create patient: ${error.message}`, { status: 500 });
   }

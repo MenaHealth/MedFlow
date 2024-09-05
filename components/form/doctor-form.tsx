@@ -1,7 +1,7 @@
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
-import { TextFormField } from "@/components/form/TextFormField"
+import { TextFormField } from "@/components/ui/TextFormField"
 import { z } from "zod"
 import * as React from "react"
 import { useForm } from "react-hook-form"
@@ -17,7 +17,7 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { MultiChoiceFormField } from "./MultiChoiceFormField"
-import { TextAreaFormField } from "./TextAreaFormField"
+import { TextAreaFormField } from "../ui/TextAreaFormField"
 import { MedicationSelection } from "./MedicationSelection"
 const doctorFormSchema = z.object({
     doctorName: z.string(),

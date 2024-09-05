@@ -10,8 +10,8 @@
 
   export interface IPatient extends Document {
     files: any[];
+    patientId?: string;
     _id?: string;
-    patientId: string;
     firstName: string;
     lastName: string;
     phone?: string;
@@ -20,6 +20,7 @@
     language?: string;
     chiefComplaint?: string;
     coordinatorId?: string;
+    email: string;
     laterality?: 'Not Selected' | 'Left' | 'Right' | 'Bilateral';
     diagnosis?: string;
     diagnosisCat?: string;
@@ -27,7 +28,7 @@
     priority?: 'Not Selected' | 'Routine' | 'Moderate' | 'Urgent' | 'Emergency';
     specialty?: typeof SPECIALTIES[number];
     status?: 'Not Selected' | 'Not Started' | 'Triaged' | 'In-Progress' | 'Completed';
-    name?: string; // can get rid of
+    name?: string; // can get rid of since we have firstname and Lastname
     complaint?: string;
     icd10?: string;
     surgeryDate?: Date;
@@ -50,14 +51,14 @@
 
   const PatientSchema = new Schema<IPatient>({
     files: [{ type: Object }],
-    patientId: { type: String, required: true, unique: true },
-    firstName: { type: String },
+    firstName: { type: String, required: true },
     lastName: { type: String },
     phone: { type: String },
-    age: { type: String, required: true },
-    location: { type: String, required: true },
-    language: { type: String, required: true },
-    chiefComplaint: { type: String, required: true },
+    age: { type: String },
+    location: { type: String },
+    language: { type: String },
+    chiefComplaint: { type: String },
+    email: { type: String },
     laterality: { type: String, enum: ['Not Selected', 'Left', 'Right', 'Bilateral'], default: 'Not Selected' },
     diagnosis: { type: String },
     diagnosisCat: { type: String },
@@ -82,7 +83,9 @@
     allergies: { type: String },
     notes: { type: String },
     visits: [{ type: Schema.Types.ObjectId, ref: 'Visit' }],
+    patientId: { type: String, sparse: true, unique: true }  // Mark as sparse to allow null values
   });
+
   const Patient = models.Patient || model<IPatient>('Patient', PatientSchema);
 
   export default Patient;

@@ -1,7 +1,7 @@
 import "@/styles/globals.css";
 import Nav from "@/components/Nav";
 import Provider from "@/components/Provider";
-
+import { ToastProvider } from '@/components/ui/toast';
 export const metadata = {
   title: "MedFlow",
   description: "Connecting patients with volunteers.",
@@ -10,6 +10,7 @@ export const metadata = {
 const RootLayout = ({ children }) => (
   <html lang='en' className="h-screen">
     <body className="h-screen">
+    <ToastProvider>
       <Provider>
         <div className='main'>
           <div className='gradient' />
@@ -20,8 +21,8 @@ const RootLayout = ({ children }) => (
           {children}
         </main>
       </Provider>
+    </ToastProvider>
     </body>
   </html>
 );
-
 export default RootLayout;

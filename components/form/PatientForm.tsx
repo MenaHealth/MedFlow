@@ -9,7 +9,7 @@ import { useForm, FormProvider } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { NumericalFormField } from "./NumericalFormField";
-import { TextAreaFormField } from "../TextAreaFormField";
+import { TextAreaFormField } from './TextAreaFormField';
 import { MedicationSelection } from "./MedicationSelection";
 import { DatePickerFormField } from "./DatePickerFormField";
 import { SelectFormField } from "./SelectFormField";
@@ -51,15 +51,15 @@ type PatientFormValues = z.infer<typeof patientFormSchema> & {
     age?: number;
     phone?: string;
     chiefComplaint?: string;
+    gender?: string;
+    address?: string;
+    city?: string;
+    zipCode?: string;
+    familyMedHx: string;
+    currentPrescriptions: string;
 };
 
 const defaultValues: Partial<PatientFormValues> = {
-    // patientId: "",
-    // chiefComplaint: "",
-    // language: "",
-    // location: "",
-    // age: undefined,
-    // phone: "",
     diagnosis: "",
     icd10: "",
     surgeryDate: undefined,

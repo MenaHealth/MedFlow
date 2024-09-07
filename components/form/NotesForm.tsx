@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { TextField, Button, List, ListItem, ListItemText, Divider, Typography, IconButton } from '@mui/material';
 import { Publish as PublishIcon, Delete as DeleteIcon, GetApp as DownloadIcon } from '@mui/icons-material';
 
@@ -12,6 +12,7 @@ interface Note {
     content: string;
     username: string;
     date: string;
+    title: string; 
 }
 
 const NotesForm: React.FC<NotesFormProps> = ({ patientId, username }) => {
@@ -55,23 +56,24 @@ const NotesForm: React.FC<NotesFormProps> = ({ patientId, username }) => {
     const [notesList, setNotesList] = useState<Note[]>([]);
     const [templateType, setTemplateType] = useState('physician'); 
     const [showTemplateButtons, setShowTemplateButtons] = useState(false); 
+    const [noteContent, setNoteContent] = useState('');
 
-    useEffect(() => {
-        fetchNote(patientId);
-    }, [patientId]);
-
-    const fetchNote = async (noteId: string) => {
+    const fetchNote = useCallback(async (noteId: string) => {
         try {
             const response = await fetch(`/api/patient/notes/${patientId}?noteId=${noteId}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const note = await response.json();
-            setNoteContent(note.content);  
+            setNoteContent(note.content);
         } catch (error) {
             console.error('Failed to fetch note:', error);
         }
-    };    
+    }, [patientId]);
+
+    useEffect(() => {
+        fetchNote(patientId);
+    }, [patientId, fetchNote]);
 
     const publishNote = async () => {
         let noteContent = '';
@@ -179,7 +181,7 @@ const NotesForm: React.FC<NotesFormProps> = ({ patientId, username }) => {
         }
     };
 
-    const deleteNote = async (noteId) => {
+    const deleteNote = async (noteId: string) => {
         try {
             const response = await fetch(`/api/patient/notes/${noteId}`, {
                 method: 'DELETE',
@@ -195,7 +197,25 @@ const NotesForm: React.FC<NotesFormProps> = ({ patientId, username }) => {
             alert('An error occurred while trying to delete the note. Please try again.');
         }
     };
+    const handleDownload = (noteId: string) => {
+        const note = notesList.find(note => note._id === noteId);
 
+        if (!note) {
+            console.error('Note not found for download');
+            return;
+        }
+
+        const blob = new Blob([note.content], { type: 'text/plain' });
+        const url = window.URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `note-${noteId}.txt`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+    }; 
     return (
         <div className="container mx-auto p-4 flex flex-col md:flex-row" style={{ paddingBottom: '80px', minHeight: '100vh' }}>
             <div className="w-full md:w-1/4 bg-gray-200 p-4">
@@ -386,6 +406,60 @@ const NotesForm: React.FC<NotesFormProps> = ({ patientId, username }) => {
                             variant="outlined"
                             fullWidth
                             value={physicianNote.rosConstitutional}
+                            onChange={handleInputChange}
+                            style={{ marginBottom: '10px' }}
+                        />
+                        <TextField
+                            label="Review of Systems (ROS) - Cardiovascular"
+                            name="rosCardiovascular"
+                            variant="outlined"
+                            fullWidth
+                            value={physicianNote.rosCardiovascular}
+                            onChange={handleInputChange}
+                            style={{ marginBottom: '10px' }}
+                        />
+                        <TextField
+                            label="Review of Systems (ROS) - Respiratory"
+                            name="rosRespiratory"
+                            variant="outlined"
+                            fullWidth
+                            value={physicianNote.rosRespiratory}
+                            onChange={handleInputChange}
+                            style={{ marginBottom: '10px' }}
+                        />
+                        <TextField
+                            label="Review of Systems (ROS) - Gastrointestinal"
+                            name="rosGastrointestinal"
+                            variant="outlined"
+                            fullWidth
+                            value={physicianNote.rosGastrointestinal}
+                            onChange={handleInputChange}
+                            style={{ marginBottom: '10px' }}
+                        />
+                        <TextField
+                            label="Review of Systems (ROS) - Genitourinary"
+                            name="rosGenitourinary"
+                            variant="outlined"
+                            fullWidth
+                            value={physicianNote.rosGenitourinary}
+                            onChange={handleInputChange}
+                            style={{ marginBottom: '10px' }}
+                        />
+                        <TextField
+                            label="Review of Systems (ROS) - Musculoskeletal"
+                            name="rosMusculoskeletal"
+                            variant="outlined"
+                            fullWidth
+                            value={physicianNote.rosMusculoskeletal}
+                            onChange={handleInputChange}
+                            style={{ marginBottom: '10px' }}
+                        />
+                        <TextField
+                            label="Review of Systems (ROS) - Neurological"
+                            name="rosNeurological"
+                            variant="outlined"
+                            fullWidth
+                            value={physicianNote.rosNeurological}
                             onChange={handleInputChange}
                             style={{ marginBottom: '10px' }}
                         />

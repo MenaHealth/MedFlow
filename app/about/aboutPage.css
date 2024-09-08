@@ -1,0 +1,141 @@
+.card-container {
+  display: flex;
+  flex-direction: column;
+  height: 400px;
+  overflow: hidden;
+  position: relative;
+}
+
+.card-header {
+  height: 10%;
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+}
+
+.card-animation {
+  height: 50%;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-content {
+  height: 40%;
+  padding: 1rem;
+  position: relative;
+  z-index: 3;
+}
+
+.heart-rate, .ball, .ball-first {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+.fade-in, .fade-out {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+}
+
+.fade-in {
+  right: 0;
+  animation: heartRateIn 2.5s linear infinite;
+  background-color: var(--white);
+}
+
+.fade-out {
+  right: -120%;
+  width: 120%;
+  animation: heartRateOut 2.5s linear infinite;
+  background: linear-gradient(to right, var(--white) 0%, var(--white) 80%, transparent 100%);
+}
+
+@keyframes heartRateIn {
+  0% { width: 100%; }
+  50% { width: 0; }
+  100% { width: 0; }
+}
+
+@keyframes heartRateOut {
+  0% { left: -120%; }
+  30% { left: -120%; }
+  100% { left: 0; }
+}
+
+.ball-first {
+  width: 1.2rem;
+  height: 1.2rem;
+  background-color: var(--darkOrange);
+  border-radius: 50%;
+  animation: move-horizontal-first var(--animation-duration) infinite linear;
+}
+
+.ball1-first { --animation-duration: 14s; --y-offset: 26%; }
+.ball2-first { --animation-duration: 9s; --y-offset: 42%; }
+.ball3-first { --animation-duration: 17s; --y-offset: 58%; }
+.ball4-first { --animation-duration: 12s; --y-offset: 74%; }
+.ball5-first { --animation-duration: 11.5s; --y-offset: 88%; }
+
+@keyframes move-horizontal-first {
+  0% {
+    left: 0%;
+    top: var(--y-offset);
+    opacity: 0;
+  }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% {
+    left: 100%;
+    top: var(--y-offset);
+    opacity: 0;
+    background-color: var(--orange);
+  }
+}
+
+.ball {
+  width: 1.2rem;
+  height: 1.2rem;
+  background-color: var(--darkBlue);
+  border-radius: 50%;
+  animation: meet-and-move var(--animation-duration) infinite ease-in-out;
+}
+
+.ball1 { --animation-duration: 14s; --initial-top: 26%; --final-top: 50%; }
+.ball2 { --animation-duration: 9s; --initial-top: 42%; --final-top: 50%; }
+.ball3 { --animation-duration: 17s; --initial-top: 58%; --final-top: 50%; }
+.ball4 { --animation-duration: 12s; --initial-top: 74%; --final-top: 50%; }
+.ball5 { --animation-duration: 11.5s; --initial-top: 88%; --final-top: 50%; }
+
+@keyframes meet-and-move {
+  0% {
+    background-color: var(--orange);
+    left: 0%;
+    top: var(--initial-top);
+    opacity: 0%;
+  }
+  10% { opacity: 100%; }
+  45%, 55% {
+    left: 50%;
+    top: 50%;
+  }
+  90% { opacity: 100%; }
+  100% {
+    background-color: var(--lightOrange);
+    left: 90%;
+    top: var(--final-top);
+    opacity: 0%;
+  }
+}
+
+/*@media (max-width: 767px) {*/
+/*  .ball, .heart-rate, .ball-first { display: none; }*/
+/*}*/
+
+/*@media (min-width: 768px) {*/
+/*  .ball, .heart-rate, .ball-first { display: block; }*/
+/*}*/

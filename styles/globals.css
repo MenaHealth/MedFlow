@@ -5,20 +5,44 @@
 :root {
   --darkOrange: #59200F;
   --lightOrange: #F2B763;
-  /*## the logo orange*/
+  /* The logo orange and doctor user type color*/
   --orange: #FF5722;
   --lightYellow: #fbf9c1;
+  /* yellow triage user type color*/
   --yellow: #F7F065;
   --blue: #66c1f8;
   --lightBlue: #94d1f7;
   --purple: #9150e8;
   --lightPurple: #9e66e8;
-  /*the primary color (darkBlue) i've been using for body/<p> text*/
+  /* The primary color (darkBlue) used for body/<p> text */
   --darkBlue: #120f0b;
   --lightGray: #d2d1d1;
   --gray: #a8a8a8;
   --darkGrey: #7a7a7a;
   --white: #ffffff;
+}
+
+:root {
+  --gradient-background: linear-gradient(-45deg, var(--lightOrange), var(--orange), var(--lightYellow), var(--yellow), var(--white));
+}
+
+body {
+  background: var(--gradient-background);
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+  height: 100vh;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .main {

@@ -8,6 +8,7 @@ import MedicalInformation from '@mui/icons-material/MedicalInformation';
 import CalendarMonth from '@mui/icons-material/CalendarMonth';
 import Notes from '@mui/icons-material/Notes';
 import Collections from '@mui/icons-material/Collections';
+import LocalPharmacy from '@mui/icons-material/LocalPharmacy';  
 import { useParams } from 'next/navigation';
 
 const PatientOverview = () => {
@@ -18,32 +19,6 @@ const PatientOverview = () => {
     useEffect(() => {
         setIsClient(true);
     }, []);
-
-    // useEffect(() => {
-    //     if (id !== '') {
-    //         // fetch the patient-info data from the API
-    //         fetch(`/api/patient/${id}`)
-    //         .then(response => response.json())
-    //         .then(data => {
-    //             // update the form with the data
-    //             data.surgeryDate = new Date(data.surgeryDate);
-    //             data.medx = data.medx.map((med) => {
-    //                 return {
-    //                     medName: med.medName,
-    //                     medDosage: med.medDosage,
-    //                     medFrequency: med.medFrequency,
-    //                 };
-    //             });
-    //             // age
-    //             data.age = parseInt(data.age);
-    //             setPatientData(data);
-    //             console.log(data)
-    //         })
-    //         .catch(error => {
-    //             // show an alert with the error message
-    //             alert('Error: ' + error.message);
-    //         });
-    //     }}, [id]);
 
     return (
         <Container maxWidth="md" sx={{ mt: 4 }}>
@@ -70,7 +45,7 @@ const PatientOverview = () => {
                             color="primary"
                             fullWidth
                             sx={{ p: 2 }}
-                            disabled={!id} // Disable button if id is not set
+                            disabled={!id} 
                         >
                             Patient Info
                         </Button>
@@ -154,6 +129,40 @@ const PatientOverview = () => {
                             sx={{ p: 2 }}
                         >
                             Image Gallery
+                        </Button>
+                    </Box>
+                </Grid>
+                {/* Add RX Button Here */}
+                <Grid item xs={12} sm={6}>
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            flexDirection: { xs: 'row', sm: 'column' },
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            ...(isClient && {
+                                '&:hover svg': {
+                                    color: theme.palette.info.main,
+                                },
+                            }),
+                        }}
+                    >
+                        <LocalPharmacy sx={{ fontSize: 40, mb: { sm: 2 }, mr: { xs: 2, sm: 0 } }} />
+                        <Button
+            component={Link}
+            href={`/rx/${id}`} 
+            variant="contained"
+            fullWidth
+            sx={{ 
+                p: 2, 
+                backgroundColor: '#BF40BF', 
+                '&:hover': {
+                    backgroundColor: '#702963', 
+                },
+                color: 'white' 
+            }}
+        >
+                            RX
                         </Button>
                     </Box>
                 </Grid>

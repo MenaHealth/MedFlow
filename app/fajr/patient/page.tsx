@@ -1,5 +1,5 @@
 // app/fajr/patient/page.tsx
-import { PatientForm } from "@/components/form/Fajr/PatientForm"
+import { PatientForm } from "@/components/form/PatientForm"
 
 export default function Home() {
   return (

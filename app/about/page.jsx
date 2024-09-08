@@ -9,7 +9,7 @@ import './aboutPage.css'
 export default function AboutPage() {
     return (
         <div className="min-h-screen">
-            <div className="max-w-6xl py-20">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
                 <div className="text-center mb-16">
                     <h1 className="text-4xl font-bold tracking-tight text-black sm:text-5xl md:text-6xl">
                         Accessible Patient Care

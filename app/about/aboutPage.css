@@ -26,6 +26,14 @@
   z-index: 3;
 }
 
+a {
+  color: var(--orange);
+}
+a:hover {
+  color: var(--white);
+  background-color: var(--orange);
+}
+
 .heart-rate, .ball, .ball-first {
   position: absolute;
   width: 100%;
@@ -131,11 +139,3 @@
     opacity: 0%;
   }
 }
-
-/*@media (max-width: 767px) {*/
-/*  .ball, .heart-rate, .ball-first { display: none; }*/
-/*}*/
-
-/*@media (min-width: 768px) {*/
-/*  .ball, .heart-rate, .ball-first { display: block; }*/
-/*}*/

@@ -3,8 +3,19 @@
 
 import React from 'react'
 import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import './aboutPage.css'
+import Link from "next/link";
+import { ClipboardList, Calendar, Image, Stethoscope, FileText } from 'lucide-react'
+
+const features = [
+    { icon: ClipboardList, title: "View Patient Info", description: "Access comprehensive patient information" },
+    { icon: Calendar, title: "Schedule Lab Visits", description: "Easily manage and schedule laboratory appointments" },
+    { icon: Stethoscope, title: "Take Notes", description: "Record detailed medical notes for each patient" },
+    { icon: Image, title: "Image Gallery", description: "Maintain a dedicated image gallery for each patient" },
+    { icon: FileText, title: "Prescription Management", description: "Generate and manage drug prescription paperwork" },
+]
+
+const baseURL = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://gaza-meds.vercel.app/';
 
 export default function AboutPage() {
     return (
@@ -15,7 +26,7 @@ export default function AboutPage() {
                         Accessible Patient Care
                     </h1>
                     <p className="mt-3 max-w-md mx-auto text-base text-darkBlue sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
-                        The mission of MedFlow is to provide a modern electronic medical record (EMR) system to hospitals in the Middle East.
+                        The mission of MedFlow is to provide a modern electronic medical record (EMR) system to hospitals in the Middle East. The user-types of the app are:
                     </p>
                 </div>
 
@@ -29,7 +40,7 @@ export default function AboutPage() {
                                     </svg>
                                 </div>
                             </div>
-                            <h3 className="text-lg font-medium text-black">Patient Information Submission</h3>
+                            <h3 className="text-lg font-medium text-black">Patients</h3>
                             <div className="card-animation">
                                 <div className="ball-first ball1-first"></div>
                                 <div className="ball-first ball2-first"></div>
@@ -96,22 +107,145 @@ export default function AboutPage() {
                 </div>
 
                 <div className="mt-20">
+                    <Card className="w-full max-w-3xl mx-auto">
+                        <h2 className="text-2xl font-bold mb-2">Patient Submission Process</h2>
+                        <p className="text-gray-600 mb-6">How patients interact with MedFlow for remote health consultations</p>
+
+                        <div className="space-y-6">
+                            <div className="space-y-4">
+                                {[
+                                    {
+                                        title: "Access the Intake Form",
+                                        description: "Patients visit our secure online platform to access the multilingual intake form."
+                                    },
+                                    {
+                                        title: "Provide Essential Information",
+                                        description: "Patients submit key details including personal information, medical concerns, and preferences."
+                                    },
+                                    {
+                                        title: "Language Selection",
+                                        description: "The form is available in multiple languages including English, Arabic, Farsi, and Pashto."
+                                    },
+                                    {
+                                        title: "Triage Process",
+                                        description: "Our specialists review submissions to direct patients to appropriate care."
+                                    },
+                                    {
+                                        title: "Doctor Assignment",
+                                        description: "Based on the patient's needs, a suitable doctor is assigned for the consultation."
+                                    }
+                                ].map((step, index) => (
+                                    <div key={index} className="flex items-start space-x-4">
+                                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[var(--orange)] flex items-center justify-center text-white font-bold">
+                                            {index + 1}
+                                        </div>
+                                        <div>
+                                            <h3 className="text-lg font-semibold">{step.title}</h3>
+                                            <p className="text-sm text-gray-600">{step.description}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="bg-orange-50 p-4 rounded-md">
+                                <h3 className="text-lg font-semibold mb-2">Key Features</h3>
+                                <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
+                                    <li>Multilingual support for broader accessibility</li>
+                                    <li>Secure handling of patient information</li>
+                                    <li>Efficient triage system for prompt care</li>
+                                    <li>Remote consultations with qualified doctors</li>
+                                </ul>
+                            </div>
+
+                            <p className="text-sm text-gray-600 italic">
+                                Our streamlined process ensures that patients receive appropriate care efficiently,
+                                bridging geographical gaps in healthcare access.
+                            </p>
+                        </div>
+                    </Card>
+                </div>
+
+                <div className="mt-20">
+                    <Card className="p-8 bg-white shadow-lg">
+                        <div className="flex flex-col space-y-8">
+                            <h2 className="text-3xl font-bold text-black">Doctor and Triage Specialist Sign-up Process</h2>
+                            <div className="grid md:grid-cols-2 gap-8">
+                                <div>
+                                    <h3 className="text-xl font-semibold text-black mb-4">For Doctors</h3>
+                                    <ul className="list-disc list-inside space-y-2 text-darkBlue">
+                                        <li>
+                                            Sign up at <Link href={`${baseURL}/auth`} className="text-[var(--orange)] hover:underline">our registration page</Link>
+                                        </li>
+                                        <li>Provide the following information:
+                                            <ul className="list-disc list-inside ml-4 mt-2">
+                                                <li>Full Name</li>
+                                                <li>Position: Physician</li>
+                                                <li>Date of Birth</li>
+                                                <li>Email Address</li>
+                                                <li>Languages Spoken</li>
+                                                <li>Countries Seeing Patients</li>
+                                            </ul>
+                                        </li>
+                                        <li><b>Await approval from a <u>Triage Specialist</u></b></li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-semibold text-black mb-4">For Triage Specialists</h3>
+                                    <ul className="list-disc list-inside space-y-2 text-darkBlue">
+                                        <li>Sign up at <Link href="http://localhost:3000/auth" className="text-[var(--orange)] hover:underline">our registration page</Link></li>
+                                        <li>Provide the following information:
+                                            <ul className="list-disc list-inside ml-4 mt-2">
+                                                <li>Full Name</li>
+                                                <li>Date of Birth</li>
+                                                <li>Email Address</li>
+                                            </ul>
+                                        </li>
+                                        <li><b>Await approval from the <u>site administrator</u></b></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div className="bg-gray-100 p-4 rounded-md">
+                                <h3 className="text-lg font-semibold text-black mb-2">Post-Registration Process</h3>
+                                <ol className="list-decimal list-inside space-y-2 text-darkBlue">
+                                    <li>An email confirmation is sent upon account creation</li>
+                                    <li>Triage Specialists are approved by the <i>site administrator</i></li>
+                                    <li>Doctors are approved by <i>Triage Specialists</i></li>
+                                    <li>Approved doctors can access the Physician Dashboard</li>
+                                    <li>Triage Specialists direct patient information to appropriate doctors based on specialization</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </Card>
+                </div>
+
+
+                <div className="mt-20">
                     <Card className="p-8 bg-white">
-                        <div className="flex flex-col md:flex-row items-center">
+                        <div className="flex flex-col md:flex-row items-start">
                             <div className="flex-1">
-                                <h2 className="text-3xl font-bold text-black">How It Works</h2>
-                                <p className="mt-4 text-lg text-darkBlue">
-                                    blah blah blah
+                                <h2 className="text-3xl font-bold text-black mb-4">Patient Care</h2>
+                                <p className="text-lg text-darkBlue mb-6">
+                                    MedFlow empowers doctors with a comprehensive suite of tools to provide efficient and effective patient care. Once a patient is directed to a doctors specialization, our platform offers:
                                 </p>
-                                <Button className="mt-8 bg-orange text-white hover:bg-darkOrange">Learn More</Button>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {features.map((feature, index) => (
+                                        <div key={index} className="flex items-start space-x-3">
+                                            <feature.icon className="w-6 h-6 text-[var(--orange)] flex-shrink-0 mt-1" />
+                                            <div>
+                                                <h3 className="font-semibold text-black">{feature.title}</h3>
+                                                <p className="text-sm text-darkBlue">{feature.description}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                             <div className="flex-1 mt-8 md:mt-0 md:ml-8">
-                                <div className="relative w-full h-64">
-                                    {/*<img*/}
-                                    {/*    src="/placeholder.svg?height=256&width=384"*/}
-                                    {/*    alt="Heart rate monitor"*/}
-                                    {/*    className="rounded-lg object-cover w-full h-full"*/}
-                                    {/*/>*/}
+                                <div className="relative w-full h-64 bg-gray-100 rounded-lg overflow-hidden">
+                                    {/* Placeholder for an image or illustration */}
+                                    <div className="absolute inset-0 flex items-center justify-center text-gray-400">
+                                        image placeholder
+                                        <Stethoscope className="w-24 h-24" />
+                                    </div>
                                 </div>
                             </div>
                         </div>

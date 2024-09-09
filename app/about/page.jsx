@@ -192,7 +192,9 @@ export default function AboutPage() {
                                 <div>
                                     <h3 className="text-xl font-semibold text-black mb-4">For Triage Specialists</h3>
                                     <ul className="list-disc list-inside space-y-2 text-darkBlue">
-                                        <li>Sign up at <Link href="http://localhost:3000/auth" className="text-[var(--orange)] hover:underline">our registration page</Link></li>
+                                        <li>
+                                            Sign up at <Link href={`${baseURL}/auth`} className="text-[var(--orange)] hover:underline">our registration page</Link>
+                                        </li>
                                         <li>Provide the following information:
                                             <ul className="list-disc list-inside ml-4 mt-2">
                                                 <li>Full Name</li>

@@ -10,7 +10,7 @@ import { Form } from "@/components/ui/form";
 import { useRouter } from "next/navigation";
 import useToast from "@/components/hooks/useToast";
 import SecurityQuestionsForm from './SecurityQuestionsForm';
-import type { SecurityQuestionsFormValues } from './SecurityQuestionsForm';
+import { sendWelcomeEmail } from '@/utils/email';
 
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const passwordRegex = /^(?=.*[0-9]).{8,}$/;
@@ -51,70 +51,24 @@ const SignupForm = ({ accountType }: Props) => {
 
     const allFieldsFilled = Object.values(form.watch()).every(value => value);
 
-    const onError = (errors: any) => {
-        console.log('Form validation errors:', errors);
-        const errorMessages = [];
-
-        if (errors.email) {
-            if (errors.email.type === 'regex') {
-                errorMessages.push('Please enter a valid email address.');
-            } else {
-                errorMessages.push('Please enter an email address.');
-            }
-        }
-
-        if (errors.password) {
-            if (errors.password.type === 'regex') {
-                errorMessages.push('Password requires 7+ letters and at least one number.');
-            } else {
-                errorMessages.push('Please enter a password.');
-            }
-        }
-
-        if (errors.confirmPassword) {
-            errorMessages.push('Please ensure your passwords match.');
-        }
-
-        if (errors.name) {
-            errorMessages.push('Please enter your last name.');
-        }
-
-        if (errorMessages.length > 0) {
-            setToast({
-                title: '!',
-                description: errorMessages.join('\n'),
-                variant: 'destructive'
-            });
-        } else {
-            setToast({
-                title: 'Form Validation Error',
-                description: 'Please correct the errors in the form.',
-                variant: 'destructive'
-            });
-        }
+    const handleError = (error: any) => {
+        console.error('Error:', error);
+        setToast({ title: 'Error', description: error.message, variant: 'destructive' });
     };
 
-    const onSubmit = async (data: SignupFormValues) => {
+    const onEmailAndPasswordSubmit = async (data: SignupFormValues) => {
         setSubmitting(true);
 
         try {
-            const result = await form.trigger();
+            const result = await form.trigger(); // Validate the form
             if (!result) {
                 const errorMessages = [];
                 if (form.formState.errors.email) {
-                    if (form.formState.errors.email.type === 'regex') {
-                        errorMessages.push('Please enter a valid email address.');
-                    } else {
-                        errorMessages.push('Please enter an email address.');
-                    }
+                    errorMessages.push('Please enter a valid email address.');
                 }
 
                 if (form.formState.errors.password) {
-                    if (form.formState.errors.password.type === 'regex') {
-                        errorMessages.push('Password requires 7+ letters and at least one number.');
-                    } else {
-                        errorMessages.push('Please enter a password.');
-                    }
+                    errorMessages.push('Password requires 7+ letters and at least one number.');
                 }
 
                 if (form.formState.errors.confirmPassword) {
@@ -133,13 +87,12 @@ const SignupForm = ({ accountType }: Props) => {
                     });
                 }
             } else {
-                // If the form data is valid, store the user's data locally and show the security questions form
+                // If the form is valid, move to the security questions
                 setUserData(data);
                 setShowSecurityQuestions(true);
             }
         } catch (error) {
-            console.error('Submission error:', error);
-            setToast({ title: 'Signup Error', description: 'An unexpected error occurred. Please try again.', variant: 'destructive' });
+            handleError(error);
         } finally {
             setSubmitting(false);
         }
@@ -153,22 +106,46 @@ const SignupForm = ({ accountType }: Props) => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    ...userData,
+                    ...userData, // Includes email, password, etc.
                     securityQuestions: securityQuestionsData.securityQuestions,
-                    accountType
+                    accountType,
                 }),
             });
 
             if (response.ok) {
-                setToast({ title: `${accountType} signed up successfully`, description: `You have successfully signed up as a ${accountType}.`, variant: 'success' });
-                router.push('/auth/login'); // Redirect to login page
+                setToast({
+                    title: `${accountType} signed up successfully`,
+                    description: `You have successfully signed up as a ${accountType}.`,
+                    variant: 'success',
+                });
+
+                // Send welcome email
+                try {
+                    const emailResponse = await fetch('/api/auth/email/welcome', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ email: userData?.email }),
+                    });
+
+                    if (emailResponse.ok) {
+                        console.log('Welcome email sent successfully');
+                    } else {
+                        console.error('Error sending welcome email');
+                    }
+                } catch (emailError) {
+                    handleError(emailError);
+                }
+
+                // Redirect to login page after sending the email
+                router.push('/auth/login');
             } else {
                 const result = await response.json();
                 setToast({ title: 'Signup Error', description: result.message, variant: 'destructive' });
             }
         } catch (error) {
-            console.error('Submission error:', error);
-            setToast({ title: 'Signup Error', description: 'An unexpected error occurred. Please try again.', variant: 'destructive' });
+            handleError(error);
         }
     };
 
@@ -184,7 +161,7 @@ const SignupForm = ({ accountType }: Props) => {
                 <div>
                     <h2 className="text-lg font-bold mb-4">Sign up as a {accountType}</h2>
                     <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-4">
+                        <form onSubmit={form.handleSubmit(onEmailAndPasswordSubmit, handleError)} className="space-y-4">
                             <TextFormField
                                 form={form}
                                 fieldName="email"

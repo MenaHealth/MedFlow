@@ -1,4 +1,4 @@
-// app/api/patient-form/new/route.ts
+// app/api/patient-form/new/route.js
 import PatientForm, { IPatientForm } from "@/models/patient_form";
 import dbConnect from "@/utils/database";
 import { v4 as uuidv4 } from 'uuid';

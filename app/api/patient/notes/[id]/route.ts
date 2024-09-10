@@ -1,4 +1,4 @@
-// app/api/patient/notes/[id]/route.ts
+// app/api/patient/notes/[id]/route.js
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '../../../../../utils/database';
 import Note from '../../../../../models/note';

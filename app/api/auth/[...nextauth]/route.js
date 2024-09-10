@@ -52,18 +52,35 @@ const handler = NextAuth({
     }),
   ],
   callbacks: {
+    async jwt({ token, account }) {
+      console.log("Account:", account);
+      console.log("Token:", token);
+      if (account) {
+        token.accessToken = account.access_token;
+      }
+      return token;
+    },
     async session({ session, token }) {
       await dbConnect();
       let sessionUser;
-      if (token.accountType === 'Doctor') {
+      console.log("Session:", session);
+      console.log("Token:", token);
+      if (token.accountType === 'Doctor' || token.accountType === 'Surgeon') {
         sessionUser = await User.findOne({ email: token.email });
       } else if (token.accountType === 'Patient') {
         sessionUser = await Patient.findOne({ email: token.email });
       }
-      session.user.id = sessionUser._id.toString();
-      session.user.accountType = sessionUser.accountType;
+      if (sessionUser) {
+        session.user.id = sessionUser._id.toString();
+        session.user.accountType = sessionUser.accountType;
+      }
       return session;
     },
+  },
+  pages: {
+    signIn: '/auth/login',
+    newUser: '/auth/signup'
+    
   },
 });
 

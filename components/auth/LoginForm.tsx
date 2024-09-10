@@ -11,6 +11,7 @@ import { useContext, useState } from "react";
 import { ToastContext } from '@/components/ui/toast';
 import useToast from '../hooks/useToast';
 import ForgotPasswordForm from "@/components/auth/ForgotPasswordForm";
+import { useRouter } from "next/navigation";
 
 const loginSchema = z.object({
     email: z.string().nonempty("Email is required.").email("Please enter a valid email address."),
@@ -20,6 +21,7 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
+    const router = useRouter();
     const form = useForm<LoginFormValues>({
         resolver: zodResolver(loginSchema),
         defaultValues: {
@@ -81,6 +83,7 @@ export function LoginForm() {
 
             if (response.ok) {
                 setToast?.({ title: '✓', description: 'You have successfully logged in.', variant: 'default' });
+                router.push('/patient-info/dashboard');
                 // Optionally, redirect to a protected route
             } else if (response.status === 401) {
                 // 401 Unauthorized means incorrect login credentials

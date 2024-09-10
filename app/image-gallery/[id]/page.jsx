@@ -20,7 +20,7 @@ const DEFAULT_FORM_VALUES = {
     surgeryDate: new Date(),
     occupation: "",
     laterality: "Bilateral",
-    priority: "Low",
+    priority: "Routine",
     hospital: "PMC",
     baselineAmbu: "Independent",
     medx: [],
@@ -31,7 +31,7 @@ const DEFAULT_FORM_VALUES = {
     otherDrugs: "",
     allergies: "",
     notes: "",
-    status: 'Not started'
+    status: 'Not Started'
 };
 
 const ImageGallery = () => {

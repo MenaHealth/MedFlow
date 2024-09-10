@@ -18,8 +18,11 @@ const Nav = () => {
         fetchProviders();
     }, []);
 
+    console.log(providers)
+    console.log('session:', session)
+
     return (
-        <nav className='w-full flex justify-between items-center mb-16 pt-3'>
+        <nav className='w-full flex justify-between items-center mb-8 pt-3'>
             <Link href='/patient-info/dashboard' className='flex gap-2'>
                 <Image
                     src='/assets/images/logo.svg'

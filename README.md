@@ -21,7 +21,6 @@ pnpm dev
 # or
 bun dev
 ```
-
 - Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 - to log in, contact a senior developer with the most recent .env file, then put the .env file at the root of the med-flow folder.

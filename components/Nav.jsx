@@ -69,16 +69,16 @@ const Nav = () => {
                     <>
                         {providers &&
                             Object.values(providers).map((provider) => (
-                                <button
-                                    type='button'
-                                    key={provider.name}
-                                    onClick={() => {
-                                        signIn(provider.id);
-                                    }}
-                                    className='black_btn'
-                                >
-                                    Sign in
-                                </button>
+<button
+    type='button'
+    key={provider.name}
+    onClick={() => {
+        signIn(provider.id);
+    }}
+    className='black_btn mobile_signin_btn'
+>
+    Sign in 
+</button>
                             ))}
                     </>
                 )}
@@ -127,16 +127,17 @@ const Nav = () => {
                     <>
                         {providers &&
                             Object.values(providers).map((provider) => (
-                                <button
-                                    type='button'
-                                    key={provider.name}
-                                    onClick={() => {
-                                        signIn(provider.id);
-                                    }}
-                                    className='black_btn'
-                                >
-                                    Sign in
-                                </button>
+                            <button
+                             type='button'
+                                key={provider.name}
+                                onClick={() => {
+                               signIn(provider.id);
+                                 }}
+                                className='black_btn desktop_signin_btn'
+                                    >
+                                Sign in 
+                        </button>
+
                             ))}
                     </>
                 )}

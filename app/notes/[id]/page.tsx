@@ -21,7 +21,6 @@ const NotesPage: React.FC<NotesPageProps> = ({ params }) => {
             <PatientSubmenu />
             <h1 className="text-3xl font-bold mb-8 text-center">Notes</h1>
             <div className="border border-gray-300 p-8 bg-white shadow rounded-lg">
-                <h2 className="text-xl font-bold mb-4">Header 1</h2>
                 <NotesForm patientId={params.id} username={username} />
             </div>
         </div>

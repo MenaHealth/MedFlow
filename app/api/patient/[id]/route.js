@@ -45,11 +45,8 @@ export const PATCH = async (request, { params }) => {
 
 export const DELETE = async (request, { params }) => {
     try {
-        await dbConnect(); // Correct function call
-
-        // Find the prompt by ID and remove it
-        await User.findByIdAndRemove(params.id);
-
+        await dbConnect();
+        await Patient.findOneAndRemove({ patientId: params.id });
         return new Response("Prompt deleted successfully", { status: 200 });
     } catch (error) {
         return new Response("Error deleting patient", { status: 500 });

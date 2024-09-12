@@ -1,3 +1,4 @@
+// app/api/patient/notes/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '../../../../../utils/database';
 import Note from '../../../../../models/note';
@@ -30,14 +31,14 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     try {
         const patientId = params.id;
         const { content, username, title } = await request.json();
-        
+
         console.log('Received data:', { content, username, title });
 
         const newNote = new Note({
             content,
             username,
             patientId,
-            title,  
+            title,
             date: new Date(),
         });
 

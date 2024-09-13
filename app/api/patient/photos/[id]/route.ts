@@ -1,4 +1,4 @@
-// app/api/patient/photos/[id]/route.ts
+// app/api/patient/photos/[id]/route.js
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 import { Readable } from 'stream';
 

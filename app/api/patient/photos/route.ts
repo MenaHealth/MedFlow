@@ -1,4 +1,4 @@
-// app/api/patient/photos/route.ts
+// app/api/patient/photos/route.js
 import { NextRequest, NextResponse } from 'next/server';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { fromArrayBuffer } from '@smithy/util-buffer-from';

@@ -52,13 +52,6 @@ export function LoginForm() {
 
         if (errorMessages.length > 0) {
             setToast?.({
-                title: '!',
-                description: errorMessages.join('\n'),
-                variant: 'destructive',
-            });
-        }
-        if (errorMessages.length > 0) {
-            setToast?.({
                 title: '❌',
                 description: errorMessages.join('\n'),
                 variant: 'error',
@@ -96,7 +89,8 @@ export function LoginForm() {
     };
 
     return (
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
+            <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-4">
                     <TextFormField
@@ -129,12 +123,12 @@ export function LoginForm() {
                         Back to login
                     </button>
                 </div>
-
             )}
-
-            <p className="text-sm text-gray-600">
-                <a href="#" onClick={() => setShowForgotPassword(true)}>Forgot password?</a>
-            </p>
+            {!showForgotPassword && (
+                <p className="text-sm text-gray-600 mt-4">
+                    <a href="#" onClick={() => setShowForgotPassword(true)}>Forgot password?</a>
+                </p>
+            )}
         </div>
     );
 }

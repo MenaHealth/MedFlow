@@ -1,11 +1,11 @@
 // components/auth/SecurityQuestionsForm.tsx
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdownMenu";
 import { TextFormField } from "@/components/ui/TextFormField";
 import { securityQuestions } from "@/utils/securityQuestions.enum";
-import { useEffect, useState } from "react";
 import useToast from "@/components/hooks/useToast";
 
 const securityQuestionsSchema = z.object({
@@ -20,11 +20,11 @@ const securityQuestionsSchema = z.object({
 export type SecurityQuestionsFormValues = z.infer<typeof securityQuestionsSchema>;
 
 interface Props {
-    onDataChange: (data: any) => void;
-    formData: any;
+    onDataChange: (data: SecurityQuestionsFormValues) => void;
+    formData: Partial<SecurityQuestionsFormValues>;
 }
 
-const SecurityQuestionsForm = ({ onDataChange, formData }: Props) => {
+const SecurityQuestionsForm: React.FC<Props> = ({ onDataChange, formData }) => {
     const { setToast } = useToast();
     const [selectedQuestions, setSelectedQuestions] = useState<string[]>([]);
 
@@ -41,27 +41,12 @@ const SecurityQuestionsForm = ({ onDataChange, formData }: Props) => {
     });
 
     useEffect(() => {
-        const subscription = form.watch((value) => {
-            onDataChange(value);
-        });
-        return () => subscription.unsubscribe();
-    }, [form, onDataChange]);
-
-    useEffect(() => {
         setSelectedQuestions([
             formData.question1 || '',
             formData.question2 || '',
             formData.question3 || '',
         ]);
     }, [formData]);
-
-    const handleError = () => {
-        setToast({
-            title: "Error",
-            description: "Security questions are required",
-            variant: "destructive",
-        });
-    };
 
     const updateSelectedQuestions = (questionNumber: string, selectedQuestion: string) => {
         form.setValue(questionNumber as "question1" | "question2" | "question3", selectedQuestion);
@@ -72,9 +57,13 @@ const SecurityQuestionsForm = ({ onDataChange, formData }: Props) => {
         });
     };
 
+    const handleSubmit = form.handleSubmit((data: SecurityQuestionsFormValues) => {
+        onDataChange(data);
+    });
+
     return (
         <div className="max-w-md mx-auto">
-            <form className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
                 {[1, 2, 3].map((num) => (
                     <div key={num}>
                         <DropdownMenu>
@@ -85,6 +74,8 @@ const SecurityQuestionsForm = ({ onDataChange, formData }: Props) => {
                                     fieldLabel={`Security Question ${num}`}
                                     className="w-full"
                                     disabled
+                                    id={`question${num}`}
+                                    autoComplete="off"
                                 />
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
@@ -100,10 +91,15 @@ const SecurityQuestionsForm = ({ onDataChange, formData }: Props) => {
                         <TextFormField
                             form={form}
                             fieldName={`answer${num}`}
-                            fieldLabel="Your Answer"
+                            fieldLabel={`Your Answer for Question ${num}`}
+                            id={`answer${num}`}
+                            autoComplete="off"
                         />
                     </div>
                 ))}
+                <button type="submit" className="btn btn-primary w-full">
+                    Save Security Questions
+                </button>
             </form>
         </div>
     );

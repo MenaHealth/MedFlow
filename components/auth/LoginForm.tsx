@@ -22,7 +22,7 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 interface Props {
-    accountType: 'Doctor' | 'Triage';
+    accountType?: 'Doctor' | 'Triage';
 }
 
 export function LoginForm({ accountType }: Props) {

@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+"use client"
+
+import React, { useState, useEffect } from 'react';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { TextFormField } from "@/components/ui/TextFormField";
-import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { useRouter } from "next/navigation";
 import useToast from "@/components/hooks/useToast";
@@ -50,19 +51,22 @@ const SignupForm = ({ accountType }: Props) => {
         const calculateProgress = () => {
             const stepProgress = (currentStep - 1) / totalSteps;
             const fieldProgress = Object.values(formData).filter(Boolean).length / (totalSteps * 3);
-            setProgress(stepProgress + fieldProgress);
+            setProgress(Math.min(stepProgress + fieldProgress, 1)); // Ensure progress doesn't exceed 1
         };
 
         calculateProgress();
     }, [currentStep, formData, totalSteps]);
 
     const handleNext = (data: any) => {
-        setFormData({ ...formData, ...data });
-        if (currentStep < totalSteps) {
-            setCurrentStep(currentStep + 1);
-        } else {
-            handleSubmit();
-        }
+        setFormData((prevData) => {
+            const newData = { ...prevData, ...data };
+            if (currentStep < totalSteps) {
+                setCurrentStep(currentStep + 1);
+            } else {
+                handleSubmit(newData);
+            }
+            return newData;
+        });
     };
 
     const handleBack = () => {
@@ -71,32 +75,24 @@ const SignupForm = ({ accountType }: Props) => {
         }
     };
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (data: any) => {
         try {
             const response = await fetch('/api/auth/signup', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    ...formData,
-                    accountType,
-                }),
+                body: JSON.stringify(data),
             });
 
+            const result = await response.json();
             if (response.ok) {
-                setToast({
-                    title: `${accountType} signed up successfully`,
-                    description: `You have successfully signed up as a ${accountType}.`,
-                    variant: 'success',
-                });
-                router.push('/dashboard');
+                setToast({ title: 'Success', description: result.message, variant: 'success' });
+                router.push('/login');
             } else {
-                const result = await response.json();
-                setToast({ title: 'Signup Error', description: result.message, variant: 'destructive' });
+                setToast({ title: 'Error', description: result.message, variant: 'destructive' });
             }
         } catch (error) {
-            console.error('Signup error:', error);
             setToast({ title: 'Error', description: 'An unexpected error occurred', variant: 'destructive' });
         }
     };
@@ -109,6 +105,7 @@ const SignupForm = ({ accountType }: Props) => {
             ></div>
         </div>
     );
+
 
     const renderForm = () => {
         switch (currentStep) {
@@ -123,13 +120,13 @@ const SignupForm = ({ accountType }: Props) => {
                     </Form>
                 );
             case 2:
-                return <SecurityQuestionsForm onDataChange={setFormData} formData={formData} />;
+                return <SecurityQuestionsForm onDataChange={handleNext} formData={formData} />;
             case 3:
                 return accountType === 'Doctor' ?
-                    <DoctorSignupForm onDataChange={setFormData} formData={formData} /> :
-                    <TriageSignupForm onDataChange={setFormData} formData={formData} />;
+                    <DoctorSignupForm onDataChange={handleNext} formData={formData} /> :
+                    <TriageSignupForm onDataChange={handleNext} formData={formData} />;
             case 4:
-                return accountType === 'Doctor' ? <DoctorSignupForm onDataChange={setFormData} formData={formData} /> : null;
+                return accountType === 'Doctor' ? <DoctorSignupForm onDataChange={handleNext} formData={formData} /> : null;
             default:
                 return null;
         }
@@ -139,27 +136,34 @@ const SignupForm = ({ accountType }: Props) => {
         if (currentStep === 1) {
             return !form.formState.isValid;
         }
-        // Add logic for other steps if needed
+        if (currentStep === 2) {
+            return !(formData.question1 && formData.answer1 && formData.question2 && formData.answer2 && formData.question3 && formData.answer3);
+        }
+        if (currentStep === 3 && accountType === 'Doctor') {
+            return !(formData.firstName && formData.lastName && formData.dob && formData.doctorSpecialty && formData.languages.length && formData.countries.length && formData.gender);
+        }
         return false;
     };
 
     return (
-        <div className="w-full max-w-md">
+        <div className="w-full h-full flex flex-col">
             {renderProgressBar()}
-            <div className="bg-white p-8 rounded-lg shadow-md">
-                <h2 className="text-2xl font-bold mb-6 text-center">{accountType} Signup - Step {currentStep}</h2>
+            <div className="flex-grow overflow-y-auto">
                 {renderForm()}
-                <div className="flex justify-between mt-6">
-                    {currentStep > 1 && (
-                        <Button onClick={handleBack} className="bg-gray-300 hover:bg-gray-400 text-black">
-                            Back
-                        </Button>
-                    )}
-                    <NextButton
-                        onClick={form.handleSubmit(handleNext)}
-                        isDisabled={isNextDisabled()}
-                    />
-                </div>
+            </div>
+            <div className="p-4 bg-white border-t flex justify-between">
+                {currentStep > 1 && (
+                    <button
+                        onClick={handleBack}
+                        className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors"
+                    >
+                        Back
+                    </button>
+                )}
+                <NextButton
+                    onClick={form.handleSubmit(handleNext)}
+                    isDisabled={isNextDisabled()}
+                />
             </div>
         </div>
     );

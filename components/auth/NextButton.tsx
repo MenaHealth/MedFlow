@@ -1,3 +1,4 @@
+// components/auth/NextButton.tsx
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { PaperPlaneIcon } from "@radix-ui/react-icons";

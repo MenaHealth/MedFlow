@@ -10,20 +10,29 @@ import { TextFormField } from "@/components/ui/TextFormField";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import ForgotPasswordForm from "@/components/auth/ForgotPasswordForm";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 
 const loginSchema = z.object({
     email: z.string().nonempty("Email is required.").email("Please enter a valid email address."),
     password: z.string().nonempty("Password is required.").min(8, ""),
+    accountType: z.enum(['Doctor', 'Triage']),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-export function LoginForm() {
+interface Props {
+    accountType?: 'Doctor' | 'Triage';
+}
+
+export function LoginForm({ accountType }: Props) {
+    const router = useRouter();
     const form = useForm<LoginFormValues>({
         resolver: zodResolver(loginSchema),
         defaultValues: {
             email: '',
             password: '',
+            accountType: accountType,
         },
     });
 
@@ -70,23 +79,23 @@ export function LoginForm() {
         setSubmitting(true);
 
         try {
-            const response = await fetch('/api/auth/login/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
+            const response = await signIn('credentials', {
+                email: data.email,
+                password: data.password,
+                redirect: false,
+                accountType,
             });
 
-            if (response.ok) {
+            if (response && !response.error) {
                 setToast?.({ title: '✓', description: 'You have successfully logged in.', variant: 'default' });
+                router.push('/patient-info/dashboard');
                 // Optionally, redirect to a protected route
-            } else if (response.status === 401) {
+            } else if (response && response.status === 401) {
                 // 401 Unauthorized means incorrect login credentials
                 setToast?.({ title: 'Login Error', description: 'Incorrect login credentials.', variant: 'destructive' });
             } else {
-                const result = await response.json();
-                setToast?.({ title: 'Login Error', description: result.message, variant: 'error' });
+                // const result = await response.json();
+                // setToast?.({ title: 'Login Error', description: result.message, variant: 'error' });
             }
         } catch (error) {
             setToast?.({ title: 'Login Error', description: 'An unexpected error occurred. Please try again.', variant: 'error' });

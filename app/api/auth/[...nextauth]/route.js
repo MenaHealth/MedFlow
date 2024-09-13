@@ -22,14 +22,13 @@ const handler = NextAuth({
       },
       async authorize(credentials) {
         await dbConnect();
-
         const { email, password } = credentials;
         let user;
 
         // Check account type and query the correct collection
         if (credentials.accountType === 'Doctor') {
           user = await User.findOne({ email });
-        } else if (credentials.accountType === 'Patient') {
+        } else if (credentials.accountType === 'Triage') {
           user = await Patient.findOne({ email });
         }
 
@@ -52,18 +51,31 @@ const handler = NextAuth({
     }),
   ],
   callbacks: {
+    async jwt({ token, account, user }) {
+      if (account) {
+        token.accountType = user.accountType;
+      }
+      return token;
+    },
     async session({ session, token }) {
       await dbConnect();
       let sessionUser;
       if (token.accountType === 'Doctor') {
         sessionUser = await User.findOne({ email: token.email });
-      } else if (token.accountType === 'Patient') {
+      } else if (token.accountType === 'Triage') {
         sessionUser = await Patient.findOne({ email: token.email });
       }
-      session.user.id = sessionUser._id.toString();
-      session.user.accountType = sessionUser.accountType;
+      if (sessionUser) {
+        session.user.id = sessionUser._id.toString();
+        session.user.accountType = sessionUser.accountType;
+      }
       return session;
     },
+  },
+  pages: {
+    signIn: '/auth/login',
+    newUser: '/auth/signup'
+    
   },
 });
 

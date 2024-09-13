@@ -31,6 +31,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdownMenu";
 
+import { getServerSession } from 'next-auth';
+import { useSession } from 'next-auth/react';
+
 
 import { CLINICS, PRIORITIES, SPECIALTIES, STATUS } from '@/data/data';
 import Link from 'next/link';
@@ -42,6 +45,20 @@ export default function PatientTriage() {
   const [prioritySort, setPrioritySort] = React.useState("all");
   const [searchTerm, setSearchTerm] = React.useState("");
   const [nameFilter, setNameFilter] = React.useState("all");
+
+  const [shouldShowClearButton, setShouldShowClearButton] = useState([
+    sortOrder !== "newest",
+    prioritySort !== "all",
+    searchTerm !== ""
+  ].filter(Boolean).length >= 2);
+
+  useEffect(() => {
+    setShouldShowClearButton([
+      sortOrder !== "newest",
+      prioritySort !== "all",
+      searchTerm !== ""
+    ].filter(Boolean).length >= 2);
+  }, [sortOrder, prioritySort, searchTerm]);
 
   const fetchRows = async () => {
     try {
@@ -129,10 +146,11 @@ export default function PatientTriage() {
             >
               <div className="relative group">
                 <PersonAddIcon
-                    className="text-5xl rounded-full shadow p-3 bg-white group-hover:shadow-lg transition-all duration-300"
+                    className="text-5xl rounded-full shadow bg-white group-hover:shadow-lg transition-all duration-300"
                     style={{
                       color: "currentColor",
                       transition: "color 0.15s ease-in-out",
+                      padding: "0.75rem"
                     }}
                     onMouseOver={(e) => (e.currentTarget.style.color = "#FF5722")}
                     onMouseOut={(e) => (e.currentTarget.style.color = "currentColor")}
@@ -194,17 +212,21 @@ export default function PatientTriage() {
                   />
                 </div>
             )}
-            <div
-                className="bg-red-100 text-red-800 px-2 py-1 rounded cursor-pointer"
-                onClick={() => {
-                  setSortOrder("newest");
-                  setPrioritySort("all");
-                  setSearchTerm("");
-                }}
-            >
-              <DeleteSweepIcon className="mr-2" />
-              Clear all filters
-            </div>
+            {shouldShowClearButton &&
+                (
+                  <div
+                    className="bg-red-100 text-red-800 px-2 py-1 rounded cursor-pointer"
+                    onClick={() => {
+                      setSortOrder("newest");
+                      setPrioritySort("all");
+                      setSearchTerm("");
+                    }}
+                  >
+                    <DeleteSweepIcon className="mr-2" />
+                    Clear all filters
+                  </div>
+                )
+            }
           </div>
           <TableContainer component={Paper} style={{ maxHeight: '80vh', overflowY: 'auto' }}>
             <Table sx={{ minWidth: 650 }} aria-label="simple table">

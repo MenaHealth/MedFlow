@@ -3,24 +3,30 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { signIn, signOut, useSession, getProviders } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 
 const Nav = () => {
     const { data: session } = useSession();
-    const [providers, setProviders] = useState(null);
     const [toggleDropdown, setToggleDropdown] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
-        const fetchProviders = async () => {
-            const res = await getProviders();
-            setProviders(res);
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 768);
         };
-        fetchProviders();
+
+        handleResize();
+
+        window.addEventListener('resize', handleResize);
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
     }, []);
 
     return (
-        <nav className='w-full flex justify-between items-center mb-16 pt-3'>
-            <Link href='/patient-info/dashboard' className='flex gap-2'>
+        <nav className='w-full flex justify-between items-center mb-8 pt-3'>
+            <Link href='/' className='flex gap-2'>
                 <Image
                     src='/assets/images/logo.svg'
                     alt='logo'
@@ -30,65 +36,52 @@ const Nav = () => {
                 />
                 <p className='logo_text'>MedFlow</p>
             </Link>
+
             {/* Desktop Navigation */}
-            <div className='sm:flex hidden gap-5'>
-                <div className='flex gap-3 md:gap-8'>
+            <div className={`sm:flex ${isMobile ? "hidden" : ""} gap-5`}>
+                <div className='flex gap-3 md:gap-4'>
                     {session?.user && (
                         <>
-                            {/*<Link href='/patient-info/dashboard' className='outline_btn'>*/}
-                            {/*    Patient List*/}
-                            {/*</Link>*/}
                             <Link href='/fajr/patient' className='outline_btn'>
                                 New Patient
                             </Link>
                             <Link href='/fajr/lab' className='outline_btn'>
                                 New Lab Form
                             </Link>
-                            {/*<Link href='/patient/660b70c7083d09310b0dc4d2' className='outline_btn'>*/}
-                            {/*    Chart Template*/}
-                            {/*</Link>*/}
+
+                            <button type='button' onClick={signOut} className='outline_btn'>
+                                Sign Out
+                            </button>
+                            <Link href='/'>
+                                {session?.user.image ? (
+                                    <Image
+                                        src={session?.user.image}
+                                        width={37}
+                                        height={37}
+                                        className='rounded-full'
+                                        alt='profile'
+                                    />
+                                ) : (
+                                    <div className='avatar'>
+                                        {session?.user.name.indexOf(' ') > 0
+                                            ? `${session?.user.name.split(' ')[0][0]}${session?.user.name.split(' ')[1][0]}`
+                                            : session?.user.name[0]}
+                                    </div>
+                                )}
+                            </Link>
                         </>
                     )}
                 </div>
-                {session?.user ? (
-                    <>
-                        <button type='button' onClick={signOut} className='outline_btn'>
-                            Sign Out
-                        </button>
-                        <Link href='/'>
-                            <Image
-                                src={session?.user.image}
-                                width={37}
-                                height={37}
-                                className='rounded-full'
-                                alt='profile'
-                            />
-                        </Link>
-                    </>
-                ) : (
-                    <>
-                        {providers &&
-                            Object.values(providers).map((provider) => (
-<button
-    type='button'
-    key={provider.name}
-    onClick={() => {
-        signIn(provider.id);
-    }}
-    className='black_btn mobile_signin_btn'
->
-    Sign in 
-</button>
-                            ))}
-                    </>
-                )}
             </div>
 
             {/* Mobile Navigation */}
             <div className='sm:hidden flex relative z-20'>
-                {session?.user ? (
+                {session?.user && (
                     <div className='flex'>
-                        <div className={`hamburger ${toggleDropdown ? 'active' : ''}`} onClick={() => setToggleDropdown(!toggleDropdown)}>
+                        <div
+                            className={`hamburger ${toggleDropdown ? 'active' : ''}`}
+                            onClick={() => setToggleDropdown(!toggleDropdown)}
+                        >
                             <span className='bar'></span>
                             <span className='bar'></span>
                             <span className='bar'></span>
@@ -123,23 +116,6 @@ const Nav = () => {
                             </div>
                         )}
                     </div>
-                ) : (
-                    <>
-                        {providers &&
-                            Object.values(providers).map((provider) => (
-                            <button
-                             type='button'
-                                key={provider.name}
-                                onClick={() => {
-                               signIn(provider.id);
-                                 }}
-                                className='black_btn desktop_signin_btn'
-                                    >
-                                Sign in 
-                        </button>
-
-                            ))}
-                    </>
                 )}
             </div>
         </nav>

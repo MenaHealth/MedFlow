@@ -412,3 +412,19 @@ a {
 .form-item .relative input {
   padding-top: 1rem;
 }
+
+.avatar{
+  background: #FF5722;
+  width: 34px;
+  height: 34px;
+  -webkit-border-radius: 50%;
+  -moz-border-radius: 50%;
+  -ms-border-radius: 50%;
+  border-radius: 50%;
+  display: inline-block;
+  text-align: center;
+  line-height: 34px;
+  font-weight: 400;
+  margin-right: 5px;
+  color: #FFFFFF;
+}

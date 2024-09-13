@@ -2,29 +2,39 @@
 import { Schema, model, models, Document, CallbackError } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import { SecurityQuestion } from '@/utils/securityQuestions.enum';
+import { DoctorSpecialty } from '@/utils/doctorSpecialty.enum';
 
 interface IUser extends Document {
   userID: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   accountType: 'Doctor' | 'Triage' | 'Admin';
   password: string;
-  specialties?: string[];
+  doctorSpecialty?: DoctorSpecialty;
+  languages?: string[];
+  countries?: string[];
+  gender?: 'male' | 'female';
+  dob: Date;
   image?: string;
   securityQuestions: {
-    question: SecurityQuestion; // Use SecurityQuestion enum
+    question: SecurityQuestion;
     answer: string;
   }[];
 }
 
 const UserSchema = new Schema<IUser>({
   userID: {
-    type: "String",
+    type: String,
     required: [true, 'userID is required!'],
   },
-  name: {
+  firstName: {
     type: String,
-    required: [true, 'Name is required!'],
+    required: [true, 'First name is required!'],
+  },
+  lastName: {
+    type: String,
+    required: [true, 'Last name is required!'],
   },
   email: {
     type: String,
@@ -36,6 +46,24 @@ const UserSchema = new Schema<IUser>({
     required: [true, 'Account type is required!'],
     enum: ['Doctor', 'Triage', 'Admin'],
   },
+  doctorSpecialty: {
+    type: String,
+    enum: Object.values(DoctorSpecialty),
+  },
+  languages: {
+    type: [String],
+  },
+  countries: {
+    type: [String],
+  },
+  gender: {
+    type: String,
+    enum: ['male', 'female'],
+  },
+  dob: {
+    type: Date,
+    required: [true, 'Date of birth is required!'],
+  },
   password: {
     type: String,
     required: [true, 'Password is required!'],
@@ -46,7 +74,7 @@ const UserSchema = new Schema<IUser>({
   securityQuestions: [{
     question: {
       type: String,
-      enum: Object.values(SecurityQuestion), // Use SecurityQuestion enum values
+      enum: Object.values(SecurityQuestion),
       required: [true, 'Question is required!'],
     },
     answer: {

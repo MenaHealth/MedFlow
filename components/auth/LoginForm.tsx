@@ -10,6 +10,7 @@ import { TextFormField } from "@/components/ui/TextFormField";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import ForgotPasswordForm from "@/components/auth/ForgotPasswordForm";
+import { useRouter } from "next/navigation";
 
 const loginSchema = z.object({
     email: z.string().nonempty("Email is required.").email("Please enter a valid email address."),
@@ -18,7 +19,12 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-export function LoginForm() {
+interface Props {
+    accountType?: 'Doctor' | 'Triage';
+}
+
+export function LoginForm({ accountType }: Props) {
+    const router = useRouter();
     const form = useForm<LoginFormValues>({
         resolver: zodResolver(loginSchema),
         defaultValues: {

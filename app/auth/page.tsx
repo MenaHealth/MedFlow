@@ -71,7 +71,25 @@ const AuthPage = () => {
                 <Card>
                     {authType === 'Login' ? (
                         <div className="login-card w-full">
-                            <LoginForm />
+                            <div className="mb-8">
+                                <RadioCard.Root
+                                    value={accountType}
+                                    onValueChange={handleAccountTypeChange}
+                                    className="flex justify-between w-full"
+                                >
+                                    <RadioCard.Item value="Doctor" className="w-1/2 p-2">
+                                        <Flex direction="column" width="100%" className="justify-center items-center h-full">
+                                            <Text size="sm" weight="normal">Doctor</Text>
+                                        </Flex>
+                                    </RadioCard.Item>
+                                    <RadioCard.Item value="Triage" className="w-1/2 p-2">
+                                        <Flex direction="column" width="100%" className="justify-center items-center h-full">
+                                            <Text size="sm" weight="normal">Triage Specialist</Text>
+                                        </Flex>
+                                    </RadioCard.Item>
+                                </RadioCard.Root>
+                            </div>
+                            <LoginForm accountType={accountType}/>
                             {showForgotPassword && (
                                 <div className="forgot-password-card w-full">
                                     <ForgotPasswordForm />

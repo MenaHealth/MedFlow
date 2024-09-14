@@ -7,7 +7,7 @@ interface IUser extends Document {
   userID: string;
   name: string;
   email: string;
-  accountType: 'Doctor' | 'Triage' | 'Admin';
+  accountType: 'Doctor' | 'Triage' | 'Admin' | 'Pending';
   password: string;
   specialties?: string[];
   image?: string;
@@ -34,7 +34,7 @@ const UserSchema = new Schema<IUser>({
   accountType: {
     type: String,
     required: [true, 'Account type is required!'],
-    enum: ['Doctor', 'Triage', 'Admin'],
+    enum: ['Doctor', 'Triage', 'Admin', 'Pending'],
   },
   password: {
     type: String,

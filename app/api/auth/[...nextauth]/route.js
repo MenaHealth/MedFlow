@@ -5,7 +5,7 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
 
 import User from '@/models/user';
-import Patient from '@/models/patient'; // Import the Patient model
+import GoogleUser from '@/models/googleUser';
 import dbConnect from '@/utils/database';
 
 const handler = NextAuth({
@@ -26,11 +26,7 @@ const handler = NextAuth({
         let user;
 
         // Check account type and query the correct collection
-        if (credentials.accountType === 'Doctor') {
-          user = await User.findOne({ email });
-        } else if (credentials.accountType === 'Triage') {
-          user = await Patient.findOne({ email });
-        }
+        user = await User.findOne({ email });
 
         if (!user) {
           throw new Error('Invalid email or password');
@@ -45,37 +41,60 @@ const handler = NextAuth({
           id: user._id.toString(),
           email: user.email,
           name: user.name,
-          accountType: credentials.accountType,
+          accountType: user.accountType,
         };
       },
     }),
   ],
   callbacks: {
-    async jwt({ token, account, user }) {
+    async signIn({ user, account, profile }) {
+      if (account.provider === "google") {
+        await dbConnect(); 
+        const existingGoogleUser = await GoogleUser.findOne({ email: user.email });
+        if (!existingGoogleUser) {
+          await GoogleUser.create({
+            userID: profile?.sub || null,
+            email: user.email,
+            name: user.name,
+            image: user.image,
+            accountType: "Pending",
+          });
+        }
+      }
+
+      return true;
+    },
+    async jwt({ token, account, user, trigger, session }) {
       if (account) {
-        token.accountType = user.accountType;
+        if (account.provider === 'google') {
+          await dbConnect();  // Ensure database is connected
+          const googleUser = await GoogleUser.findOne({ email: user.email });
+    
+          if (googleUser) {
+            token.id = googleUser.userID;
+            token.accountType = googleUser.accountType;
+          } else {
+            // Handle the case when the GoogleUser hasn't been created yet
+            // You can set default token values or indicate that the user is in a 'Pending' state
+            token.accountType = 'Pending';  // Or any default value
+          }
+        } else {
+          token.id = user.id;
+          token.accountType = user.accountType;
+        }
+      }
+      if (trigger === 'update') {
+        token.accountType = session.user?.accountType;
       }
       return token;
     },
     async session({ session, token }) {
-      await dbConnect();
-      let sessionUser;
-      if (token.accountType === 'Doctor') {
-        sessionUser = await User.findOne({ email: token.email });
-      } else if (token.accountType === 'Triage') {
-        sessionUser = await Patient.findOne({ email: token.email });
-      }
-      if (sessionUser) {
-        session.user.id = sessionUser._id.toString();
-        session.user.accountType = sessionUser.accountType;
+      if (token) {
+        session.user.id = token.id;
+        session.user.accountType = token.accountType;
       }
       return session;
     },
-  },
-  pages: {
-    signIn: '/auth/login',
-    newUser: '/auth/signup'
-    
   },
 });
 

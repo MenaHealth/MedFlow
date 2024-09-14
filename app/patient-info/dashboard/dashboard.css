@@ -46,12 +46,16 @@
 }
 
 .MuiTableCell-head {
-  font-size: 0.7rem;
-  font-weight: 500;
+  font-size: 0.7rem !important;
+  font-weight: 500 !important;
   color: #333;
   background-color: #f7f7f7;
   border-bottom: 1px solid #ddd;
   padding: 12px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.05em !important;
+}
+
+.MuiTableCell-root {
+  padding: 12px;
 }

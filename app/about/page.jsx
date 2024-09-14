@@ -73,7 +73,7 @@ export default function AboutPage() {
                             </div>
                             <div className="card-content">
                                 <p className="mt-2 text-base text-darkBlue">
-                                    The triage specialists manage patient information, direct it to appropriate doctors, and ensure language compatibility.
+                                    The triage coordinators manage patient information, direct it to appropriate doctors, and ensure language compatibility.
                                 </p>
                             </div>
                         </Card>
@@ -99,7 +99,7 @@ export default function AboutPage() {
                             </div>
                             <div className="card-content">
                                 <p className="mt-2 text-base text-darkBlue">
-                                    Doctors with various specializations are authorized and scheduled by triage specialists based on patient needs and location.
+                                    Doctors with various specializations are authorized and scheduled by triage coordinators based on patient needs and location.
                                 </p>
                             </div>
                         </Card>
@@ -168,7 +168,7 @@ export default function AboutPage() {
                 <div className="mt-20">
                     <Card className="p-8 bg-white shadow-lg">
                         <div className="flex flex-col space-y-8">
-                            <h2 className="text-3xl font-bold text-black">Doctor and Triage Specialist Sign-up Process</h2>
+                            <h2 className="text-3xl font-bold text-black">Doctor and Triage Coordinator Sign-up Process</h2>
                             <div className="grid md:grid-cols-2 gap-8">
                                 <div>
                                     <h3 className="text-xl font-semibold text-black mb-4">For Doctors</h3>
@@ -186,11 +186,11 @@ export default function AboutPage() {
                                                 <li>Countries Seeing Patients</li>
                                             </ul>
                                         </li>
-                                        <li><b>Await approval from a <u>Triage Specialist</u></b></li>
+                                        <li><b>Await approval from a <u>Triage Coordinator</u></b></li>
                                     </ul>
                                 </div>
                                 <div>
-                                    <h3 className="text-xl font-semibold text-black mb-4">For Triage Specialists</h3>
+                                    <h3 className="text-xl font-semibold text-black mb-4">For Triage Coordinators</h3>
                                     <ul className="list-disc list-inside space-y-2 text-darkBlue">
                                         <li>
                                             Sign up at <Link href={`${baseURL}/auth`} className="text-[var(--orange)] hover:underline">our registration page</Link>
@@ -210,10 +210,10 @@ export default function AboutPage() {
                                 <h3 className="text-lg font-semibold text-black mb-2">Post-Registration Process</h3>
                                 <ol className="list-decimal list-inside space-y-2 text-darkBlue">
                                     <li>An email confirmation is sent upon account creation</li>
-                                    <li>Triage Specialists are approved by the <i>site administrator</i></li>
-                                    <li>Doctors are approved by <i>Triage Specialists</i></li>
+                                    <li>Triage Coordinators are approved by the <i>site administrator</i></li>
+                                    <li>Doctors are approved by <i>Triage Coordinators</i></li>
                                     <li>Approved doctors can access the Physician Dashboard</li>
-                                    <li>Triage Specialists direct patient information to appropriate doctors based on specialization</li>
+                                    <li>Triage Coordinators direct patient information to appropriate doctors based on specialization</li>
                                 </ol>
                             </div>
                         </div>

@@ -1,32 +1,47 @@
-// app/auth/page.tsx
+// app/complete-signup/page.tsx
 'use client';
-
-import React, { useState } from 'react';
-import SignupForm from '@/components/auth/SignupForm';
-import LoginForm from '@/components/auth/LoginForm';
-import ForgotPasswordForm from '@/components/auth/ForgotPasswordForm';
-import { RadioCard } from '@/components/ui/radio-card';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import Flex from "@/components/ui/flex";
 import Text from "@/components/ui/text";
 import Card from '@/components/ui/card';
+import { RadioCard } from '@/components/ui/radio-card';
+import { Button } from "@/components/ui/button";
 
-const AuthPage = () => {
-    const [authType, setAuthType] = useState<'Login' | 'Signup'>('Login');
+
+const CompleteSignup = () => {
+    const { data: session, update } = useSession();
+    const router = useRouter();
     const [accountType, setAccountType] = useState<'Doctor' | 'Triage'>('Doctor');
-    const [showForgotPassword, setShowForgotPassword] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
 
     const handleAccountTypeChange = (value: 'Doctor' | 'Triage') => {
         setAccountType(value);
     };
 
-    const handleForgotPasswordClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-        e.preventDefault();
-        setShowForgotPassword(true);
-    };
+    const heartRateOpacity = accountType === 'Doctor' ? 'opacity-80' : 'opacity-20';
+    const ballsOpacity = accountType === 'Doctor' ? 'opacity-20' : 'opacity-80';
 
-    // Determine the appropriate opacity classes based on the form state
-    const heartRateOpacity = authType === 'Login' ? 'opacity-50' : accountType === 'Doctor' ? 'opacity-80' : 'opacity-20';
-    const ballsOpacity = authType === 'Login' ? 'opacity-50' : accountType === 'Doctor' ? 'opacity-20' : 'opacity-80';
+    useEffect(() => {
+        if (!session) {
+            router.push('/');
+        }
+    }, [session]);
+
+    const handleSubmit = async () => {
+        if (!session) return;
+    
+        await update({ ...session, user: { ...session.user, accountType }});
+    
+        await fetch(`/api/google-user/${session.user?.email}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ accountType }),
+        headers: { 'Content-Type': 'application/json' },
+        });
+    
+        router.replace('/patient-info/dashboard');
+    };
 
     return (
         <div className="h-screen w-full p-4 flex flex-col items-center justify-center relative">
@@ -51,37 +66,9 @@ const AuthPage = () => {
             </div>
 
             <div className="flex flex-col items-center justify-center w-full max-w-md z-10">
-                <RadioCard.Root
-                    value={authType}
-                    onValueChange={(value) => setAuthType(value as 'Login' | 'Signup')}
-                    className="flex flex-col w-full mb-8"
-                >
-                    <RadioCard.Item value="Login" className="w-full mb-2 p-2">
-                        <Flex direction="column" width="100%" className="justify-center items-center h-full">
-                            <Text size="sm" weight="normal">Login</Text>
-                        </Flex>
-                    </RadioCard.Item>
-                    <RadioCard.Item value="Signup" className="w-full p-2">
-                        <Flex direction="column" width="100%" className="justify-center items-center h-full">
-                            <Text size="sm" weight="normal">Sign Up</Text>
-                        </Flex>
-                    </RadioCard.Item>
-                </RadioCard.Root>
+            <h1>Complete Your Sign-Up</h1>
 
                 <Card>
-                    {authType === 'Login' ? (
-                        <div className="login-card w-full">
-                            <LoginForm />
-                            {showForgotPassword && (
-                                <div className="forgot-password-card w-full">
-                                    <ForgotPasswordForm />
-                                    <button className="text-sm text-gray-600 hover:text-gray-800" onClick={() => setShowForgotPassword(false)}>
-                                        Back to login
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    ) : (
                         <div className="signup-card w-full">
                             <div className="mb-8">
                                 <RadioCard.Root
@@ -100,14 +87,24 @@ const AuthPage = () => {
                                         </Flex>
                                     </RadioCard.Item>
                                 </RadioCard.Root>
+                                {accountType && 
+                                (
+                                    <div className="flex justify-center mt-6">
+                                        <Button
+                                            onClick={handleSubmit}
+                                            type="submit"
+                                            disabled={submitting}
+                                        >
+                                            {submitting ? "Submitting..." : "Submit"}
+                                        </Button>
+                                    </div>
+                                )}
                             </div>
-                            <SignupForm accountType={accountType} />
                         </div>
-                    )}
                 </Card>
             </div>
         </div>
     );
 };
 
-export default AuthPage;
+export default CompleteSignup;

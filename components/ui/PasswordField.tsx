@@ -1,28 +1,24 @@
 import { useState } from 'react';
-import { Controller } from 'react-hook-form';
+import * as Form from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { EyeClosedIcon, EyeOpenIcon } from "@radix-ui/react-icons";
 
 interface Props {
+    form: any;
     fieldName: string;
     fieldLabel: string;
     className?: string;
-    type?: string;
-    tooltip?: string;
-    showTooltip?: boolean;
     onFocus?: () => void;
     onBlur?: () => void;
     error?: string;
     disabled?: boolean;
 }
 
-const TextFormField = ({
+const PasswordField = ({
+                           form,
                            fieldName,
                            fieldLabel,
                            className,
-                           type,
-                           tooltip,
-                           showTooltip,
                            onFocus,
                            onBlur,
                            error,
@@ -30,28 +26,32 @@ const TextFormField = ({
                        }: Props) => {
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const [isFocused, setIsFocused] = useState(false);
+    const [showTooltip, setShowTooltip] = useState(false);
 
     const id = `${fieldName}-input`;
 
     const handleFocus = () => {
         setIsFocused(true);
+        setShowTooltip(true);
         if (onFocus) onFocus();
     };
 
     const handleBlur = () => {
         setIsFocused(false);
+        setShowTooltip(false);
         if (onBlur) onBlur();
     };
 
     return (
-        <Controller
+        <Form.FormField
+            control={form.control}
             name={fieldName}
             render={({ field }) => (
-                <div className={`mb-6 p-2 ${className}`}>
+                <Form.FormItem className={`mb-6 p-2 ${className}`}>
                     <div className="relative">
                         <Input
                             {...field}
-                            type={type === 'password' && isPasswordVisible ? 'text' : type}
+                            type={isPasswordVisible ? 'text' : 'password'}
                             onFocus={handleFocus}
                             onBlur={handleBlur}
                             id={id}
@@ -59,24 +59,34 @@ const TextFormField = ({
                                 isFocused || field.value ? 'bg-white' : ''
                             }`}
                         />
-                        <label
-                            htmlFor={id}
-                            className={`absolute transition-all ${
-                                (isFocused || field.value) ? 'text-xs -top-6' : 'text-sm top-1/2 -translate-y-1/2'
-                            } left-2 pointer-events-none`}
-                        >
+                        <Form.FormLabel htmlFor={id} className={`absolute transition-all ${
+                            (isFocused || field.value) ? 'text-xs -top-6' : 'text-sm top-1/2 -translate-y-1/2'
+                        } left-2 pointer-events-none`}>
                             {fieldLabel}
-                        </label>
-                        {showTooltip && tooltip && (
+                        </Form.FormLabel>
+                        <button
+                            type="button"
+                            onMouseEnter={() => setIsPasswordVisible(true)}
+                            onMouseLeave={() => setIsPasswordVisible(false)}
+                            className="absolute right-2 top-1/2 transform -translate-y-1/2"
+                            tabIndex={-1}
+                        >
+                            {isPasswordVisible ? (
+                                <EyeOpenIcon className="h-5 w-5 text-gray-500" />
+                            ) : (
+                                <EyeClosedIcon className="h-5 w-5 text-gray-500" />
+                            )}
+                        </button>
+                        {showTooltip && (
                             <div className="absolute left-0 bottom-full mt-2 w-full bg-gray-700 text-white text-sm p-2 rounded shadow-lg z-10">
-                                {tooltip}
+                                Eight or more characters and at least one number
                             </div>
                         )}
                     </div>
-                </div>
+                </Form.FormItem>
             )}
         />
     );
 };
 
-export { TextFormField };
+export default PasswordField;

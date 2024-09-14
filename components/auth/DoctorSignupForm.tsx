@@ -6,6 +6,7 @@ import { TextFormField } from "@/components/ui/TextFormField";
 import { DoctorSpecialty } from '@/utils/doctorSpecialty.enum';
 import { MultiChoiceFormField } from "@/components/form/MultiChoiceFormField";
 import { useSignupContext } from './SignupContext';
+import Submit from "@/components/auth/Submit";
 
 const doctorSignupSchema = z.object({
     firstName: z.string().min(1, "First name is required"),
@@ -20,7 +21,7 @@ const doctorSignupSchema = z.object({
 export type DoctorSignupFormValues = z.infer<typeof doctorSignupSchema>;
 
 const DoctorSignupForm: React.FC = () => {
-    const { formData, setFormData, setIsFormComplete } = useSignupContext();
+    const { formData, setFormData, setIsFormComplete, accountType } = useSignupContext();
 
     const form = useForm<DoctorSignupFormValues>({
         resolver: zodResolver(doctorSignupSchema),
@@ -40,7 +41,6 @@ const DoctorSignupForm: React.FC = () => {
             setFormData((prevData) => ({ ...prevData, ...data }));
             const isValid = Object.keys(form.formState.errors).length === 0;
             setIsFormComplete(isValid);
-            console.log('DoctorSignupForm isFormComplete:', isValid);
         });
 
         return () => subscription.unsubscribe();
@@ -91,6 +91,7 @@ const DoctorSignupForm: React.FC = () => {
                         custom={false}
                     />
                 </form>
+                <Submit />
             </FormProvider>
         </div>
     );

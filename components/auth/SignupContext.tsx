@@ -51,6 +51,9 @@ export const SignupProvider = ({ children, initialAccountType }: { children: Rea
 
     const handleNext = useCallback(() => {
         if (isFormComplete[currentStep]) {
+            if (currentStep === 3) {
+                return;
+            }
             setCurrentStep((prev) => prev + 1);
             setProgress((prev) => Math.min(1, prev + 0.25));
         }

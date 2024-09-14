@@ -1,3 +1,4 @@
+// components/auth/SignupSection.tsx
 import React from 'react';
 import { useSignupContext } from './SignupContext';
 import UserTypeForm from './UserTypeForm';
@@ -11,7 +12,6 @@ const SignupSection = () => {
     const {
         currentStep,
         accountType,
-        handleBack,
     } = useSignupContext();
 
     const renderForm = () => {
@@ -35,15 +35,16 @@ const SignupSection = () => {
                 {renderForm()}
             </div>
             <div className="p-4 bg-white border-t flex justify-between">
+                {/* Render next and back buttons */}
+                <NextButton />
                 {currentStep > 0 && (
                     <button
-                        onClick={handleBack}
+                        onClick={() => console.log('handle back button click')}
                         className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors"
                     >
                         Back
                     </button>
                 )}
-                <NextButton />
             </div>
         </div>
     );

@@ -7,6 +7,9 @@ const NextButton = () => {
     const { isFormComplete, currentStep, handleNext } = useSignupContext();
 
     const isCurrentStepComplete = isFormComplete[currentStep];
+    const isLastStep = currentStep === 3; // Assuming 3 is the index of the last step
+
+    if (isLastStep) return null; // Don't render on the last step
 
     return (
         <Button
@@ -23,6 +26,7 @@ const NextButton = () => {
                 ? 'text-orange-500 group-hover:text-orange-50'
                 : 'text-orange-200 group-hover:text-orange-700'
             }`} />
+            Next
         </Button>
     );
 };

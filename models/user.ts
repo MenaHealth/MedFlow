@@ -5,7 +5,6 @@ import { SecurityQuestion } from '@/utils/securityQuestions.enum';
 import { DoctorSpecialty } from '@/utils/doctorSpecialty.enum';
 
 interface IUser extends Document {
-  userID: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -24,10 +23,6 @@ interface IUser extends Document {
 }
 
 const UserSchema = new Schema<IUser>({
-  userID: {
-    type: String,
-    required: [true, 'userID is required!'],
-  },
   firstName: {
     type: String,
     required: [true, 'First name is required!'],

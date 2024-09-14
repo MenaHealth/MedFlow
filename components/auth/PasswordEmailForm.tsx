@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
-import { useForm, useFormState } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { TextFormField } from "@/components/ui/TextFormField";
@@ -34,6 +34,19 @@ const PasswordEmailForm = () => {
         },
         mode: 'onChange',
     });
+
+    // Update formData when the form fields change
+    useEffect(() => {
+        const subscription = form.watch((values) => {
+            setFormData((prevData) => ({
+                ...prevData,
+                email: values.email,
+                password: values.password,
+                confirmPassword: values.confirmPassword,
+            }));
+        });
+        return () => subscription.unsubscribe();
+    }, [form.watch, setFormData]);
 
     const updateIsFormComplete = useCallback(() => {
         setIsFormComplete(form.formState.isValid);

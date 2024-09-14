@@ -1,9 +1,8 @@
-// app/api/auth/signup/route.js
-
+// app/api/signup/route.js
 import { NextResponse } from 'next/server';
+import bcrypt from 'bcryptjs';
 import User from '@/models/user';
 import dbConnect from '@/utils/database';
-import { v4 as uuidv4 } from 'uuid';
 
 export async function POST(request) {
     await dbConnect();
@@ -19,40 +18,41 @@ export async function POST(request) {
         doctorSpecialty,
         languages,
         countries,
-        gender
+        gender,
     } = await request.json();
+
+    console.log('Received Signup Data:', { email, password, accountType });  // Log incoming request data
+    console.log('Password (before hashing):', password);  // Log the password before hashing
 
     try {
         const existingUser = await User.findOne({ email });
+
         if (existingUser) {
-            return NextResponse.json({ message: `User with this email already exists. Please login.` }, { status: 400 });
+            return NextResponse.json({ message: 'User with this email already exists' }, { status: 400 });
         }
+
+        const hashedPassword = await bcrypt.hash(password, 10);  // bcrypt expects a string password
+        console.log('Hashed Password:', hashedPassword);  // Log hashed password
 
         const newUser = new User({
-            userID: uuidv4(),
+            email,
+            password: hashedPassword,
             accountType,
+            securityQuestions,
             firstName,
             lastName,
-            email,
-            password,
-            securityQuestions,
-            dob: new Date(dob),
+            dob,
+            doctorSpecialty,
+            languages,
+            countries,
+            gender,
         });
-
-        if (accountType === 'Doctor') {
-            newUser.doctorSpecialty = doctorSpecialty;
-            newUser.languages = languages;
-            newUser.countries = countries;
-            newUser.gender = gender;
-        }
-
-        console.log('New user object:', newUser);
 
         await newUser.save();
 
-        return NextResponse.json({ userId: newUser.userID, message: `${accountType} created successfully` }, { status: 201 });
+        return NextResponse.json({ message: 'Signup successful' }, { status: 201 });
     } catch (error) {
         console.error('Signup error:', error);
-        return NextResponse.json({ message: 'Server error', error: error.message }, { status: 500 });
+        return NextResponse.json({ message: 'Server error' }, { status: 500 });
     }
 }

@@ -2,9 +2,10 @@
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import {useFormContext} from "react-hook-form";
 
-export function MultiChoiceFormField({ form, fieldName, fieldLabel, choices, custom, cols = 1, defaultValue, onRadioChange }: { form: any, fieldName: string, fieldLabel: string, choices: string[], custom: boolean, cols?: number, defaultValue?: string, onRadioChange?: (value: string) => void }) {
-    // let cols = window.innerWidth >= 1024 ? 3 : 1;
+export function MultiChoiceFormField({ fieldName, fieldLabel, choices, custom, cols = 1, defaultValue, onRadioChange }) {
+    const form = useFormContext();
     return (
         <FormField
             control={form.control}

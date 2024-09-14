@@ -10,6 +10,7 @@ import { TextFormField } from "@/components/ui/TextFormField";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import ForgotPasswordForm from "@/components/auth/ForgotPasswordForm";
+import PasswordField from "@/components/ui/PasswordField";
 
 const loginSchema = z.object({
     email: z.string().nonempty("Email is required.").email("Please enter a valid email address."),
@@ -99,11 +100,10 @@ export function LoginForm() {
                         fieldLabel="Email"
                         error={form.formState.errors.email?.message}
                     />
-                    <TextFormField
+                    <PasswordField
                         form={form}
                         fieldName="password"
                         fieldLabel="Password"
-                        type="password"
                         error={form.formState.errors.password?.message}
                     />
                     <div className="flex justify-center mt-6">

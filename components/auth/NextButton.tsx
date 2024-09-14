@@ -1,25 +1,25 @@
-// components/auth/NextButton.tsx
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { PaperPlaneIcon } from "@radix-ui/react-icons";
+import { useSignupContext } from "@/components/auth/SignupContext";
 
-interface NextButtonProps {
-    onClick: () => void;
-    isDisabled: boolean;
-}
+const NextButton = () => {
+    const { isFormComplete, currentStep, handleNext } = useSignupContext();
 
-const NextButton: React.FC<NextButtonProps> = ({ onClick, isDisabled }) => {
+    const isCurrentStepComplete = isFormComplete[currentStep];
+
     return (
         <Button
-            onClick={onClick}
-            disabled={isDisabled}
+            onClick={handleNext}
+            disabled={!isCurrentStepComplete}
             className={`flex items-center justify-center px-4 py-2 rounded transition-all duration-300
-                ${isDisabled
-                ? 'bg-gray-300 text-gray-600'
-                : 'bg-white hover:bg-orange text-orange hover:text-white shadow-[0_4px_6px_rgba(234,88,12,0.5)] hover:shadow-[0_4px_6px_rgba(234,88,12,0.8)]'
+                ${isCurrentStepComplete
+                ? 'bg-orange text-white hover:bg-orange-600'
+                : 'bg-gray-300 text-gray-600 cursor-not-allowed'
             }`}
         >
-            <PaperPlaneIcon className="h-5 w-5" />
+            <PaperPlaneIcon className="h-5 w-5 mr-2" />
+            Next
         </Button>
     );
 };

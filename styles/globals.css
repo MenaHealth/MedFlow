@@ -22,6 +22,18 @@
   --white: #ffffff;
 }
 
+.lightYellow {
+  background-color: #fbf9c1;
+}
+
+.text-muted-foreground {
+  color: #6b7280; /* You can change this to any muted color you like */
+}
+
+.text-white {
+  color: #ffffff;
+}
+
 :root {
   --gradient-background: linear-gradient(-45deg, var(--lightOrange), var(--orange), var(--lightYellow), var(--yellow), var(--white));
 }

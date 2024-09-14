@@ -14,6 +14,7 @@ interface Props {
     onBlur?: () => void;
     error?: string;
     disabled?: boolean;
+    autoComplete?: string;
 }
 
 const TextFormField = ({
@@ -27,6 +28,7 @@ const TextFormField = ({
                            onBlur,
                            error,
                            disabled,
+                           autoComplete,
                        }: Props) => {
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const [isFocused, setIsFocused] = useState(false);
@@ -47,7 +49,7 @@ const TextFormField = ({
         <Controller
             name={fieldName}
             render={({ field }) => (
-                <div className={`mb-6 p-2 ${className}`}>
+                <div className={`mt-6 mb-6 p-2 ${className}`}>
                     <div className="relative">
                         <Input
                             {...field}
@@ -55,6 +57,8 @@ const TextFormField = ({
                             onFocus={handleFocus}
                             onBlur={handleBlur}
                             id={id}
+                            name={fieldName}
+                            autoComplete={autoComplete}
                             className={`w-full pt-4 pb-2 pl-2 pr-10 ${
                                 isFocused || field.value ? 'bg-white' : ''
                             }`}

@@ -1,3 +1,4 @@
+/*styles/globals.css*/
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -22,9 +23,6 @@
   --white: #ffffff;
 }
 
-.lightYellow {
-  background-color: #fbf9c1;
-}
 
 .text-muted-foreground {
   color: #6b7280; /* You can change this to any muted color you like */

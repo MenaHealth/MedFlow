@@ -1,36 +1,23 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useSignupContext } from './SignupContext';
 import { RadioCard } from '@/components/ui/radio-card';
 import Flex from "@/components/ui/flex";
 import Text from "@/components/ui/text";
 
 const UserTypeForm = () => {
-    const {
-        setAccountType,
-        setIsFormComplete,
-        formData,
-        setFormData,
-    } = useSignupContext();
+    const { setAccountType, setFormData, accountType, updateAnsweredQuestions } = useSignupContext();
 
-    const [selectedType, setSelectedType] = useState<'Doctor' | 'Triage' | null>(formData.accountType || null);
+    const handleSelectAccountType = (selectedType: 'Doctor' | 'Triage') => {
+        setAccountType(selectedType);
+        setFormData((prevData) => ({ ...prevData, accountType: selectedType }));
 
-    useEffect(() => {
-        setIsFormComplete(selectedType !== null);
-    }, [selectedType, setIsFormComplete]);
-
-    const handleSelectAccountType = (accountType: 'Doctor' | 'Triage') => {
-        setSelectedType(accountType);
-        setAccountType(accountType);
-        setFormData((prevData) => ({ ...prevData, accountType }));
+        // Call updateAnsweredQuestions with step 0 (for UserTypeForm)
+        updateAnsweredQuestions(0, selectedType ? 1 : 0); // 1 if selected, 0 if not
     };
 
     return (
         <div className="flex justify-center items-center h-full p-4 bg-gray-100 rounded-lg shadow-md">
-            <RadioCard.Root
-                value={selectedType}
-                onValueChange={(value) => handleSelectAccountType(value as 'Doctor' | 'Triage')}
-                className="flex w-full justify-center"
-            >
+            <RadioCard.Root value={accountType ?? undefined} onValueChange={handleSelectAccountType} className="flex w-full justify-center">
                 <RadioCard.Item value="Doctor" className="w-1/2 p-2">
                     <Flex direction="column" width="100%" className="justify-center items-center h-full">
                         <Text size="sm" weight="normal">Doctor</Text>

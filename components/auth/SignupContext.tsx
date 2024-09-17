@@ -1,35 +1,33 @@
-import { createContext, useState, useContext, useCallback } from 'react';
+import React, { createContext, useState, useContext, useCallback, useMemo, useEffect } from 'react';
+
+interface FormData {
+    accountType?: string;
+    email?: string;
+    password?: string;
+    confirmPassword?: string;
+    securityQuestions?: { question: string; answer: string }[];
+    firstName?: string;
+    lastName?: string;
+    doctorType?: string;
+    language?: string;
+    gender?: string;
+    location?: string;
+}
 
 interface SignupContextValue {
-    formData: {
-        email?: string;
-        password?: string;
-        confirmPassword?: string;
-        question1?: string;
-        answer1?: string;
-        question2?: string;
-        answer2?: string;
-        question3?: string;
-        answer3?: string;
-        firstName?: string;
-        lastName?: string;
-        dob?: string;
-        doctorSpecialty?: string[];
-        languages?: string[];
-        countries?: string[];
-        gender?: 'male' | 'female';
-    };
-    setFormData: (data: any) => void;
+    formData: FormData;
+    setFormData: React.Dispatch<React.SetStateAction<FormData>>;
     currentStep: number;
     setCurrentStep: (step: number) => void;
     progress: number;
-    setProgress: (progress: number) => void;
+    updateProgress: () => void;
     handleNext: () => void;
     handleBack: () => void;
-    isFormComplete: boolean[];
-    setIsFormComplete: (complete: boolean) => void;
     accountType: 'Doctor' | 'Triage' | null;
     setAccountType: (accountType: 'Doctor' | 'Triage') => void;
+    answeredQuestions: number;
+    setAnsweredQuestions: (count: number) => void;
+    updateAnsweredQuestions: (step: number, count: number) => void;
 }
 
 const SignupContext = createContext<SignupContextValue | null>(null);
@@ -42,51 +40,84 @@ export const useSignupContext = () => {
     return context;
 };
 
-export const SignupProvider = ({ children, initialAccountType }: { children: React.ReactNode, initialAccountType: 'Doctor' | 'Triage' }) => {
-    const [formData, setFormData] = useState<SignupContextValue['formData']>({});
+export const SignupProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const [formData, setFormData] = useState<FormData>({});
     const [currentStep, setCurrentStep] = useState(0);
     const [progress, setProgress] = useState(0);
-    const [isFormComplete, setIsFormComplete] = useState([false, false, false, false]);
-    const [accountType, setAccountType] = useState(initialAccountType);
+    const [accountType, setAccountType] = useState<'Doctor' | 'Triage' | null>(null);
+    const [answeredQuestions, setAnsweredQuestions] = useState(0);
+    const [stepAnswers, setStepAnswers] = useState<number[]>(new Array(4).fill(0)); // Adjust the number based on your total steps
 
-    const handleNext = useCallback(() => {
-        if (isFormComplete[currentStep]) {
-            if (currentStep === 3) {
-                return;
-            }
-            setCurrentStep((prev) => prev + 1);
-            setProgress((prev) => Math.min(1, prev + 0.25));
+    const totalQuestions = useMemo(() => {
+        return accountType === 'Doctor' ? 14 : 12;
+    }, [accountType]);
+
+    const updateProgress = useCallback(() => {
+        console.log('Updating progress...');
+        const newProgress = (answeredQuestions / totalQuestions) * 100;
+        console.log('New progress calculated:', newProgress, 'Answered:', answeredQuestions, 'Total:', totalQuestions);
+        setProgress(newProgress);
+    }, [answeredQuestions, totalQuestions]);
+
+    const updateAnsweredQuestions = useCallback((step: number, count: number) => {
+        if (count < 0) {
+            console.error("Invalid count value. Count cannot be less than 0.");
+            return;
         }
-    }, [currentStep, isFormComplete]);
-
-    const handleBack = useCallback(() => {
-        setCurrentStep((prev) => Math.max(0, prev - 1));
-        setProgress((prev) => Math.max(0, prev - 0.25));
+        setStepAnswers(prev => {
+            const newStepAnswers = [...prev];
+            newStepAnswers[step] = count;
+            const newTotal = newStepAnswers.reduce((acc, curr) => acc + curr, 0);
+            setAnsweredQuestions(newTotal);
+            console.log('Updated stepAnswers:', newStepAnswers); // Add this log
+            return newStepAnswers;
+        });
     }, []);
 
-    const updateIsFormComplete = useCallback((complete: boolean) => {
-        setIsFormComplete((prev) => {
-            const newIsFormComplete = [...prev];
-            newIsFormComplete[currentStep] = complete;
-            return newIsFormComplete;
-        });
+    useEffect(() => {
+        if (currentStep === 0 && answeredQuestions === 0) {
+        }
+    }, [currentStep, answeredQuestions]);
+
+    useEffect(() => {
+        console.log('Answered Questions:', answeredQuestions);
+        console.log('Total Questions:', totalQuestions);
+        updateProgress(); // this is the function that calculates and sets the progress
+
+        // You could also log the progress directly after calling updateProgress:
+        console.log('Updated Progress:', (answeredQuestions / totalQuestions) * 100);
+    }, [answeredQuestions, totalQuestions, updateProgress]);
+
+    const handleNext = useCallback(() => {
+        if (currentStep < 3) {
+            setCurrentStep((prev) => prev + 1);
+        }
+    }, [currentStep]);
+
+    const handleBack = useCallback(() => {
+        if (currentStep > 0) {
+            setCurrentStep((prev) => prev - 1);
+        }
     }, [currentStep]);
 
     return (
-        <SignupContext.Provider value={{
-            formData,
-            setFormData,
-            currentStep,
-            setCurrentStep,
-            progress,
-            setProgress,
-            isFormComplete,
-            setIsFormComplete: updateIsFormComplete,
-            handleNext,
-            handleBack,
-            accountType,
-            setAccountType,
-        }}>
+        <SignupContext.Provider
+            value={{
+                formData,
+                setFormData,
+                currentStep,
+                setCurrentStep,
+                progress,
+                updateProgress,
+                handleNext,
+                handleBack,
+                accountType,
+                setAccountType,
+                answeredQuestions,
+                setAnsweredQuestions,
+                updateAnsweredQuestions,
+            }}
+        >
             {children}
         </SignupContext.Provider>
     );

@@ -4,12 +4,24 @@ import { PaperPlaneIcon } from "@radix-ui/react-icons";
 import { useSignupContext } from "@/components/auth/SignupContext";
 
 const NextButton = () => {
-    const { isFormComplete, currentStep, handleNext } = useSignupContext();
+    const { stepAnswers, currentStep, handleNext, accountType } = useSignupContext();
 
-    const isCurrentStepComplete = isFormComplete[currentStep];
-    const isLastStep = currentStep === 3; // Assuming 3 is the index of the last step
+    // Ensure stepAnswers[currentStep] exists and is a number
+    const isCurrentStepComplete = currentStep === 0 ? accountType !== null :
+        stepAnswers && stepAnswers[currentStep] === getTotalRequiredFieldsForStep(currentStep);
 
-    if (isLastStep) return null; // Don't render on the last step
+    const getTotalRequiredFieldsForStep = (step: number) => {
+        switch (step) {
+            case 0:
+                return 1; // UserTypeForm has 1 required field
+            case 1:
+                return 3; // PasswordEmailForm has 3 required fields
+            // Add more cases for other steps
+            default:
+                return 0;
+        }
+    };
+
 
     return (
         <Button

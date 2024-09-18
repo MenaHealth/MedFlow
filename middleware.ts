@@ -12,7 +12,8 @@ export async function middleware(req: any) {
     if (
         pathname.startsWith('/api') ||          // Allow API routes
         pathname === '/auth' ||                 // Allow the auth page
-        pathname.match(PUBLIC_FILE)             // Allow static files (e.g., .css, .js, .png, .jpg, etc.)
+        pathname.match(PUBLIC_FILE) ||          // Allow static files (e.g., .css, .js, .png, .jpg, etc.)
+        pathname === '/create-patient'          // Allow the new patient form
     ) {
         return NextResponse.next();
     }

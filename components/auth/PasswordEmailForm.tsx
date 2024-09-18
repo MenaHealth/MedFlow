@@ -4,8 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { TextFormField } from "@/components/ui/TextFormField";
 import { Form } from "@/components/ui/form";
-import PasswordField from '@/components/ui/PasswordField';
+import PasswordField from '@/components/ui/passwordField';
 import { useSignupContext } from './SignupContext';
+import EmailField from "@/components/ui/emailField";
 
 const passwordEmailSchema = z.object({
     email: z.string().email("Invalid email address"),
@@ -24,7 +25,8 @@ const PasswordEmailForm = () => {
         setFormData,
         updateAnsweredQuestions,
         accountType,
-        setPasswordsMatch // Add this
+        setValidEmail,
+        setPasswordsMatch,
     } = useSignupContext();
 
     const form = useForm<PasswordEmailFormValues>({
@@ -50,6 +52,11 @@ const PasswordEmailForm = () => {
         const passwordFilled = !!password;
         const confirmPasswordFilled = !!confirmPassword;
 
+        // Check if the email follows regex rules
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const isEmailValid = emailRegex.test(email);
+
+        // Update answered questions
         updateAnsweredQuestions(1, emailFilled + passwordFilled + confirmPasswordFilled);
 
         setFormData((prevData) => ({
@@ -59,14 +66,14 @@ const PasswordEmailForm = () => {
             confirmPassword,
         }));
 
-        // Update passwordsMatch state
         setPasswordsMatch(password === confirmPassword && passwordFilled);
-    }, [email, password, confirmPassword, updateAnsweredQuestions, setFormData]);
+        setValidEmail(isEmailValid);
+    }, [email, password, confirmPassword, updateAnsweredQuestions, setFormData, setPasswordsMatch, setValidEmail]);
 
     return (
         <Form {...form}>
             <form className="space-y-4">
-                <TextFormField form={form} fieldName="email" fieldLabel="Email" />
+                <EmailField form={form} fieldName="email" fieldLabel="Email" />
                 <PasswordField
                     form={form}
                     fieldName="password"

@@ -15,6 +15,7 @@ interface FormData {
 }
 
 interface SignupContextValue {
+    // next/back button, progress bar, and form completion
     formData: FormData;
     setFormData: React.Dispatch<React.SetStateAction<FormData>>;
     currentStep: number;
@@ -27,11 +28,17 @@ interface SignupContextValue {
     setAnsweredQuestions: (count: number) => void;
     updateAnsweredQuestions: (step: number, count: number) => void;
     stepAnswers: number[];
-
+    // userTypeForm
     accountType: 'Doctor' | 'Triage' | null;
     setAccountType: (accountType: 'Doctor' | 'Triage') => void;
+    //PasswordEmailForm
+    validEmail: boolean;
+    setValidEmail: React.Dispatch<React.SetStateAction<boolean>>;
     passwordsMatch: boolean;
     setPasswordsMatch: React.Dispatch<React.SetStateAction<boolean>>;
+    // SecurityQuestionsForm
+
+    //
 
 }
 
@@ -52,7 +59,9 @@ export const SignupProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const [progress, setProgress] = useState(0);
     const [accountType, setAccountType] = useState<'Doctor' | 'Triage' | null>(null);
     const [answeredQuestions, setAnsweredQuestions] = useState(0);
-    const [stepAnswers, setStepAnswers] = useState<number[]>(new Array(4).fill(0)); // Adjust the number based on your total steps
+    const [stepAnswers, setStepAnswers] = useState<number[]>(new Array(4).fill(0));
+    // step 1: user type selection, step 2: email password, step 3: security questions, step 4: doctor / triage sign up
+    const [validEmail, setValidEmail] = useState(false);
     const [passwordsMatch, setPasswordsMatch] = useState(false);
 
     const totalQuestions = useMemo(() => {
@@ -128,6 +137,8 @@ export const SignupProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
                 accountType,
                 setAccountType,
+                validEmail,
+                setValidEmail,
                 passwordsMatch,
                 setPasswordsMatch,
             }}

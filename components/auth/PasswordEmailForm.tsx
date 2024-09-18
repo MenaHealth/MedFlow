@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, {useEffect, useState} from 'react';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -19,7 +19,13 @@ const passwordEmailSchema = z.object({
 type PasswordEmailFormValues = z.infer<typeof passwordEmailSchema>;
 
 const PasswordEmailForm = () => {
-    const { formData, setFormData, updateAnsweredQuestions, accountType } = useSignupContext();
+    const {
+        formData,
+        setFormData,
+        updateAnsweredQuestions,
+        accountType,
+        setPasswordsMatch // Add this
+    } = useSignupContext();
 
     const form = useForm<PasswordEmailFormValues>({
         resolver: zodResolver(passwordEmailSchema),
@@ -35,22 +41,27 @@ const PasswordEmailForm = () => {
     const totalQuestions = accountType === 'Doctor' ? 14 : 11;
 
     // Update answered questions based on form state
-    useEffect(() => {
-        const emailFilled = form.watch('email') ? 1 : 0;
-        const passwordFilled = form.watch('password') ? 1 : 0;
-        const confirmPasswordFilled = form.watch('confirmPassword') ? 1 : 0;
+    const email = form.watch('email');
+    const password = form.watch('password');
+    const confirmPassword = form.watch('confirmPassword');
 
-        // Update answered questions for this step (step 1: PasswordEmailForm)
+    useEffect(() => {
+        const emailFilled = !!email;
+        const passwordFilled = !!password;
+        const confirmPasswordFilled = !!confirmPassword;
+
         updateAnsweredQuestions(1, emailFilled + passwordFilled + confirmPasswordFilled);
 
-        // Update form data in context
         setFormData((prevData) => ({
             ...prevData,
-            email: form.getValues('email'),
-            password: form.getValues('password'),
-            confirmPassword: form.getValues('confirmPassword'),
+            email,
+            password,
+            confirmPassword,
         }));
-    }, [form.watch('email'), form.watch('password'), form.watch('confirmPassword'), setFormData, updateAnsweredQuestions]);
+
+        // Update passwordsMatch state
+        setPasswordsMatch(password === confirmPassword && passwordFilled);
+    }, [email, password, confirmPassword, updateAnsweredQuestions, setFormData]);
 
     return (
         <Form {...form}>

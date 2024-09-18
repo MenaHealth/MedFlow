@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { Button } from "@/components/ui/button";
 import { PaperPlaneIcon } from "@radix-ui/react-icons";
 import { useSignupContext } from "@/components/auth/SignupContext";
@@ -6,22 +6,33 @@ import { useSignupContext } from "@/components/auth/SignupContext";
 const NextButton = () => {
     const { stepAnswers, currentStep, handleNext, accountType } = useSignupContext();
 
-    // Ensure stepAnswers[currentStep] exists and is a number
-    const isCurrentStepComplete = currentStep === 0 ? accountType !== null :
-        stepAnswers && stepAnswers[currentStep] === getTotalRequiredFieldsForStep(currentStep);
+    useEffect(() => {
+        console.log('stepAnswers updated: ', stepAnswers);
+    }, [stepAnswers]);
 
     const getTotalRequiredFieldsForStep = (step: number) => {
         switch (step) {
             case 0:
-                return 1; // UserTypeForm has 1 required field
+                return 1;
             case 1:
-                return 3; // PasswordEmailForm has 3 required fields
-            // Add more cases for other steps
+                return 3;
+            case 2:
+                return 3;
+            case 3:
+                return accountType === 'Doctor' ? 4 : 4;
             default:
                 return 0;
         }
     };
 
+    const isCurrentStepComplete = currentStep === 0 ? accountType !== null :
+        stepAnswers && stepAnswers.length > currentStep && stepAnswers[currentStep] === getTotalRequiredFieldsForStep(currentStep);
+
+    console.log('NextButton: ');
+    console.log('currentStep: ', currentStep);
+    console.log('stepAnswers: ', stepAnswers);
+    console.log('isCurrentStepComplete: ', isCurrentStepComplete);
+    console.log('getTotalRequiredFieldsForStep(currentStep): ', getTotalRequiredFieldsForStep(currentStep));
 
     return (
         <Button

@@ -23,11 +23,16 @@ interface SignupContextValue {
     updateProgress: () => void;
     handleNext: () => void;
     handleBack: () => void;
-    accountType: 'Doctor' | 'Triage' | null;
-    setAccountType: (accountType: 'Doctor' | 'Triage') => void;
     answeredQuestions: number;
     setAnsweredQuestions: (count: number) => void;
     updateAnsweredQuestions: (step: number, count: number) => void;
+    stepAnswers: number[];
+
+    accountType: 'Doctor' | 'Triage' | null;
+    setAccountType: (accountType: 'Doctor' | 'Triage') => void;
+    passwordsMatch: boolean;
+    setPasswordsMatch: React.Dispatch<React.SetStateAction<boolean>>;
+
 }
 
 const SignupContext = createContext<SignupContextValue | null>(null);
@@ -37,6 +42,7 @@ export const useSignupContext = () => {
     if (!context) {
         throw new Error('useSignupContext must be used within a SignupProvider');
     }
+    console.log('useSignupContext: ', context);
     return context;
 };
 
@@ -47,6 +53,7 @@ export const SignupProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const [accountType, setAccountType] = useState<'Doctor' | 'Triage' | null>(null);
     const [answeredQuestions, setAnsweredQuestions] = useState(0);
     const [stepAnswers, setStepAnswers] = useState<number[]>(new Array(4).fill(0)); // Adjust the number based on your total steps
+    const [passwordsMatch, setPasswordsMatch] = useState(false);
 
     const totalQuestions = useMemo(() => {
         return accountType === 'Doctor' ? 14 : 12;
@@ -69,7 +76,8 @@ export const SignupProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             newStepAnswers[step] = count;
             const newTotal = newStepAnswers.reduce((acc, curr) => acc + curr, 0);
             setAnsweredQuestions(newTotal);
-            console.log('Updated stepAnswers:', newStepAnswers); // Add this log
+            console.log('Updated stepAnswers:', newStepAnswers);
+            console.log('Updated answeredQuestions:', newTotal);
             return newStepAnswers;
         });
     }, []);
@@ -80,8 +88,10 @@ export const SignupProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }, [currentStep, answeredQuestions]);
 
     useEffect(() => {
-        console.log('Answered Questions:', answeredQuestions);
-        console.log('Total Questions:', totalQuestions);
+        console.log('SignupContext: ');
+        console.log('currentStep: ', currentStep);
+        console.log('stepAnswers: ', stepAnswers);
+        console.log('answeredQuestions: ', answeredQuestions);
         updateProgress(); // this is the function that calculates and sets the progress
 
         // You could also log the progress directly after calling updateProgress:
@@ -111,11 +121,15 @@ export const SignupProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                 updateProgress,
                 handleNext,
                 handleBack,
-                accountType,
-                setAccountType,
                 answeredQuestions,
                 setAnsweredQuestions,
                 updateAnsweredQuestions,
+                stepAnswers,
+
+                accountType,
+                setAccountType,
+                passwordsMatch,
+                setPasswordsMatch,
             }}
         >
             {children}

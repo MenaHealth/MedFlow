@@ -4,21 +4,21 @@ import { useSignupContext } from "@/components/auth/SignupContext";
 import { useFormContext } from 'react-hook-form';
 
 const Submit = () => {
-    const { formData, accountType } = useSignupContext();
+    const { formData, accountType, doctorSignupFormCompleted } = useSignupContext();
     const formContext = useFormContext();
 
     const handleSubmit = async () => {
         try {
             const data = formContext.getValues();
-            console.log('Form Data:', formData);  // Log all formData
-            console.log('Password:', formData.password);  // Log password to check its value
+            console.log('Form Data:', formData);
+            console.log('Password:', formData.password);
 
             const response = await fetch('/api/auth/signup', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     email: formData.email,
-                    password: formData.password,  // Check if password is correctly populated
+                    password: formData.password,
                     accountType,
                     securityQuestions: [
                         { question: formData.question1, answer: formData.answer1 },
@@ -36,21 +36,19 @@ const Submit = () => {
             });
 
             const result = await response.json();
-            console.log('Signup API Response:', result);  // Log API response
+            console.log('Signup API Response:', result);
 
         } catch (error) {
             console.error('Error making API call:', error);
         }
     };
 
-    const isValid = Object.keys(formContext.formState.errors).length === 0;
-
     return (
         <Button
             onClick={handleSubmit}
-            disabled={!isValid}
+            disabled={!doctorSignupFormCompleted}
             className={`group flex items-center justify-center px-4 py-2 rounded transition-all duration-300
-                ${isValid
+                ${doctorSignupFormCompleted
                 ? 'bg-orange-200 text-orange-500 shadow-lg shadow-orange-50 border-2 border-orange-200 hover:bg-orange-500 hover:text-orange-700 hover:shadow-orange-200'
                 : 'bg-transparent text-orange-200 border-2 border-orange-200 hover:text-orange-700 hover:bg-transparent'
             }`}

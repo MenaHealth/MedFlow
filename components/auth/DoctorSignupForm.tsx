@@ -5,14 +5,14 @@ import { z } from "zod";
 import { TextFormField } from "@/components/ui/TextFormField";
 import { DoctorSpecialty } from '@/utils/doctorSpecialty.enum';
 import { MultiChoiceFormField } from "@/components/form/MultiChoiceFormField";
+import { SingleChoiceFormField } from "@/components/form/SingleChoiceFormField";
 import { useSignupContext } from './SignupContext';
-import Submit from "@/components/auth/Submit";
 
 const doctorSignupSchema = z.object({
     firstName: z.string().min(1, "First name is required"),
     lastName: z.string().min(1, "Last name is required"),
     dob: z.string().min(1, "Date of birth is required"),
-    doctorSpecialty: z.array(z.string()).min(1, "At least one specialty is required"),
+    doctorSpecialty: z.string().min(1, "Specialty is required"),
     languages: z.array(z.string()).min(1, "At least one language is required"),
     countries: z.array(z.string()).min(1, "At least one country is required"),
     gender: z.enum(['male', 'female'], { errorMap: () => ({ message: "Gender is required" }) }),
@@ -21,7 +21,7 @@ const doctorSignupSchema = z.object({
 export type DoctorSignupFormValues = z.infer<typeof doctorSignupSchema>;
 
 const DoctorSignupForm: React.FC = () => {
-    const { formData, setFormData, setIsFormComplete, accountType } = useSignupContext();
+    const { formData, setFormData, setDoctorSignupFormCompleted } = useSignupContext();
 
     const form = useForm<DoctorSignupFormValues>({
         resolver: zodResolver(doctorSignupSchema),
@@ -29,22 +29,32 @@ const DoctorSignupForm: React.FC = () => {
             firstName: formData.firstName || '',
             lastName: formData.lastName || '',
             dob: formData.dob || '',
-            doctorSpecialty: formData.doctorSpecialty || [],
+            doctorSpecialty: formData.doctorSpecialty || '',
             languages: formData.languages || [],
             countries: formData.countries || [],
             gender: formData.gender || undefined,
         },
+        mode: "onChange",
     });
 
     useEffect(() => {
         const subscription = form.watch((data) => {
             setFormData((prevData) => ({ ...prevData, ...data }));
-            const isValid = Object.keys(form.formState.errors).length === 0;
-            setIsFormComplete(isValid);
+
+            const isFormValid = form.formState.isValid;
+            const areAllFieldsFilled = Object.entries(data).every(([key, value]) => {
+                if (Array.isArray(value)) {
+                    return value.length > 0;
+                }
+                return !!value;
+            });
+
+            setDoctorSignupFormCompleted(isFormValid && areAllFieldsFilled);
+            console.log("Form completed:", isFormValid && areAllFieldsFilled);
         });
 
         return () => subscription.unsubscribe();
-    }, [form, setFormData, setIsFormComplete]);
+    }, [form, setFormData, setDoctorSignupFormCompleted]);
 
     return (
         <div className="max-w-md mx-auto">
@@ -79,19 +89,17 @@ const DoctorSignupForm: React.FC = () => {
                         fieldLabel="Countries"
                         choices={["Egypt", "Palestine - West Bank", "Syria", "Yemen", "Afghanistan"]}
                     />
-                    <MultiChoiceFormField
+                    <SingleChoiceFormField
                         fieldName="doctorSpecialty"
                         fieldLabel="Please select your specialty"
                         choices={Object.values(DoctorSpecialty)}
                     />
-                    <MultiChoiceFormField
+                    <SingleChoiceFormField
                         fieldName="gender"
                         fieldLabel="Please select your gender"
                         choices={["male", "female"]}
-                        custom={false}
                     />
                 </form>
-                <Submit />
             </FormProvider>
         </div>
     );

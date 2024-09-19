@@ -6,6 +6,7 @@ import SecurityQuestionsForm from './SecurityQuestionsForm';
 import DoctorSignupForm from './DoctorSignupForm';
 import TriageSignupForm from './TriageSignupForm';
 import NextButton from '@/components/auth/NextButton';
+import Submit from '@/components/auth/Submit';
 import ProgressBar from './ProgressBar';
 
 const SignupSection = () => {
@@ -13,7 +14,7 @@ const SignupSection = () => {
         currentStep,
         accountType,
         handleBack,
-        progress, // Progress value from context
+        progress,
     } = useSignupContext();
 
     const renderForm = () => {
@@ -31,17 +32,23 @@ const SignupSection = () => {
         }
     };
 
+    const renderButton = () => {
+        if (currentStep === 3) {
+            return <Submit />;
+        }
+        return <NextButton />;
+    };
+
     return (
         <div className="w-full h-full flex flex-col">
-            {/* Progress bar at the top */}
             <div className="p-4">
-                <ProgressBar progress={progress} /> {/* Pass the progress from context */}
+                <ProgressBar progress={progress} />
             </div>
             <div className="flex-grow overflow-y-auto">
                 {renderForm()}
             </div>
             <div className="p-4 bg-white border-t flex justify-between">
-                <NextButton />
+                {renderButton()}
                 {currentStep > 0 && (
                     <button
                         onClick={handleBack}

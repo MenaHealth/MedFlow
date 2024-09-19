@@ -1,82 +1,45 @@
+import React from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useFormContext } from "react-hook-form";
 import { Label } from "@/components/ui/label";
 
-export function MultiChoiceFormField({ fieldName, fieldLabel, choices, custom, cols = 1, defaultValue, onRadioChange }) {
+export function MultiChoiceFormField({ fieldName, fieldLabel, choices }) {
     const form = useFormContext();
+
     return (
         <FormField
             control={form.control}
             name={fieldName}
             render={({ field }) => (
-                <FormItem className="space-y-3">
-                    <Label>{fieldLabel}</Label>
-                    <FormControl>
-                        <RadioGroup
-                            onValueChange={(value) => {
-                                if (value !== "custom") {
-                                    field.onChange(value);
-                                }
-                                if (onRadioChange) {
-                                    onRadioChange(value);
-                                }
-                            }}
-                            defaultValue={defaultValue ?? field.value}
-                            className="flex flex-col space-y-1"
-                        >
-                            <div className={`grid gap-4 sm:grid-cols-${cols}`}>
-                                {choices.map((choice) => {
-                                    const id = `${fieldName}-${choice}`;
-                                    return (
-                                        <div className="flex items-center space-x-2" key={choice}>
-                                            <FormItem className="flex items-center space-x-3 space-y-0">
-                                                <FormControl>
-                                                    <RadioGroupItem
-                                                        value={choice}
-                                                        id={id}
-                                                        name={fieldName}
-                                                    />
-                                                </FormControl>
-                                                <Label htmlFor={id} className="font-normal">
-                                                    {choice}
-                                                </Label>
-                                            </FormItem>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                            {custom && (
-                                <div className="flex items-center">
-                                    <FormItem className="flex items-center space-x-1 space-y-0">
-                                        <FormControl>
-                                            <RadioGroupItem
-                                                value="other"
-                                                id={`${fieldName}-other`}
-                                                name={fieldName}
-                                            />
-                                        </FormControl>
-                                        <Label htmlFor={`${fieldName}-other`} className="font-normal">
-                                            Custom:
-                                        </Label>
-                                        <Input
-                                            type="text"
-                                            id={`${fieldName}-custom-input`}
-                                            name={`${fieldName}-custom`}
-                                            onChange={(e) => {
-                                                field.onChange(e.target.value);
-                                                document.getElementById(`${fieldName}-other`)?.click();
-                                            }}
-                                        />
-                                    </FormItem>
-                                </div>
-                            )}
-                        </RadioGroup>
-                    </FormControl>
+                <FormItem>
+                    <FormLabel>{fieldLabel}</FormLabel>
+                    <div className="space-y-2">
+                        {choices.map((item) => (
+                            <FormItem
+                                key={item}
+                                className="flex flex-row items-start space-x-3 space-y-0"
+                            >
+                                <FormControl>
+                                    <Checkbox
+                                        checked={field.value?.includes(item)}
+                                        onCheckedChange={(checked) => {
+                                            const updatedValue = checked
+                                                ? [...(field.value || []), item]
+                                                : (field.value || []).filter((value) => value !== item);
+                                            field.onChange(updatedValue);
+                                        }}
+                                    />
+                                </FormControl>
+                                <FormLabel className="font-normal">
+                                    {item}
+                                </FormLabel>
+                            </FormItem>
+                        ))}
+                    </div>
                     <FormMessage />
                 </FormItem>
             )}
         />
     );
-};
+}

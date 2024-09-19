@@ -39,7 +39,9 @@ interface SignupContextValue {
     // SecurityQuestionsForm
     securityQuestionFormCompleted: boolean;
     setSecurityQuestionFormCompleted: React.Dispatch<React.SetStateAction<boolean>>;
-
+    // DoctorSignupForm
+    doctorSignupFormCompleted: boolean;
+    setDoctorSignupFormCompleted: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const SignupContext = createContext<SignupContextValue | null>(null);
@@ -64,6 +66,7 @@ export const SignupProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const [validEmail, setValidEmail] = useState(false);
     const [passwordsMatch, setPasswordsMatch] = useState(false);
     const [securityQuestionFormCompleted, setSecurityQuestionFormCompleted] = useState(false);
+    const [doctorSignupFormCompleted, setDoctorSignupFormCompleted] = useState(false);
 
     const totalQuestions = useMemo(() => {
         return accountType === 'Doctor' ? 14 : 12;
@@ -144,6 +147,8 @@ export const SignupProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                 setPasswordsMatch,
                 securityQuestionFormCompleted,
                 setSecurityQuestionFormCompleted,
+                doctorSignupFormCompleted,
+                setDoctorSignupFormCompleted,
             }}
         >
             {children}

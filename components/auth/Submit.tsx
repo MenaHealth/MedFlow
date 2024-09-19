@@ -1,17 +1,34 @@
-import React from 'react';
-import { Button } from "@/components/ui/button";
-import { useSignupContext } from "@/components/auth/SignupContext";
-import { useFormContext } from 'react-hook-form';
+'use client'
 
-const Submit = () => {
-    const { formData, accountType, doctorSignupFormCompleted } = useSignupContext();
-    const formContext = useFormContext();
+import React, { useState, useEffect, useRef } from 'react'
+import { Button } from "@/components/ui/button"
+import { useSignupContext } from "@/components/auth/SignupContext"
+import { PaperPlaneIcon } from "@radix-ui/react-icons"
+import { ClipLoader } from 'react-spinners'
+
+export default function Submit() {
+    const { formData, accountType } = useSignupContext()
+    const [isLoading, setIsLoading] = useState(false)
+    const [isSuccess, setIsSuccess] = useState(false)
+    const [showSuccessMessage, setShowSuccessMessage] = useState(false)
+    const [animateFlyOff, setAnimateFlyOff] = useState(false)
+    const [iconPosition, setIconPosition] = useState({ top: 0, left: 0 })
+    const buttonRef = useRef(null)
+
+    useEffect(() => {
+        if (isSuccess && buttonRef.current) {
+            const rect = buttonRef.current.getBoundingClientRect()
+            setIconPosition({
+                top: rect.top,
+                left: rect.left + rect.width / 2,
+            })
+        }
+    }, [isSuccess])
 
     const handleSubmit = async () => {
+        setIsLoading(true)
         try {
-            const data = formContext.getValues();
             console.log('Form Data:', formData);
-            console.log('Password:', formData.password);
 
             const response = await fetch('/api/auth/signup', {
                 method: 'POST',
@@ -25,37 +42,83 @@ const Submit = () => {
                         { question: formData.question2, answer: formData.answer2 },
                         { question: formData.question3, answer: formData.answer3 },
                     ],
-                    firstName: data.firstName,
-                    lastName: data.lastName,
-                    dob: data.dob,
-                    doctorSpecialty: data.doctorSpecialty,
-                    languages: data.languages,
-                    countries: data.countries,
-                    gender: data.gender,
+                    firstName: formData.firstName,
+                    lastName: formData.lastName,
+                    dob: formData.dob,
+                    doctorSpecialty: formData.doctorSpecialty,
+                    languages: formData.languages,
+                    countries: formData.countries,
+                    gender: formData.gender,
                 }),
             });
 
             const result = await response.json();
             console.log('Signup API Response:', result);
 
-        } catch (error) {
-            console.error('Error making API call:', error);
+            if (response.ok) {
+                setIsSuccess(true);
+                setAnimateFlyOff(true); // Trigger the fly-off animation
+                setTimeout(() => {
+                    setShowSuccessMessage(true); // Show success message after animation
+                }, 2000); // Match duration with animation
+            } else {
+                console.error('Signup failed:', result.message);
+            }
+        }catch (error) {
+            console.error('Error making API call:', error)
+        } finally {
+            setIsLoading(false)
         }
-    };
+    }
 
     return (
-        <Button
-            onClick={handleSubmit}
-            disabled={!doctorSignupFormCompleted}
-            className={`group flex items-center justify-center px-4 py-2 rounded transition-all duration-300
-                ${doctorSignupFormCompleted
-                ? 'bg-orange-200 text-orange-500 shadow-lg shadow-orange-50 border-2 border-orange-200 hover:bg-orange-500 hover:text-orange-700 hover:shadow-orange-200'
-                : 'bg-transparent text-orange-200 border-2 border-orange-200 hover:text-orange-700 hover:bg-transparent'
-            }`}
-        >
-            Submit
-        </Button>
-    );
-};
+        <div className="relative overflow-visible h-20">
+            <Button
+                ref={buttonRef}
+                onClick={handleSubmit}
+                className="group flex items-center justify-center px-4 py-2 rounded transition-all duration-300"
+                disabled={isLoading || isSuccess}
+            >
+                {isLoading ? (
+                    <ClipLoader color="#ffffff" size={20} />
+                ) : (
+                    <span className={`flex items-center ${animateFlyOff ? 'invisible' : ''}`}>
+            {isSuccess ? 'Success' : 'Submit'}
+          </span>
+                )}
+            </Button>
 
-export default Submit;
+            {isSuccess && (
+                <PaperPlaneIcon
+                    className={`h-5 w-5 text-orange-500 absolute z-50 transition-all duration-1000 ease-in-out ${
+                        animateFlyOff ? 'fly-off' : ''
+                    }`}
+                    style={{
+                        top: `${iconPosition.top}px`,
+                        left: `${iconPosition.left}px`,
+                    }}
+                />
+            )}
+
+            {showSuccessMessage && (
+                <div className="absolute top-full left-0 right-0 mt-2 text-center text-green-600 animate-fade-in">
+                    Signup successful!
+                </div>
+            )}
+
+            <style jsx>{`
+        .fly-off {
+          transform: translate(0, -100vh) rotate(-45deg) !important;
+          opacity: 0;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        .animate-fade-in {
+          animation: fadeIn 0.5s ease-in-out;
+        }
+      `}</style>
+        </div>
+    )
+}

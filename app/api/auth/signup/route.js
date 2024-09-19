@@ -31,14 +31,24 @@ export async function POST(request) {
             return NextResponse.json({ message: 'User with this email already exists' }, { status: 400 });
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);  // bcrypt expects a string password
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, 10);
         console.log('Hashed Password:', hashedPassword);  // Log hashed password
 
+        // Hash each security question answer
+        const hashedSecurityQuestions = await Promise.all(
+            securityQuestions.map(async (question) => {
+                const hashedAnswer = await bcrypt.hash(question.answer, 10);
+                return { question: question.question, answer: hashedAnswer };
+            })
+        );
+
+        // Create new user object
         const newUser = new User({
+            accountType,
             email,
             password: hashedPassword,
-            accountType,
-            securityQuestions,
+            securityQuestions: hashedSecurityQuestions,
             firstName,
             lastName,
             dob,
@@ -48,6 +58,7 @@ export async function POST(request) {
             gender,
         });
 
+        // Save the user to the database
         await newUser.save();
 
         return NextResponse.json({ message: 'Signup successful' }, { status: 201 });

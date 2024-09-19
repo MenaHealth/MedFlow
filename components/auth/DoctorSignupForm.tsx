@@ -22,7 +22,6 @@ export type DoctorSignupFormValues = z.infer<typeof doctorSignupSchema>;
 
 const DoctorSignupForm: React.FC = () => {
     const { formData, setFormData, setDoctorSignupFormCompleted } = useSignupContext();
-
     const form = useForm<DoctorSignupFormValues>({
         resolver: zodResolver(doctorSignupSchema),
         defaultValues: {
@@ -40,6 +39,7 @@ const DoctorSignupForm: React.FC = () => {
     useEffect(() => {
         const subscription = form.watch((data) => {
             setFormData((prevData) => ({ ...prevData, ...data }));
+            setDoctorSignupFormCompleted(form.formState.isValid);
 
             const isFormValid = form.formState.isValid;
             const areAllFieldsFilled = Object.entries(data).every(([key, value]) => {

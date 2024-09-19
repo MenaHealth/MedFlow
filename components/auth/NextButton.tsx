@@ -1,10 +1,17 @@
-import React, {useEffect} from 'react';
+import React, { useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { PaperPlaneIcon } from "@radix-ui/react-icons";
 import { useSignupContext } from "@/components/auth/SignupContext";
 
 const NextButton = () => {
-    const { stepAnswers, currentStep, handleNext, accountType, passwordsMatch } = useSignupContext();
+    const {
+        stepAnswers,
+        currentStep,
+        handleNext,
+        accountType,
+        passwordsMatch,
+        securityQuestionFormCompleted
+    } = useSignupContext();
 
     useEffect(() => {
         console.log('stepAnswers updated: ', stepAnswers);
@@ -17,7 +24,7 @@ const NextButton = () => {
             case 1:
                 return 3;  // Email, Password, Confirm Password
             case 2:
-                return 3;
+                return 6;  // 3 questions and 3 answers
             case 3:
                 return accountType === 'Doctor' ? 4 : 4;
             default:
@@ -25,17 +32,19 @@ const NextButton = () => {
         }
     };
 
-    const isCurrentStepComplete = currentStep === 0
-        ? accountType !== null
-        : stepAnswers && stepAnswers.length > currentStep && stepAnswers[currentStep] === getTotalRequiredFieldsForStep(currentStep);
+    const isCurrentStepComplete = () => {
+        if (currentStep === 0) return accountType !== null;
+        if (currentStep === 1) return stepAnswers[currentStep] === getTotalRequiredFieldsForStep(currentStep) && passwordsMatch;
+        if (currentStep === 2) return securityQuestionFormCompleted;
+        return stepAnswers[currentStep] === getTotalRequiredFieldsForStep(currentStep);
+    };
 
-    // Add additional password matching check for step 1 (Password step)
-    const canProceed = currentStep === 1 ? isCurrentStepComplete && passwordsMatch : isCurrentStepComplete;
+    const canProceed = isCurrentStepComplete();
 
     console.log('NextButton: ');
     console.log('currentStep: ', currentStep);
     console.log('stepAnswers: ', stepAnswers);
-    console.log('isCurrentStepComplete: ', isCurrentStepComplete);
+    console.log('isCurrentStepComplete: ', isCurrentStepComplete());
     console.log('canProceed: ', canProceed);
     console.log('getTotalRequiredFieldsForStep(currentStep): ', getTotalRequiredFieldsForStep(currentStep));
 
@@ -54,7 +63,6 @@ const NextButton = () => {
                 ? 'text-orange-500 group-hover:text-orange-50'
                 : 'text-orange-200 group-hover:text-orange-700'
             }`} />
-            {/*Next*/}
         </Button>
     );
 };

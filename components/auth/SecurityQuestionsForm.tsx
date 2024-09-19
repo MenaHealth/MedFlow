@@ -19,7 +19,7 @@ const securityQuestionsSchema = z.object({
 export type SecurityQuestionsFormValues = z.infer<typeof securityQuestionsSchema>;
 
 const SecurityQuestionsForm: React.FC = () => {
-    const { formData, setFormData, setIsFormComplete } = useSignupContext();
+    const { formData, setFormData, updateAnsweredQuestions, setSecurityQuestionFormCompleted } = useSignupContext();
     const [selectedQuestions, setSelectedQuestions] = useState<string[]>([]);
 
     const form = useForm<SecurityQuestionsFormValues>({
@@ -32,12 +32,11 @@ const SecurityQuestionsForm: React.FC = () => {
             question3: formData.question3 || '',
             answer3: formData.answer3 || '',
         },
-        mode: "onChange", // Trigger validation on change
+        mode: "onChange",
     });
 
     useEffect(() => {
         const subscription = form.watch((values) => {
-            // Update formData in the context when form values change
             setFormData((prevData) => ({
                 ...prevData,
                 question1: values.question1,
@@ -47,20 +46,17 @@ const SecurityQuestionsForm: React.FC = () => {
                 question3: values.question3,
                 answer3: values.answer3,
             }));
+
+            const filledFields = Object.values(values).filter(Boolean).length;
+            updateAnsweredQuestions(2, filledFields);
+
+            // Check if all fields are filled
+            const isFormComplete = filledFields === 6;
+            setSecurityQuestionFormCompleted(isFormComplete);
         });
 
         return () => subscription.unsubscribe();
-    }, [form.watch, setFormData]);
-
-    useEffect(() => {
-        // Validate form completeness
-        const subscription = form.watch(() => {
-            const isValid = form.formState.isValid;
-            setIsFormComplete(isValid);
-        });
-
-        return () => subscription.unsubscribe();
-    }, [form, setIsFormComplete]);
+    }, [form.watch, setFormData, updateAnsweredQuestions, setSecurityQuestionFormCompleted]);
 
     const updateSelectedQuestions = (questionNumber: string, selectedQuestion: string) => {
         form.setValue(questionNumber as "question1" | "question2" | "question3", selectedQuestion, { shouldValidate: true });

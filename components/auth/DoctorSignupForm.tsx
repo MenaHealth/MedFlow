@@ -21,7 +21,7 @@ const doctorSignupSchema = z.object({
 export type DoctorSignupFormValues = z.infer<typeof doctorSignupSchema>;
 
 const DoctorSignupForm: React.FC = () => {
-    const { formData, setFormData, setDoctorSignupFormCompleted } = useSignupContext();
+    const { formData, setFormData, updateAnsweredQuestions, setDoctorSignupFormCompleted } = useSignupContext();
     const form = useForm<DoctorSignupFormValues>({
         resolver: zodResolver(doctorSignupSchema),
         defaultValues: {
@@ -38,23 +38,27 @@ const DoctorSignupForm: React.FC = () => {
 
     useEffect(() => {
         const subscription = form.watch((data) => {
+            // Update form data in context
             setFormData((prevData) => ({ ...prevData, ...data }));
-            setDoctorSignupFormCompleted(form.formState.isValid);
 
-            const isFormValid = form.formState.isValid;
-            const areAllFieldsFilled = Object.entries(data).every(([key, value]) => {
+            // Count filled fields
+            const filledFields = Object.entries(data).filter(([key, value]) => {
                 if (Array.isArray(value)) {
                     return value.length > 0;
                 }
                 return !!value;
-            });
+            }).length;
 
-            setDoctorSignupFormCompleted(isFormValid && areAllFieldsFilled);
-            console.log("Form completed:", isFormValid && areAllFieldsFilled);
+            // Update answered questions for the doctor signup form (Step 4)
+            updateAnsweredQuestions(3, filledFields);
+
+            // Check if form is complete
+            const isFormComplete = filledFields === 7; // 7 required fields in this form
+            setDoctorSignupFormCompleted(isFormComplete);
         });
 
         return () => subscription.unsubscribe();
-    }, [form, setFormData, setDoctorSignupFormCompleted]);
+    }, [form, setFormData, setDoctorSignupFormCompleted, updateAnsweredQuestions]);
 
     return (
         <div className="max-w-md mx-auto">

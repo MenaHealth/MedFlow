@@ -69,7 +69,7 @@ export const SignupProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const [doctorSignupFormCompleted, setDoctorSignupFormCompleted] = useState(false);
 
     const totalQuestions = useMemo(() => {
-        return accountType === 'Doctor' ? 14 : 12;
+        return accountType === 'Doctor' ? 17 : 12;
     }, [accountType]);
 
     const updateProgress = useCallback(() => {

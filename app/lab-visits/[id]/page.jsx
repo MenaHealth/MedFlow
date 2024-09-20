@@ -4,10 +4,11 @@ import PatientSubmenu from '../../../components/PatientSubmenu';
 
 const LabVisits = () => {
     return (
-        <div className="container mx-auto p-4">
+        <div className="w-full max-w-4xl mx-auto pb-16">
             <PatientSubmenu />
-            <h1 className="text-2xl font-bold mb-4">Lab Visits</h1>
-            <p>Content for Lab Visits</p>
+            <h1 className="text-3xl font-bold mb-8 text-center">Lab Visits</h1>
+            <div className="border border-gray-300 p-8 bg-white shadow rounded-lg">
+        </div>
         </div>
     );
 };

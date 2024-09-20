@@ -1,5 +1,5 @@
-"use client"; 
-import React, { useState } from 'react';
+"use client";
+import React, { useState, useCallback, useEffect } from 'react';
 import { TextField, Button, Typography } from '@mui/material';
 import PatientSubmenu from '../../components/PatientSubmenu';  // Ensure you import the PatientSubmenu
 
@@ -16,6 +16,107 @@ const RXForm: React.FC = () => {
         medicationsNeeded: '',
         pharmacyLocation: '',
     });
+
+    const [medicalrequestNote, setmedicalrequestNote] = useState({
+        date: '',
+        drInCharge: '',
+        specialty: '',
+        patientName: '',
+        patientPhoneNumber: '',
+        patientAddress: '',
+        diagnosis: '',
+        medications: '',
+        dosage: '',
+        frequency: '',
+    });
+
+    const pharmacies = [
+        'Egypt',
+        'Gaza',
+    ];
+
+    const [notesList, setNotesList] = useState<any[]>([]); // Add a type for notes, if available
+    const [templateType, setTemplateType] = useState('rxform'); // Default to rxform
+    const [showTemplateButtons, setShowTemplateButtons] = useState(false);
+    const [noteContent, setNoteContent] = useState('');
+
+    const fetchNote = useCallback(async (noteId: string) => {
+        try {
+            const response = await fetch(`/api/patient/notes/${rxData.patientIDNumber}?noteId=${noteId}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const note = await response.json();
+            setNoteContent(note.content);
+        } catch (error) {
+            console.error('Failed to fetch note:', error);
+        }
+    }, [rxData.patientIDNumber]);
+
+    useEffect(() => {
+        fetchNote(rxData.patientIDNumber);
+    }, [rxData.patientIDNumber, fetchNote]);
+
+    const publishNote = async () => {
+        let noteContent = '';
+        let noteTitle = '';
+
+        if (templateType === 'rxform') {
+            noteContent = `
+                RX Form Note
+                Full Name: ${rxData.fullName}
+                Phone Number: ${rxData.phoneNumber}
+                Age: ${rxData.age}
+                Address: ${rxData.address}
+                Patient ID: ${rxData.patientIDNumber}
+                Referring Dr: ${rxData.referringDr}
+                Prescribing Dr: ${rxData.prescribingDr}
+                Diagnosis: ${rxData.diagnosis}
+                Medications Needed: ${rxData.medicationsNeeded}
+                Pharmacy Location: ${rxData.pharmacyLocation}
+            `;
+            noteTitle = 'RX Form';
+        } else {
+            noteContent = `
+                Medical Request Note
+                Date: ${medicalrequestNote.date}
+                Dr In Charge: ${medicalrequestNote.drInCharge}
+                Specialty: ${medicalrequestNote.specialty}
+                Patient Name: ${medicalrequestNote.patientName}
+                Patient Phone Number: ${medicalrequestNote.patientPhoneNumber}
+                Patient Address: ${medicalrequestNote.patientAddress}
+                Diagnosis: ${medicalrequestNote.diagnosis}
+                Medications Needed: ${medicalrequestNote.medications}
+                Dosage: ${medicalrequestNote.dosage}
+                Frequency: ${medicalrequestNote.frequency}
+            `;
+            noteTitle = 'Medical Request';
+        }
+
+        if (noteContent.trim()) {
+            try {
+                const response = await fetch(`/api/patient/notes/${rxData.patientIDNumber}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        content: noteContent,
+                        username: "username_placeholder", // replace with actual username
+                        title: noteTitle,
+                        date: new Date(),
+                    }),
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const newNote = await response.json();
+                setNotesList((prevNotes) => [...prevNotes, newNote]);
+            } catch (error) {
+                console.error('Failed to publish note:', error);
+            }
+        }
+    };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setRxData({
@@ -146,4 +247,3 @@ const RXForm: React.FC = () => {
 }
 
 export default RXForm;
-

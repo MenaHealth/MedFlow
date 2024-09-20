@@ -8,6 +8,7 @@ import TriageSignupForm from './TriageSignupForm';
 import NextButton from '@/components/auth/NextButton';
 import Submit from '@/components/auth/Submit';
 import ProgressBar from './ProgressBar';
+import BackButton from "@/components/auth/BackButton";
 
 const SignupSection = () => {
     const {
@@ -47,16 +48,18 @@ const SignupSection = () => {
             <div className="flex-grow overflow-y-auto">
                 {renderForm()}
             </div>
-            <div className="p-4 bg-white border-t flex justify-between">
-                {renderButton()}
+            <div className="p-4 bg-white border-t relative overflow-visible h-auto">
+                {/* Back Button positioned on the left */}
                 {currentStep > 0 && (
-                    <button
-                        onClick={handleBack}
-                        className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors"
-                    >
-                        Back
-                    </button>
+                    <div className="absolute left-0">
+                        <BackButton />
+                    </div>
                 )}
+
+                {/* Next/Submit button centered */}
+                <div className="flex justify-center">
+                    {renderButton()}
+                </div>
             </div>
         </div>
     );

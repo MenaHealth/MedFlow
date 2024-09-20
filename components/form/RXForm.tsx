@@ -45,14 +45,8 @@ const NotesForm: React.FC<NotesFormProps> = ({ patientId, username }) => {
     });
 
     const pharmacies = [
-        'EGH, Khan Younis',
-        'Shuhada Al Aqsa, Dier El Balah',
-        'Abu Yousif Najjar, Rafah',
-        'Al Emarati, Rafah',
-        'Tal Sultan, Rafah',
-        'Kuwaiti Hospital, Rafah',
-        'Jordanian Field Hospital, Khan Younis',
-        'Nusseirat, Al Awda',
+        'Egypt',
+        'Gaza',
     ];
 
     const [notesList, setNotesList] = useState<Note[]>([]);

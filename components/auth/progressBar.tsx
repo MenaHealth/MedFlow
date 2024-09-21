@@ -1,8 +1,6 @@
 import React from 'react';
 
 const ProgressBar = ({ progress }) => {
-    console.log('Rendering ProgressBar with progress:', progress); // Ensure progress updates correctly
-
     return (
         <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
             <div

@@ -42,6 +42,8 @@ interface SignupContextValue {
     // DoctorSignupForm
     doctorSignupFormCompleted: boolean;
     setDoctorSignupFormCompleted: React.Dispatch<React.SetStateAction<boolean>>;
+    emailExists: boolean;
+    setEmailExists: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const SignupContext = createContext<SignupContextValue | null>(null);
@@ -51,7 +53,6 @@ export const useSignupContext = () => {
     if (!context) {
         throw new Error('useSignupContext must be used within a SignupProvider');
     }
-    console.log('useSignupContext: ', context);
     return context;
 };
 
@@ -64,24 +65,21 @@ export const SignupProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const [stepAnswers, setStepAnswers] = useState<number[]>(new Array(4).fill(0));
     // step 1: user type selection, step 2: email password, step 3: security questions, step 4: doctor / triage sign up
     const [validEmail, setValidEmail] = useState(false);
+    const [emailExists, setEmailExists] = useState(false);
     const [passwordsMatch, setPasswordsMatch] = useState(false);
     const [securityQuestionFormCompleted, setSecurityQuestionFormCompleted] = useState(false);
     const [doctorSignupFormCompleted, setDoctorSignupFormCompleted] = useState(false);
-
     const totalQuestions = useMemo(() => {
         return accountType === 'Doctor' ? 17 : 12;
     }, [accountType]);
 
     const updateProgress = useCallback(() => {
-        console.log('Updating progress...');
         const newProgress = (answeredQuestions / totalQuestions) * 100;
-        console.log('New progress calculated:', newProgress, 'Answered:', answeredQuestions, 'Total:', totalQuestions);
         setProgress(newProgress);
     }, [answeredQuestions, totalQuestions]);
 
     const updateAnsweredQuestions = useCallback((step: number, count: number) => {
         if (count < 0) {
-            console.error("Invalid count value. Count cannot be less than 0.");
             return;
         }
         setStepAnswers(prev => {
@@ -89,8 +87,6 @@ export const SignupProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             newStepAnswers[step] = count;
             const newTotal = newStepAnswers.reduce((acc, curr) => acc + curr, 0);
             setAnsweredQuestions(newTotal);
-            console.log('Updated stepAnswers:', newStepAnswers);
-            console.log('Updated answeredQuestions:', newTotal);
             return newStepAnswers;
         });
     }, []);
@@ -101,21 +97,17 @@ export const SignupProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }, [currentStep, answeredQuestions]);
 
     useEffect(() => {
-        console.log('SignupContext: ');
-        console.log('currentStep: ', currentStep);
-        console.log('stepAnswers: ', stepAnswers);
-        console.log('answeredQuestions: ', answeredQuestions);
-        updateProgress(); // this is the function that calculates and sets the progress
-
-        // You could also log the progress directly after calling updateProgress:
-        console.log('Updated Progress:', (answeredQuestions / totalQuestions) * 100);
+        updateProgress();
     }, [answeredQuestions, totalQuestions, updateProgress]);
 
     const handleNext = useCallback(() => {
+        if (currentStep === 1 && emailExists) {
+            return;
+        }
         if (currentStep < 3) {
             setCurrentStep((prev) => prev + 1);
         }
-    }, [currentStep]);
+    }, [currentStep, emailExists]);
 
     const handleBack = useCallback(() => {
         if (currentStep > 0) {
@@ -143,6 +135,8 @@ export const SignupProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                 setAccountType,
                 validEmail,
                 setValidEmail,
+                emailExists,
+                setEmailExists,
                 passwordsMatch,
                 setPasswordsMatch,
                 securityQuestionFormCompleted,

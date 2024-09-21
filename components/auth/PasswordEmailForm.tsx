@@ -59,12 +59,16 @@ const PasswordEmailForm = () => {
         // Update answered questions
         updateAnsweredQuestions(1, emailFilled + passwordFilled + confirmPasswordFilled);
 
-        setFormData((prevData) => ({
-            ...prevData,
-            email,
-            password,
-            confirmPassword,
-        }));
+        setFormData((prevData) => {
+            const newData = {
+                ...prevData,
+                email,
+                password,
+                confirmPassword,
+            };
+            console.log('Updated form data:', newData);
+            return newData;
+        });
 
         setPasswordsMatch(password === confirmPassword && passwordFilled);
         setValidEmail(isEmailValid);

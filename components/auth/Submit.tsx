@@ -7,12 +7,12 @@ import { PaperPlaneIcon } from "@radix-ui/react-icons"
 import { ClipLoader } from 'react-spinners'
 
 export default function Submit() {
-    const { formData, accountType, doctorSignupFormCompleted } = useSignupContext();
+    const { formData, accountType, doctorSignupFormCompleted, triageSignupFormCompleted } = useSignupContext();
     const [isLoading, setIsLoading] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [animateFlyOff, setAnimateFlyOff] = useState(false);
     const [iconPosition, setIconPosition] = useState({ top: 0, left: 0 });
-    const buttonRef = useRef(null);
+    const buttonRef = useRef<HTMLButtonElement>(null);
 
     useEffect(() => {
         if (isSuccess && buttonRef.current) {
@@ -53,10 +53,12 @@ export default function Submit() {
                     firstName: formData.firstName,
                     lastName: formData.lastName,
                     dob: formData.dob,
-                    doctorSpecialty: formData.doctorSpecialty,
-                    languages: formData.languages,
-                    countries: formData.countries,
-                    gender: formData.gender,
+                    ...(accountType === 'Doctor' && {
+                        doctorSpecialty: formData.doctorSpecialty,
+                        languages: formData.languages,
+                        countries: formData.countries,
+                        gender: formData.gender,
+                    }),
                 }),
             });
 
@@ -78,7 +80,7 @@ export default function Submit() {
         }
     };
 
-    const isFormComplete = accountType === 'Doctor' ? doctorSignupFormCompleted : true;
+    const isFormComplete = accountType === 'Doctor' ? doctorSignupFormCompleted : triageSignupFormCompleted;
 
     return (
         <div className="relative flex items-center justify-center">

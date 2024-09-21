@@ -1,13 +1,12 @@
 // components/form/NewPatientForm.tsx
-import { zodResolver } from "@hookform/resolvers/zod";
+import { FormProvider, useForm } from "react-hook-form";
 import * as React from "react";
-import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { TextFormField } from "@/components/ui/TextFormField";
 import { NumericalFormField } from "@/components/form/NumericalFormField";
 import { TextAreaFormField } from "@/components/ui/TextAreaFormField";
 import { PhoneFormField } from "@/components/form/PhoneFormField";
-import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
 import PuffLoader from "react-spinners/PuffLoader";
@@ -90,17 +89,17 @@ export function NewPatientForm({ handleSubmit, submitting }: NewPatientFormProps
     };
 
     return (
-        <Form {...form}>
+        <FormProvider {...form}>  {/* Use FormProvider here */}
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                 <div className="flex flex-col md:flex-row md:space-x-4">
                     <div className="w-full md:w-1/2">
-                        <TextFormField form={form} fieldName="firstName" fieldLabel="First Name" />
+                        <TextFormField fieldName="firstName" fieldLabel="First Name" />
                     </div>
                     <div className="w-full md:w-1/2">
-                        <TextFormField form={form} fieldName="lastName" fieldLabel="Last Name" />
+                        <TextFormField fieldName="lastName" fieldLabel="Last Name" />
                     </div>
                 </div>
-                <TextFormField form={form} fieldName="email" fieldLabel="Email" />
+                <TextFormField fieldName="email" fieldLabel="Email" />
                 <div className="flex flex-col md:flex-row md:space-x-4">
                     <div className="w-full md:w-1/4">
                         <NumericalFormField form={form} fieldName="age" fieldLabel="Age" />
@@ -109,13 +108,13 @@ export function NewPatientForm({ handleSubmit, submitting }: NewPatientFormProps
                         <PhoneFormField form={form} fieldName="phone" fieldLabel="Phone Number" />
                     </div>
                     <div className="w-full md:w-3/8">
-                        <TextFormField form={form} fieldName="language" fieldLabel="Language" />
+                        <TextFormField fieldName="language" fieldLabel="Language" />
                     </div>
                 </div>
 
                 <div className="flex w-full space-x-2">
                     <div className="flex-grow">
-                        <TextFormField form={form} fieldName="location" fieldLabel="Location" className="w-full" />
+                        <TextFormField fieldName="location" fieldLabel="Location" className="w-full" />
                     </div>
                     <div className="flex items-end">
                         {loading ? (
@@ -139,8 +138,8 @@ export function NewPatientForm({ handleSubmit, submitting }: NewPatientFormProps
                     </Button>
                 </div>
             </form>
-        </Form>
-    );
+        </FormProvider>
+);
 }
 
 export default NewPatientForm;

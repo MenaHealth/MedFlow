@@ -8,10 +8,17 @@ interface FormData {
     securityQuestions?: { question: string; answer: string }[];
     firstName?: string;
     lastName?: string;
-    doctorType?: string;
-    language?: string;
-    gender?: string;
-    location?: string;
+    dob?: string;
+    doctorSpecialty?: string;
+    languages?: string[];
+    gender?: 'male' | 'female' | undefined;
+    countries?: string[];
+    question1?: string;
+    answer1?: string;
+    question2?: string;
+    answer2?: string;
+    question3?: string;
+    answer3?: string;
 }
 
 interface SignupContextValue {
@@ -34,6 +41,8 @@ interface SignupContextValue {
     //PasswordEmailForm
     validEmail: boolean;
     setValidEmail: React.Dispatch<React.SetStateAction<boolean>>;
+    emailExists: boolean;
+    setEmailExists: React.Dispatch<React.SetStateAction<boolean>>;
     passwordsMatch: boolean;
     setPasswordsMatch: React.Dispatch<React.SetStateAction<boolean>>;
     // SecurityQuestionsForm
@@ -42,8 +51,9 @@ interface SignupContextValue {
     // DoctorSignupForm
     doctorSignupFormCompleted: boolean;
     setDoctorSignupFormCompleted: React.Dispatch<React.SetStateAction<boolean>>;
-    emailExists: boolean;
-    setEmailExists: React.Dispatch<React.SetStateAction<boolean>>;
+    // TriageSignupForm
+    triageSignupFormCompleted: boolean;
+    setTriageSignupFormCompleted: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const SignupContext = createContext<SignupContextValue | null>(null);
@@ -69,8 +79,10 @@ export const SignupProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const [passwordsMatch, setPasswordsMatch] = useState(false);
     const [securityQuestionFormCompleted, setSecurityQuestionFormCompleted] = useState(false);
     const [doctorSignupFormCompleted, setDoctorSignupFormCompleted] = useState(false);
+    const [triageSignupFormCompleted, setTriageSignupFormCompleted] = useState(false);
     const totalQuestions = useMemo(() => {
-        return accountType === 'Doctor' ? 17 : 12;
+        return accountType === 'Doctor' ? 17 : 13;
+        // how many steps are in the progress bar for each user type
     }, [accountType]);
 
     const updateProgress = useCallback(() => {
@@ -143,6 +155,8 @@ export const SignupProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                 setSecurityQuestionFormCompleted,
                 doctorSignupFormCompleted,
                 setDoctorSignupFormCompleted,
+                triageSignupFormCompleted,
+                setTriageSignupFormCompleted,
             }}
         >
             {children}

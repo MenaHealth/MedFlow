@@ -95,18 +95,14 @@ export function LoginForm() {
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-4">
                     <TextFormField
-                        form={form}
                         fieldName="email"
                         fieldLabel="Email"
-                        id="email"
                         error={form.formState.errors.email?.message}
                         autoComplete="email"
                     />
                     <TextFormField
-                        form={form}
                         fieldName="password"
                         fieldLabel="Password"
-                        id="password"
                         error={form.formState.errors.password?.message}
                     />
                     <div className="flex justify-center mt-6">

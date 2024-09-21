@@ -1,5 +1,5 @@
-// utils/locations.enum.ts
-export enum Locations {
+// utils/countries.enum.ts
+export enum Countries {
     EGYPT = 'Egypt',
     PALESTINE_WEST_BANK = 'Palestine - West Bank',
     SYRIA = 'Syria',
@@ -7,4 +7,4 @@ export enum Locations {
     AFGHANISTAN = 'Afghanistan',
 }
 
-export const locationsList = Object.values(Locations);
+export const CountriesList = Object.values(Countries);

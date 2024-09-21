@@ -7,7 +7,7 @@ import DoctorSignupForm from './DoctorSignupForm';
 import TriageSignupForm from './TriageSignupForm';
 import NextButton from '@/components/auth/NextButton';
 import Submit from '@/components/auth/Submit';
-import ProgressBar from './ProgressBar';
+import ProgressBar from './progressBar';
 import BackButton from "@/components/auth/BackButton";
 
 const SignupSection = () => {

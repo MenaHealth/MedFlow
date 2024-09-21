@@ -3,9 +3,12 @@ import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { TextFormField } from "@/components/ui/TextFormField";
-import { DoctorSpecialty } from '@/utils/doctorSpecialty.enum';
 import { MultiChoiceFormField } from "@/components/form/MultiChoiceFormField";
 import { SingleChoiceFormField } from "@/components/form/SingleChoiceFormField";
+import { DoctorSpecialtyList } from '@/utils/doctorSpecialty.enum';
+import { languagesList } from '@/utils/languages.enum';
+import { locationsList } from '@/utils/locations.enum';
+
 import { useSignupContext } from './SignupContext';
 
 const doctorSignupSchema = z.object({
@@ -38,22 +41,15 @@ const DoctorSignupForm: React.FC = () => {
 
     useEffect(() => {
         const subscription = form.watch((data) => {
-            // Update form data in context
             setFormData((prevData) => ({ ...prevData, ...data }));
-
-            // Count filled fields
             const filledFields = Object.entries(data).filter(([key, value]) => {
                 if (Array.isArray(value)) {
                     return value.length > 0;
                 }
                 return !!value;
             }).length;
-
-            // Update answered questions for the doctor signup form (Step 4)
             updateAnsweredQuestions(3, filledFields);
-
-            // Check if form is complete
-            const isFormComplete = filledFields === 7; // 7 required fields in this form
+            const isFormComplete = filledFields === 7;
             setDoctorSignupFormCompleted(isFormComplete);
         });
 
@@ -86,21 +82,21 @@ const DoctorSignupForm: React.FC = () => {
                     <MultiChoiceFormField
                         fieldName="languages"
                         fieldLabel="Languages"
-                        choices={["English", "Arabic", "Farsi", "Pashto", "Turkish", "Urdu", "Spanish", "French"]}
+                        choices={languagesList}
                     />
                     <MultiChoiceFormField
                         fieldName="countries"
                         fieldLabel="Countries"
-                        choices={["Egypt", "Palestine - West Bank", "Syria", "Yemen", "Afghanistan"]}
+                        choices={locationsList}
                     />
                     <SingleChoiceFormField
                         fieldName="doctorSpecialty"
-                        fieldLabel="Please select your specialty"
-                        choices={Object.values(DoctorSpecialty)}
+                        fieldLabel="Doctor Specialty"
+                        choices={Object.values(DoctorSpecialtyList)}
                     />
                     <SingleChoiceFormField
                         fieldName="gender"
-                        fieldLabel="Please select your gender"
+                        fieldLabel="Gender"
                         choices={["male", "female"]}
                     />
                 </form>

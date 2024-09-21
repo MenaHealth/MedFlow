@@ -255,6 +255,8 @@ export function ForgotPasswordForm() {
                                 form={form}
                                 fieldName="email"
                                 fieldLabel="Email"
+                                id="email"
+                                autoComplete="email"
                                 error={form.formState.errors.email?.message}
                             />
                             <Button onClick={handleNextStep}>Next</Button>

@@ -98,12 +98,15 @@ export function LoginForm() {
                         form={form}
                         fieldName="email"
                         fieldLabel="Email"
+                        id="email"
                         error={form.formState.errors.email?.message}
+                        autoComplete="email"
                     />
-                    <PasswordField
+                    <TextFormField
                         form={form}
                         fieldName="password"
                         fieldLabel="Password"
+                        id="password"
                         error={form.formState.errors.password?.message}
                     />
                     <div className="flex justify-center mt-6">

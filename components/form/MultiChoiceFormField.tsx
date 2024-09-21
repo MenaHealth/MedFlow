@@ -82,7 +82,6 @@ export function MultiChoiceFormField({ fieldName, fieldLabel, choices }) {
                                     </ScrollArea>
                                 </CommandGroup>
                             </Command>
-                            {/* Updated div to justify-center and Button to w-full */}
                             <div className="flex items-center justify-center p-2">
                                 <Button className="w-full" onClick={handleSubmit}>
                                     <PaperPlaneIcon className="h-5 w-5 text-white" />

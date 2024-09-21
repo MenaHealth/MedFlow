@@ -63,6 +63,7 @@ const EmailField = ({
                                 onBlur={handleBlur}
                                 onChange={handleChange}
                                 id={id}
+                                autoComplete={"email"}
                                 className={`w-full pt-4 pb-2 pl-2 pr-10 ${
                                     isFocused || field.value ? 'bg-white' : ''
                                 } ${!isValidEmail && field.value ? 'text-orange-700' : ''}`}

@@ -2,7 +2,7 @@
 import { Schema, model, models, Document, CallbackError } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import { SecurityQuestion } from '@/utils/securityQuestions.enum';
-import { DoctorSpecialty } from '@/utils/doctorSpecialty.enum';
+import { DoctorSpecialtyList } from '@/utils/doctorSpecialty.enum';
 
 interface IUser extends Document {
   firstName: string;
@@ -10,7 +10,7 @@ interface IUser extends Document {
   email: string;
   accountType: 'Doctor' | 'Triage' | 'Admin';
   password: string;
-  doctorSpecialty?: DoctorSpecialty;
+  doctorSpecialty?: DoctorSpecialtyList;
   languages?: string[];
   countries?: string[];
   gender?: 'male' | 'female';
@@ -43,7 +43,7 @@ const UserSchema = new Schema<IUser>({
   },
   doctorSpecialty: {
     type: String,
-    enum: Object.values(DoctorSpecialty),
+    enum: Object.values(DoctorSpecialtyList),
   },
   languages: {
     type: [String],

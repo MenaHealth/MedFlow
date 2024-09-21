@@ -73,7 +73,12 @@ const PasswordEmailForm = () => {
     return (
         <Form {...form}>
             <form className="space-y-4">
-                <EmailField form={form} fieldName="email" fieldLabel="Email" />
+                <EmailField
+                    form={form}
+                    fieldName="email"
+                    fieldLabel="Email"
+                    id="email"
+                />
                 <PasswordField
                     form={form}
                     fieldName="password"

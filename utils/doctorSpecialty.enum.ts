@@ -1,4 +1,4 @@
-export enum DoctorSpecialty {
+export enum DoctorSpecialtyList {
     ALLERGY_IMMUNOLOGY = 'Allergy & Immunology',
     ANESTHESIA_PAIN_MANAGEMENT = 'Anesthesia & Pain Management',
     CARDIOLOGY = 'Cardiology',
@@ -48,4 +48,4 @@ export enum DoctorSpecialty {
     UROLOGY = 'Urology',
 }
 
-export const doctorSpecialties = Object.values(DoctorSpecialty);
+export const doctorSpecialties = Object.values(DoctorSpecialtyList);

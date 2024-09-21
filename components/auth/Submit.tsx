@@ -7,7 +7,7 @@ import { PaperPlaneIcon } from "@radix-ui/react-icons"
 import { ClipLoader } from 'react-spinners'
 
 export default function Submit() {
-    const { formData, accountType } = useSignupContext();
+    const { formData, accountType, doctorSignupFormCompleted } = useSignupContext();
     const [isLoading, setIsLoading] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [animateFlyOff, setAnimateFlyOff] = useState(false);
@@ -78,6 +78,8 @@ export default function Submit() {
         }
     };
 
+    const isFormComplete = accountType === 'Doctor' ? doctorSignupFormCompleted : true;
+
     return (
         <div className="relative flex items-center justify-center">
             {isLoading && (
@@ -88,18 +90,17 @@ export default function Submit() {
             <Button
                 ref={buttonRef}
                 onClick={handleSubmit}
-                disabled={isLoading || isSuccess}
+                disabled={isLoading || isSuccess || !isFormComplete}
                 className={`group flex items-center justify-center px-4 py-2 rounded transition-all duration-300
-                    ${isSuccess || isLoading
+                    ${isSuccess || isLoading || !isFormComplete
                     ? 'bg-transparent border-none shadow-none'
                     : 'bg-orange-200 text-orange-500 shadow-lg shadow-orange-50 border-2 border-orange-200 hover:bg-orange-500 hover:text-orange-700 hover:shadow-orange-200'
                 }`}
             >
-
                 <PaperPlaneIcon className={`h-5 w-5 transition-colors duration-300
                     ${isSuccess
                     ? 'opacity-0'
-                    : isLoading
+                    : isLoading || !isFormComplete
                         ? 'text-orange-500'
                         : 'text-orange-500 group-hover:text-orange-50 ml-2'
                 }`}

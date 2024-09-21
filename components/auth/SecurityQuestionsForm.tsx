@@ -50,7 +50,6 @@ const SecurityQuestionsForm: React.FC = () => {
             const filledFields = Object.values(values).filter(Boolean).length;
             updateAnsweredQuestions(2, filledFields);
 
-            // Check if all fields are filled
             const isFormComplete = filledFields === 6;
             setSecurityQuestionFormCompleted(isFormComplete);
         });
@@ -86,7 +85,7 @@ const SecurityQuestionsForm: React.FC = () => {
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent>
                                     {securityQuestions
-                                        .filter(question => !selectedQuestions.includes(question) || question === form.getValues(`question${num}`))
+                                        .filter(question => !selectedQuestions.includes(question) || question === form.getValues(`question${num}` as "question1" | "question2" | "question3"))
                                         .map((question, index) => (
                                             <DropdownMenuItem key={index} onSelect={() => updateSelectedQuestions(`question${num}`, question)}>
                                                 {question}

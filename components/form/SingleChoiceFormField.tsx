@@ -8,7 +8,17 @@ import { ScrollArea } from "@/components/form/ScrollArea";
 import { ChevronsUpDown, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export function SingleChoiceFormField({ fieldName, fieldLabel, choices }) {
+interface SingleChoiceFormFieldProps {
+    fieldName: string;
+    fieldLabel: string;
+    choices: string[];
+}
+
+export function SingleChoiceFormField({
+                                          fieldName,
+                                          fieldLabel,
+                                          choices,
+                                      }: SingleChoiceFormFieldProps) {
     const form = useFormContext();
     const [open, setOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");

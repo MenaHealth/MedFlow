@@ -57,7 +57,7 @@ const PasswordEmailForm = () => {
         const isEmailValid = emailRegex.test(email);
 
         // Update answered questions
-        updateAnsweredQuestions(1, emailFilled + passwordFilled + confirmPasswordFilled);
+        updateAnsweredQuestions(1, Number(emailFilled) + Number(passwordFilled) + Number(confirmPasswordFilled));
 
         setFormData((prevData) => {
             const newData = {
@@ -81,13 +81,11 @@ const PasswordEmailForm = () => {
                     form={form}
                     fieldName="email"
                     fieldLabel="Email"
-                    id="email"
                 />
                 <PasswordField
                     form={form}
                     fieldName="password"
                     fieldLabel="Password"
-                    tooltipOnType="Password must be at least 8 characters and include one number"
                 />
                 <PasswordField form={form} fieldName="confirmPassword" fieldLabel="Confirm Password" />
             </form>

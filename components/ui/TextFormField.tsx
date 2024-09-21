@@ -15,6 +15,7 @@ interface Props {
     error?: string;
     disabled?: boolean;
     autoComplete?: string;
+    id?: string;
 }
 
 const TextFormField = ({
@@ -26,8 +27,6 @@ const TextFormField = ({
                            showTooltip,
                            onFocus,
                            onBlur,
-                           error,
-                           disabled,
                            autoComplete,
                        }: Props) => {
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);

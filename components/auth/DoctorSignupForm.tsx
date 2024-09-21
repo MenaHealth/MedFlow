@@ -7,7 +7,7 @@ import { MultiChoiceFormField } from "@/components/form/MultiChoiceFormField";
 import { SingleChoiceFormField } from "@/components/form/SingleChoiceFormField";
 import { DoctorSpecialtyList } from '@/utils/doctorSpecialty.enum';
 import { languagesList } from '@/utils/languages.enum';
-import { locationsList } from '@/utils/locations.enum';
+import { CountriesList } from '@/utils/countries.enum';
 
 import { useSignupContext } from './SignupContext';
 
@@ -41,14 +41,24 @@ const DoctorSignupForm: React.FC = () => {
 
     useEffect(() => {
         const subscription = form.watch((data) => {
-            setFormData((prevData) => ({ ...prevData, ...data }));
-            const filledFields = Object.entries(data).filter(([key, value]) => {
+            const cleanedData = {
+                ...data,
+                languages: data.languages?.filter((language) => language !== undefined) || [],  // Remove undefined values
+                countries: data.countries?.filter((country) => country !== undefined) || [],   // Remove undefined values
+            };
+
+            setFormData((prevData) => ({
+                ...prevData,
+                ...cleanedData,
+            }));
+
+            const filledFields = Object.entries(cleanedData).filter(([key, value]) => {
                 if (Array.isArray(value)) {
                     return value.length > 0;
                 }
                 return !!value;
             }).length;
-            updateAnsweredQuestions(3, filledFields);
+
             const isFormComplete = filledFields === 7;
             setDoctorSignupFormCompleted(isFormComplete);
         });
@@ -63,20 +73,17 @@ const DoctorSignupForm: React.FC = () => {
                     <TextFormField
                         fieldName="firstName"
                         fieldLabel="First Name"
-                        id="firstName"
                         autoComplete="given-name"
                     />
                     <TextFormField
                         fieldName="lastName"
                         fieldLabel="Last Name"
-                        id="lastName"
                         autoComplete="family-name"
                     />
                     <TextFormField
                         fieldName="dob"
                         fieldLabel="Date of Birth (MM/DD/YYYY)"
                         type="date"
-                        id="dob"
                         autoComplete="bday"
                     />
                     <MultiChoiceFormField
@@ -87,7 +94,7 @@ const DoctorSignupForm: React.FC = () => {
                     <MultiChoiceFormField
                         fieldName="countries"
                         fieldLabel="Countries"
-                        choices={locationsList}
+                        choices={CountriesList}
                     />
                     <SingleChoiceFormField
                         fieldName="doctorSpecialty"

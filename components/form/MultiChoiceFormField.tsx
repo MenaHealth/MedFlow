@@ -9,7 +9,13 @@ import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {PaperPlaneIcon} from "@radix-ui/react-icons";
 
-export function MultiChoiceFormField({ fieldName, fieldLabel, choices }) {
+interface MultiChoiceFormFieldProps {
+    fieldName: string;
+    fieldLabel: string;
+    choices: string[];
+}
+
+export function MultiChoiceFormField({ fieldName, fieldLabel, choices }: MultiChoiceFormFieldProps) {
     const form = useFormContext();
     const [open, setOpen] = useState(false);
     const [selectedItems, setSelectedItems] = useState<string[]>([]);

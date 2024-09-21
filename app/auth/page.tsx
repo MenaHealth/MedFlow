@@ -2,7 +2,6 @@
 "use client"
 
 import React, { useState } from 'react';
-import PasswordEmailForm from '@/components/auth/PasswordEmailForm';
 import LoginForm from '@/components/auth/LoginForm';
 import { RadioCard } from '@/components/ui/radio-card';
 import Flex from "@/components/ui/flex";
@@ -42,7 +41,7 @@ const AuthPage = () => {
                                 <LoginForm />
                             </div>
                         ) : (
-                            <SignupProvider initialAccountType={accountType}>
+                            <SignupProvider>
                                 <SignupSection />
                             </SignupProvider>
                         )}

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/form/ScrollArea";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {PaperPlaneIcon} from "@radix-ui/react-icons";
 
 export function MultiChoiceFormField({ fieldName, fieldLabel, choices }) {
     const form = useFormContext();
@@ -81,9 +82,10 @@ export function MultiChoiceFormField({ fieldName, fieldLabel, choices }) {
                                     </ScrollArea>
                                 </CommandGroup>
                             </Command>
-                            <div className="flex items-center justify-end p-2">
-                                <Button onClick={handleSubmit}>
-                                    Submit
+                            {/* Updated div to justify-center and Button to w-full */}
+                            <div className="flex items-center justify-center p-2">
+                                <Button className="w-full" onClick={handleSubmit}>
+                                    <PaperPlaneIcon className="h-5 w-5 text-white" />
                                 </Button>
                             </div>
                         </PopoverContent>

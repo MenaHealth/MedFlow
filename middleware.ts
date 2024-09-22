@@ -13,7 +13,8 @@ export async function middleware(req: any) {
         pathname.startsWith('/api') ||          // Allow API routes
         pathname === '/auth' ||                 // Allow the auth page
         pathname.match(PUBLIC_FILE) ||          // Allow static files (e.g., .css, .js, .png, .jpg, etc.)
-        pathname === '/create-patient'          // Allow the new patient form
+        pathname === '/create-patient' ||       // Allow the new patient form
+        pathname === '/about'                // Allow the about page
     ) {
         return NextResponse.next();
     }

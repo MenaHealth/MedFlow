@@ -55,7 +55,7 @@ const SecurityQuestionsForm: React.FC = () => {
         });
 
         return () => subscription.unsubscribe();
-    }, [form.watch, setFormData, updateAnsweredQuestions, setSecurityQuestionFormCompleted]);
+    }, [form, setFormData, updateAnsweredQuestions, setSecurityQuestionFormCompleted]); // Added 'form' as a dependency
 
     const updateSelectedQuestions = (questionNumber: string, selectedQuestion: string) => {
         form.setValue(questionNumber as "question1" | "question2" | "question3", selectedQuestion, { shouldValidate: true });

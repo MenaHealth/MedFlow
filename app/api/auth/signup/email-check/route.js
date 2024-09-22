@@ -1,4 +1,7 @@
 // app/api/auth/signup/email-check/route.js
+export const dynamic = 'force-dynamic';
+// have this line ^^ to stop the Dynamic server usage errors when running `npm run build`
+
 import User from '@/models/user'; // Import your User model
 import dbConnect from '@/utils/database'; // Import your database connection utility
 

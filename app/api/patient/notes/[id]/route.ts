@@ -1,4 +1,7 @@
 // app/api/patient/notes/[id]/route.js
+export const dynamic = 'force-dynamic';
+// have this line ^^ to stop the Dynamic server usage errors when running `npm run build`
+
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '../../../../../utils/database';
 import Note from '../../../../../models/note';

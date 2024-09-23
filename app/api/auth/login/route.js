@@ -17,8 +17,13 @@ export async function POST(request) {
             return NextResponse.json({ message: 'Invalid email or password' }, { status: 400 });
         }
 
-        console.log('User found:', user);
+        // Log the plain password submitted by the user
+        console.log('Plain password (submitted):', password);
 
+        // Log the hashed password stored in the database
+        console.log('Hashed password (stored in DB):', user.password);
+
+        // Compare the submitted password with the stored hash
         const isPasswordValid = await bcrypt.compare(password, user.password);
 
         if (!isPasswordValid) {

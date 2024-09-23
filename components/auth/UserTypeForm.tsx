@@ -17,13 +17,13 @@ const UserTypeForm = () => {
 
     return (
         <div className="flex justify-center items-center h-full p-4 bg-gray-100 rounded-lg shadow-md">
-            <RadioCard.Root value={accountType ?? undefined} onValueChange={handleSelectAccountType} className="flex w-full justify-center">
-                <RadioCard.Item value="Doctor" className="w-1/2 p-2">
+            <RadioCard.Root value={accountType ?? undefined} onValueChange={handleSelectAccountType} className="flex w-full h-full justify-center space-x-4">
+                <RadioCard.Item value="Doctor" className="flex-grow p-4 h-full">
                     <Flex direction="column" width="100%" className="justify-center items-center h-full">
                         <Text size="sm" weight="normal">Doctor</Text>
                     </Flex>
                 </RadioCard.Item>
-                <RadioCard.Item value="Triage" className="w-1/2 p-2">
+                <RadioCard.Item value="Triage" className="flex-grow p-4 h-full">
                     <Flex direction="column" width="100%" className="justify-center items-center h-full">
                         <Text size="sm" weight="normal">Triage</Text>
                     </Flex>

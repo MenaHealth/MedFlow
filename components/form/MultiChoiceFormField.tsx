@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/form/ScrollArea";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {PaperPlaneIcon} from "@radix-ui/react-icons";
+import { Send } from "lucide-react";
 
 interface MultiChoiceFormFieldProps {
     fieldName: string;
@@ -90,7 +90,7 @@ export function MultiChoiceFormField({ fieldName, fieldLabel, choices }: MultiCh
                             </Command>
                             <div className="flex items-center justify-center p-2">
                                 <Button className="w-full" onClick={handleSubmit}>
-                                    <PaperPlaneIcon className="h-5 w-5 text-white" />
+                                    <Send className="h-5 w-5 text-white" />
                                 </Button>
                             </div>
                         </PopoverContent>

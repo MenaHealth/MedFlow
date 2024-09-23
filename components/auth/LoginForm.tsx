@@ -13,7 +13,7 @@ import ForgotPasswordForm from "@/components/auth/ForgotPasswordForm";
 
 const loginSchema = z.object({
     email: z.string().nonempty("Email is required.").email("Please enter a valid email address."),
-    password: z.string().nonempty("Password is required.").min(8, ""),
+    password: z.string().nonempty("Password is required.").min(8, "incorrect password"),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;

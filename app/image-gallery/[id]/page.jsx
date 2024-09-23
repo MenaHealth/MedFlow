@@ -3,9 +3,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { Box, Grid, IconButton, Button } from '@mui/material';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import { ClipLoader } from 'react-spinners'; // Import the loading spinner
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ClipLoader } from 'react-spinners';
 import { generateEncryptionKey, encryptPhoto, calculateFileHash, convertToWebP, decryptPhoto } from '@/utils/encryptPhoto';
 import Image from 'next/image';
 import PatientSubmenu from "../../../components/PatientSubmenu";
@@ -265,7 +264,7 @@ const ImageGallery = () => {
                                     {photos.length > 1 && (
                                         <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
                                             <IconButton onClick={handlePrevClick} sx={{ flex: '0 0 auto' }}>
-                                                <ChevronLeftIcon />
+                                                <ChevronLeft />
                                             </IconButton>
                                             <Box ref={carouselRef} sx={{ display: 'flex', overflowX: 'auto', maxWidth: '300px', flex: '1 1 auto' }}>
                                                 {photos.map((photo, index) => (
@@ -289,7 +288,7 @@ const ImageGallery = () => {
                                                 ))}
                                             </Box>
                                             <IconButton onClick={handleNextClick} sx={{ flex: '0 0 auto' }}>
-                                                <ChevronRightIcon />
+                                                <ChevronRight />
                                             </IconButton>
                                         </Box>
                                     )}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { ResetIcon } from "@radix-ui/react-icons";
+import { UndoDot } from "lucide-react";
 import { useSignupContext } from "@/components/auth/SignupContext";
 
 const BackButton = () => {
@@ -13,7 +13,7 @@ const BackButton = () => {
                 bg-gray-200 text-gray-800 shadow-lg shadow-gray-50 border-2 border-gray-200 hover:bg-gray-300 hover:text-gray-900 hover:shadow-gray-200
             `}
         >
-            <ResetIcon className="h-5 w-5 text-gray-800 group-hover:text-gray-900 transition-colors duration-300" />
+            <UndoDot className="h-5 w-5 text-gray-800 group-hover:text-gray-900 transition-colors duration-300" />
         </Button>
     );
 };

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import * as Form from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { EyeClosedIcon, EyeOpenIcon } from "@radix-ui/react-icons";
+import { EyeOff, Eye } from "lucide-react";
 
 interface Props {
     form: any;
@@ -81,9 +81,9 @@ const PasswordField = ({
                                 tabIndex={-1}
                             >
                                 {isPasswordVisible ? (
-                                    <EyeOpenIcon className="h-5 w-5 text-gray-500" />
+                                    <Eye className="h-5 w-5 text-gray-500" />
                                 ) : (
-                                    <EyeClosedIcon className="h-5 w-5 text-gray-500" />
+                                    <EyeOff className="h-5 w-5 text-gray-500" />
                                 )}
                             </button>
                             {showTooltip && (

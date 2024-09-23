@@ -51,21 +51,26 @@ const sendGraphEmail = async (email: string, firstName: string, lastName: string
             greeting = `Hello ${firstName},`;
         }
 
+        // HTML email template with inline CSS for styling
         const mailBody = {
             message: {
                 subject: 'Welcome to MedFlow',
                 body: {
-                    contentType: 'Text',
-                    content: `${greeting}
-
-Thank you for signing up for MedFlow!
-
-We're excited to have you on board. Your account has been created successfully.
-
-If you have any questions or need assistance, please don't hesitate to contact our support team.
-
-Best regards,
-The MedFlow Team`,
+                    contentType: 'HTML',  // Use HTML content
+                    content: `
+                        <div style="background-color: #120f0b; padding: 20px; color: #ffffff;">
+                            <h3 style="color: #ff5722; background-color: #ffffff; padding: 10px 20px; border-radius: 5px;">
+                                ${greeting}
+                            </h3>
+                            <p style="color: #ffffff; font-size: 16px; line-height: 1.6;">
+                                Thank you for signing up for MedFlow!<br><br>
+                                We're excited to have you on board. Your account has been created successfully.<br><br>
+                                If you have any questions or need assistance, please don't hesitate to contact our support team.<br><br>
+                                <strong>Best regards,</strong><br>
+                                <strong>The MedFlow Team</strong>
+                            </p>
+                        </div>
+                    `,
                 },
                 toRecipients: [
                     {

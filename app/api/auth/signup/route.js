@@ -1,6 +1,5 @@
 // app/api/signup/route.js
 import { NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs';
 import User from '@/models/user';
 import dbConnect from '@/utils/database';
 import { sendGraphEmail } from '@/utils/email'; // Import your email utility
@@ -24,25 +23,15 @@ export async function POST(request) {
 
     try {
         const existingUser = await User.findOne({ email });
-
         if (existingUser) {
             return NextResponse.json({ message: 'User with this email already exists' }, { status: 400 });
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        const hashedSecurityQuestions = await Promise.all(
-            securityQuestions.map(async (question) => {
-                const hashedAnswer = await bcrypt.hash(question.answer, 10);
-                return { question: question.question, answer: hashedAnswer };
-            })
-        );
-
         const newUser = new User({
             accountType,
             email,
-            password: hashedPassword,
-            securityQuestions: hashedSecurityQuestions,
+            password, // DO NOT HASH Password in the API route. PW HASHING HAPPENS IN THE user model.
+            securityQuestions, // DO NOT HASH Security questions here
             firstName,
             lastName,
             dob,
@@ -52,10 +41,8 @@ export async function POST(request) {
             gender,
         });
 
-        // Save the user to the database
         await newUser.save();
 
-        // Send the welcome email after a successful signup
         await sendGraphEmail(email, firstName, lastName, accountType);
 
         return NextResponse.json({ message: 'Signup successful' }, { status: 201 });

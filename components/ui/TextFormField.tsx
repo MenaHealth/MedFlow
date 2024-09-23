@@ -52,7 +52,7 @@ const TextFormField = ({
                     <div className="relative">
                         <Input
                             {...field}
-                            type={type === 'password' && isPasswordVisible ? 'text' : type}
+                            type={type === 'password' && !isPasswordVisible ? 'password' : 'text'}
                             onFocus={handleFocus}
                             onBlur={handleBlur}
                             id={id}
@@ -70,6 +70,21 @@ const TextFormField = ({
                         >
                             {fieldLabel}
                         </label>
+
+                        {type === 'password' && (
+                            <div
+                                className="absolute right-2 top-1/2 transform -translate-y-1/2"
+                                onMouseEnter={() => setIsPasswordVisible(true)}  // Show password on hover
+                                onMouseLeave={() => setIsPasswordVisible(false)}  // Hide password when not hovering
+                            >
+                                {isPasswordVisible ? (
+                                    <EyeOpenIcon className="w-6 h-6" />
+                                ) : (
+                                    <EyeClosedIcon className="w-6 h-6" />
+                                )}
+                            </div>
+                        )}
+
                         {showTooltip && tooltip && (
                             <div className="absolute left-0 bottom-full mt-2 w-full bg-gray-700 text-white text-sm p-2 rounded shadow-lg z-10">
                                 {tooltip}

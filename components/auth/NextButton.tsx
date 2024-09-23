@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { Button } from "@/components/ui/button"
-import { PaperPlaneIcon } from "@radix-ui/react-icons"
+import { Send } from "lucide-react";
 import { useSignupContext } from "@/components/auth/SignupContext"
 import useToast from "./../hooks/useToast"
 import { Loader2 } from "lucide-react"
@@ -124,7 +124,7 @@ export default function NextButton() {
             {loading ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
-                <PaperPlaneIcon className={`h-5 w-5 transition-colors duration-300
+                <Send className={`h-5 w-5 transition-colors duration-300
           ${canProceed
                     ? 'text-orange-500 group-hover:text-orange-50'
                     : 'text-orange-200 group-hover:text-orange-700'

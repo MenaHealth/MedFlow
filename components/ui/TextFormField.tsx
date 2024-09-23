@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Controller } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
-import { EyeClosedIcon, EyeOpenIcon } from "@radix-ui/react-icons";
+import { EyeOff, Eye } from "lucide-react";
 
 interface Props {
     fieldName: string;
@@ -78,9 +78,9 @@ const TextFormField = ({
                                 onMouseLeave={() => setIsPasswordVisible(false)}  // Hide password when not hovering
                             >
                                 {isPasswordVisible ? (
-                                    <EyeOpenIcon className="w-6 h-6" />
+                                    <Eye className="w-6 h-6" />
                                 ) : (
-                                    <EyeClosedIcon className="w-6 h-6" />
+                                    <EyeOff className="w-6 h-6" />
                                 )}
                             </div>
                         )}

@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Button } from "@/components/ui/button"
 import { useSignupContext } from "@/components/auth/SignupContext"
-import { PaperPlaneIcon } from "@radix-ui/react-icons"
+import { SendHorizonal } from "lucide-react";
 import { ClipLoader } from 'react-spinners'
 
 export default function Submit() {
@@ -99,7 +99,7 @@ export default function Submit() {
                     : 'bg-orange-200 text-orange-500 shadow-lg shadow-orange-50 border-2 border-orange-200 hover:bg-orange-500 hover:text-orange-700 hover:shadow-orange-200'
                 }`}
             >
-                <PaperPlaneIcon className={`h-5 w-5 transition-colors duration-300
+                <SendHorizonal className={`h-5 w-5 transition-colors duration-300
                     ${isSuccess
                     ? 'opacity-0'
                     : isLoading || !isFormComplete
@@ -117,7 +117,7 @@ export default function Submit() {
                         left: `${iconPosition.left}px`,
                     }}
                 >
-                    <PaperPlaneIcon className="h-5 w-5 text-orange-500" />
+                    <SendHorizonal className="h-5 w-5 text-orange-500" />
                 </div>
             )}
 

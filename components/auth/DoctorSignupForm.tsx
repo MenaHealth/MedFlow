@@ -10,6 +10,7 @@ import { languagesList } from '@/utils/languages.enum';
 import { CountriesList } from '@/utils/countries.enum';
 
 import { useSignupContext } from './SignupContext';
+import {DatePickerFormField} from "@/components/form/DatePickerFormField";
 
 const doctorSignupSchema = z.object({
     firstName: z.string().min(1, "First name is required"),
@@ -80,10 +81,10 @@ const DoctorSignupForm: React.FC = () => {
                         fieldLabel="Last Name"
                         autoComplete="family-name"
                     />
-                    <TextFormField
+                    <DatePickerFormField
                         fieldName="dob"
                         fieldLabel="Date of Birth (MM/DD/YYYY)"
-                        type="date"
+                        form={form}
                         autoComplete="bday"
                     />
                     <MultiChoiceFormField

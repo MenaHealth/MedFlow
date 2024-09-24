@@ -5,17 +5,22 @@ import { z } from "zod";
 import { TextFormField } from "@/components/ui/TextFormField";
 import { MultiChoiceFormField } from "@/components/form/MultiChoiceFormField";
 import { SingleChoiceFormField } from "@/components/form/SingleChoiceFormField";
+import { Calendar } from "@/components/ui/calendar"
+import { DatePickerFormField } from "@/components/form/DatePickerFormField"
 import { DoctorSpecialtyList } from '@/utils/doctorSpecialty.enum';
 import { languagesList } from '@/utils/languages.enum';
 import { CountriesList } from '@/utils/countries.enum';
 
 import { useSignupContext } from './SignupContext';
-import {DatePickerFormField} from "@/components/form/DatePickerFormField";
+
 
 const doctorSignupSchema = z.object({
     firstName: z.string().min(1, "First name is required"),
     lastName: z.string().min(1, "Last name is required"),
-    dob: z.string().min(1, "Date of birth is required"),
+    dob: z.date({
+        required_error: "Date of birth is required",
+        invalid_type_error: "That's not a valid date",
+    }),
     doctorSpecialty: z.string().min(1, "Specialty is required"),
     languages: z.array(z.string()).min(1, "At least one language is required"),
     countries: z.array(z.string()).min(1, "At least one country is required"),
@@ -31,7 +36,7 @@ const DoctorSignupForm: React.FC = () => {
         defaultValues: {
             firstName: formData.firstName || '',
             lastName: formData.lastName || '',
-            dob: formData.dob || '',
+            dob: formData.dob ? new Date(formData.dob) : undefined,
             doctorSpecialty: formData.doctorSpecialty || '',
             languages: formData.languages || [],
             countries: formData.countries || [],
@@ -83,9 +88,8 @@ const DoctorSignupForm: React.FC = () => {
                     />
                     <DatePickerFormField
                         fieldName="dob"
-                        fieldLabel="Date of Birth (MM/DD/YYYY)"
+                        fieldLabel="Date of Birth"
                         form={form}
-                        autoComplete="bday"
                     />
                     <MultiChoiceFormField
                         fieldName="languages"

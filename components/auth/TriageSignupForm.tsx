@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { TextFormField } from "@/components/ui/TextFormField";
 import { useSignupContext } from './SignupContext';
-import { Calendar } from "@/components/ui/calendar"
 import { DatePickerFormField } from "@/components/form/DatePickerFormField"
 
 const triageSignupSchema = z.object({
@@ -34,8 +33,17 @@ const TriageSignupForm: React.FC = () => {
 
     useEffect(() => {
         const subscription = form.watch((data) => {
-            setFormData((prevData) => ({ ...prevData, ...data }));
-            const filledFields = Object.values(data).filter(Boolean).length;
+            const cleanedData = {
+                ...data,
+                dob: data.dob ? data.dob.toISOString() : undefined, // Convert Date to string
+            };
+
+            setFormData((prevData) => ({
+                ...prevData,
+                ...cleanedData,
+            }));
+
+            const filledFields = Object.values(cleanedData).filter(Boolean).length;
             updateAnsweredQuestions(3, filledFields);
             const isFormComplete = filledFields === 3;
             setTriageSignupFormCompleted(isFormComplete);

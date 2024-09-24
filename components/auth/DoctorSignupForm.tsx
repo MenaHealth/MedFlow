@@ -5,14 +5,12 @@ import { z } from "zod";
 import { TextFormField } from "@/components/ui/TextFormField";
 import { MultiChoiceFormField } from "@/components/form/MultiChoiceFormField";
 import { SingleChoiceFormField } from "@/components/form/SingleChoiceFormField";
-import { Calendar } from "@/components/ui/calendar"
 import { DatePickerFormField } from "@/components/form/DatePickerFormField"
 import { DoctorSpecialtyList } from '@/utils/doctorSpecialty.enum';
 import { languagesList } from '@/utils/languages.enum';
 import { CountriesList } from '@/utils/countries.enum';
 
 import { useSignupContext } from './SignupContext';
-
 
 const doctorSignupSchema = z.object({
     firstName: z.string().min(1, "First name is required"),
@@ -49,8 +47,9 @@ const DoctorSignupForm: React.FC = () => {
         const subscription = form.watch((data) => {
             const cleanedData = {
                 ...data,
-                languages: data.languages?.filter((language) => language !== undefined) || [],  // Remove undefined values
-                countries: data.countries?.filter((country) => country !== undefined) || [],   // Remove undefined values
+                dob: data.dob ? data.dob.toISOString() : undefined, // Convert Date to string
+                languages: data.languages?.filter((language): language is string => language !== undefined) || [],
+                countries: data.countries?.filter((country): country is string => country !== undefined) || [],
             };
 
             setFormData((prevData) => ({
@@ -71,6 +70,7 @@ const DoctorSignupForm: React.FC = () => {
 
         return () => subscription.unsubscribe();
     }, [form, setFormData, setDoctorSignupFormCompleted, updateAnsweredQuestions]);
+
 
     return (
         <div className="max-w-md mx-auto">

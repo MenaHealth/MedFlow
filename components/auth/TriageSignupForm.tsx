@@ -6,11 +6,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { TextFormField } from "@/components/ui/TextFormField";
 import { useSignupContext } from './SignupContext';
+import { Calendar } from "@/components/ui/calendar"
+import { DatePickerFormField } from "@/components/form/DatePickerFormField"
 
 const triageSignupSchema = z.object({
     firstName: z.string().min(1, "First name is required"),
     lastName: z.string().min(1, "Last name is required"),
-    dob: z.string().min(1, "Date of birth is required"),
+    dob: z.date({
+        required_error: "Date of birth is required",
+        invalid_type_error: "That's not a valid date",
+    }),
 });
 
 export type TriageSignupFormValues = z.infer<typeof triageSignupSchema>;
@@ -22,7 +27,7 @@ const TriageSignupForm: React.FC = () => {
         defaultValues: {
             firstName: formData.firstName || '',
             lastName: formData.lastName || '',
-            dob: formData.dob || '',
+            dob: formData.dob ? new Date(formData.dob) : undefined,
         },
         mode: "onChange",
     });
@@ -55,12 +60,10 @@ const TriageSignupForm: React.FC = () => {
                         id="lastName"
                         autoComplete="family-name"
                     />
-                    <TextFormField
+                    <DatePickerFormField
                         fieldName="dob"
-                        fieldLabel="Date of Birth (MM/DD/YYYY)"
-                        type="date"
-                        id="dob"
-                        autoComplete="bday"
+                        fieldLabel="Date of Birth"
+                        form={form}
                     />
                 </form>
             </FormProvider>

@@ -20,9 +20,10 @@ const CreatePatient = () => {
   const createPatient = async (formData) => {
     setIsSubmitting(true);
     setError(null);
+    console.log("Creating patient:", formData);
 
     try {
-      const response = await fetch(`/api/patient/new`, {
+      const response = await fetch(`/api/patient-form/new`, {
         method: "POST",
         body: JSON.stringify(formData),
         headers: {
@@ -34,7 +35,7 @@ const CreatePatient = () => {
         const data = await response.json();
         setPatientData({ firstName: formData.firstName, lastName: formData.lastName });
         setShowModal(true);
-        router.push(`/create-patient/${data._id}`);  // Redirect with the new patient ID
+        router.replace(`/patient/${data._id}`);  // Redirect with the new patient ID
       } else {
         const errorMessage = await response.text();
         setError(`Failed to create patient: ${errorMessage}`);

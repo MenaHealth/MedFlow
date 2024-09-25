@@ -24,6 +24,15 @@ const Nav = () => {
         };
     }, []);
 
+    const getInitials = (name) => {
+        if (!name) return '';
+        const names = name.split(' ');
+        if (names.length > 1) {
+            return `${names[0][0]}${names[1][0]}`.toUpperCase();
+        }
+        return name[0].toUpperCase();
+    };
+
     return (
         <nav className='w-full flex justify-between items-center mb-8 pt-3'>
             <Link href='/' className='flex gap-2'>
@@ -49,13 +58,13 @@ const Nav = () => {
                                 New Lab Form
                             </Link>
 
-                            <button type='button' onClick={signOut} className='outline_btn'>
+                            <button type='button' onClick={() => signOut()} className='outline_btn'>
                                 Sign Out
                             </button>
                             <Link href='/'>
-                                {session?.user.image ? (
+                                {session.user.image ? (
                                     <Image
-                                        src={session?.user.image}
+                                        src={session.user.image}
                                         width={37}
                                         height={37}
                                         className='rounded-full'
@@ -63,9 +72,7 @@ const Nav = () => {
                                     />
                                 ) : (
                                     <div className='avatar'>
-                                        {session?.user.name.indexOf(' ') > 0
-                                            ? `${session?.user.name.split(' ')[0][0]}${session?.user.name.split(' ')[1][0]}`
-                                            : session?.user.name[0]}
+                                        {getInitials(session.user.name)}
                                     </div>
                                 )}
                             </Link>
@@ -89,30 +96,28 @@ const Nav = () => {
 
                         {toggleDropdown && (
                             <div className='dropdown'>
-                                <>
-                                    <Link href='/patient-info/dashboard' className='outline_btn mobile_link'>
-                                        Patient List
-                                    </Link>
-                                    <Link href='/fajr/patient' className='outline_btn mobile_link'>
-                                        New Patient
-                                    </Link>
-                                    <Link href='/fajr/lab' className='outline_btn mobile_link'>
-                                        New Lab Form
-                                    </Link>
-                                    <Link href='/patient/660b70c7083d09310b0dc4d2' className='outline_btn mobile_link'>
-                                        Chart Template
-                                    </Link>
-                                    <button
-                                        type='button'
-                                        onClick={() => {
-                                            setToggleDropdown(false);
-                                            signOut();
-                                        }}
-                                        className='mt-5 w-full black_btn'
-                                    >
-                                        Sign Out
-                                    </button>
-                                </>
+                                <Link href='/patient-info/dashboard' className='outline_btn mobile_link'>
+                                    Patient List
+                                </Link>
+                                <Link href='/fajr/patient' className='outline_btn mobile_link'>
+                                    New Patient
+                                </Link>
+                                <Link href='/fajr/lab' className='outline_btn mobile_link'>
+                                    New Lab Form
+                                </Link>
+                                <Link href='/patient/660b70c7083d09310b0dc4d2' className='outline_btn mobile_link'>
+                                    Chart Template
+                                </Link>
+                                <button
+                                    type='button'
+                                    onClick={() => {
+                                        setToggleDropdown(false);
+                                        signOut();
+                                    }}
+                                    className='mt-5 w-full black_btn'
+                                >
+                                    Sign Out
+                                </button>
                             </div>
                         )}
                     </div>

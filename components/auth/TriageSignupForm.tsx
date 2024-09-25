@@ -44,7 +44,7 @@ const TriageSignupForm: React.FC = () => {
             }));
 
             const filledFields = Object.values(data).filter(Boolean).length;
-            updateAnsweredQuestions(3, filledFields);
+            updateAnsweredQuestions(3, filledFields); // Instead of 7
             const isFormComplete = filledFields === 3;
             setTriageSignupFormCompleted(isFormComplete);
         });

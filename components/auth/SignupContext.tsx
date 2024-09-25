@@ -81,27 +81,39 @@ export const SignupProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const [doctorSignupFormCompleted, setDoctorSignupFormCompleted] = useState(false);
     const [triageSignupFormCompleted, setTriageSignupFormCompleted] = useState(false);
     const totalQuestions = useMemo(() => {
+        console.log('Calculating total questions for account type:', accountType);
         return accountType === 'Doctor' ? 17 : 13;
-        // how many steps are in the progress bar for each user type
     }, [accountType]);
 
     const updateProgress = useCallback(() => {
         const newProgress = (answeredQuestions / totalQuestions) * 100;
+        console.log(`Answered Questions: ${answeredQuestions}, Total Questions: ${totalQuestions}, New Progress: ${newProgress}%`); // Log for debugging
         setProgress(newProgress);
     }, [answeredQuestions, totalQuestions]);
 
     const updateAnsweredQuestions = useCallback((step: number, count: number) => {
-        if (count < 0) {
+        if (count < 0 || step >= stepAnswers.length) {
+            console.warn(`Invalid step: ${step} or count: ${count}`);
             return;
         }
-        setStepAnswers(prev => {
+
+        // Check if we actually need to update
+        setStepAnswers((prev) => {
+            if (prev[step] === count) {
+                // If there's no change, don't update state
+                return prev;
+            }
+
             const newStepAnswers = [...prev];
             newStepAnswers[step] = count;
-            const newTotal = newStepAnswers.reduce((acc, curr) => acc + curr, 0);
+
+            // Calculate total answered questions
+            const newTotal = newStepAnswers.reduce((acc, curr) => acc + (curr || 0), 0); // Prevent NaN by ensuring 0 for undefined values
+            console.log(`Step: ${step}, Answered count: ${count}, Total answered questions: ${newTotal}`);
             setAnsweredQuestions(newTotal);
             return newStepAnswers;
         });
-    }, []);
+    }, [stepAnswers]);
 
     useEffect(() => {
         if (currentStep === 0 && answeredQuestions === 0) {
@@ -109,6 +121,7 @@ export const SignupProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }, [currentStep, answeredQuestions]);
 
     useEffect(() => {
+        console.log('Updating progress based on answered questions or total questions');
         updateProgress();
     }, [answeredQuestions, totalQuestions, updateProgress]);
 

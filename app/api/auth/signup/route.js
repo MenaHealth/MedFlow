@@ -34,7 +34,7 @@ export async function POST(request) {
             securityQuestions, // DO NOT HASH Security questions here
             firstName,
             lastName,
-            dob,
+            dob: new Date(dob),
             doctorSpecialty,
             languages,
             countries,
@@ -48,6 +48,6 @@ export async function POST(request) {
         return NextResponse.json({ message: 'Signup successful' }, { status: 201 });
     } catch (error) {
         console.error('Signup error:', error);
-        return NextResponse.json({ message: 'Server error' }, { status: 500 });
+        return NextResponse.json({ message: `Error during signup: ${error.message}` }, { status: 500 });
     }
 }

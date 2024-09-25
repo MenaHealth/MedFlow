@@ -49,7 +49,9 @@ export function LoginForm({ accountType }: Props) {
                 accountType: accountType || 'Doctor',
             });
 
-            if (result.error) {
+            if (!result) {
+                setToast?.({ title: 'Login Error', description: 'An unexpected error occurred. Please try again.', variant: 'destructive' });
+            } else if (result.error) {
                 setToast?.({ title: 'Login Error', description: result.error, variant: 'destructive' });
             } else {
                 setToast?.({ title: '✓', description: 'You have successfully logged in.', variant: 'default' });

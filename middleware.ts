@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
 const protectedPaths = ['/patient-info', '/other-protected-path'];
 
-export async function middleware(req) {
+export async function middleware(req: NextRequest) {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
     const { pathname } = req.nextUrl;

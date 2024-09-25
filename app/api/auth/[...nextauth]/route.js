@@ -38,13 +38,16 @@ const handler = NextAuth({
           throw new Error('Invalid email or password');
         }
 
+        user.lastLogin = new Date();
+        await user.save();
+
         return {
           id: user._id.toString(),
           email: user.email,
           name: user.name,
           accountType: accountType,
         };
-      },
+      }
     }),
   ],
   callbacks: {

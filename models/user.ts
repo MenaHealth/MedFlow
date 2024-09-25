@@ -5,6 +5,7 @@ import { SecurityQuestion } from '@/utils/securityQuestions.enum';
 import { DoctorSpecialtyList } from '@/utils/doctorSpecialty.enum';
 
 interface IUser extends Document {
+  lastLogin: Date;
   firstName: string;
   lastName: string;
   email: string;

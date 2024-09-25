@@ -94,12 +94,12 @@ export function LoginForm({ accountType }: Props) {
     };
 
 
-    useEffect(() => {
-        console.log("LoginForm mounted");
-        return () => {
-            console.log("LoginForm unmounted");
-        };
-    }, []);
+    // useEffect(() => {
+    //     console.log("LoginForm mounted");
+    //     return () => {
+    //         console.log("LoginForm unmounted");
+    //     };
+    // }, []);
 
     return (
         <div className="w-full md:max-w-md bg-white p-4 md:p-8 rounded-lg shadow-md">

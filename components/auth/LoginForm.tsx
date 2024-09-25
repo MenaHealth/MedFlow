@@ -3,7 +3,7 @@
 
 import { useForm } from "react-hook-form";
 import useToast from '../hooks/useToast';
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { TextFormField } from "@/components/ui/TextFormField";
@@ -65,7 +65,15 @@ export function LoginForm({ accountType }: Props) {
         }
     };
 
+    useEffect(() => {
+        console.log("LoginForm mounted");
+        return () => {
+            console.log("LoginForm unmounted");
+        };
+    }, []);
+
     const onSubmit = async (data: LoginFormValues) => {
+        console.log("Login submission started", data);
         setSubmitting(true);
 
         try {
@@ -77,17 +85,27 @@ export function LoginForm({ accountType }: Props) {
                 body: JSON.stringify(data),
             });
 
+            console.log("Login response status:", response.status);
+
             if (response.ok) {
+                console.log("Login successful");
                 setToast?.({ title: '✓', description: 'You have successfully logged in.', variant: 'default' });
-                // Optionally, redirect to a protected route
+
+                // Add a delay before redirecting
+                setTimeout(() => {
+                    console.log("Attempting to redirect to dashboard");
+                    router.push('/patient-info/dashboard');
+                }, 1000); // Increased delay to 1 second for debugging
             } else if (response.status === 401) {
-                // 401 Unauthorized means incorrect login credentials
+                console.log("Login failed: Incorrect credentials");
                 setToast?.({ title: 'Login Error', description: 'Incorrect login credentials.', variant: 'destructive' });
             } else {
                 const result = await response.json();
+                console.log("Login failed:", result.message);
                 setToast?.({ title: 'Login Error', description: result.message, variant: 'error' });
             }
         } catch (error) {
+            console.error("Unexpected login error:", error);
             setToast?.({ title: 'Login Error', description: 'An unexpected error occurred. Please try again.', variant: 'error' });
         } finally {
             setSubmitting(false);

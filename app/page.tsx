@@ -10,13 +10,18 @@ const HomePage = () => {
     const router = useRouter();
 
     useEffect(() => {
+        console.log("HomePage - Session status:", status);
+        console.log("HomePage - Session data:", session);
+
         if (status === 'loading') {
             return;
         }
 
         if (session) {
+            console.log("Redirecting to dashboard");
             router.replace('/patient-info/dashboard');
         } else {
+            console.log("Redirecting to auth");
             router.replace('/auth');
         }
     }, [router, session, status]);

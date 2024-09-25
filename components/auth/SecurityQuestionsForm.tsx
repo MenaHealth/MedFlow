@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+// components/auth/SecurityQuestionsForm.tsx
+import React, {useEffect, useState, useRef, useMemo} from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -35,6 +36,14 @@ const SecurityQuestionsForm: React.FC = () => {
         mode: "onChange",
     });
 
+    // Create refs for each question
+    const questionRef1 = useRef<HTMLDivElement>(null);
+    const questionRef2 = useRef<HTMLDivElement>(null);
+    const questionRef3 = useRef<HTMLDivElement>(null);
+
+    const questionRefs = useMemo(() => [questionRef1, questionRef2, questionRef3], []);
+
+    // Scroll to the next question after the user answers the current one
     useEffect(() => {
         const subscription = form.watch((values) => {
             setFormData((prevData) => ({
@@ -52,10 +61,15 @@ const SecurityQuestionsForm: React.FC = () => {
 
             const isFormComplete = filledFields === 6;
             setSecurityQuestionFormCompleted(isFormComplete);
+
+            // Scroll to the next question when an answer is provided
+            if (filledFields % 2 === 0 && filledFields < 6) {
+                questionRefs[filledFields / 2]?.current?.scrollIntoView({ behavior: 'smooth' });
+            }
         });
 
         return () => subscription.unsubscribe();
-    }, [form, setFormData, updateAnsweredQuestions, setSecurityQuestionFormCompleted]); // Added 'form' as a dependency
+    }, [form, setFormData, updateAnsweredQuestions, setSecurityQuestionFormCompleted, questionRefs]);
 
     const updateSelectedQuestions = (questionNumber: string, selectedQuestion: string) => {
         form.setValue(questionNumber as "question1" | "question2" | "question3", selectedQuestion, { shouldValidate: true });
@@ -70,8 +84,8 @@ const SecurityQuestionsForm: React.FC = () => {
         <div className="max-w-md mx-auto">
             <FormProvider {...form}>
                 <form className="space-y-4">
-                    {[1, 2, 3].map((num) => (
-                        <div key={num}>
+                    {[1, 2, 3].map((num, index) => (
+                        <div key={num} ref={questionRefs[index]}>
                             <DropdownMenu>
                                 <DropdownMenuTrigger className="w-full">
                                     <TextFormField

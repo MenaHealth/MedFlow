@@ -39,9 +39,6 @@ const PasswordEmailForm = () => {
         mode: 'onChange',
     });
 
-    // Total questions differ for Doctor and Triage
-    const totalQuestions = accountType === 'Doctor' ? 14 : 11;
-
     // Update answered questions based on form state
     const email = form.watch('email');
     const password = form.watch('password');
@@ -66,7 +63,6 @@ const PasswordEmailForm = () => {
                 password,
                 confirmPassword,
             };
-            console.log('Updated form data:', newData);
             return newData;
         });
 

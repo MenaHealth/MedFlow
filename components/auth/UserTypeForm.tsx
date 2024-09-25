@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSignupContext } from './SignupContext';
 import { RadioCard } from '@/components/ui/radio-card';
 import Flex from "@/components/ui/flex";
@@ -7,12 +7,21 @@ import Text from "@/components/ui/text";
 const UserTypeForm = () => {
     const { setAccountType, setFormData, accountType, updateAnsweredQuestions } = useSignupContext();
 
-    const handleSelectAccountType = (selectedType: 'Doctor' | 'Triage') => {
-        setAccountType(selectedType);
-        setFormData((prevData) => ({ ...prevData, accountType: selectedType }));
+    useEffect(() => {
+        // Avoid unnecessary state updates
+        if (accountType) {
+            // Call updateAnsweredQuestions once, avoid setting it repeatedly
+            updateAnsweredQuestions(0, 1); // 1 if accountType is selected
+        } else {
+            updateAnsweredQuestions(0, 0); // 0 if no accountType is selected
+        }
+    }, [accountType, updateAnsweredQuestions]); // Depend only on accountType
 
-        // Call updateAnsweredQuestions with step 0 (for UserTypeForm)
-        updateAnsweredQuestions(0, selectedType ? 1 : 0); // 1 if selected, 0 if not
+    const handleSelectAccountType = (selectedType: 'Doctor' | 'Triage') => {
+        if (selectedType !== accountType) {  // Avoid re-setting the same value
+            setAccountType(selectedType);
+            setFormData((prevData) => ({ ...prevData, accountType: selectedType }));
+        }
     };
 
     return (

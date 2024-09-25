@@ -1,35 +1,31 @@
-// app/api/auth/[...nextauth]/route.js
 import NextAuth from 'next-auth';
-import GoogleProvider from 'next-auth/providers/google';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
-
-import User from '@/models/user';
-import Patient from '@/models/patient'; // Import the Patient model
 import dbConnect from '@/utils/database';
+import User from '@/models/user';
+import Patient from '@/models/patient';
+// import jwt from 'jsonwebtoken';
 
 const handler = NextAuth({
+  session: {
+    strategy: 'jwt',
+  },
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    }),
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
+        accountType: { label: 'Account Type', type: 'text' },
       },
       async authorize(credentials) {
         await dbConnect();
-
-        const { email, password } = credentials;
+        const { email, password, accountType } = credentials;
         let user;
 
-        // Check account type and query the correct collection
-        if (credentials.accountType === 'Doctor') {
+        if (accountType === 'Doctor') {
           user = await User.findOne({ email });
-        } else if (credentials.accountType === 'Patient') {
+        } else if (accountType === 'Patient') {
           user = await Patient.findOne({ email });
         }
 
@@ -42,28 +38,35 @@ const handler = NextAuth({
           throw new Error('Invalid email or password');
         }
 
+        user.lastLogin = new Date();
+        await user.save();
+
         return {
           id: user._id.toString(),
           email: user.email,
           name: user.name,
-          accountType: credentials.accountType,
+          accountType: accountType,
         };
-      },
+      }
     }),
   ],
   callbacks: {
-    async session({ session, token }) {
-      await dbConnect();
-      let sessionUser;
-      if (token.accountType === 'Doctor') {
-        sessionUser = await User.findOne({ email: token.email });
-      } else if (token.accountType === 'Patient') {
-        sessionUser = await Patient.findOne({ email: token.email });
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.email = user.email;
+        token.name = user.name;
+        token.accountType = user.accountType;
       }
-      session.user.id = sessionUser._id.toString();
-      session.user.accountType = sessionUser.accountType;
+      return token;
+    },
+    async session({ session, token }) {
+      session.user = token;
       return session;
     },
+  },
+  pages: {
+    signIn: '/auth',
   },
 });
 

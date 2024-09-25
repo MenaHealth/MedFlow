@@ -22,6 +22,7 @@ interface CalendarProps {
     type?: "future" | "past";
     selected?: Date | undefined;
     onSelect?: (date: Date | undefined) => void;
+    mode?: "single" | "range" | "multiple";
 }
 
 function Calendar({
@@ -29,31 +30,31 @@ function Calendar({
                       classNames,
                       showOutsideDays = true,
                       type = "future",
-                      selected,
-                      onSelect,
+                      mode = "single",
                       ...props
                   }: CalendarProps) {
-    const today = useMemo(() => new Date(), []); // The empty array ensures it's only computed once
-    const [year, setYear] = React.useState(today.getFullYear())
-    const yearsToShow = 100
+    const today = useMemo(() => new Date(), []);
+    const [year, setYear] = React.useState(today.getFullYear());
+    const yearsToShow = 100;
 
     const years = React.useMemo(() => {
         if (type === "future") {
-            return Array.from({ length: yearsToShow }, (_, i) => today.getFullYear() + i)
+            return Array.from({ length: yearsToShow }, (_, i) => today.getFullYear() + i);
         } else {
-            return Array.from({ length: yearsToShow }, (_, i) => today.getFullYear() - i).reverse()
+            return Array.from({ length: yearsToShow }, (_, i) => today.getFullYear() - i).reverse();
         }
-    }, [type, today])
+    }, [type, today]);
 
     const months = React.useMemo(() => {
         return eachMonthOfInterval({
             start: startOfYear(new Date(year, 0, 1)),
             end: endOfYear(new Date(year, 0, 1)),
-        })
-    }, [year])
+        });
+    }, [year]);
 
     return (
         <DayPicker
+            mode={mode as "single"} // Explicitly cast mode as "single"
             showOutsideDays={showOutsideDays}
             className={cn("p-3", className)}
             classNames={{
@@ -62,29 +63,27 @@ function Calendar({
                 caption: "flex justify-center pt-1 relative items-center",
                 caption_label: "text-sm font-medium",
                 nav: "space-x-1 flex items-center",
-                nav_button: cn(
-                    "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"
-                ),
+                nav_button: cn("h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"),
                 nav_button_previous: "absolute left-1",
                 nav_button_next: "absolute right-1",
                 table: "w-full border-collapse space-y-1",
                 head_row: "flex",
-                head_cell:
-                    "text-muted-foreground rounded-md w-8 font-normal text-[0.8rem]",
+                head_cell: "text-muted-foreground rounded-md w-8 font-normal text-[0.8rem]",
                 row: "flex w-full mt-2",
                 cell: cn(
                     "relative p-0 text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-accent [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected].day-range-end)]:rounded-r-md",
-                    "[&:has([aria-selected])]:rounded-md"
+                    mode === "range"
+                        ? "[&:has(>.day-range-end)]:rounded-r-md [&:has(>.day-range-start)]:rounded-l-md first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md"
+                        : "[&:has([aria-selected])]:rounded-md"
                 ),
-                day: cn(
-                    "h-8 w-8 p-0 font-normal aria-selected:opacity-100"
-                ),
-                day_selected:
-                    "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+                day: cn("h-8 w-8 p-0 font-normal aria-selected:opacity-100"),
+                day_range_start: "day-range-start",
+                day_range_end: "day-range-end",
+                day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
                 day_today: "bg-accent text-accent-foreground",
-                day_outside:
-                    "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
+                day_outside: "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
                 day_disabled: "text-muted-foreground opacity-50",
+                day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
                 day_hidden: "invisible",
                 ...classNames,
             }}
@@ -95,13 +94,13 @@ function Calendar({
                     <div className="flex justify-center space-x-2">
                         <Select
                             onValueChange={(value) => {
-                                const newDate = new Date(selected as Date || new Date())
-                                newDate.setMonth(parseInt(value))
-                                onSelect?.(newDate)
+                                const newDate = new Date(props.selected as Date || new Date());
+                                newDate.setMonth(parseInt(value));
+                                props.onSelect?.(newDate);
                             }}
                         >
                             <SelectTrigger className="w-[110px]">
-                                <SelectValue placeholder={format(selected as Date || new Date(), "MMMM")} />
+                                <SelectValue placeholder={format(props.selected as Date || new Date(), "MMMM")} />
                             </SelectTrigger>
                             <SelectContent>
                                 {months.map((month, index) => (
@@ -113,10 +112,10 @@ function Calendar({
                         </Select>
                         <Select
                             onValueChange={(value) => {
-                                setYear(parseInt(value))
-                                const newDate = new Date(selected as Date || new Date())
-                                newDate.setFullYear(parseInt(value))
-                                onSelect?.(newDate)
+                                setYear(parseInt(value));
+                                const newDate = new Date(props.selected as Date || new Date());
+                                newDate.setFullYear(parseInt(value));
+                                props.onSelect?.(newDate);
                             }}
                         >
                             <SelectTrigger className="w-[90px]">
@@ -133,12 +132,10 @@ function Calendar({
                     </div>
                 ),
             }}
-            selected={selected}
-            onSelect={onSelect}
             disabled={type === "future" ? (date) => date < new Date() : (date) => date > new Date()}
             {...props}
         />
-    )
+    );
 }
 
 interface DatePickerFormFieldProps {

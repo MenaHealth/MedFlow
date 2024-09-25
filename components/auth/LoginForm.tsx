@@ -11,8 +11,7 @@ import { Button } from "@/components/ui/button";
 import ForgotPasswordForm from "@/components/auth/ForgotPasswordForm";
 import { useRouter } from "next/navigation";
 import { BarLoader } from "react-spinners";
-import axios from "axios";
-import Cookies from 'js-cookie';
+import { signIn } from 'next-auth/react';
 
 const loginSchema = z.object({
     email: z.string().nonempty("Email is required.").email("Please enter a valid email address."),
@@ -38,6 +37,31 @@ export function LoginForm({ accountType }: Props) {
             password: '',
         },
     });
+
+    const onSubmit = async (data: LoginFormValues) => {
+        setSubmitting(true);
+
+        try {
+            const result = await signIn('credentials', {
+                redirect: false,
+                email: data.email,
+                password: data.password,
+                accountType: accountType || 'Doctor',
+            });
+
+            if (result.error) {
+                setToast?.({ title: 'Login Error', description: result.error, variant: 'destructive' });
+            } else {
+                setToast?.({ title: '✓', description: 'You have successfully logged in.', variant: 'default' });
+                router.push('/patient-info/dashboard');
+            }
+        } catch (error) {
+            console.error("Unexpected login error:", error);
+            setToast?.({ title: 'Login Error', description: 'An unexpected error occurred. Please try again.', variant: 'error' });
+        } finally {
+            setSubmitting(false);
+        }
+    };
 
     const onError = (errors: any) => {
         const errorMessages = [];
@@ -67,63 +91,6 @@ export function LoginForm({ accountType }: Props) {
         }
     };
 
-    const onSubmit = async (data: LoginFormValues) => {
-        console.log("Login submission started", data);
-        setSubmitting(true);
-
-        try {
-            const response = await fetch('/api/auth/login/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
-            });
-
-            console.log("Login response status:", response.status);
-
-            if (response.ok) {
-                console.log("Login successful");
-                setToast?.({ title: '✓', description: 'You have successfully logged in.', variant: 'default' });
-
-                // Get the session token from the response
-                const sessionToken = await response.json().then((data) => data.token);
-                Cookies.set('token', sessionToken);
-
-                // Add a delay before redirecting
-                setTimeout(() => {
-                    console.log("Attempting to redirect to dashboard");
-                    axios.get('/patient-info/dashboard', {
-                        headers: {
-                            Authorization: `Bearer ${sessionToken}`,
-                        },
-                    })
-                        .then((response) => {
-                            if (response.status === 200) {
-                                router.push('/patient-info/dashboard');
-                            } else {
-                                console.error("Error redirecting to dashboard:", response.status);
-                            }
-                        })
-                        .catch((error) => {
-                            console.error("Error redirecting to dashboard:", error);
-                        });
-                }, 1000); // Increased delay to 1 second for debugging
-            } else if (response.status === 401) {
-                console.log("Login failed: Incorrect credentials");
-                setToast?.({ title: 'Login Error', description: 'Incorrect login credentials.', variant: 'destructive' });
-            } else {
-                const result = await response.json();
-                console.log("Login failed:", result.message);
-                setToast?.({ title: 'Login Error', description: result.message, variant: 'error' });
-            }
-        } catch (error) {
-            console.error("Unexpected login error:", error);
-            setToast?.({ title: 'Login Error', description: 'An unexpected error occurred. Please try again.', variant: 'error' });
-        } finally {
-            setSubmitting(false);
-        }
-    };
 
     useEffect(() => {
         console.log("LoginForm mounted");

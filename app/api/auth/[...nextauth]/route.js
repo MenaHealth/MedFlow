@@ -1,17 +1,14 @@
-// app/api/auth/[...nextauth]/route.js
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
 import dbConnect from '@/utils/database';
 import User from '@/models/user';
 import Patient from '@/models/patient';
+// import jwt from 'jsonwebtoken';
 
 const handler = NextAuth({
   session: {
-    strategy: 'jwt',  // Use JWT instead of a database session
-  },
-  jwt: {
-    secret: process.env.NEXTAUTH_SECRET,
+    strategy: 'jwt',
   },
   providers: [
     CredentialsProvider({
@@ -19,15 +16,16 @@ const handler = NextAuth({
       credentials: {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
+        accountType: { label: 'Account Type', type: 'text' },
       },
       async authorize(credentials) {
         await dbConnect();
-        const { email, password } = credentials;
+        const { email, password, accountType } = credentials;
         let user;
 
-        if (credentials.accountType === 'Doctor') {
+        if (accountType === 'Doctor') {
           user = await User.findOne({ email });
-        } else if (credentials.accountType === 'Patient') {
+        } else if (accountType === 'Patient') {
           user = await Patient.findOne({ email });
         }
 
@@ -40,35 +38,32 @@ const handler = NextAuth({
           throw new Error('Invalid email or password');
         }
 
-        // Successful login
         return {
           id: user._id.toString(),
           email: user.email,
           name: user.name,
-          accountType: credentials.accountType,
+          accountType: accountType,
         };
       },
     }),
   ],
   callbacks: {
     async jwt({ token, user }) {
-      console.log('Setting token:', token);
       if (user) {
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
         token.accountType = user.accountType;
       }
-      console.log('Generated JWT token:', token);
       return token;
     },
     async session({ session, token }) {
-      session.user.id = token.id;
-      session.user.email = token.email;
-      session.user.name = token.name;
-      session.user.accountType = token.accountType;
+      session.user = token;
       return session;
     },
+  },
+  pages: {
+    signIn: '/auth',
   },
 });
 

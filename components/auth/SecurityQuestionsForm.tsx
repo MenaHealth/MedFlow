@@ -1,5 +1,5 @@
 // components/auth/SecurityQuestionsForm.tsx
-import React, { useEffect, useState, useRef } from "react";
+import React, {useEffect, useState, useRef, useMemo} from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -37,7 +37,11 @@ const SecurityQuestionsForm: React.FC = () => {
     });
 
     // Create refs for each question
-    const questionRefs = [useRef<HTMLDivElement>(null), useRef<HTMLDivElement>(null), useRef<HTMLDivElement>(null)];
+    const questionRef1 = useRef<HTMLDivElement>(null);
+    const questionRef2 = useRef<HTMLDivElement>(null);
+    const questionRef3 = useRef<HTMLDivElement>(null);
+
+    const questionRefs = useMemo(() => [questionRef1, questionRef2, questionRef3], []);
 
     // Scroll to the next question after the user answers the current one
     useEffect(() => {
@@ -65,7 +69,7 @@ const SecurityQuestionsForm: React.FC = () => {
         });
 
         return () => subscription.unsubscribe();
-    }, [form, setFormData, updateAnsweredQuestions, setSecurityQuestionFormCompleted]);
+    }, [form, setFormData, updateAnsweredQuestions, setSecurityQuestionFormCompleted, questionRefs]);
 
     const updateSelectedQuestions = (questionNumber: string, selectedQuestion: string) => {
         form.setValue(questionNumber as "question1" | "question2" | "question3", selectedQuestion, { shouldValidate: true });

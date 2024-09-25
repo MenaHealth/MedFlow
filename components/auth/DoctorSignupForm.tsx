@@ -15,10 +15,13 @@ import { useSignupContext } from './SignupContext';
 const doctorSignupSchema = z.object({
     firstName: z.string().min(1, "First name is required"),
     lastName: z.string().min(1, "Last name is required"),
-    dob: z.date({
-        required_error: "Date of birth is required",
-        invalid_type_error: "That's not a valid date",
-    }),
+    dob: z.string()
+        .refine((value) => {
+            const date = new Date(value);
+            return !isNaN(date.getTime()) && date < new Date();
+        }, {
+            message: "Please enter a valid date of birth in the past",
+        }),
     doctorSpecialty: z.string().min(1, "Specialty is required"),
     languages: z.array(z.string()).min(1, "At least one language is required"),
     countries: z.array(z.string()).min(1, "At least one country is required"),
@@ -29,12 +32,12 @@ export type DoctorSignupFormValues = z.infer<typeof doctorSignupSchema>;
 
 const DoctorSignupForm: React.FC = () => {
     const { formData, setFormData, updateAnsweredQuestions, setDoctorSignupFormCompleted } = useSignupContext();
-    const form = useForm<DoctorSignupFormValues>({
+    const methods = useForm<DoctorSignupFormValues>({
         resolver: zodResolver(doctorSignupSchema),
         defaultValues: {
             firstName: formData.firstName || '',
             lastName: formData.lastName || '',
-            dob: formData.dob ? new Date(formData.dob) : undefined,
+            dob: formData.dob || '',
             doctorSpecialty: formData.doctorSpecialty || '',
             languages: formData.languages || [],
             countries: formData.countries || [],
@@ -89,7 +92,7 @@ const DoctorSignupForm: React.FC = () => {
                     <DatePickerFormField
                         fieldName="dob"
                         fieldLabel="Date of Birth"
-                        form={form}
+                        type="past"
                     />
                     <MultiChoiceFormField
                         fieldName="languages"

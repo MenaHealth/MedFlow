@@ -23,6 +23,10 @@ interface IUser extends Document {
 }
 
 const UserSchema = new Schema<IUser>({
+  lastLogin: {
+    type: Date,
+    default: null,
+  },
   firstName: {
     type: String,
     required: [true, 'First name is required!'],

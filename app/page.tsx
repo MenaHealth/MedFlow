@@ -19,6 +19,11 @@ const HomePage = () => {
 
         if (session) {
             console.log("Redirecting to dashboard");
+
+            // Get the token from local storage
+            const token = localStorage.getItem('token');
+
+            // Redirect to the dashboard
             router.replace('/patient-info/dashboard');
         } else {
             console.log("Redirecting to auth");

@@ -1,19 +1,19 @@
 // app/api/auth/[...nextauth]/route.js
 import NextAuth from 'next-auth';
-import GoogleProvider from 'next-auth/providers/google';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
-
-import User from '@/models/user';
-import Patient from '@/models/patient'; // Import the Patient model
 import dbConnect from '@/utils/database';
+import User from '@/models/user';
+import Patient from '@/models/patient';
 
 const handler = NextAuth({
+  session: {
+    strategy: 'jwt',  // Use JWT instead of a database session
+  },
+  jwt: {
+    secret: process.env.NEXTAUTH_SECRET,
+  },
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    }),
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
@@ -22,11 +22,9 @@ const handler = NextAuth({
       },
       async authorize(credentials) {
         await dbConnect();
-
         const { email, password } = credentials;
         let user;
 
-        // Check account type and query the correct collection
         if (credentials.accountType === 'Doctor') {
           user = await User.findOne({ email });
         } else if (credentials.accountType === 'Patient') {
@@ -42,6 +40,7 @@ const handler = NextAuth({
           throw new Error('Invalid email or password');
         }
 
+        // Successful login
         return {
           id: user._id.toString(),
           email: user.email,
@@ -52,16 +51,22 @@ const handler = NextAuth({
     }),
   ],
   callbacks: {
-    async session({ session, token }) {
-      await dbConnect();
-      let sessionUser;
-      if (token.accountType === 'Doctor') {
-        sessionUser = await User.findOne({ email: token.email });
-      } else if (token.accountType === 'Patient') {
-        sessionUser = await Patient.findOne({ email: token.email });
+    async jwt({ token, user }) {
+      console.log('Setting token:', token);
+      if (user) {
+        token.id = user.id;
+        token.email = user.email;
+        token.name = user.name;
+        token.accountType = user.accountType;
       }
-      session.user.id = sessionUser._id.toString();
-      session.user.accountType = sessionUser.accountType;
+      console.log('Generated JWT token:', token);
+      return token;
+    },
+    async session({ session, token }) {
+      session.user.id = token.id;
+      session.user.email = token.email;
+      session.user.name = token.name;
+      session.user.accountType = token.accountType;
       return session;
     },
   },

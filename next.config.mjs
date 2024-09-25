@@ -11,7 +11,7 @@ const nextConfig = {
             topLevelAwait: true,
         };
         return config;
-    }
+    },
 };
 
 export default nextConfig;

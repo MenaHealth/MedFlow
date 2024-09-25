@@ -1,14 +1,13 @@
 "use client";
 // components/form/NewPatientForm.tsx
-import { zodResolver } from "@hookform/resolvers/zod";
+import { FormProvider, useForm } from "react-hook-form";
 import * as React from "react";
-import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { TextFormField } from "@/components/ui/TextFormField";
 import { NumericalFormField } from "@/components/form/NumericalFormField";
 import { TextAreaFormField } from "@/components/ui/TextAreaFormField";
 import { PhoneFormField } from "@/components/form/PhoneFormField";
-import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { SelectFormField } from "./SelectFormField";
 import { LanguagesList } from "@/data/languages.enum";
@@ -68,10 +67,10 @@ export function NewPatientForm({ handleSubmit, submitting }: NewPatientFormProps
                 {/* Top row - name */}
                 <div className="flex flex-col md:flex-row md:space-x-4">
                     <div className="w-full md:w-1/2">
-                        <TextFormField form={form} fieldName="firstName" fieldLabel="First Name" />
+                        <TextFormField fieldName="firstName" fieldLabel="First Name" />
                     </div>
                     <div className="w-full md:w-1/2">
-                        <TextFormField form={form} fieldName="lastName" fieldLabel="Last Name" />
+                        <TextFormField fieldName="lastName" fieldLabel="Last Name" />
                     </div>
                 </div>
                 {/* Second row - email */}
@@ -133,8 +132,8 @@ export function NewPatientForm({ handleSubmit, submitting }: NewPatientFormProps
                     </Button>
                 </div>
             </form>
-        </Form>
-    );
+        </FormProvider>
+);
 }
 
 export default NewPatientForm;

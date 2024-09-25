@@ -5,35 +5,32 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/form/ScrollArea";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { ChevronsUpDown, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Send } from "lucide-react";
 
-interface MultiChoiceFormFieldProps {
+interface SingleChoiceFormFieldProps {
     fieldName: string;
     fieldLabel: string;
     choices: string[];
 }
 
-export function MultiChoiceFormField({ fieldName, fieldLabel, choices }: MultiChoiceFormFieldProps) {
+export function SingleChoiceFormField({
+                                          fieldName,
+                                          fieldLabel,
+                                          choices,
+                                      }: SingleChoiceFormFieldProps) {
     const form = useFormContext();
     const [open, setOpen] = useState(false);
-    const [selectedItems, setSelectedItems] = useState<string[]>([]);
+    const [searchQuery, setSearchQuery] = useState("");
 
-    const handleSelect = useCallback((currentValue: string) => {
-        setSelectedItems((prev) => {
-            if (prev.includes(currentValue)) {
-                return prev.filter(item => item !== currentValue);
-            } else {
-                return [...prev, currentValue];
-            }
-        });
-    }, []);
+    const filteredChoices = choices.filter((choice) =>
+        choice.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
-    const handleSubmit = useCallback(() => {
-        form.setValue(fieldName, selectedItems);
+    const handleSelect = useCallback((selectedChoice: string) => {
+        form.setValue(fieldName, selectedChoice);
         setOpen(false);
-    }, [fieldName, form, selectedItems]);
+    }, [form, fieldName]);
 
     const displayValue = form.watch(fieldName);
 
@@ -56,9 +53,7 @@ export function MultiChoiceFormField({ fieldName, fieldLabel, choices }: MultiCh
                                         !displayValue && "text-muted-foreground"
                                     )}
                                 >
-                                    {displayValue && displayValue.length > 0
-                                        ? displayValue.join(", ")
-                                        : `Select ${fieldLabel}`}
+                                    {displayValue || `Select ${fieldLabel}`}
                                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                 </Button>
                             </FormControl>
@@ -66,12 +61,16 @@ export function MultiChoiceFormField({ fieldName, fieldLabel, choices }: MultiCh
                         <PopoverContent className="w-[300px] p-0">
                             <Command>
                                 {choices.length >= 7 && (
-                                    <CommandInput placeholder={`Search ${fieldLabel.toLowerCase()}...`} />
+                                    <CommandInput
+                                        placeholder={`Search ${fieldLabel.toLowerCase()}...`}
+                                        value={searchQuery}
+                                        onValueChange={setSearchQuery}
+                                    />
                                 )}
                                 <CommandEmpty>No {fieldLabel.toLowerCase()} found.</CommandEmpty>
                                 <CommandGroup>
                                     <ScrollArea className="h-72">
-                                        {choices.map((choice) => (
+                                        {filteredChoices.map((choice) => (
                                             <CommandItem
                                                 key={choice}
                                                 onSelect={() => handleSelect(choice)}
@@ -79,7 +78,7 @@ export function MultiChoiceFormField({ fieldName, fieldLabel, choices }: MultiCh
                                                 <Check
                                                     className={cn(
                                                         "mr-2 h-4 w-4",
-                                                        selectedItems.includes(choice) ? "opacity-100" : "opacity-0"
+                                                        field.value === choice ? "opacity-100" : "opacity-0"
                                                     )}
                                                 />
                                                 {choice}
@@ -88,11 +87,6 @@ export function MultiChoiceFormField({ fieldName, fieldLabel, choices }: MultiCh
                                     </ScrollArea>
                                 </CommandGroup>
                             </Command>
-                            <div className="flex items-center justify-center p-2">
-                                <Button className="w-full" onClick={handleSubmit}>
-                                    <Send className="h-5 w-5 text-white" />
-                                </Button>
-                            </div>
                         </PopoverContent>
                     </Popover>
                     <FormMessage />

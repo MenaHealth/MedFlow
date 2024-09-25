@@ -30,5 +30,5 @@ export async function middleware(req: any) {
 
 // Apply the middleware to all routes, but exclude static files, api, and auth
 export const config = {
-  matcher: ['/:path*'],
+    matcher: ['/:path*'],
 };

@@ -1,6 +1,7 @@
+// app/api/auth/email/welcome/route.js
 import { NextResponse } from 'next/server';
 import { sendGraphEmail } from '@/utils/email';  // Use the new sendGraphEmail function
-
+// this API route sends an email after a signup is processed
 export async function POST(request) {
     const { email } = await request.json();
 

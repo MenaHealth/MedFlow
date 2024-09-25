@@ -61,14 +61,14 @@ export function DoctorForm() {
         <>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                <TextFormField form={form} fieldName="doctorName" fieldLabel="Doctor(s) Full Name" />
-                <MultiChoiceFormField form={form} fieldName="specialty" fieldLabel="Specialty" custom={true} choices={["Cardiology", "Dermatology", "Endocrinology", "Gastroenterology", "Hematology", "Infectious Disease", "Nephrology", "Neurology", "Oncology", "Pulmonology", "Rheumatology", "Urology"]} cols={3} />
-                <TextFormField form={form} fieldName="patientName" fieldLabel="Patient's Full Name" />
-                <TextFormField form={form} fieldName="patientPhoneNumber" fieldLabel="Patient's Phone Number" />
-                <MultiChoiceFormField form={form} fieldName="patientAddress" fieldLabel="Patient's Address" custom={false} choices={["North Gaza", "Gaza City", "Deir Al Balah", "Khan Yunis", "Rafah"]} cols={3} />
+                <TextFormField fieldName="doctorName" fieldLabel="Doctor(s) Full Name" />
+                <MultiChoiceFormField fieldName="specialty" fieldLabel="Specialty" choices={["Cardiology", "Dermatology", "Endocrinology", "Gastroenterology", "Hematology", "Infectious Disease", "Nephrology", "Neurology", "Oncology", "Pulmonology", "Rheumatology", "Urology"]} />
+                <TextFormField fieldName="patientName" fieldLabel="Patient's Full Name" />
+                <TextFormField fieldName="patientPhoneNumber" fieldLabel="Patient's Phone Number" />
+                <MultiChoiceFormField fieldName="patientAddress" fieldLabel="Patient's Address" choices={["North Gaza", "Gaza City", "Deir Al Balah", "Khan Yunis", "Rafah"]} />
                 <TextAreaFormField form={form} fieldName="diagnosis" fieldLabel="Patient Diagnosis" />
                 <MedicationSelection form={form} fieldLabel="Medicine" fieldName="medx"  />
-                <MultiChoiceFormField form={form} fieldName="urgency" fieldLabel="Rate the Urgency" custom={false} choices={["Extremely urgent: vital prognosis at risk", "Urgent: functional prognosis at risk", "Moderately urgent: can wait for few days-weeks", 
+                <MultiChoiceFormField fieldName="urgency" fieldLabel="Rate the Urgency" choices={["Extremely urgent: vital prognosis at risk", "Urgent: functional prognosis at risk", "Moderately urgent: can wait for few days-weeks",
                 "Less urgent: can wait", "Not urgent"]} />
                 <Button type="submit">Submit Request</Button>
                 </form>

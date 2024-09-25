@@ -1,3 +1,4 @@
+/*styles/globals.css*/
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -20,6 +21,15 @@
   --gray: #a8a8a8;
   --darkGrey: #7a7a7a;
   --white: #ffffff;
+}
+
+
+.text-muted-foreground {
+  color: #6b7280; /* You can change this to any muted color you like */
+}
+
+.text-white {
+  color: #ffffff;
 }
 
 :root {

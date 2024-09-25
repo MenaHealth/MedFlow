@@ -36,6 +36,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdownMenu";
 
+import { getServerSession } from 'next-auth';
+import { useSession } from 'next-auth/react';
+
 
 import { PRIORITIES, SPECIALTIES, STATUS } from '@/data/data';
 import Link from 'next/link';

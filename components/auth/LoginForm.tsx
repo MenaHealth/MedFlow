@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import ForgotPasswordForm from "@/components/auth/ForgotPasswordForm";
 import { useRouter } from "next/navigation";
 import { BarLoader } from "react-spinners";
+import axios from "axios";
+import Cookies from 'js-cookie';
 
 const loginSchema = z.object({
     email: z.string().nonempty("Email is required.").email("Please enter a valid email address."),
@@ -84,10 +86,28 @@ export function LoginForm({ accountType }: Props) {
                 console.log("Login successful");
                 setToast?.({ title: '✓', description: 'You have successfully logged in.', variant: 'default' });
 
+                // Get the session token from the response
+                const sessionToken = await response.json().then((data) => data.token);
+                Cookies.set('token', sessionToken);
+
                 // Add a delay before redirecting
                 setTimeout(() => {
                     console.log("Attempting to redirect to dashboard");
-                    router.push('/patient-info/dashboard');
+                    axios.get('/patient-info/dashboard', {
+                        headers: {
+                            Authorization: `Bearer ${sessionToken}`,
+                        },
+                    })
+                        .then((response) => {
+                            if (response.status === 200) {
+                                router.push('/patient-info/dashboard');
+                            } else {
+                                console.error("Error redirecting to dashboard:", response.status);
+                            }
+                        })
+                        .catch((error) => {
+                            console.error("Error redirecting to dashboard:", error);
+                        });
                 }, 1000); // Increased delay to 1 second for debugging
             } else if (response.status === 401) {
                 console.log("Login failed: Incorrect credentials");

@@ -2,25 +2,22 @@
 import { NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
-// Define the protected paths
-const protectedRoutes = ['/patient-info/dashboard', '/other-protected-route'];
+const protectedPaths = ['/patient-info', '/other-protected-path'];
 
-export async function middleware(req: any) {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+export async function middleware(req) {
+    const session = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
     // Get the requested URL path
     const { pathname } = req.nextUrl;
 
-    // If the user is trying to access a protected route and there's no token, redirect to login
-    if (protectedRoutes.includes(pathname) && !token) {
+    // Check if the requested path starts with any of the protected paths
+    const isProtectedRoute = protectedPaths.some((path) => pathname.startsWith(path));
+
+    // If the user is trying to access a protected route and there's no session, redirect to login
+    if (isProtectedRoute && !session) {
         return NextResponse.redirect(new URL('/auth', req.url));
     }
 
-    // Allow the request to continue if authenticated
+    // If the user is trying to access a protected route and there is a session, allow the request to continue
     return NextResponse.next();
 }
-
-// Specify the routes where the middleware will be active
-export const config = {
-  matcher: ['/:path*'],
-};

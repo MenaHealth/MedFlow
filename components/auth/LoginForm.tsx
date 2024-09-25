@@ -1,16 +1,16 @@
 // components/auth/LoginForm.tsx
 'use client';
 
-import { useForm } from "react-hook-form";
+import { useForm, FormProvider } from "react-hook-form";
 import useToast from '../hooks/useToast';
 import {useEffect, useState} from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { TextFormField } from "@/components/ui/TextFormField";
 import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
 import ForgotPasswordForm from "@/components/auth/ForgotPasswordForm";
 import { useRouter } from "next/navigation";
+import { BarLoader } from "react-spinners";
 
 const loginSchema = z.object({
     email: z.string().nonempty("Email is required.").email("Please enter a valid email address."),
@@ -25,6 +25,10 @@ interface Props {
 
 export function LoginForm({ accountType }: Props) {
     const router = useRouter();
+    const { setToast } = useToast();
+    const [submitting, setSubmitting] = useState(false);
+    const [showForgotPassword, setShowForgotPassword] = useState(false);
+
     const form = useForm<LoginFormValues>({
         resolver: zodResolver(loginSchema),
         defaultValues: {
@@ -32,10 +36,6 @@ export function LoginForm({ accountType }: Props) {
             password: '',
         },
     });
-
-    const { setToast } = useToast();
-    const [submitting, setSubmitting] = useState(false);
-    const [showForgotPassword, setShowForgotPassword] = useState(false);
 
     const onError = (errors: any) => {
         const errorMessages = [];
@@ -64,13 +64,6 @@ export function LoginForm({ accountType }: Props) {
             });
         }
     };
-
-    useEffect(() => {
-        console.log("LoginForm mounted");
-        return () => {
-            console.log("LoginForm unmounted");
-        };
-    }, []);
 
     const onSubmit = async (data: LoginFormValues) => {
         console.log("Login submission started", data);
@@ -112,10 +105,17 @@ export function LoginForm({ accountType }: Props) {
         }
     };
 
+    useEffect(() => {
+        console.log("LoginForm mounted");
+        return () => {
+            console.log("LoginForm unmounted");
+        };
+    }, []);
+
     return (
         <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
             <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
-            <Form {...form}>
+            <FormProvider {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-4">
                     <TextFormField
                         fieldName="email"
@@ -133,12 +133,16 @@ export function LoginForm({ accountType }: Props) {
                         <Button
                             type="submit"
                             disabled={submitting}
-                        >
-                            {submitting ? "Submitting..." : "Login"}
+                        > Login
+                            {submitting && (
+                                <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
+                                    <BarLoader />
+                                </div>
+                            )}
                         </Button>
                     </div>
                 </form>
-            </Form>
+            </FormProvider>
             {showForgotPassword && (
                 <div className="forgot-password-card w-full p-8 rounded-lg shadow-lg bg-white bg-opacity-10 backdrop-filter backdrop-blur-md">
                     <ForgotPasswordForm />

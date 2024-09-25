@@ -47,37 +47,25 @@ const DoctorSignupForm: React.FC = () => {
     });
 
     useEffect(() => {
-        const subscription = form.watch((data) => {
-            const cleanedData = {
-                ...data,
-                dob: data.dob ? data.dob.toISOString() : undefined, // Convert Date to string
-                languages: data.languages?.filter((language): language is string => language !== undefined) || [],
-                countries: data.countries?.filter((country): country is string => country !== undefined) || [],
-            };
-
+        const subscription = methods.watch((data) => {
             setFormData((prevData) => ({
                 ...prevData,
-                ...cleanedData,
+                ...data,
             }));
 
-            const filledFields = Object.entries(cleanedData).filter(([key, value]) => {
-                if (Array.isArray(value)) {
-                    return value.length > 0;
-                }
-                return !!value;
-            }).length;
-
+            const filledFields = Object.values(data).filter(Boolean).length;
+            updateAnsweredQuestions(7, filledFields);
             const isFormComplete = filledFields === 7;
             setDoctorSignupFormCompleted(isFormComplete);
         });
 
         return () => subscription.unsubscribe();
-    }, [form, setFormData, setDoctorSignupFormCompleted, updateAnsweredQuestions]);
+    }, [methods, setFormData, setDoctorSignupFormCompleted, updateAnsweredQuestions]);
 
 
     return (
         <div className="max-w-md mx-auto">
-            <FormProvider {...form}>
+            <FormProvider {...methods}>
                 <form className="space-y-6">
                     <TextFormField
                         fieldName="firstName"
@@ -90,8 +78,8 @@ const DoctorSignupForm: React.FC = () => {
                         autoComplete="family-name"
                     />
                     <DatePickerFormField
-                        fieldName="dob"
-                        fieldLabel="Date of Birth"
+                        name="dob"
+                        label="Date of Birth"
                         type="past"
                     />
                     <MultiChoiceFormField

@@ -1,24 +1,24 @@
-// app/api/auth/[...nextauth]/route.js
 import NextAuth from 'next-auth';
-import GoogleProvider from 'next-auth/providers/google';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
 
 import User from '@/models/user';
 import GoogleUser from '@/models/googleUser';
 import dbConnect from '@/utils/database';
+import Patient from '@/models/patient';
+// import jwt from 'jsonwebtoken';
 
 const handler = NextAuth({
+  session: {
+    strategy: 'jwt',
+  },
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    }),
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
+        accountType: { label: 'Account Type', type: 'text' },
       },
       async authorize(credentials) {
         await dbConnect();
@@ -37,13 +37,16 @@ const handler = NextAuth({
           throw new Error('Invalid email or password');
         }
 
+        user.lastLogin = new Date();
+        await user.save();
+
         return {
           id: user._id.toString(),
           email: user.email,
           name: user.name,
           accountType: user.accountType,
         };
-      },
+      }
     }),
   ],
   callbacks: {
@@ -95,6 +98,9 @@ const handler = NextAuth({
       }
       return session;
     },
+  },
+  pages: {
+    signIn: '/auth',
   },
 });
 

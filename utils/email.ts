@@ -7,12 +7,6 @@ const clientSecret = process.env.OUTLOOK_CLIENT_SECRET;
 const tenantId = process.env.OUTLOOK_TENANT_ID;
 const outlookEmail = process.env.OUTLOOK_EMAIL;
 
-// console.log('Environment Variables:');
-// console.log('OUTLOOK_CLIENT_ID:', clientId);
-// console.log('OUTLOOK_CLIENT_SECRET:', clientSecret);
-// console.log('OUTLOOK_TENANT_ID:', tenantId);
-// console.log('OUTLOOK_EMAIL:', outlookEmail);
-
 if (!clientId || !clientSecret || !tenantId || !outlookEmail) {
     console.error('Missing required environment variables');
     process.exit(1);
@@ -45,37 +39,48 @@ const getAccessToken = async () => {
     }
 };
 
-const sendGraphEmail = async (email: string) => {
+const sendGraphEmail = async (email: string, firstName: string, lastName: string, accountType: string) => {
     try {
-        console.log('Fetching access token...');
         const accessToken = await getAccessToken();
-        console.log('Access token retrieved');
 
+        // Customize the greeting based on accountType
+        let greeting;
+        if (accountType === 'Doctor') {
+            greeting = `Hello Dr. ${lastName},`;
+        } else {
+            greeting = `Hello ${firstName},`;
+        }
+
+        // HTML email template with inline CSS for styling
         const mailBody = {
             message: {
                 subject: 'Welcome to MedFlow',
                 body: {
-                    contentType: 'Text',
-                    content: `Thank you for signing up for MedFlow!
-
-We're excited to have you on board. Your account has been created successfully.
-
-If you have any questions or need assistance, please don't hesitate to contact our support team.
-
-Best regards,
-The MedFlow Team`,
+                    contentType: 'HTML',  // Use HTML content
+                    content: `
+                        <div style="background-color: #120f0b; padding: 20px; color: #ffffff;">
+                            <h3 style="color: #ff5722; background-color: #ffffff; padding: 10px 20px; border-radius: 5px;">
+                                ${greeting}
+                            </h3>
+                            <p style="color: #ffffff; font-size: 16px; line-height: 1.6;">
+                                Thank you for signing up for MedFlow!<br><br>
+                                We're excited to have you on board. Your account has been created successfully.<br><br>
+                                If you have any questions or need assistance, please don't hesitate to contact our support team.<br><br>
+                                <strong>Best regards,</strong><br>
+                                <strong>The MedFlow Team</strong>
+                            </p>
+                        </div>
+                    `,
                 },
                 toRecipients: [
                     {
                         emailAddress: {
-                            address: email,  // Recipient email address
+                            address: email,
                         },
                     },
                 ],
             },
         };
-
-        console.log('Sending welcome email via Microsoft Graph API to:', email);
 
         const response = await fetch(`https://graph.microsoft.com/v1.0/users/${outlookEmail}/sendMail`, {
             method: 'POST',
@@ -86,10 +91,7 @@ The MedFlow Team`,
             body: JSON.stringify(mailBody),
         });
 
-        if (response.ok) {
-            console.log(`Welcome email sent to ${email}`);
-        } else {
-            console.error('Error sending email:', response.statusText);
+        if (!response.ok) {
             throw new Error(`Failed to send email. Status: ${response.status}`);
         }
     } catch (error) {

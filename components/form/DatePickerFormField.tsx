@@ -5,6 +5,7 @@
 import * as React from "react"
 import { format, startOfYear, endOfYear, eachMonthOfInterval, addYears, subYears } from "date-fns"
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react"
+import { Send } from "lucide-react";
 import { DayPicker } from "react-day-picker"
 import { useFormContext } from "react-hook-form"
 
@@ -13,7 +14,8 @@ import { Button } from "@/components/ui/button"
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import {useMemo} from "react";
+import {useMemo, useState} from "react";
+
 
 interface CalendarProps {
     className?: string;
@@ -31,10 +33,14 @@ function Calendar({
                       showOutsideDays = true,
                       type = "future",
                       mode = "single",
+                      selected,
+                      onSelect,
                       ...props
                   }: CalendarProps) {
     const today = useMemo(() => new Date(), []);
-    const [year, setYear] = React.useState(today.getFullYear());
+    const [year, setYear] = React.useState(selected?.getFullYear() || today.getFullYear());
+    const [month, setMonth] = React.useState(selected?.getMonth() || today.getMonth());
+
     const yearsToShow = 100;
 
     const years = React.useMemo(() => {
@@ -52,10 +58,38 @@ function Calendar({
         });
     }, [year]);
 
+    // Adjust the month and year when a new date is selected
+    const handleDateSelect = (date: Date | undefined) => {
+        if (date) {
+            setYear(date.getFullYear());
+            setMonth(date.getMonth());
+            onSelect?.(date);
+        }
+    };
+
+    // Update the month without changing the selected date
+    const handleMonthChange = (value: string) => {
+        setMonth(parseInt(value));
+        const newDate = new Date(year, parseInt(value), selected?.getDate() || today.getDate());
+        onSelect?.(newDate); // Only update the month visually
+    };
+
+    // Update the year without changing the selected date
+    const handleYearChange = (value: string) => {
+        setYear(parseInt(value));
+        const newDate = new Date(parseInt(value), month, selected?.getDate() || today.getDate());
+        onSelect?.(newDate); // Only update the year visually
+    };
+
+
+
     return (
         <DayPicker
-            mode={mode as "single"} // Explicitly cast mode as "single"
+            mode={mode as "single"}
+            selected={selected}
             showOutsideDays={showOutsideDays}
+            onSelect={handleDateSelect}
+            month={new Date(year, month)}
             className={cn("p-3", className)}
             classNames={{
                 months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
@@ -93,14 +127,10 @@ function Calendar({
                 Caption: ({ ...captionProps }) => (
                     <div className="flex justify-center space-x-2">
                         <Select
-                            onValueChange={(value) => {
-                                const newDate = new Date(props.selected as Date || new Date());
-                                newDate.setMonth(parseInt(value));
-                                props.onSelect?.(newDate);
-                            }}
+                            onValueChange={handleMonthChange}
                         >
                             <SelectTrigger className="w-[110px]">
-                                <SelectValue placeholder={format(props.selected as Date || new Date(), "MMMM")} />
+                                <SelectValue placeholder={format(new Date(year, month), "MMMM")} />
                             </SelectTrigger>
                             <SelectContent>
                                 {months.map((month, index) => (
@@ -111,12 +141,7 @@ function Calendar({
                             </SelectContent>
                         </Select>
                         <Select
-                            onValueChange={(value) => {
-                                setYear(parseInt(value));
-                                const newDate = new Date(props.selected as Date || new Date());
-                                newDate.setFullYear(parseInt(value));
-                                props.onSelect?.(newDate);
-                            }}
+                            onValueChange={handleYearChange}
                         >
                             <SelectTrigger className="w-[90px]">
                                 <SelectValue placeholder={year.toString()} />
@@ -145,7 +170,16 @@ interface DatePickerFormFieldProps {
 }
 
 export function DatePickerFormField({ name, label, type = "future" }: DatePickerFormFieldProps) {
-    const { control } = useFormContext()
+    const { control, setValue } = useFormContext()
+    const [selectedDate, setSelectedDate] = useState<Date | undefined>()
+    const [isOpen, setIsOpen] = useState(false)
+
+    const handleSubmit = () => {
+        if (selectedDate) {
+            setValue(name, selectedDate.toISOString())
+            setIsOpen(false)
+        }
+    }
 
     return (
         <FormField
@@ -154,7 +188,7 @@ export function DatePickerFormField({ name, label, type = "future" }: DatePicker
             render={({ field }) => (
                 <FormItem className="flex flex-col">
                     <FormLabel>{label}</FormLabel>
-                    <Popover>
+                    <Popover open={isOpen} onOpenChange={setIsOpen}>
                         <PopoverTrigger asChild>
                             <FormControl>
                                 <Button
@@ -174,11 +208,19 @@ export function DatePickerFormField({ name, label, type = "future" }: DatePicker
                             </FormControl>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                                selected={field.value ? new Date(field.value) : undefined}
-                                onSelect={(date) => field.onChange(date?.toISOString())}
-                                type={type}
-                            />
+                            <div className="p-3">
+                                <Calendar
+                                    mode="single"
+                                    selected={selectedDate}
+                                    onSelect={setSelectedDate}
+                                    type={type}
+                                />
+                                <div className="mt-4">
+                                    <Button className="w-full" onClick={handleSubmit}>
+                                        <Send className="mr-2 h-4 w-4" />
+                                    </Button>
+                                </div>
+                            </div>
                         </PopoverContent>
                     </Popover>
                     <FormMessage />

@@ -7,25 +7,38 @@ import { BarLoader } from "react-spinners";
 import NewPatientForm from "@/components/form/NewPatientForm";
 import ConfirmationModal from "@/components/ConfirmationModal";
 import ErrorModal from "@/components/ErrorModal";
+import { useSession } from "next-auth/react";
 
 const CreatePatient = () => {
   const router = useRouter();
+  const { data: session } = useSession();
 
   const [submitting, setIsSubmitting] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [patientData, setPatientData] = useState(null);
   const [error, setError] = useState(null);
+  const [submittingFromNoSession, setSubmittingFromNoSession] = useState(false);
+  const [formDataState, setFormDataState] = useState(undefined);
 
   const createPatient = async (formData) => {
     setIsSubmitting(true);
     setError(null);
-    console.log("Creating patient:", formData);
+    formData && setPatientData({ firstName: formData.firstName, lastName: formData.lastName });
+    
+    if (!session && !submittingFromNoSession) {
+      setFormDataState(formData);
+      setShowModal(true);
+      setSubmittingFromNoSession(true);
+      return;
+    }
+
+    console.log("Creating patient:", formData ? formData : formDataState);
 
     try {
       const response = await fetch(`/api/patient-form/new`, {
         method: "POST",
-        body: JSON.stringify(formData),
+        body: JSON.stringify(formData ? formData : formDataState),
         headers: {
           "Content-Type": "application/json",
         },
@@ -33,9 +46,10 @@ const CreatePatient = () => {
 
       if (response.ok) {
         const data = await response.json();
-        setPatientData({ firstName: formData.firstName, lastName: formData.lastName });
         setShowModal(true);
-        router.replace(`/patient/${data._id}`);  // Redirect with the new patient ID
+        setTimeout(() => {
+          router.replace(`/patient/${data._id}`);  // Redirect with the new patient ID
+        }, 2000);
       } else {
         const errorMessage = await response.text();
         setError(`Failed to create patient: ${errorMessage}`);
@@ -78,6 +92,9 @@ const CreatePatient = () => {
             <ConfirmationModal
                 patientName={{ firstName: patientData?.firstName, lastName: patientData?.lastName }}
                 onClose={handleModalClose}
+                submittingFromNoSession={submittingFromNoSession}
+                setSubmittingFromNoSession={setSubmittingFromNoSession}
+                submit={createPatient}
             />
         )}
         {showErrorModal && (

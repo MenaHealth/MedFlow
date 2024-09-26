@@ -43,8 +43,10 @@ const handler = NextAuth({
         return {
           id: user._id.toString(),
           email: user.email,
-          name: user.name,
+          firstName: user.firstName,
+          lastName: user.lastName,
           accountType: user.accountType,
+          image: user.image,
         };
       }
     }),
@@ -58,7 +60,7 @@ const handler = NextAuth({
           await GoogleUser.create({
             userID: profile?.sub || null,
             email: user.email,
-            name: user.name,
+            firstName: user.name,
             image: user.image,
             accountType: "Pending",
           });
@@ -76,6 +78,7 @@ const handler = NextAuth({
           if (googleUser) {
             token.id = googleUser.userID;
             token.accountType = googleUser.accountType;
+            token.firstName = googleUser.firstName;
           } else {
             // Handle the case when the GoogleUser hasn't been created yet
             // You can set default token values or indicate that the user is in a 'Pending' state
@@ -84,6 +87,9 @@ const handler = NextAuth({
         } else {
           token.id = user.id;
           token.accountType = user.accountType;
+          token.firstName = user.firstName;
+          token.lastName = user.lastName;
+          token.image = user.image;
         }
       }
       if (trigger === 'update') {
@@ -92,9 +98,13 @@ const handler = NextAuth({
       return token;
     },
     async session({ session, token }) {
+      console.log(token)
       if (token) {
         session.user.id = token.id;
         session.user.accountType = token.accountType;
+        session.user.firstName = token.firstName;
+        session.user.lastName = token.lastName;
+        session.user.image = token.image;
       }
       return session;
     },

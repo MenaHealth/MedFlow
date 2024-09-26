@@ -25,8 +25,8 @@ const newPatientFormSchema = z.object({
     language: z.string().min(1, "Language is required"),
     chiefComplaint: z.string().min(1, "Please enter the main reason you seek medical care"),
     email: z.string().email(),
-    genderPreference: z.string().min(1, "Please select a gender preference"),
-    previouslyRegistered: z.string().min(1, "Please select if you have previously registered with us"),
+    genderPreference: z.string(),
+    previouslyRegistered: z.string(),
 });
 
 type NewPatientFormValues = z.infer<typeof newPatientFormSchema>;
@@ -62,7 +62,7 @@ export function NewPatientForm({ handleSubmit, submitting }: NewPatientFormProps
     };
 
     return (
-        <Form {...form}>
+        <FormProvider {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} onChange={() => console.log(form.getValues())} className="space-y-8">
                 {/* Top row - name */}
                 <div className="flex flex-col md:flex-row md:space-x-4">
@@ -74,7 +74,7 @@ export function NewPatientForm({ handleSubmit, submitting }: NewPatientFormProps
                     </div>
                 </div>
                 {/* Second row - email */}
-                <TextFormField form={form} fieldName="email" fieldLabel="Email" />
+                <TextFormField fieldName="email" fieldLabel="Email" />
 
                 {/* Third row - age, phone, language */}
                 <div className="flex flex-col md:flex-row md:space-x-4">
@@ -94,8 +94,8 @@ export function NewPatientForm({ handleSubmit, submitting }: NewPatientFormProps
                     <div className="w-full md:w-1/2">
                         <SelectFormField form={form} fieldName="country" fieldLabel="Country" selectOptions={CountriesList} />
                     </div>
-                    <div className="w-full md:w-1/2 mt-6">
-                        <TextFormField form={form} fieldName="city" fieldLabel="City" />
+                    <div className="w-full md:w-1/2">
+                        <TextFormField fieldName="city" fieldLabel="City" />
                     </div>
                 </div>
 

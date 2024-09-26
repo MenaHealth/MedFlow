@@ -4,6 +4,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import { styled } from '@mui/material/styles';
+import DescriptionIcon from '@mui/icons-material/Description';
 
 const CellWrapper = styled('div')({
         position: 'relative',

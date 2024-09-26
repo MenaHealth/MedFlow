@@ -160,7 +160,7 @@ export default function PatientTriage() {
             </h2>
             <div style={{ width: 48 }}>
               {" "}
-              {/* Placeholder to balance the header visually */}
+              {}
             </div>
           </div>
           <div className="flex flex-wrap gap-2 mb-4">
@@ -258,7 +258,7 @@ export default function PatientTriage() {
                             className="h-8 w-full justify-start"
                             style={{ fontSize: "0.7rem", fontWeight: 500, letterSpacing: "0.05rem" }}
                         >
-                          STATUS
+                          STATUS OF PATIENT
                           <KeyboardArrowDownIcon className="ml-2 h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -509,7 +509,50 @@ export default function PatientTriage() {
                             : ''
                         }
                       </TableCell>
-                      <TableCell align="center">{row.doctor}</TableCell>
+                      
+                      {/* Doctor Assigned */}
+                      <TableCell align="center">
+                        {row.doctor ? (
+                          row.doctor
+                        ) : (
+<Button
+  variant="contained"
+  color="primary"
+  onClick={async () => {
+    try {
+      const response = await fetch('/api/patient/assign', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          patientId: row._id,
+          doctor: session?.user?.name,
+        }),
+      });
+
+      const result = await response.json(); // Get the JSON response body
+
+      if (response.ok) {
+        const updatedRows = [...rows];
+        updatedRows[index].doctor = session?.user?.name; // Assign the doctor in UI
+        setRows(updatedRows);
+        triggerToast('Case successfully assigned');
+      } else {
+        console.log("Error response from server:", result); // Log the error response
+        triggerToast('Failed to assign case');
+      }
+    } catch (error) {
+      console.log("Request error:", error); // Log network or other errors
+      triggerToast('Error assigning case');
+    }
+  }}
+>
+  Take Case
+</Button>
+
+                        )}
+                      </TableCell>
                     </TableRow>
                 ))}
               </TableBody>
@@ -530,3 +573,4 @@ export default function PatientTriage() {
       </>
   );
 }
+

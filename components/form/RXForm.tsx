@@ -394,7 +394,7 @@ const NotesForm: React.FC<NotesFormProps> = ({ patientId, username }) => {
 
                                 <div style={{ marginBottom: '10px' }}>
                                     <Typography variant="body2" color="textSecondary" style={{ marginBottom: '4px' }}>
-                                        Patient's Full Name
+                                     Patient&apos;s Full Name
                                     </Typography>
                                     <Typography variant="body1">
                                         {medicalrequestNote.patientName || 'N/A'}

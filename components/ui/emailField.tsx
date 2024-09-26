@@ -54,7 +54,7 @@ const EmailField = ({
                 };
 
                 return (
-                    <Form.FormItem className={`mb-6 p-2 ${className} ${isValidEmail ? 'bg-yellow-100' : ''}`}>
+                    <Form.FormItem className={`mb-6 p-2 ${className}`}>
                         <div className="relative">
                             <Input
                                 {...field}
@@ -64,13 +64,18 @@ const EmailField = ({
                                 onChange={handleChange}
                                 id={id}
                                 autoComplete={"email"}
-                                className={`w-full pt-4 pb-2 pl-2 pr-10 ${
-                                    isFocused || field.value ? 'bg-white' : ''
-                                } ${!isValidEmail && field.value ? 'text-orange-700' : ''}`}
+                                className={`w-full pt-4 pb-2 pl-2 pr-10 border ${
+                                    isValidEmail ? 'border-orange-500' : 'border-gray-300'
+                                } ${isFocused || field.value ? 'bg-white' : ''} ${
+                                    !isValidEmail && field.value ? 'text-orange-700' : ''
+                                }`}
                             />
-                            <Form.FormLabel htmlFor={id} className={`absolute transition-all ${
-                                (isFocused || field.value) ? 'text-xs -top-6' : 'text-sm top-1/2 -translate-y-1/2'
-                            } left-2 pointer-events-none`}>
+                            <Form.FormLabel
+                                htmlFor={id}
+                                className={`absolute transition-all ${
+                                    isFocused || field.value ? 'text-xs -top-6' : 'text-sm top-1/2 -translate-y-1/2'
+                                } left-2 pointer-events-none`}
+                            >
                                 {fieldLabel}
                             </Form.FormLabel>
                             {showTooltip && (

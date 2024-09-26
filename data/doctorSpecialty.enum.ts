@@ -48,4 +48,4 @@ export enum DoctorSpecialtyList {
     UROLOGY = 'Urology',
 }
 
-export const doctorSpecialties = Object.values(DoctorSpecialtyList);
+export const DoctorSpecialties = Object.values(DoctorSpecialtyList);

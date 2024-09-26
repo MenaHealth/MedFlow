@@ -35,9 +35,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdownMenu";
-
-import { getServerSession } from 'next-auth';
-import { useSession } from 'next-auth/react';
+import DescriptionIcon from '@mui/icons-material/Description';
 
 
 import { PRIORITIES, SPECIALTIES, STATUS } from '@/data/data';

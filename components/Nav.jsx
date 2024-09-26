@@ -50,6 +50,10 @@ const Nav = () => {
         };
     }, [dropdownRef, avatarRef]);
 
+    const getInitials = (firstName, lastName) => {
+        return `${firstName?.charAt(0)}${lastName?.charAt(0)}`;
+    };
+
     return (
         <nav className="w-full flex justify-between items-center mb-8 pt-3 relative">
             <Link href="/" className="flex gap-2">
@@ -91,9 +95,7 @@ const Nav = () => {
                                         />
                                     ) : (
                                         <div className="avatar">
-                                            {session?.user.name.indexOf(' ') > 0
-                                                ? `${session?.user.name.split(' ')[0][0]}${session?.user.name.split(' ')[1][0]}`
-                                                : session?.user.name[0]}
+                                            {getInitials(session?.user?.firstName, session?.user?.lastName)}
                                         </div>
                                     )}
                                 </div>

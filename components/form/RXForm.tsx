@@ -1,14 +1,7 @@
-<<<<<<< HEAD
 import React, { useState, useEffect, useCallback } from 'react';
 import { TextField, Button, MenuItem, List, ListItem, ListItemText, Divider, Typography, IconButton, Select, InputLabel, FormControl } from '@mui/material';
 import { Publish as PublishIcon, Delete as DeleteIcon, GetApp as DownloadIcon } from '@mui/icons-material';
 import { SelectChangeEvent } from '@mui/material';
-=======
-"use client";
-import React, { useState, useCallback, useEffect } from 'react';
-import { TextField, Button, Typography } from '@mui/material';
-import PatientSubmenu from '../../components/PatientSubmenu';  // Ensure you import the PatientSubmenu
->>>>>>> main
 
 interface NotesFormProps {
     patientId: string;
@@ -56,22 +49,14 @@ const NotesForm: React.FC<NotesFormProps> = ({ patientId, username }) => {
         'Gaza',
     ];
 
-<<<<<<< HEAD
     const [notesList, setNotesList] = useState<Note[]>([]);
-=======
-    const [notesList, setNotesList] = useState<any[]>([]); // Add a type for notes, if available
->>>>>>> main
     const [templateType, setTemplateType] = useState('rxform'); // Default to rxform
     const [showTemplateButtons, setShowTemplateButtons] = useState(false);
     const [noteContent, setNoteContent] = useState('');
 
     const fetchNote = useCallback(async (noteId: string) => {
         try {
-<<<<<<< HEAD
             const response = await fetch(`/api/patient/notes/${patientId}?noteId=${noteId}`);
-=======
-            const response = await fetch(`/api/patient/notes/${rxData.patientIDNumber}?noteId=${noteId}`);
->>>>>>> main
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -80,19 +65,11 @@ const NotesForm: React.FC<NotesFormProps> = ({ patientId, username }) => {
         } catch (error) {
             console.error('Failed to fetch note:', error);
         }
-<<<<<<< HEAD
     }, [patientId]);
 
     useEffect(() => {
         fetchNote(patientId);
     }, [patientId, fetchNote]);
-=======
-    }, [rxData.patientIDNumber]);
-
-    useEffect(() => {
-        fetchNote(rxData.patientIDNumber);
-    }, [rxData.patientIDNumber, fetchNote]);
->>>>>>> main
 
     const publishNote = async () => {
         let noteContent = '';
@@ -101,7 +78,6 @@ const NotesForm: React.FC<NotesFormProps> = ({ patientId, username }) => {
         if (templateType === 'rxform') {
             noteContent = `
                 RX Form Note
-<<<<<<< HEAD
                 Full Name: ${rxformNote.patientName}
                 Phone Number: ${rxformNote.phoneNumber}
                 Age: ${rxformNote.age}
@@ -113,18 +89,6 @@ const NotesForm: React.FC<NotesFormProps> = ({ patientId, username }) => {
                 Diagnosis: ${rxformNote.diagnosis}
                 Medications Needed: ${rxformNote.medicationsNeeded}
                 Pharmacy/Clinic: ${rxformNote.pharmacyOrClinic}
-=======
-                Full Name: ${rxData.fullName}
-                Phone Number: ${rxData.phoneNumber}
-                Age: ${rxData.age}
-                Address: ${rxData.address}
-                Patient ID: ${rxData.patientIDNumber}
-                Referring Dr: ${rxData.referringDr}
-                Prescribing Dr: ${rxData.prescribingDr}
-                Diagnosis: ${rxData.diagnosis}
-                Medications Needed: ${rxData.medicationsNeeded}
-                Pharmacy Location: ${rxData.pharmacyLocation}
->>>>>>> main
             `;
             noteTitle = 'RX Form';
         } else {
@@ -146,22 +110,14 @@ const NotesForm: React.FC<NotesFormProps> = ({ patientId, username }) => {
 
         if (noteContent.trim()) {
             try {
-<<<<<<< HEAD
                 const response = await fetch(`/api/patient/notes/${patientId}`, {
-=======
-                const response = await fetch(`/api/patient/notes/${rxData.patientIDNumber}`, {
->>>>>>> main
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
                         content: noteContent,
-<<<<<<< HEAD
                         username: username,
-=======
-                        username: "username_placeholder", // replace with actual username
->>>>>>> main
                         title: noteTitle,
                         date: new Date(),
                     }),
@@ -570,8 +526,4 @@ const NotesForm: React.FC<NotesFormProps> = ({ patientId, username }) => {
     );
 }
 
-<<<<<<< HEAD
 export default NotesForm;
-=======
-export default RXForm;
->>>>>>> main

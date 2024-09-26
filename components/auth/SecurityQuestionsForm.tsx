@@ -1,3 +1,4 @@
+// components/auth/SecurityQuestionsForm.tsx
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { z } from "zod";
@@ -60,6 +61,11 @@ const SecurityQuestionsForm: React.FC = () => {
                 question2,
                 answer2: values.answer2 || "",
                 question3,
+                question1: values.question1,
+                answer1: values.answer1 || "", // Ensure answer1 is a string
+                question2: values.question2,
+                answer2: values.answer2 || "",
+                question3: values.question3,
                 answer3: values.answer3 || "",
             }));
 
@@ -95,6 +101,21 @@ const SecurityQuestionsForm: React.FC = () => {
             questionRefs[index + 1]?.current?.scrollIntoView({ behavior: "smooth" });
         }
     };
+            // Update the opacity and completion status based on question and answer completeness
+            setIsCompleted([
+                !!values.question1 && (values.answer1?.length ?? 0) > 0, // Use nullish coalescing to safely check length
+                !!values.question2 && (values.answer2?.length ?? 0) > 0,
+                !!values.question3 && (values.answer3?.length ?? 0) > 0,
+            ]);
+
+            // Scroll to the next question when an answer is provided
+            if (filledFields % 2 === 0 && filledFields < 6) {
+                questionRefs[filledFields / 2]?.current?.scrollIntoView({ behavior: "smooth" });
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, [form, setFormData, updateAnsweredQuestions, setSecurityQuestionFormCompleted, questionRefs]);
 
     return (
         <div className="w-full max-w-md mx-auto p-8">
@@ -108,13 +129,14 @@ const SecurityQuestionsForm: React.FC = () => {
                                 isCompleted[index] ? "opacity-100 shadow-lg border-orange-500" : "opacity-50 border-yellow-50"
                             } bg-white`}
                             style={{ marginBottom: "24px" }}
-                        >
                             <div className="space-y-4">
                                 <h2 className="text-lg font-semibold">Security Question {num}</h2>
 
                                 <SingleChoiceFormField
                                     fieldName={`question${num}`}
                                     choices={filteredQuestions[`question${num}` as keyof typeof filteredQuestions]}
+                                    fieldLabel={`Select a security question`}
+                                    choices={securityQuestions}
                                 />
 
                                 <TextFormField

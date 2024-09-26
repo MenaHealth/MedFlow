@@ -10,12 +10,12 @@ const LayoutWrapper = ({ children }) => {
     const isFullWidth = pathname === '/patient-info/dashboard';
 
     return (
-        <div className="flex-grow flex flex-col relative z-0"> {/* Ensure Layout has lower z-index */}
+        <div className="flex-grow flex flex-col">
+        <main className={`w-full ${isFullWidth ? 'px-2' : 'max-w-6xl mx-auto'} flex-grow`}>
             <Nav />
-            <main className={`w-full ${isFullWidth ? 'px-2' : 'max-w-6xl mx-auto'} flex-grow`}>
-                {children}
-            </main>
-            <Footer className={`w-full ${isFullWidth ? '' : 'max-w-6xl mx-auto'}`} />
+            <div className="flex-grow">{children}</div>
+        </main>
+        <Footer className={`w-full ${isFullWidth ? '' : 'max-w-6xl mx-auto'}`} />
         </div>
     );
 };

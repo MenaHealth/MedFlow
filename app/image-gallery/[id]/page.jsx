@@ -12,7 +12,6 @@ import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { FiMinus, FiPlus } from 'react-icons/fi';
 
 const DEFAULT_FORM_VALUES = {
-    patientId: "",
     age: 0,
     diagnosis: "",
     icd10: "",
@@ -177,7 +176,7 @@ const ImageGallery = () => {
             const currentPhotos = (await currentPatient.json()).files;
             const patchResponse = await fetch(`/api/patient/${id}`, {
                 method: 'PATCH',
-                body: JSON.stringify({ ...DEFAULT_FORM_VALUES, patientId: id, files: currentPhotos.length > 0 ? [...currentPhotos, ...encryptedImages] : encryptedImages }),
+                body: JSON.stringify({ ...DEFAULT_FORM_VALUES, files: currentPhotos.length > 0 ? [...currentPhotos, ...encryptedImages] : encryptedImages }),
                 headers: {
                     'Content-Type': 'application/json',
                 },

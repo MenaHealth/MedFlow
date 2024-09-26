@@ -7,6 +7,10 @@ export const POST = async (request: Request) => {
     const patientData: IPatient = await request.json();
     console.log('Received patient data:', patientData);
 
+    if (!patientData) {
+      return new Response('Invalid patient data', { status: 400 });
+    }
+
     await dbConnect();
 
     const newPatient = new Patient(patientData);

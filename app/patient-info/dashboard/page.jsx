@@ -111,7 +111,6 @@ export default function PatientTriage() {
       try {
         const response = await fetch("/api/patient/");
         const data = await response.json();
-        console.log(data)
         const sortedAndFilteredData = sortAndFilterRows(
             data,
             priorityFilter,
@@ -126,6 +125,18 @@ export default function PatientTriage() {
 
     fetchAndSortRows();
   }, [priorityFilter, statusFilter, specialtyFilter]);
+
+  const formatLocation = (city, country) => {
+    if (!city && !country) {
+      return "";
+    } else if (!city) {
+      return country;
+    } else if (!country) {
+      return city;
+    } else {
+      return `${city}, ${country}`;
+    }
+  };
 
   return (
       <>
@@ -328,7 +339,7 @@ export default function PatientTriage() {
                       whiteSpace: 'nowrap',
                     }}>
                       <span>Notes</span>
-                      <Tooltip tooltipText={`Hover to see full text.\nClick text box to edit.`} showTooltip={true}>
+                      <Tooltip tooltipText={`Hover description icon to see full text.\nClick pencil icon to edit.`} showTooltip={true}>
                         <InfoIcon className="ml-2" style={{ height: '1rem', width: '1rem' }}/>
                       </Tooltip>
                     </div>
@@ -344,18 +355,18 @@ export default function PatientTriage() {
                         sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                     >
 
-                      <TableCellWithTooltip tooltipText={row.patientId} maxWidth='100px'>
+                      <TableCellWithTooltip tooltipText={row._id} maxWidth='100px'>
                           <a href={`/patient-overview/${row._id}`} className="block overflow-hidden text-ellipsis text-sm" style={{
                             maxWidth: '100px',
                             whiteSpace: 'nowrap',
                           }}>
-                            {row.patientId}
+                            {row._id}
                           </a>
                       </TableCellWithTooltip>
 
                       <TableCell align="center" style={{ minWidth: '150px' }}>{row.lastName}</TableCell>
                       <TableCell align="center">{row.age || ''}</TableCell>
-                      <TableCell align="center" style={{ minWidth: '150px' }}>{row.location}</TableCell>
+                      <TableCell align="center" style={{ minWidth: '150px' }}>{formatLocation(row.city, row.country)}</TableCell>
                       <TableCell align="center">{row.language}</TableCell>
                       <TableCellWithTooltip tooltipText={row.chiefComplaint} maxWidth='200px'>
                       <div className="block overflow-hidden text-ellipsis text-sm">

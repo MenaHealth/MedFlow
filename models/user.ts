@@ -1,8 +1,8 @@
 // models/user.ts
 import { Schema, model, models, Document, CallbackError } from 'mongoose';
 import bcrypt from 'bcryptjs';
-import { SecurityQuestion } from '@/utils/securityQuestions.enum';
-import { DoctorSpecialtyList } from '@/utils/doctorSpecialty.enum';
+import { SecurityQuestion } from '@/data/securityQuestions.enum';
+import { DoctorSpecialties, DoctorSpecialtyList } from '@/data/doctorSpecialty.enum';
 
 interface IUser extends Document {
   lastLogin: Date;
@@ -48,7 +48,7 @@ const UserSchema = new Schema<IUser>({
   },
   doctorSpecialty: {
     type: String,
-    enum: Object.values(DoctorSpecialtyList),
+    enum: DoctorSpecialties,
   },
   languages: {
     type: [String],

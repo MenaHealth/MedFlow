@@ -60,16 +60,16 @@ export default function Submit() {
                 setIsSuccess(true);
                 setTimeout(() => {
                     setAnimateFlyOff(true);
-                    // Prevent users from navigating back
+                    // Replace the current page in the history stack
                     window.history.pushState(null, '', window.location.pathname);
                     window.addEventListener('popstate', () => {
-                        router.push('/auth/signup-success');
+                        router.replace('/auth/signup-success');
                     });
                     setTimeout(() => {
-                        router.push('/auth/signup-success');
+                        router.replace('/auth/signup-success');
                     }, 2000);
                 }, 100);
-            } else {
+            }  else {
                 console.error('Signup failed:', result.message);
             }
         } catch (error) {

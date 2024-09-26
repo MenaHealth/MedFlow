@@ -1,8 +1,6 @@
 // app/auth/page.tsx
 "use client"
 
-"use client"
-
 import React, { useState } from 'react';
 import LoginForm from '@/components/auth/LoginForm';
 import { RadioCard } from '@/components/ui/radio-card';
@@ -28,8 +26,9 @@ export default function AuthPage() {
     };
 
     return (
-        <div className="h-screen w-[100vw] sm:w-[80vw] md:w-[80vw] p-4 flex flex-col items-center justify-center relative">
-            <div className="w-full md:w-[80vw] h-[80vh] bg-white rounded-lg shadow-md overflow-hidden flex flex-col relative">
+        <div className="absolute inset-0 flex items-center justify-center z-50">
+            {/* Form container positioned absolutely with some opacity */}
+            <div className="relative w-full md:w-[80vw] h-[80vh] bg-white rounded-lg shadow-md flex flex-col overflow-y-auto z-50">
                 {/* Header section */}
                 <div
                     className={`transition-all duration-300 ease-in-out ${
@@ -69,11 +68,7 @@ export default function AuthPage() {
                 </button>
 
                 {/* Content section */}
-                <div
-                    className={`flex-grow overflow-y-auto md:p-8 p-4 transition-all duration-300 ease-in-out ${
-                        isHeaderVisible ? '' : 'pt-12'
-                    }`}
-                >
+                <div className="flex-grow overflow-y-auto md:p-8 p-4">
                     {authType === 'Login' ? (
                         <div className="login-card w-full flex flex-col items-center justify-center">
                             <LoginForm />

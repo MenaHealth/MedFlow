@@ -64,16 +64,14 @@ const PasswordEmailForm = () => {
 
     return (
         <Form {...form}>
-            {/* Adjust spacing and layout */}
-            <form className="space-y-6 lg:space-y-8 lg:w-1/2 mx-auto">
-                {/* Overhead space for the email field */}
-                <div className="mt-10">
-                    <EmailField
-                        form={form}
-                        fieldName="email"
-                        fieldLabel="Email"
-                    />
-                </div>
+            <form className="h-full flex flex-col justify-between space-y-6 lg:space-y-8 lg:w-1/2 mx-auto py-8">
+                {/* Email Field */}
+                <EmailField
+                    form={form}
+                    fieldName="email"
+                    fieldLabel="Email"
+                />
+                {/* Password Fields */}
                 <PasswordField
                     form={form}
                     fieldName="password"

@@ -1,5 +1,5 @@
 // app/fajr/patient/[id]/page.tsx
-import PatientForm from "@/components/form/PatientForm";
+import PatientForm from "@/components/form/Fajr/PatientForm";
 import PatientSubmenu from "@/components/PatientSubmenu";
 import React from "react";
 

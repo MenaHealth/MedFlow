@@ -19,7 +19,7 @@ const DEFAULT_FORM_VALUES = {
     surgeryDate: new Date(),
     occupation: "",
     laterality: "Bilateral",
-    priority: "Low",
+    priority: "Routine",
     hospital: "PMC",
     baselineAmbu: "Independent",
     medx: [],
@@ -30,7 +30,7 @@ const DEFAULT_FORM_VALUES = {
     otherDrugs: "",
     allergies: "",
     notes: "",
-    status: 'Not started'
+    status: 'Not Started'
 };
 
 const ImageGallery = () => {
@@ -206,9 +206,8 @@ const ImageGallery = () => {
 
     return (
         <>
-            <h1 className="text-2xl font-bold mb-4" style={{ transform: 'translateX(5rem)' }}>Image Gallery</h1>
-            <div className="container mx-auto p-4 flex flex-row justify-between">
-                <div style={{ minWidth: '75%', display: 'flex', justifyContent: 'center' }}>
+            <h1 className="text-3xl font-bold mb-8 text-center">Image Gallery</h1>
+            <div className="w-full max-w-4xl mx-auto pb-16">
                 <PatientSubmenu />
                     <div style={{ minWidth: '75%' }}>
                         {isLoading ? (
@@ -315,7 +314,7 @@ const ImageGallery = () => {
                         </Button>
                     </form>
                 </div>
-            </div>
+
         </>
     );
 };

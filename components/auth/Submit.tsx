@@ -1,3 +1,4 @@
+// components/auth/Submit.tsx
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
@@ -5,8 +6,10 @@ import { Button } from "@/components/ui/button"
 import { useSignupContext } from "@/components/auth/SignupContext"
 import { SendHorizonal } from "lucide-react";
 import { ClipLoader } from 'react-spinners'
+import { useRouter } from "next/navigation";
 
 export default function Submit() {
+    const router = useRouter();
     const { formData, accountType, doctorSignupFormCompleted, triageSignupFormCompleted } = useSignupContext();
     const [isLoading, setIsLoading] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
@@ -24,20 +27,9 @@ export default function Submit() {
         }
     }, [isSuccess]);
 
-    useEffect(() => {
-        if (animateFlyOff) {
-            console.log('Animation started for fly-right');
-            setTimeout(() => {
-                console.log('Final Icon Position:', iconPosition);
-            }, 2000);
-        }
-    }, [animateFlyOff, iconPosition]);
-
     const handleSubmit = async () => {
         setIsLoading(true);
         try {
-            console.log('Form Data:', formData);
-
             const response = await fetch('/api/auth/signup', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -63,12 +55,19 @@ export default function Submit() {
             });
 
             const result = await response.json();
-            console.log('Signup API Response:', result);
 
             if (response.ok) {
                 setIsSuccess(true);
                 setTimeout(() => {
                     setAnimateFlyOff(true);
+                    // Prevent users from navigating back
+                    window.history.pushState(null, '', window.location.pathname);
+                    window.addEventListener('popstate', () => {
+                        router.push('/auth/signup-success');
+                    });
+                    setTimeout(() => {
+                        router.push('/auth/signup-success');
+                    }, 2000);
                 }, 100);
             } else {
                 console.error('Signup failed:', result.message);

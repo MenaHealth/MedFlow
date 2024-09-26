@@ -3,14 +3,13 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/comp
 import { useFormContext } from "react-hook-form";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/form/ScrollArea";
 import { ChevronsUpDown, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SingleChoiceFormFieldProps {
     fieldName: string;
-    fieldLabel: string;
+    fieldLabel?: string;
     choices: string[];
 }
 
@@ -34,40 +33,52 @@ export function SingleChoiceFormField({
 
     const displayValue = form.watch(fieldName);
 
+    const listBoxId = `listbox-${fieldName}`;
+
     return (
         <FormField
             control={form.control}
             name={fieldName}
             render={({ field }) => (
                 <FormItem className="flex flex-col">
-                    <FormLabel>{fieldLabel}</FormLabel>
+                    {fieldLabel && <FormLabel>{fieldLabel}</FormLabel>}
                     <Popover open={open} onOpenChange={setOpen}>
                         <PopoverTrigger asChild>
                             <FormControl>
-                                <Button
-                                    variant="outline"
+                                <div
+                                    className={cn(
+                                        "w-full p-2 border rounded-md bg-white text-left flex justify-between items-center", // Added flex, justify-between, items-center for alignment
+                                        !displayValue && "text-muted-foreground",
+                                        "min-h-[40px]" // sets minimum height
+                                    )}
+                                    style={{
+                                        whiteSpace: "pre-wrap",
+                                        overflowWrap: "break-word",
+                                        wordWrap: "break-word",
+                                        maxHeight: "200px",
+                                        overflowY: "auto",
+                                    }}
+                                    onClick={() => setOpen(true)}
                                     role="combobox"
                                     aria-expanded={open}
-                                    className={cn(
-                                        "w-full justify-between",
-                                        !displayValue && "text-muted-foreground"
-                                    )}
+                                    aria-controls={listBoxId}
                                 >
-                                    {displayValue || `Select ${fieldLabel}`}
+                                    <span>{displayValue || `Select ${fieldLabel || 'option'}`}</span>
+                                    {/* Added margin to the left and aligned chevrons to the right */}
                                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                </Button>
+                                </div>
                             </FormControl>
                         </PopoverTrigger>
-                        <PopoverContent className="w-[300px] p-0">
+                        <PopoverContent className="w-[300px] p-0" id={listBoxId}>
                             <Command>
-                                {choices.length >= 7 && (
+                                {choices.length >= 10 && (
                                     <CommandInput
-                                        placeholder={`Search ${fieldLabel.toLowerCase()}...`}
+                                        placeholder={`Search ${fieldLabel?.toLowerCase() || 'option'}...`}
                                         value={searchQuery}
                                         onValueChange={setSearchQuery}
                                     />
                                 )}
-                                <CommandEmpty>No {fieldLabel.toLowerCase()} found.</CommandEmpty>
+                                <CommandEmpty>No {fieldLabel?.toLowerCase() || 'option'} found.</CommandEmpty>
                                 <CommandGroup>
                                     <ScrollArea className="h-72">
                                         {filteredChoices.map((choice) => (

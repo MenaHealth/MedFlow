@@ -11,12 +11,7 @@ import ProgressBar from './progressBar';
 import BackButton from "@/components/auth/BackButton";
 
 const SignupSection = () => {
-    const {
-        currentStep,
-        accountType,
-        handleBack,
-        progress,
-    } = useSignupContext();
+    const { currentStep, accountType, handleBack, progress } = useSignupContext();
 
     const renderForm = () => {
         switch (currentStep) {
@@ -27,7 +22,7 @@ const SignupSection = () => {
             case 2:
                 return <SecurityQuestionsForm />;
             case 3:
-                return accountType === 'Doctor' ? <DoctorSignupForm /> : <TriageSignupForm />;
+                return accountType === "Doctor" ? <DoctorSignupForm /> : <TriageSignupForm />;
             default:
                 return null;
         }
@@ -45,18 +40,16 @@ const SignupSection = () => {
             <div className="p-4">
                 <ProgressBar progress={progress} />
             </div>
-            <div className="flex-grow overflow-y-auto">
+            <div className="flex-grow overflow-y-auto w-full">
                 {renderForm()}
             </div>
-            <div className="p-4 bg-white border-t relative overflow-visible h-auto">
-                {/* Back Button positioned on the left */}
+            <div className="p-4 bg-white border-t relative overflow-visible h-auto w-full"> {/* Full width buttons section */}
                 {currentStep > 0 && (
                     <div className="absolute left-0">
                         <BackButton />
                     </div>
                 )}
 
-                {/* Next/Submit button centered */}
                 <div className="flex justify-center">
                     {renderButton()}
                 </div>

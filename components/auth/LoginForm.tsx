@@ -100,7 +100,7 @@ export function LoginForm() {
     };
 
     return (
-        <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
+        <div className="w-full md:max-w-md bg-white p-4 md:p-8 rounded-lg shadow-md">
             <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
             <FormProvider {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-4">

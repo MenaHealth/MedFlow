@@ -1,6 +1,8 @@
 // app/auth/page.tsx
 "use client"
 
+"use client"
+
 import React, { useState } from 'react';
 import LoginForm from '@/components/auth/LoginForm';
 import { RadioCard } from '@/components/ui/radio-card';
@@ -8,7 +10,7 @@ import Flex from "@/components/ui/flex";
 import Text from "@/components/ui/text";
 import { SignupProvider } from "@/components/auth/SignupContext";
 import SignupSection from "@/components/auth/SignupSection";
-import { ChevronUpIcon } from 'lucide-react';
+import { ChevronUpIcon, ChevronDownIcon } from 'lucide-react';
 
 export default function AuthPage() {
     const [authType, setAuthType] = useState<'Login' | 'Signup'>('Login');
@@ -26,8 +28,9 @@ export default function AuthPage() {
     };
 
     return (
-        <div className="h-screen w-[90vw] sm:w-[80vw] md:w-[80vw] p-4 flex flex-col items-center justify-center relative">
+        <div className="h-screen w-[100vw] sm:w-[80vw] md:w-[80vw] p-4 flex flex-col items-center justify-center relative">
             <div className="w-full md:w-[80vw] h-[80vh] bg-white rounded-lg shadow-md overflow-hidden flex flex-col relative">
+                {/* Header section */}
                 <div
                     className={`transition-all duration-300 ease-in-out ${
                         isHeaderVisible ? 'h-16' : 'h-0 overflow-hidden'
@@ -52,14 +55,20 @@ export default function AuthPage() {
                         </RadioCard.Root>
                     </div>
                 </div>
-                {!isHeaderVisible && (
-                    <button
-                        onClick={toggleHeader}
-                        className="absolute top-2 left-1/2 transform -translate-x-1/2 z-10 bg-white rounded-full p-1 shadow-md"
-                    >
+
+                {/* Toggle button */}
+                <button
+                    onClick={toggleHeader}
+                    className="absolute top-2 left-1/2 transform -translate-x-1/2 z-10 bg-white rounded-full p-1 shadow-md"
+                >
+                    {isHeaderVisible ? (
                         <ChevronUpIcon size={24} />
-                    </button>
-                )}
+                    ) : (
+                        <ChevronDownIcon size={24} />
+                    )}
+                </button>
+
+                {/* Content section */}
                 <div
                     className={`flex-grow overflow-y-auto md:p-8 p-4 transition-all duration-300 ease-in-out ${
                         isHeaderVisible ? '' : 'pt-12'

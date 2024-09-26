@@ -6,9 +6,9 @@
     import { MultiChoiceFormField } from "@/components/form/MultiChoiceFormField";
     import { SingleChoiceFormField } from "@/components/form/SingleChoiceFormField";
     import { DatePickerFormField } from "@/components/form/DatePickerFormField";
-    import { DoctorSpecialtyList } from '@/utils/doctorSpecialty.enum';
-    import { languagesList } from '@/utils/languages.enum';
-    import { CountriesList } from '@/utils/countries.enum';
+    import { DoctorSpecialties } from '@/data/doctorSpecialty.enum';
+    import { LanguagesList } from '@/data/languages.enum';
+    import { CountriesList } from '@/data/countries.enum';
     import { useSignupContext } from './SignupContext';
 
     const doctorSignupSchema = z.object({
@@ -101,7 +101,7 @@
                         <MultiChoiceFormField
                             fieldName="languages"
                             fieldLabel="Languages"
-                            choices={languagesList}
+                            choices={LanguagesList}
                         />
                         <MultiChoiceFormField
                             fieldName="countries"
@@ -111,7 +111,7 @@
                         <SingleChoiceFormField
                             fieldName="doctorSpecialty"
                             fieldLabel="Doctor Specialty"
-                            choices={Object.values(DoctorSpecialtyList)}
+                            choices={DoctorSpecialties}
                         />
                         <SingleChoiceFormField
                             fieldName="gender"

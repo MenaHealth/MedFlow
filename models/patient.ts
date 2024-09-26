@@ -9,15 +9,17 @@
   }
 
   export interface IPatient extends Document {
-    files: any[];
-    patientId?: string;
+    files?: any[];
     _id?: string;
     firstName: string;
     lastName: string;
     phone?: string;
     age?: string;
-    location?: string;
+    country?: string;
+    city?: string;
     language?: string;
+    genderPreference?: string;
+    previouslyRegistered?: string;
     chiefComplaint?: string;
     coordinatorId?: string;
     email: string;
@@ -28,7 +30,6 @@
     priority?: 'Not Selected' | 'Routine' | 'Moderate' | 'Urgent' | 'Emergency';
     specialty?: typeof SPECIALTIES[number];
     status?: 'Not Selected' | 'Not Started' | 'Triaged' | 'In-Progress' | 'Completed';
-    name?: string; // can get rid of since we have firstname and Lastname
     complaint?: string;
     icd10?: string;
     surgeryDate?: Date;
@@ -58,7 +59,10 @@
     lastName: { type: String },
     phone: { type: String },
     age: { type: String },
-    location: { type: String },
+    city: { type: String },
+    country: { type: String },
+    genderPreference: { type: String },
+    previouslyRegistered: { type: String },
     language: { type: String },
     chiefComplaint: { type: String },
     email: { type: String },
@@ -86,7 +90,6 @@
     allergies: { type: String },
     notes: { type: String },
     visits: [{ type: Schema.Types.ObjectId, ref: 'Visit' }],
-    patientId: { type: String, sparse: true, unique: true },  // Mark as sparse to allow null values
     triagedBy: { type: Object },
   });
 

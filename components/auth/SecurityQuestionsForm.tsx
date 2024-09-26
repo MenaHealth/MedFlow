@@ -97,8 +97,7 @@ const SecurityQuestionsForm: React.FC = () => {
 
                                 <SingleChoiceFormField
                                     fieldName={`question${num}`}
-                                    fieldLabel={`Select a security question`}
-                                    choices={securityQuestions} // Use securityQuestions as options
+                                    choices={securityQuestions}
                                 />
 
                                 <TextFormField

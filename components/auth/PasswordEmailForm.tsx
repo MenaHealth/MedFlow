@@ -1,8 +1,7 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { TextFormField } from "@/components/ui/TextFormField";
 import { Form } from "@/components/ui/form";
 import PasswordField from '@/components/ui/passwordField';
 import { useSignupContext } from './SignupContext';
@@ -24,7 +23,6 @@ const PasswordEmailForm = () => {
         formData,
         setFormData,
         updateAnsweredQuestions,
-        accountType,
         setValidEmail,
         setPasswordsMatch,
     } = useSignupContext();
@@ -39,10 +37,6 @@ const PasswordEmailForm = () => {
         mode: 'onChange',
     });
 
-    // Total questions differ for Doctor and Triage
-    const totalQuestions = accountType === 'Doctor' ? 14 : 11;
-
-    // Update answered questions based on form state
     const email = form.watch('email');
     const password = form.watch('password');
     const confirmPassword = form.watch('confirmPassword');
@@ -52,23 +46,17 @@ const PasswordEmailForm = () => {
         const passwordFilled = !!password;
         const confirmPasswordFilled = !!confirmPassword;
 
-        // Check if the email follows regex rules
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         const isEmailValid = emailRegex.test(email);
 
-        // Update answered questions
         updateAnsweredQuestions(1, Number(emailFilled) + Number(passwordFilled) + Number(confirmPasswordFilled));
 
-        setFormData((prevData) => {
-            const newData = {
-                ...prevData,
-                email,
-                password,
-                confirmPassword,
-            };
-            console.log('Updated form data:', newData);
-            return newData;
-        });
+        setFormData((prevData) => ({
+            ...prevData,
+            email,
+            password,
+            confirmPassword,
+        }));
 
         setPasswordsMatch(password === confirmPassword && passwordFilled);
         setValidEmail(isEmailValid);
@@ -76,18 +64,26 @@ const PasswordEmailForm = () => {
 
     return (
         <Form {...form}>
-            <form className="space-y-4">
-                <EmailField
-                    form={form}
-                    fieldName="email"
-                    fieldLabel="Email"
-                />
+            {/* Adjust spacing and layout */}
+            <form className="space-y-6 lg:space-y-8 lg:w-1/2 mx-auto">
+                {/* Overhead space for the email field */}
+                <div className="mt-10">
+                    <EmailField
+                        form={form}
+                        fieldName="email"
+                        fieldLabel="Email"
+                    />
+                </div>
                 <PasswordField
                     form={form}
                     fieldName="password"
                     fieldLabel="Password"
                 />
-                <PasswordField form={form} fieldName="confirmPassword" fieldLabel="Confirm Password" />
+                <PasswordField
+                    form={form}
+                    fieldName="confirmPassword"
+                    fieldLabel="Confirm Password"
+                />
             </form>
         </Form>
     );

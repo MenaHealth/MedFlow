@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input';
 
 import { MedicationPopover } from './MedicationPopover';
 import { Label } from "@/components/ui/label"
-import { DatePickerFormField, DatePopover } from './DatePickerFormField';
 
 export function PSHxSelect({ form, fieldName, fieldLabel, fieldCompact, PopOverComponent }:
     { form: any, fieldName: string, fieldLabel: string, fieldCompact: string, PopOverComponent: any }) {

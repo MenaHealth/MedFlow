@@ -5,6 +5,7 @@ export enum Countries {
     SYRIA = 'Syria',
     YEMEN = 'Yemen',
     AFGHANISTAN = 'Afghanistan',
+    Lebanon = 'Lebanon'
 }
 
 export const CountriesList = Object.values(Countries);

@@ -26,8 +26,8 @@ export default function AuthPage() {
     };
 
     return (
-        <div className="h-screen w-full p-4 flex flex-col items-center justify-center relative">
-            <div className="w-[70vw] h-[70vh] bg-white rounded-lg shadow-md overflow-hidden flex flex-col relative">
+        <div className="h-screen w-[90vw] sm:w-[80vw] md:w-[80vw] p-4 flex flex-col items-center justify-center relative">
+            <div className="w-full md:w-[80vw] h-[80vh] bg-white rounded-lg shadow-md overflow-hidden flex flex-col relative">
                 <div
                     className={`transition-all duration-300 ease-in-out ${
                         isHeaderVisible ? 'h-16' : 'h-0 overflow-hidden'
@@ -60,9 +60,11 @@ export default function AuthPage() {
                         <ChevronUpIcon size={24} />
                     </button>
                 )}
-                <div className={`flex-grow overflow-y-auto p-8 transition-all duration-300 ease-in-out ${
-                    isHeaderVisible ? '' : 'pt-12'
-                }`}>
+                <div
+                    className={`flex-grow overflow-y-auto md:p-8 p-4 transition-all duration-300 ease-in-out ${
+                        isHeaderVisible ? '' : 'pt-12'
+                    }`}
+                >
                     {authType === 'Login' ? (
                         <div className="login-card w-full flex flex-col items-center justify-center">
                             <LoginForm />

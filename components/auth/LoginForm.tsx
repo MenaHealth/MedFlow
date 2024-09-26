@@ -92,14 +92,6 @@ export function LoginForm({ accountType }: Props) {
             });
         }
     };
-
-
-    // useEffect(() => {
-    //     console.log("LoginForm mounted");
-    //     return () => {
-    //         console.log("LoginForm unmounted");
-    //     };
-    // }, []);
     useEffect(() => {
         console.log("LoginForm mounted");
         return () => {

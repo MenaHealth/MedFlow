@@ -7,8 +7,8 @@ import { RadioCard } from '@/components/ui/radio-card';
 import Flex from "@/components/ui/flex";
 import Text from "@/components/ui/text";
 import { SignupProvider } from "@/components/auth/SignupContext";
-import SignupSection from "@/components/auth/SignupSection";
-import { ChevronUpIcon } from 'lucide-react';
+import SignupSection from '@/components/auth/SignupSection';
+import { ChevronUpIcon, ChevronDownIcon } from 'lucide-react';
 
 export default function AuthPage() {
     const [authType, setAuthType] = useState<'Login' | 'Signup'>('Login');
@@ -26,8 +26,11 @@ export default function AuthPage() {
     };
 
     return (
-        <div className="h-screen w-[90vw] sm:w-[80vw] md:w-[80vw] p-4 flex flex-col items-center justify-center relative">
-            <div className="w-full md:w-[80vw] h-[80vh] bg-white rounded-lg shadow-md overflow-hidden flex flex-col relative">
+        // Set pointer-events-none on the entire wrapper, to allow interaction with Nav and Footer
+        <div className="absolute inset-0 z-10 pointer-events-none flex items-center justify-center">
+            {/* Only this section should be clickable */}
+            <div className="relative w-full md:w-[80vw] h-[80vh] bg-white rounded-lg shadow-md flex flex-col overflow-y-auto z-20 pointer-events-auto">
+                {/* Header section */}
                 <div
                     className={`transition-all duration-300 ease-in-out ${
                         isHeaderVisible ? 'h-16' : 'h-0 overflow-hidden'
@@ -52,19 +55,21 @@ export default function AuthPage() {
                         </RadioCard.Root>
                     </div>
                 </div>
-                {!isHeaderVisible && (
-                    <button
-                        onClick={toggleHeader}
-                        className="absolute top-2 left-1/2 transform -translate-x-1/2 z-10 bg-white rounded-full p-1 shadow-md"
-                    >
-                        <ChevronUpIcon size={24} />
-                    </button>
-                )}
-                <div
-                    className={`flex-grow overflow-y-auto md:p-8 p-4 transition-all duration-300 ease-in-out ${
-                        isHeaderVisible ? '' : 'pt-12'
-                    }`}
+
+                {/* Toggle button */}
+                <button
+                    onClick={toggleHeader}
+                    className="absolute top-2 left-1/2 transform -translate-x-1/2 z-30 bg-white rounded-full p-1 shadow-md"
                 >
+                    {isHeaderVisible ? (
+                        <ChevronUpIcon size={24} />
+                    ) : (
+                        <ChevronDownIcon size={24} />
+                    )}
+                </button>
+
+                {/* Content section */}
+                <div className="flex-grow overflow-y-auto md:p-8 p-4">
                     {authType === 'Login' ? (
                         <div className="login-card w-full flex flex-col items-center justify-center">
                             <LoginForm />

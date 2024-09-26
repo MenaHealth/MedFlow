@@ -9,9 +9,12 @@ export interface IPatientForm extends Document {
     firstName: string;
     lastName: string;
     age?: string;
-    location?: string;
+    country?: string;
+    city?: string;
     language?: string;
     chiefComplaint?: string;
+    genderPreference?: string;
+    previouslyRegistered?: string;
 }
 
 const PatientFormSchema = new Schema<IPatientForm>({
@@ -21,9 +24,12 @@ const PatientFormSchema = new Schema<IPatientForm>({
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
     age: { type: String },
-    location: { type: String },
+    country: { type: String },
+    city: { type: String },
     language: { type: String },
     chiefComplaint: { type: String },
+    genderPreference: { type: String },
+    previouslyRegistered: { type: String },
 }, {
     collection: 'patient_forms'
 });

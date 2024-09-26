@@ -41,7 +41,10 @@
     drinkCount?: string;
     otherDrugs?: string;
     allergies?: string;
-    triagedBy?: string;
+    triagedBy?: {
+      name?: string;
+      email?: string;
+    }
     doctor?: string;
     notes?: string;
     visits?: Types.ObjectId[];
@@ -83,7 +86,8 @@
     allergies: { type: String },
     notes: { type: String },
     visits: [{ type: Schema.Types.ObjectId, ref: 'Visit' }],
-    patientId: { type: String, sparse: true, unique: true }  // Mark as sparse to allow null values
+    patientId: { type: String, sparse: true, unique: true },  // Mark as sparse to allow null values
+    triagedBy: { type: Object },
   });
 
   const Patient = models.Patient || model<IPatient>('Patient', PatientSchema);

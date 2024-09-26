@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from 'react';
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
@@ -19,8 +19,13 @@ import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 
 import { Button } from '@/components/ui/button';
-import Tooltip from './Tooltip';
+import Tooltip from '../../../components/form/Tooltip';
 import './dashboard.css';
+import InfoIcon from '@mui/icons-material/Info';
+import TableCellWithTooltip from '@/components/TableCellWithTooltip';
+import * as Toast from '@radix-ui/react-toast';
+import { useSession } from 'next-auth/react';
+import NotesCell from '@/components/NotesCell';
 
 import {
   DropdownMenu,
@@ -30,73 +35,49 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdownMenu";
-
-import { getServerSession } from 'next-auth';
-import { useSession } from 'next-auth/react';
+import DescriptionIcon from '@mui/icons-material/Description';
 
 
-import { CLINICS, PRIORITIES, SPECIALTIES, STATUS } from '@/data/data';
+import { PRIORITIES, SPECIALTIES, STATUS } from '@/data/data';
 import Link from 'next/link';
 
 export default function PatientTriage() {
   const [rows, setRows] = React.useState([]);
-  const [users, setUsers] = React.useState([]);
-  const [sortOrder, setSortOrder] = React.useState("newest");
-  const [prioritySort, setPrioritySort] = React.useState("all");
-  const [searchTerm, setSearchTerm] = React.useState("");
-  const [nameFilter, setNameFilter] = React.useState("all");
+  const [priorityFilter, setPriorityFilter] = React.useState("all");
+  const [statusFilter, setStatusFilter] = React.useState("all");
+  const [specialtyFilter, setSpecialtyFilter] = React.useState("all");
+
+  const { data: session } = useSession();
+
+  const [open, setOpen] = useState(false);
+  const [message, setMessage] = useState('');
+
+  const triggerToast = (msg) => {
+    setMessage(msg);
+    setOpen(true);
+  };
 
   const [shouldShowClearButton, setShouldShowClearButton] = useState([
-    sortOrder !== "newest",
-    prioritySort !== "all",
-    searchTerm !== ""
+    priorityFilter !== "all",
+    statusFilter !== "all",
+    specialtyFilter !== "all"
   ].filter(Boolean).length >= 2);
 
   useEffect(() => {
     setShouldShowClearButton([
-      sortOrder !== "newest",
-      prioritySort !== "all",
-      searchTerm !== ""
+      priorityFilter !== "all",
+      statusFilter !== "all",
+      specialtyFilter !== "all"
     ].filter(Boolean).length >= 2);
-  }, [sortOrder, prioritySort, searchTerm]);
-
-  const fetchRows = async () => {
-    try {
-      const response = await fetch("/api/patient/");
-      const data = await response.json();
-      setRows(data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const fetchUsers = async () => {
-    try {
-      const response = await fetch("/api/user/");
-      const data = await response.json();
-      setUsers(data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  }, [priorityFilter, statusFilter, specialtyFilter]);
 
   const sortAndFilterRows = (
       rows,
-      dateOrder,
       priorityFilter,
-      nameFilter,
-      searchTerm
+      statusFilter,
+      specialtyFilter
   ) => {
-    let filteredRows = rows.filter((row) => {
-      if (searchTerm) {
-        return row.patientId.toLowerCase().includes(searchTerm.toLowerCase());
-      }
-      return true;
-    });
-
-    if (nameFilter !== "all") {
-      filteredRows = filteredRows.filter((row) => row.patientId === nameFilter);
-    }
+    let filteredRows = rows;
 
     if (priorityFilter !== "all") {
       filteredRows = filteredRows.filter(
@@ -104,10 +85,22 @@ export default function PatientTriage() {
       );
     }
 
+    if (statusFilter !== "all") {
+      filteredRows = filteredRows.filter(
+          (row) => row.status === statusFilter
+      );
+    }
+
+    if (specialtyFilter !== "all") {
+      filteredRows = filteredRows.filter(
+          (row) => row.specialty === specialtyFilter
+      );
+    }
+
     let sortedRows = [...filteredRows].sort((a, b) => {
       const dateA = new Date(a.surgeryDate);
       const dateB = new Date(b.surgeryDate);
-      return dateOrder === "newest" ? dateB - dateA : dateA - dateB;
+      return dateB - dateA;
     });
 
     return sortedRows;
@@ -118,12 +111,12 @@ export default function PatientTriage() {
       try {
         const response = await fetch("/api/patient/");
         const data = await response.json();
+        console.log(data)
         const sortedAndFilteredData = sortAndFilterRows(
             data,
-            sortOrder,
-            prioritySort,
-            nameFilter,
-            searchTerm
+            priorityFilter,
+            statusFilter,
+            specialtyFilter
         );
         setRows(sortedAndFilteredData);
       } catch (error) {
@@ -132,8 +125,7 @@ export default function PatientTriage() {
     };
 
     fetchAndSortRows();
-    fetchUsers();
-  }, [sortOrder, prioritySort, nameFilter, searchTerm]);
+  }, [priorityFilter, statusFilter, specialtyFilter]);
 
   return (
       <>
@@ -173,42 +165,39 @@ export default function PatientTriage() {
             </div>
           </div>
           <div className="flex flex-wrap gap-2 mb-4">
-            {sortOrder !== "newest" && (
-                <div className="bg-blue-100 text-blue-800 px-2 py-1 rounded flex items-center">
-                  <EditIcon
-                      className="mr-2 cursor-pointer"
-                      onClick={() => console.log("Edit date filter")}
-                  />
-                  Date: {sortOrder === "oldest" ? "Oldest first" : "Newest first"}
-                  <RemoveCircleIcon
-                      className="ml-2 cursor-pointer"
-                      onClick={() => setSortOrder("newest")}
-                  />
-                </div>
-            )}
-            {prioritySort !== "all" && (
+            {priorityFilter !== "all" && (
                 <div className="bg-green-100 text-green-800 px-2 py-1 rounded flex items-center">
                   <EditIcon
                       className="mr-2 cursor-pointer"
-                      onClick={() => console.log("Edit priority filter")}
                   />
-                  Priority: {prioritySort}
+                  Priority: {priorityFilter}
                   <RemoveCircleIcon
                       className="ml-2 cursor-pointer"
-                      onClick={() => setPrioritySort("all")}
+                      onClick={() => setPriorityFilter("all")}
                   />
                 </div>
             )}
-            {searchTerm !== "" && (
+            {statusFilter !== "all" && (
                 <div className="bg-purple-100 text-purple-800 px-2 py-1 rounded flex items-center">
                   <EditIcon
                       className="mr-2 cursor-pointer"
-                      onClick={() => console.log("Edit patient name filter")}
                   />
-                  Patient Name: {searchTerm}
+                  Status: {statusFilter}
                   <RemoveCircleIcon
                       className="ml-2 cursor-pointer"
-                      onClick={() => setSearchTerm("")}
+                      onClick={() => setStatusFilter("all")}
+                  />
+                </div>
+            )}
+            {specialtyFilter !== "all" && (
+                <div className="bg-blue-100 text-blue-800 px-2 py-1 rounded flex items-center">
+                  <EditIcon
+                      className="mr-2 cursor-pointer"
+                  />
+                  Specialty: {specialtyFilter}
+                  <RemoveCircleIcon
+                      className="ml-2 cursor-pointer"
+                      onClick={() => setSpecialtyFilter("all")}
                   />
                 </div>
             )}
@@ -217,9 +206,9 @@ export default function PatientTriage() {
                   <div
                     className="bg-red-100 text-red-800 px-2 py-1 rounded cursor-pointer"
                     onClick={() => {
-                      setSortOrder("newest");
-                      setPrioritySort("all");
-                      setSearchTerm("");
+                      setPriorityFilter("all");
+                      setStatusFilter("all");
+                      setSpecialtyFilter("all");
                     }}
                   >
                     <DeleteSweepIcon className="mr-2" />
@@ -232,28 +221,72 @@ export default function PatientTriage() {
             <Table sx={{ minWidth: 650 }} aria-label="simple table">
               <TableHead className="MuiTableHead-root">
                 <TableRow>
-                  <TableCell align="left">Patient ID</TableCell>
+                  <TableCell
+                    align="left"
+                    className="whitespace-nowrap"
+                  >
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                    }}>
+                      <span>Patient ID</span>
+                      <Tooltip tooltipText="Hover to see full patient ID" showTooltip={true}>
+                        <InfoIcon className="ml-2" style={{ height: '1rem', width: '1rem' }}/>
+                      </Tooltip>
+                    </div>
+                  </TableCell>
                   <TableCell align="center">Last Name</TableCell>
                   <TableCell align="center">Age</TableCell>
                   <TableCell align="center">Location</TableCell>
                   <TableCell align="center">Language Spoken</TableCell>
-                  <TableCell align="center">Chief Complaint</TableCell>
+                  <TableCell
+                    align="left"
+                    className="whitespace-nowrap"
+                  >
+                    <div className='flex items-center'>
+                      <span>Chief Complaint</span>
+                      <Tooltip tooltipText="Hover to see full text" showTooltip={true}>
+                        <InfoIcon className="ml-2" style={{ height: '1rem', width: '1rem' }}/>
+                      </Tooltip>
+                    </div>
+                  </TableCell>
 
-
-                  <TableCell align="center">Status</TableCell>
                   <TableCell align="center">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
                             variant="ghost"
                             className="h-8 w-full justify-start"
+                            style={{ fontSize: "0.7rem", fontWeight: 500, letterSpacing: "0.05rem" }}
                         >
-                          Priority
+                          STATUS
                           <KeyboardArrowDownIcon className="ml-2 h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuRadioGroup value={prioritySort} onValueChange={setPrioritySort}>
+                        <DropdownMenuRadioGroup value={statusFilter} onValueChange={setStatusFilter}>
+                          <DropdownMenuRadioItem value="all">All</DropdownMenuRadioItem>
+                          {STATUS.map((status) => (
+                              <DropdownMenuRadioItem key={status} value={status}>{status}</DropdownMenuRadioItem>
+                          ))}
+                        </DropdownMenuRadioGroup>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                  <TableCell align="center">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                            variant="ghost"
+                            className="h-8 w-full justify-start"
+                            style={{ fontSize: "0.7rem", fontWeight: 500, letterSpacing: "0.05rem" }}
+                        >
+                          PRIORITY
+                          <KeyboardArrowDownIcon className="ml-2 h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuRadioGroup value={priorityFilter} onValueChange={setPriorityFilter}>
                           <DropdownMenuRadioItem value="all">All</DropdownMenuRadioItem>
                           {PRIORITIES.map((priority) => (
                               <DropdownMenuRadioItem key={priority} value={priority}>{priority}</DropdownMenuRadioItem>
@@ -262,8 +295,44 @@ export default function PatientTriage() {
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
-                  <TableCell align="center">Specialty</TableCell>
-                  <TableCell align="center">Additional Notes</TableCell>
+                  <TableCell align="center">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                            variant="ghost"
+                            className="h-8 w-full justify-start"
+                            style={{ fontSize: "0.7rem", fontWeight: 500, letterSpacing: "0.05rem" }}
+                        >
+                          SPECIALTY
+                          <KeyboardArrowDownIcon className="ml-2 h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuRadioGroup value={specialtyFilter} onValueChange={setSpecialtyFilter}>
+                          <DropdownMenuRadioItem value="all">All</DropdownMenuRadioItem>
+                          {SPECIALTIES.map((specialty) => (
+                              <DropdownMenuRadioItem key={specialty} value={specialty}>{specialty}</DropdownMenuRadioItem>
+                          ))}
+                        </DropdownMenuRadioGroup>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                  <TableCell
+                    align="left"
+                    // className="whitespace-nowrap"
+                    >
+                    <span>Additional</span>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      whiteSpace: 'nowrap',
+                    }}>
+                      <span>Notes</span>
+                      <Tooltip tooltipText={`Hover to see full text.\nClick text box to edit.`} showTooltip={true}>
+                        <InfoIcon className="ml-2" style={{ height: '1rem', width: '1rem' }}/>
+                      </Tooltip>
+                    </div>
+                  </TableCell>
                   <TableCell align="center">Triaged By</TableCell>
                   <TableCell align="center">Doctor Assigned</TableCell>
                 </TableRow>
@@ -274,27 +343,25 @@ export default function PatientTriage() {
                         key={index}
                         sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                     >
-                      <TableCell 
-                        align="left"
-                        style={{
-                          maxWidth: '120px', 
-                          overflow: 'hidden', 
-                          textOverflow: 'ellipsis', 
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        <Tooltip tooltipText={row.patientId}>
-                          <a href={`/patient-overview/${row._id}`} className="block overflow-hidden text-ellipsis">
+
+                      <TableCellWithTooltip tooltipText={row.patientId} maxWidth='100px'>
+                          <a href={`/patient-overview/${row._id}`} className="block overflow-hidden text-ellipsis text-sm" style={{
+                            maxWidth: '100px',
+                            whiteSpace: 'nowrap',
+                          }}>
                             {row.patientId}
                           </a>
-                        </Tooltip>
-                      </TableCell>
+                      </TableCellWithTooltip>
 
                       <TableCell align="center" style={{ minWidth: '150px' }}>{row.lastName}</TableCell>
                       <TableCell align="center">{row.age || ''}</TableCell>
                       <TableCell align="center" style={{ minWidth: '150px' }}>{row.location}</TableCell>
                       <TableCell align="center">{row.language}</TableCell>
-                      <TableCell align="center">{row.chiefComplaint}</TableCell>
+                      <TableCellWithTooltip tooltipText={row.chiefComplaint} maxWidth='200px'>
+                      <div className="block overflow-hidden text-ellipsis text-sm">
+                            {row.chiefComplaint}
+                          </div>
+                      </TableCellWithTooltip>
 
                       {/* Status */}
                       <TableCell align="center">
@@ -305,6 +372,14 @@ export default function PatientTriage() {
                             <DropdownMenuContent className="w-46">
                               <DropdownMenuSeparator />
                               <DropdownMenuRadioGroup value={row.status} onValueChange={async (value) => {
+                                let triagedBy = {};
+                                if (value === 'Triaged') {
+                                  if (session.user.accountType !== 'Triage') {
+                                    triggerToast('You do not have the correct permissions to triage patients');
+                                    return;
+                                  }
+                                  triagedBy = { name: session.user?.name, email: session.user?.email };
+                                }
                                 try {
                                   await fetch('/api/patient/', {
                                     method: 'PATCH',
@@ -314,10 +389,14 @@ export default function PatientTriage() {
                                     body: JSON.stringify({
                                       _id: rows[index]["_id"],
                                       status: value,
+                                      triagedBy
                                     }),
                                   });
                                   const updatedRows = [...rows];
                                   updatedRows[index].status = value;
+                                  if (value === 'Triaged') {
+                                    updatedRows[index].triagedBy = triagedBy;
+                                  }
                                   setRows(updatedRows);
                                 } catch (error) {
                                   console.log(error);
@@ -400,8 +479,37 @@ export default function PatientTriage() {
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
-                      <TableCell align="center">{row.notes}</TableCell>
-                      <TableCell align="center">{row.triagedBy}</TableCell>
+                      <NotesCell
+                        notes={row.notes}
+                        onUpdate={async (newNotes) => {
+                          try {
+                            await fetch('/api/patient/', {
+                              method: 'PATCH',
+                              headers: {
+                                'Content-Type': 'application/json',
+                              },
+                              body: JSON.stringify({
+                                _id: rows[index]["_id"],
+                                notes: newNotes,
+                              }),
+                            });
+                            const updatedRows = [...rows];
+                            updatedRows[index].notes = newNotes;
+                            setRows(updatedRows);
+                          } catch (error) {
+                            console.log(error);
+                          }
+                        }}
+                      />
+                      <TableCell align="center">
+                        {
+                          row.triagedBy?.name ? 
+                            row.triagedBy?.name.indexOf(' ') === -1 ? 
+                              row.triagedBy?.name[0] : 
+                                `${row.triagedBy.name?.split(' ')[0][0]}${row.triagedBy.name?.split(' ')[1][0]}`
+                            : ''
+                        }
+                      </TableCell>
                       <TableCell align="center">{row.doctor}</TableCell>
                     </TableRow>
                 ))}
@@ -409,6 +517,17 @@ export default function PatientTriage() {
             </Table>
           </TableContainer>
         </div>
+        <Toast.Provider>
+        <Toast.Root 
+          className="bg-black text-white p-3 rounded-lg shadow-lg" 
+          open={open} 
+          onOpenChange={setOpen}
+          duration={3000}
+        >
+          <Toast.Title>{message}</Toast.Title>
+        </Toast.Root>
+        <Toast.Viewport className="fixed bottom-5 left-1/2 transform -translate-x-1/2" />
+      </Toast.Provider>
       </>
   );
 }

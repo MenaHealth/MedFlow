@@ -8,13 +8,13 @@ import * as React from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import { NumericalFormField } from "./NumericalFormField";
-import { TextAreaFormField } from './TextAreaFormField';
-import { MedicationSelection } from "./MedicationSelection";
-import { DatePickerFormField } from "./DatePickerFormField";
-import { SelectFormField } from "./SelectFormField";
-import { PMHxSelect } from "./PMHxSelection";
-import { PSHxSelect } from "./PSHxSelection";
+import { NumericalFormField } from "../NumericalFormField";
+import { TextAreaFormField } from '../TextAreaFormField';
+import { MedicationSelection } from "../MedicationSelection";
+import { DatePickerFormField } from "../DatePickerFormField";
+import { SelectFormField } from "../SelectFormField";
+import { PMHxSelect } from "../PMHxSelection";
+import { PSHxSelect } from "../PSHxSelection";
 import { PhoneFormField } from "@/components/form/PhoneFormField";
 
 const patientFormSchema = z.object({

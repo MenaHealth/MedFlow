@@ -1,19 +1,30 @@
-'use client';
-import React from 'react';
-import RXForm from '../../../components/form/RXForm';
-import { useParams } from 'next/navigation';
+// app/notes/[id]/page.tsx
+"use client"
 
-const RXPage = () => {
+import React from 'react';
+import { useSession } from "next-auth/react";
+import RXForm from "@/components/form/RXForm";
+import PatientSubmenu from "@/components/PatientSubmenu";
+
+interface RXPageProps {
+    params: {
+        id: string;
+    }
+}
+
+const RXPage: React.FC<RXPageProps> = ({ params }) => {
+    const { data: session } = useSession();
+    const username = session?.user?.name || session?.user?.email || 'Anonymous';
+
     return (
-        <div className="flex flex-col md:flex-row">
-            <div className="w-full md:w-1/4 bg-gray-100 p-4">
-                {/* Side menu or any additional content */}
-            </div>
-            <div className="w-full md:w-3/4 bg-white p-4">
-                <RXForm />
+        <div className="w-full max-w-4xl mx-auto pb-16">
+            <PatientSubmenu />
+            <h1 className="text-3xl font-bold mb-8 text-center">Prescription</h1>
+            <div className="border border-gray-300 p-8 bg-white shadow rounded-lg">
+                <RXForm patientId={params.id} username={username} />
             </div>
         </div>
     );
-};
+}
 
 export default RXPage;

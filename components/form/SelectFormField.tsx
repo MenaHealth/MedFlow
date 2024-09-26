@@ -18,11 +18,11 @@ export function SelectFormField({ form, fieldName, fieldLabel, selectOptions }: 
         name={fieldName}
         render={({ field }) => (
         <FormItem>
-          <FormLabel>{fieldLabel} {field.value}</FormLabel>
-          <Select onValueChange={field.onChange} defaultValue={field.value ? field.value : selectOptions[1]}>
+          <FormLabel>{fieldLabel}</FormLabel>
+          <Select onValueChange={field.onChange} defaultValue={undefined}>
           <FormControl>
             <SelectTrigger>
-            <SelectValue placeholder="Left" />
+            <SelectValue/>
             </SelectTrigger>
           </FormControl>
           <SelectContent>

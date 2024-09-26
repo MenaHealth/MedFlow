@@ -4,7 +4,7 @@ import { useForm, FormProvider } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { TextFormField } from "@/components/ui/TextFormField";
-import { securityQuestions } from "@/utils/securityQuestions.enum";
+import { securityQuestions } from "@/data/securityQuestions.enum";
 import { useSignupContext } from "@/components/auth/SignupContext";
 import { Card } from "@/components/ui/card";
 import { SingleChoiceFormField } from "@/components/form/SingleChoiceFormField";

@@ -114,7 +114,7 @@ const SecurityQuestionsForm: React.FC = () => {
 
                                 <SingleChoiceFormField
                                     fieldName={`question${num}`}
-                                    choices={filteredQuestions[`question${num}`]} // Use filtered questions
+                                    choices={filteredQuestions[`question${num}` as keyof typeof filteredQuestions]}
                                 />
 
                                 <TextFormField

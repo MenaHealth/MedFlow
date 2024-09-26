@@ -36,7 +36,7 @@ const CreatePatient = () => {
     console.log("Creating patient:", formData ? formData : formDataState);
 
     try {
-      const response = await fetch(`/api/patient-form/new`, {
+      const response = await fetch(`/api/patient/new`, {
         method: "POST",
         body: JSON.stringify(formData ? formData : formDataState),
         headers: {

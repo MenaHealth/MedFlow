@@ -5,8 +5,6 @@ import bcrypt from 'bcryptjs';
 import User from '@/models/user';
 import GoogleUser from '@/models/googleUser';
 import dbConnect from '@/utils/database';
-import Patient from '@/models/patient';
-// import jwt from 'jsonwebtoken';
 
 const handler = NextAuth({
   session: {
@@ -18,7 +16,6 @@ const handler = NextAuth({
       credentials: {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
-        accountType: { label: 'Account Type', type: 'text' },
       },
       async authorize(credentials) {
         await dbConnect();
@@ -29,12 +26,12 @@ const handler = NextAuth({
         user = await User.findOne({ email });
 
         if (!user) {
-          throw new Error('Invalid email or password');
+          throw new Error('That email does not exist in our database.');
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-          throw new Error('Invalid email or password');
+          throw new Error('Invalid password');
         }
 
         user.lastLogin = new Date();
@@ -98,7 +95,6 @@ const handler = NextAuth({
       return token;
     },
     async session({ session, token }) {
-      console.log(token)
       if (token) {
         session.user.id = token.id;
         session.user.accountType = token.accountType;

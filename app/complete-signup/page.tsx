@@ -27,7 +27,7 @@ const CompleteSignup = () => {
         if (!session) {
             router.push('/');
         }
-    }, [session]);
+    }, [session, router]); 
 
     const handleSubmit = async () => {
         if (!session) return;

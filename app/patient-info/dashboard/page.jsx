@@ -1,6 +1,8 @@
 // app/patient-info/dashboard/page.jsx
 "use client";
 
+
+
 import * as React from 'react';
 import { useEffect, useState } from "react";
 
@@ -35,7 +37,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdownMenu";
-
 
 import { PRIORITIES, SPECIALTIES, STATUS } from '@/data/data';
 import Link from 'next/link';
@@ -130,7 +131,7 @@ export default function PatientTriage() {
       <>
         <div className="w-full relative dashboard-page">
           <div className="flex justify-between items-center py-3">
-            {/* Update the href to point to /create-patient */}
+            {}
             <Link
                 href="/create-patient"
                 className="flex items-center justify-center no-underline"
@@ -222,8 +223,7 @@ export default function PatientTriage() {
                 <TableRow>
                   <TableCell
                     align="left"
-                    className="whitespace-nowrap"
-                  >
+                    className="whitespace-nowrap">
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -240,8 +240,7 @@ export default function PatientTriage() {
                   <TableCell align="center">Language Spoken</TableCell>
                   <TableCell
                     align="left"
-                    className="whitespace-nowrap"
-                  >
+                    className="whitespace-nowrap">
                     <div className='flex items-center'>
                       <span>Chief Complaint</span>
                       <Tooltip tooltipText="Hover to see full text" showTooltip={true}>
@@ -256,8 +255,7 @@ export default function PatientTriage() {
                         <Button
                             variant="ghost"
                             className="h-8 w-full justify-start"
-                            style={{ fontSize: "0.7rem", fontWeight: 500, letterSpacing: "0.05rem" }}
-                        >
+                            style={{ fontSize: "0.7rem", fontWeight: 500, letterSpacing: "0.05rem" }}>
                           STATUS OF PATIENT
                           <KeyboardArrowDownIcon className="ml-2 h-4 w-4" />
                         </Button>
@@ -278,8 +276,7 @@ export default function PatientTriage() {
                         <Button
                             variant="ghost"
                             className="h-8 w-full justify-start"
-                            style={{ fontSize: "0.7rem", fontWeight: 500, letterSpacing: "0.05rem" }}
-                        >
+                            style={{ fontSize: "0.7rem", fontWeight: 500, letterSpacing: "0.05rem" }}>
                           PRIORITY
                           <KeyboardArrowDownIcon className="ml-2 h-4 w-4" />
                         </Button>
@@ -300,8 +297,7 @@ export default function PatientTriage() {
                         <Button
                             variant="ghost"
                             className="h-8 w-full justify-start"
-                            style={{ fontSize: "0.7rem", fontWeight: 500, letterSpacing: "0.05rem" }}
-                        >
+                            style={{ fontSize: "0.7rem", fontWeight: 500, letterSpacing: "0.05rem" }}>
                           SPECIALTY
                           <KeyboardArrowDownIcon className="ml-2 h-4 w-4" />
                         </Button>
@@ -317,9 +313,7 @@ export default function PatientTriage() {
                     </DropdownMenu>
                   </TableCell>
                   <TableCell
-                    align="left"
-                    // className="whitespace-nowrap"
-                    >
+                    align="left">
                     <span>Additional</span>
                     <div style={{
                       display: 'flex',
@@ -340,8 +334,7 @@ export default function PatientTriage() {
                 {rows.map((row, index) => (
                     <TableRow
                         key={index}
-                        sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                    >
+                        sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
 
                       <TableCellWithTooltip tooltipText={row.patientId} maxWidth='100px'>
                           <a href={`/patient-overview/${row._id}`} className="block overflow-hidden text-ellipsis text-sm" style={{
@@ -380,7 +373,7 @@ export default function PatientTriage() {
                                   triagedBy = { name: session.user?.name, email: session.user?.email };
                                 }
                                 try {
-                                  await fetch('/api/patient/', {
+                                  await fetch("/api/patient/assign", {
                                     method: 'PATCH',
                                     headers: {
                                       'Content-Type': 'application/json',
@@ -419,7 +412,7 @@ export default function PatientTriage() {
                             <DropdownMenuSeparator />
                             <DropdownMenuRadioGroup value={row.priority} onValueChange={async (value) => {
                               try {
-                                await fetch('/api/patient/', {
+                                await fetch("/api/patient/assign", {
                                   method: 'PATCH',
                                   headers: {
                                     'Content-Type': 'application/json',
@@ -454,7 +447,7 @@ export default function PatientTriage() {
                             <DropdownMenuSeparator />
                             <DropdownMenuRadioGroup value={row.specialty} onValueChange={async (value) => {
                               try {
-                                await fetch('/api/patient/', {
+                                await fetch("/api/patient/assign", {
                                   method: 'PATCH',
                                   headers: {
                                     'Content-Type': 'application/json',
@@ -482,7 +475,7 @@ export default function PatientTriage() {
                         notes={row.notes}
                         onUpdate={async (newNotes) => {
                           try {
-                            await fetch('/api/patient/', {
+                            await fetch("/api/patient/assign", {
                               method: 'PATCH',
                               headers: {
                                 'Content-Type': 'application/json',
@@ -512,47 +505,59 @@ export default function PatientTriage() {
                       
                       {/* Doctor Assigned */}
                       <TableCell align="center">
-                        {row.doctor ? (
-                          row.doctor
-                        ) : (
+  {
+    row.doctor ? (
+      <>
+        {row.doctor.firstName} {row.doctor.lastName}
+      </>
+    ) : (
 <Button
   variant="contained"
   color="primary"
+  style={{
+    backgroundColor: 'black',
+    color: 'white',
+    borderRadius: '4px',
+    padding: '8px 16px',
+    fontSize: '14px',
+    //fontWeight: 'regular',
+    textTransform: 'none',
+    boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
+  }}
   onClick={async () => {
+    const doctor = { firstName: session.user?.firstName, lastName: session.user?.lastName, email: session.user?.email };
+
     try {
-      const response = await fetch('/api/patient/assign', {
-        method: 'POST',
+      await fetch('/api/patient/', {
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          patientId: row._id,
-          doctor: session?.user?.name,
+          _id: row._id,    // Use the patient ID
+          status: 'In Progress',   // Update the status to 'In Progress'
+          doctor: doctor           // Assign the current doctor
         }),
       });
 
-      const result = await response.json(); // Get the JSON response body
+      // Update the rows state to reflect the changes
+      const updatedRows = [...rows];
+      const index = rows.findIndex((r) => r._id === row._id);
+      updatedRows[index].status = 'In Progress';
+      updatedRows[index].doctor = doctor;
+      setRows(updatedRows);
 
-      if (response.ok) {
-        const updatedRows = [...rows];
-        updatedRows[index].doctor = session?.user?.name; // Assign the doctor in UI
-        setRows(updatedRows);
-        triggerToast('Case successfully assigned');
-      } else {
-        console.log("Error response from server:", result); // Log the error response
-        triggerToast('Failed to assign case');
-      }
+      triggerToast('Case assigned successfully');
     } catch (error) {
-      console.log("Request error:", error); // Log network or other errors
-      triggerToast('Error assigning case');
+      console.log("Error assigning case:", error);
+      triggerToast('Failed to assign case');
     }
   }}
 >
   Take Case
 </Button>
-
-                        )}
-                      </TableCell>
+  )}
+</TableCell>
                     </TableRow>
                 ))}
               </TableBody>
@@ -573,4 +578,3 @@ export default function PatientTriage() {
       </>
   );
 }
-

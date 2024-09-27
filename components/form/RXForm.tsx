@@ -403,7 +403,7 @@ const NotesForm: React.FC<NotesFormProps> = ({ patientId, username }) => {
 
                                 <div style={{ marginBottom: '10px' }}>
                                     <Typography variant="body2" color="textSecondary" style={{ marginBottom: '4px' }}>
-                                        Patient's Phone Number
+                                        Patient&apos;s Phone Number
                                     </Typography>
                                     <Typography variant="body1">
                                         {medicalrequestNote.patientPhoneNumber || 'N/A'}
@@ -412,7 +412,7 @@ const NotesForm: React.FC<NotesFormProps> = ({ patientId, username }) => {
 
                                 <div style={{ marginBottom: '10px' }}>
                                     <Typography variant="body2" color="textSecondary" style={{ marginBottom: '4px' }}>
-                                        Patient's Address
+                                        Patient&apos;s Address
                                     </Typography>
                                     <Typography variant="body1">
                                         {medicalrequestNote.patientAddress || 'N/A'}

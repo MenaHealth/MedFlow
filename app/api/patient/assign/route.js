@@ -1,4 +1,4 @@
-import { connectToDB } from "@/utils/database";
+import dbConnect from "@/utils/database";
 import { ObjectId } from 'mongodb';
 
 export async function POST(req, res) {

@@ -35,6 +35,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdownMenu";
+import DescriptionIcon from '@mui/icons-material/Description';
 
 
 import { PRIORITIES, SPECIALTIES, STATUS } from '@/data/data';
@@ -76,8 +77,7 @@ export default function PatientTriage() {
       statusFilter,
       specialtyFilter
   ) => {
-    if (!session) return;
-
+    if (!session) return [];
     let filteredRows = rows;
 
     if (priorityFilter !== "all") {
@@ -99,7 +99,6 @@ export default function PatientTriage() {
     }
 
     if (session?.user?.accountType === "Doctor") {
-      console.log('filtering for doctor')
       filteredRows = filteredRows.filter(
           (row) => row.triagedBy ? Object.keys(row.triagedBy).length !== 0 : false
       )
@@ -111,10 +110,8 @@ export default function PatientTriage() {
       return dateB - dateA;
     });
 
-
     return sortedRows;
   };
-
 
   useEffect(() => {
     const fetchAndSortRows = async () => {
@@ -149,7 +146,6 @@ export default function PatientTriage() {
       }
       triagedBy = { firstName: session.user?.firstName, lastName: session.user?.lastName, email: session.user?.email };
     }
-    console.log(value, row);
 
     try {
       await fetch('/api/patient/', {
@@ -196,6 +192,34 @@ export default function PatientTriage() {
     } else {
       return `${firstName[0]}${lastName[0]}`;
     }
+  }
+
+  const handleTakeCase = async (index) => {
+    let doctor = { firstName: session.user?.firstName, lastName: session.user?.lastName, email: session.user?.email };
+
+    try {
+      await fetch('/api/patient/', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          _id: rows[index]["_id"],
+          status: "In-Progress",
+          doctor
+        }),
+      });
+      const updatedRows = [...rows];
+      updatedRows[index].status = "In-Progress";
+      updatedRows[index].doctor = doctor;
+      setRows(updatedRows);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const handleArchive = (row) => {
+    
   }
 
   return (
@@ -409,7 +433,7 @@ export default function PatientTriage() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {rows?.map((row, index) => (
+                {rows.map((row, index) => (
                     <TableRow
                         key={index}
                         sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
@@ -547,7 +571,27 @@ export default function PatientTriage() {
                           getInitials(row.triagedBy?.firstName, row.triagedBy?.lastName)
                         }
                       </TableCell>
-                      <TableCell align="center">{getInitials(row.doctor?.firstName, row.doctor?.lastName)}</TableCell>
+                      <TableCell align="center">
+                        {
+                          row.status === 'Not Started' 
+                            ? '' 
+                            : row.status === 'In-Progress' 
+                              ? getInitials(row.doctor?.firstName, row.doctor?.lastName) 
+                              : row.status === 'Triaged'
+                                ? session.user.accountType === 'Doctor'
+                                  ?  (
+                                        <Button onClick={() => handleTakeCase(index)}>
+                                          Take Case
+                                        </Button>
+                                      )
+                                    : ''
+                                : (
+                                      <Button onClick={() => handleArchive(index)}>
+                                        Archive
+                                      </Button>
+                                  )
+                        }
+                      </TableCell>
                     </TableRow>
                 ))}
               </TableBody>

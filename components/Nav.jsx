@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { signOut, useSession } from "next-auth/react";
 
 const Nav = () => {
     const { data: session } = useSession();
+    const path = usePathname();
 
     const [toggleDropdown, setToggleDropdown] = useState(false);
     const dropdownRef = useRef(null);
@@ -48,6 +50,10 @@ const Nav = () => {
         };
     }, [dropdownRef, avatarRef]);
 
+    const getInitials = (firstName, lastName) => {
+        return `${firstName?.charAt(0)}${lastName?.charAt(0)}`;
+    };
+
     return (
         <nav className="w-full flex justify-between items-center mb-8 pt-3 relative">
             <Link href="/" className="flex gap-2">
@@ -64,18 +70,15 @@ const Nav = () => {
             {/* Desktop Navigation */}
             <div className={`sm:flex ${isMobile ? "hidden" : ""} gap-5`}>
                 <div className="flex gap-3 md:gap-4 relative">
+                    {!session && path !== "/create-patient" && (
+                        <>
+                            <Link href="/create-patient" className="outline_btn">
+                                New Patient
+                            </Link>
+                        </>
+                    )}
                     {session?.user && (
                         <>
-                            {session?.user.accountType !== "Pending" && (
-                                <>
-                                    <Link href="/fajr/patient" className="outline_btn">
-                                        New Patient
-                                    </Link>
-                                    <Link href="/fajr/lab" className="outline_btn">
-                                        New Lab Form
-                                    </Link>
-                                </>
-                            )}
                             <div className="relative">
                                 <div
                                     className="cursor-pointer"
@@ -92,9 +95,7 @@ const Nav = () => {
                                         />
                                     ) : (
                                         <div className="avatar">
-                                            {session?.user.name.indexOf(' ') > 0
-                                                ? `${session?.user.name.split(' ')[0][0]}${session?.user.name.split(' ')[1][0]}`
-                                                : session?.user.name[0]}
+                                            {getInitials(session?.user?.firstName, session?.user?.lastName)}
                                         </div>
                                     )}
                                 </div>
@@ -135,6 +136,11 @@ const Nav = () => {
 
             {/* Mobile Navigation */}
             <div className="sm:hidden flex relative z-20">
+                {!session && path !== '/create-patient' && toggleDropdown && (
+                    <Link href="/fajr/patient" className="outline_btn mobile_link">
+                        New Patient
+                    </Link>
+                )}
                 {session?.user && (
                     <div className="flex">
                         <div
@@ -148,20 +154,15 @@ const Nav = () => {
 
                         {toggleDropdown && (
                             <div className="dropdown">
-                                <Link href="/fajr/patient" className="outline_btn mobile_link">
-                                    New Patient
-                                </Link>
-                                <Link href="/fajr/lab" className="outline_btn mobile_link">
-                                    New Lab Form
-                                </Link>
                                 <Link href="/my-profile" className="outline_btn mobile_link">
                                     My Profile
                                 </Link>
                                 <button
                                     type="button"
                                     onClick={() => {
-                                        setToggleDropdown(false);
-                                        signOut();
+                                        signOut().then(() => {
+                                            setToggleDropdown(false);
+                                        })
                                     }}
                                     className="mt-5 w-full black_btn"
                                 >

@@ -1,37 +1,53 @@
-// app/api/auth/signup/route.js
-
+// app/api/signup/route.js
 import { NextResponse } from 'next/server';
 import User from '@/models/user';
 import dbConnect from '@/utils/database';
-import { v4 as uuidv4 } from 'uuid';
+import { sendGraphEmail } from '@/utils/email'; // Import your email utility
 
 export async function POST(request) {
     await dbConnect();
 
-    const { name, email, password, accountType, securityQuestions } = await request.json();
+    const {
+        email,
+        password,
+        accountType,
+        securityQuestions,
+        firstName,
+        lastName,
+        dob,
+        doctorSpecialty,
+        languages,
+        countries,
+        gender,
+    } = await request.json();
 
     try {
         const existingUser = await User.findOne({ email });
         if (existingUser) {
-            return NextResponse.json({ message: `${accountType} (email) already exists. Please login.` }, { status: 400 });
+            return NextResponse.json({ message: 'User with this email already exists' }, { status: 400 });
         }
 
         const newUser = new User({
-            userID: uuidv4(),
             accountType,
-            name,
             email,
-            password,
-            securityQuestions,
+            password, // DO NOT HASH Password in the API route. PW HASHING HAPPENS IN THE user model.
+            securityQuestions, // DO NOT HASH Security questions here
+            firstName,
+            lastName,
+            dob: new Date(dob),
+            doctorSpecialty,
+            languages,
+            countries,
+            gender,
         });
-
-        console.log('New user object:', newUser);
 
         await newUser.save();
 
-        return NextResponse.json({ userId: newUser.userId, message: `${accountType} created successfully` }, { status: 201 });
+        await sendGraphEmail(email, firstName, lastName, accountType);
+
+        return NextResponse.json({ message: 'Signup successful' }, { status: 201 });
     } catch (error) {
         console.error('Signup error:', error);
-        return NextResponse.json({ message: 'Server error' }, { status: 500 });
+        return NextResponse.json({ message: `Error during signup: ${error.message}` }, { status: 500 });
     }
 }

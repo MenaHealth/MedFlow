@@ -1,6 +1,4 @@
-// app/api/auth/[...nextauth]/route.js
 import NextAuth from 'next-auth';
-import GoogleProvider from 'next-auth/providers/google';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
 
@@ -9,11 +7,10 @@ import GoogleUser from '@/models/googleUser';
 import dbConnect from '@/utils/database';
 
 const handler = NextAuth({
+  session: {
+    strategy: 'jwt',
+  },
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    }),
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
@@ -29,21 +26,26 @@ const handler = NextAuth({
         user = await User.findOne({ email });
 
         if (!user) {
-          throw new Error('Invalid email or password');
+          throw new Error('That email does not exist in our database.');
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-          throw new Error('Invalid email or password');
+          throw new Error('Invalid password');
         }
+
+        user.lastLogin = new Date();
+        await user.save();
 
         return {
           id: user._id.toString(),
           email: user.email,
-          name: user.name,
+          firstName: user.firstName,
+          lastName: user.lastName,
           accountType: user.accountType,
+          image: user.image,
         };
-      },
+      }
     }),
   ],
   callbacks: {
@@ -55,7 +57,7 @@ const handler = NextAuth({
           await GoogleUser.create({
             userID: profile?.sub || null,
             email: user.email,
-            name: user.name,
+            firstName: user.name,
             image: user.image,
             accountType: "Pending",
           });
@@ -73,6 +75,7 @@ const handler = NextAuth({
           if (googleUser) {
             token.id = googleUser.userID;
             token.accountType = googleUser.accountType;
+            token.firstName = googleUser.firstName;
           } else {
             // Handle the case when the GoogleUser hasn't been created yet
             // You can set default token values or indicate that the user is in a 'Pending' state
@@ -81,6 +84,9 @@ const handler = NextAuth({
         } else {
           token.id = user.id;
           token.accountType = user.accountType;
+          token.firstName = user.firstName;
+          token.lastName = user.lastName;
+          token.image = user.image;
         }
       }
       if (trigger === 'update') {
@@ -92,9 +98,15 @@ const handler = NextAuth({
       if (token) {
         session.user.id = token.id;
         session.user.accountType = token.accountType;
+        session.user.firstName = token.firstName;
+        session.user.lastName = token.lastName;
+        session.user.image = token.image;
       }
       return session;
     },
+  },
+  pages: {
+    signIn: '/auth',
   },
 });
 

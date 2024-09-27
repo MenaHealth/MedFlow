@@ -252,9 +252,9 @@ export function ForgotPasswordForm() {
                     {step === 1 && (
                         <div>
                             <TextFormField
-                                form={form}
                                 fieldName="email"
                                 fieldLabel="Email"
+                                autoComplete="email"
                                 error={form.formState.errors.email?.message}
                             />
                             <Button onClick={handleNextStep}>Next</Button>
@@ -271,7 +271,6 @@ export function ForgotPasswordForm() {
                                 <div>
                                     <p>{securityQuestion}</p>
                                     <TextFormField
-                                        form={form}
                                         fieldName="securityAnswer"
                                         fieldLabel="Security answer"
                                         error={form.formState.errors.securityAnswer?.message}
@@ -285,7 +284,6 @@ export function ForgotPasswordForm() {
                     {step === 3 && (
                         <div>
                             <TextFormField
-                                form={form}
                                 fieldName="newPassword"
                                 fieldLabel="New Password"
                                 type="password"
@@ -296,7 +294,6 @@ export function ForgotPasswordForm() {
                                 onBlur={() => setShowTooltip(false)}
                             />
                             <TextFormField
-                                form={form}
                                 fieldName="confirmNewPassword"
                                 fieldLabel="Confirm New Password"
                                 type="password"

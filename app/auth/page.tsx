@@ -1,113 +1,86 @@
 // app/auth/page.tsx
-'use client';
+"use client"
 
 import React, { useState } from 'react';
-import SignupForm from '@/components/auth/SignupForm';
 import LoginForm from '@/components/auth/LoginForm';
-import ForgotPasswordForm from '@/components/auth/ForgotPasswordForm';
 import { RadioCard } from '@/components/ui/radio-card';
 import Flex from "@/components/ui/flex";
 import Text from "@/components/ui/text";
-import Card from '@/components/ui/card';
+import { SignupProvider } from "@/components/auth/SignupContext";
+import SignupSection from '@/components/auth/SignupSection';
+import { ChevronUpIcon, ChevronDownIcon } from 'lucide-react';
 
-const AuthPage = () => {
+export default function AuthPage() {
     const [authType, setAuthType] = useState<'Login' | 'Signup'>('Login');
-    const [accountType, setAccountType] = useState<'Doctor' | 'Triage'>('Doctor');
-    const [showForgotPassword, setShowForgotPassword] = useState(false);
+    const [isHeaderVisible, setIsHeaderVisible] = useState(true);
 
-    const handleAccountTypeChange = (value: 'Doctor' | 'Triage') => {
-        setAccountType(value);
+    const handleAuthTypeChange = (value: 'Login' | 'Signup') => {
+        setAuthType(value);
+        if (value === 'Signup') {
+            setIsHeaderVisible(false);
+        }
     };
 
-    const handleForgotPasswordClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-        e.preventDefault();
-        setShowForgotPassword(true);
+    const toggleHeader = () => {
+        setIsHeaderVisible(!isHeaderVisible);
     };
-
-    // Determine the appropriate opacity classes based on the form state
-    const heartRateOpacity = authType === 'Login' ? 'opacity-50' : accountType === 'Doctor' ? 'opacity-80' : 'opacity-20';
-    const ballsOpacity = authType === 'Login' ? 'opacity-50' : accountType === 'Doctor' ? 'opacity-20' : 'opacity-80';
 
     return (
-        <div className="h-screen w-full p-4 flex flex-col items-center justify-center relative">
-            <div className="absolute top-0 left-0 w-full h-full bg-transparent z-0">
-                <section className="container absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4">
-                    <div className="content">
-                        <div className={`ball ball1 ${ballsOpacity}`}></div>
-                        <div className={`ball ball2 ${ballsOpacity}`}></div>
-                        <div className={`ball ball3 ${ballsOpacity}`}></div>
-                        <div className={`ball ball4 ${ballsOpacity}`}></div>
-                        <div className={`ball ball5 ${ballsOpacity}`}></div>
-                        <div className="heart-rate">
-                            <svg viewBox="0 9 498.778 54.805" className={`w-full h-full ${heartRateOpacity}`}>
-                                <polyline fill="none" stroke="#FF5722" strokeWidth="2" strokeMiterlimit="10" points="0 45.486 64.133 45.486 74.259 33.324 84.385 45.486 96.2 45.486 104.637 55.622 119.825 9 133.327 63.729 140.079 45.486 162.018 45.486 172.146 40.419 183.958 45.486 249.778 45.486" />
-                                <polyline fill="none" stroke="#FF5722" strokeWidth="2" strokeMiterlimit="10" points="249 45.562 313.133 45.562 323.259 33.4 333.385 45.562 345.2 45.562 353.637 55.698 368.825 9.076 382.327 63.805 389.079 45.562 411.018 45.562 421.146 40.495 432.958 45.562 498.778 45.562" />
-                            </svg>
-                            <div className="fade-in"></div>
-                            <div className="fade-out"></div>
-                        </div>
-                    </div>
-                </section>
-            </div>
-
-            <div className="flex flex-col items-center justify-center w-full max-w-md z-10">
-                <RadioCard.Root
-                    value={authType}
-                    onValueChange={(value) => setAuthType(value as 'Login' | 'Signup')}
-                    className="flex flex-col w-full mb-8"
+        // Set pointer-events-none on the entire wrapper, to allow interaction with Nav and Footer
+        <div className="absolute inset-0 z-10 pointer-events-none flex items-center justify-center">
+            {/* Only this section should be clickable */}
+            <div className="relative w-full md:w-[80vw] h-[80vh] bg-white rounded-lg shadow-md flex flex-col overflow-y-auto z-20 pointer-events-auto">
+                {/* Header section */}
+                <div
+                    className={`transition-all duration-300 ease-in-out ${
+                        isHeaderVisible ? 'h-16' : 'h-0 overflow-hidden'
+                    }`}
                 >
-                    <RadioCard.Item value="Login" className="w-full mb-2 p-2">
-                        <Flex direction="column" width="100%" className="justify-center items-center h-full">
-                            <Text size="sm" weight="normal">Login</Text>
-                        </Flex>
-                    </RadioCard.Item>
-                    <RadioCard.Item value="Signup" className="w-full p-2">
-                        <Flex direction="column" width="100%" className="justify-center items-center h-full">
-                            <Text size="sm" weight="normal">Sign Up</Text>
-                        </Flex>
-                    </RadioCard.Item>
-                </RadioCard.Root>
+                    <div className="p-4 bg-gray-100 h-full">
+                        <RadioCard.Root
+                            value={authType}
+                            onValueChange={handleAuthTypeChange}
+                            className="flex w-full h-full"
+                        >
+                            <RadioCard.Item value="Login" className="w-1/2 p-2">
+                                <Flex direction="column" width="100%" className="justify-center items-center h-full">
+                                    <Text size="sm" weight="normal">Login</Text>
+                                </Flex>
+                            </RadioCard.Item>
+                            <RadioCard.Item value="Signup" className="w-1/2 p-2">
+                                <Flex direction="column" width="100%" className="justify-center items-center h-full">
+                                    <Text size="sm" weight="normal">Sign Up</Text>
+                                </Flex>
+                            </RadioCard.Item>
+                        </RadioCard.Root>
+                    </div>
+                </div>
 
-                <Card>
+                {/* Toggle button */}
+                <button
+                    onClick={toggleHeader}
+                    className="absolute top-2 left-1/2 transform -translate-x-1/2 z-30 bg-white rounded-full p-1 shadow-md"
+                >
+                    {isHeaderVisible ? (
+                        <ChevronUpIcon size={24} />
+                    ) : (
+                        <ChevronDownIcon size={24} />
+                    )}
+                </button>
+
+                {/* Content section */}
+                <div className="flex-grow overflow-y-auto md:p-8 p-4">
                     {authType === 'Login' ? (
-                        <div className="login-card w-full">
+                        <div className="login-card w-full flex flex-col items-center justify-center">
                             <LoginForm />
-                            {showForgotPassword && (
-                                <div className="forgot-password-card w-full">
-                                    <ForgotPasswordForm />
-                                    <button className="text-sm text-gray-600 hover:text-gray-800" onClick={() => setShowForgotPassword(false)}>
-                                        Back to login
-                                    </button>
-                                </div>
-                            )}
                         </div>
                     ) : (
-                        <div className="signup-card w-full">
-                            <div className="mb-8">
-                                <RadioCard.Root
-                                    value={accountType}
-                                    onValueChange={handleAccountTypeChange}
-                                    className="flex justify-between w-full"
-                                >
-                                    <RadioCard.Item value="Doctor" className="w-1/2 p-2">
-                                        <Flex direction="column" width="100%" className="justify-center items-center h-full">
-                                            <Text size="sm" weight="normal">Doctor</Text>
-                                        </Flex>
-                                    </RadioCard.Item>
-                                    <RadioCard.Item value="Triage" className="w-1/2 p-2">
-                                        <Flex direction="column" width="100%" className="justify-center items-center h-full">
-                                            <Text size="sm" weight="normal">Triage Coordinator</Text>
-                                        </Flex>
-                                    </RadioCard.Item>
-                                </RadioCard.Root>
-                            </div>
-                            <SignupForm accountType={accountType} />
-                        </div>
+                        <SignupProvider>
+                            <SignupSection />
+                        </SignupProvider>
                     )}
-                </Card>
+                </div>
             </div>
         </div>
     );
-};
-
-export default AuthPage;
+}

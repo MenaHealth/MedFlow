@@ -43,10 +43,15 @@
     otherDrugs?: string;
     allergies?: string;
     triagedBy?: {
-      name?: string;
+      firstName?: string;
+      lastName?: string;
       email?: string;
     }
-    doctor?: string;
+    doctor?: {
+      firstName?: string;
+      lastName?: string;
+      email?: string;
+    };
     notes?: string;
     visits?: Types.ObjectId[];
   }
@@ -91,6 +96,7 @@
     notes: { type: String },
     visits: [{ type: Schema.Types.ObjectId, ref: 'Visit' }],
     triagedBy: { type: Object },
+    doctor: { type: Object },
   });
 
   const Patient = models.Patient || model<IPatient>('Patient', PatientSchema);

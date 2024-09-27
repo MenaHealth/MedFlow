@@ -36,14 +36,14 @@ const SignupSection = () => {
     };
 
     return (
-        <div className="w-full h-full flex flex-col">
+        <div className="w-full h-full flex flex-col py-8"> {/* Add top and bottom padding */}
             <div className="p-4">
                 <ProgressBar progress={progress} />
             </div>
             <div className="flex-grow overflow-y-auto w-full">
                 {renderForm()}
             </div>
-            <div className="p-4 bg-white border-t relative overflow-visible h-auto w-full"> {/* Full width buttons section */}
+            <div className="p-4 bg-white border-t relative overflow-visible h-auto w-full">
                 {currentStep > 0 && (
                     <div className="absolute left-0">
                         <BackButton />

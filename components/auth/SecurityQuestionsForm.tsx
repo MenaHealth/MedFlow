@@ -1,4 +1,3 @@
-// components/auth/SecurityQuestionsForm.tsx
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { z } from "zod";
@@ -22,7 +21,6 @@ export type SecurityQuestionsFormValues = z.infer<typeof securityQuestionsSchema
 
 const SecurityQuestionsForm: React.FC = () => {
     const { formData, setFormData, updateAnsweredQuestions, setSecurityQuestionFormCompleted } = useSignupContext();
-    const [selectedQuestions, setSelectedQuestions] = useState<string[]>([]);
 
     const form = useForm<SecurityQuestionsFormValues>({
         resolver: zodResolver(securityQuestionsSchema),
@@ -44,16 +42,24 @@ const SecurityQuestionsForm: React.FC = () => {
     const questionRefs = useMemo(() => [questionRef1, questionRef2, questionRef3], []);
 
     const [isCompleted, setIsCompleted] = useState([false, false, false]);
+    const [filteredQuestions, setFilteredQuestions] = useState({
+        question1: securityQuestions,
+        question2: securityQuestions,
+        question3: securityQuestions,
+    });
 
     useEffect(() => {
         const subscription = form.watch((values) => {
+            const { question1, question2, question3 } = values;
+
+            // Update form data
             setFormData((prevData) => ({
                 ...prevData,
-                question1: values.question1,
-                answer1: values.answer1 || "", // Ensure answer1 is a string
-                question2: values.question2,
+                question1,
+                answer1: values.answer1 || "",
+                question2,
                 answer2: values.answer2 || "",
-                question3: values.question3,
+                question3,
                 answer3: values.answer3 || "",
             }));
 
@@ -63,26 +69,37 @@ const SecurityQuestionsForm: React.FC = () => {
             const isFormComplete = filledFields === 6;
             setSecurityQuestionFormCompleted(isFormComplete);
 
+            // Dynamically filter the questions to prevent duplicates
+            const availableForQ2 = securityQuestions.filter(q => q !== question1);
+            const availableForQ3 = securityQuestions.filter(q => q !== question1 && q !== question2);
+
+            setFilteredQuestions({
+                question1: securityQuestions,
+                question2: availableForQ2,
+                question3: availableForQ3,
+            });
+
             // Update the opacity and completion status based on question and answer completeness
             setIsCompleted([
-                !!values.question1 && (values.answer1?.length ?? 0) > 0, // Use nullish coalescing to safely check length
+                !!values.question1 && (values.answer1?.length ?? 0) > 0,
                 !!values.question2 && (values.answer2?.length ?? 0) > 0,
                 !!values.question3 && (values.answer3?.length ?? 0) > 0,
             ]);
-
-            // Scroll to the next question when an answer is provided
-            if (filledFields % 2 === 0 && filledFields < 6) {
-                questionRefs[filledFields / 2]?.current?.scrollIntoView({ behavior: "smooth" });
-            }
         });
 
         return () => subscription.unsubscribe();
-    }, [form, setFormData, updateAnsweredQuestions, setSecurityQuestionFormCompleted, questionRefs]);
+    }, [form, setFormData, updateAnsweredQuestions, setSecurityQuestionFormCompleted]);
+
+    const handleBlur = (index: number) => {
+        if (isCompleted[index] && index < 2) {
+            questionRefs[index + 1]?.current?.scrollIntoView({ behavior: "smooth" });
+        }
+    };
 
     return (
         <div className="w-full max-w-md mx-auto p-8">
             <FormProvider {...form}>
-                <form className="space-y-8 w-full"> {/* Ensure form takes up full width */}
+                <form className="space-y-8 w-full">
                     {[1, 2, 3].map((num, index) => (
                         <Card
                             key={num}
@@ -90,15 +107,14 @@ const SecurityQuestionsForm: React.FC = () => {
                             className={`p-6 transition-shadow duration-300 ${
                                 isCompleted[index] ? "opacity-100 shadow-lg border-orange-500" : "opacity-50 border-yellow-50"
                             } bg-white`}
-                            style={{ marginBottom: "24px" }} // Add more space between cards
+                            style={{ marginBottom: "24px" }}
                         >
                             <div className="space-y-4">
                                 <h2 className="text-lg font-semibold">Security Question {num}</h2>
 
                                 <SingleChoiceFormField
                                     fieldName={`question${num}`}
-                                    fieldLabel={`Select a security question`}
-                                    choices={securityQuestions} // Use securityQuestions as options
+                                    choices={filteredQuestions[`question${num}` as keyof typeof filteredQuestions]}
                                 />
 
                                 <TextFormField
@@ -106,6 +122,7 @@ const SecurityQuestionsForm: React.FC = () => {
                                     fieldLabel={`Your Answer`}
                                     id={`answer${num}`}
                                     autoComplete="off"
+                                    onBlur={() => handleBlur(index)} // Trigger scroll on blur
                                 />
                             </div>
                         </Card>

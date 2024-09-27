@@ -37,7 +37,7 @@ const handler = NextAuth({
         user.lastLogin = new Date();
         await user.save();
 
-        return {
+        const session = {
           id: user._id.toString(),
           email: user.email,
           firstName: user.firstName,
@@ -45,6 +45,13 @@ const handler = NextAuth({
           accountType: user.accountType,
           image: user.image,
         };
+
+        if (user.accountType === 'Doctor') {
+          session.doctorSpecialty = user.doctorSpecialty;
+          session.languages = user.languages;
+        }
+
+        return session;
       }
     }),
   ],
@@ -84,6 +91,10 @@ const handler = NextAuth({
         } else {
           token.id = user.id;
           token.accountType = user.accountType;
+          if (user.accountType === 'Doctor') {
+            token.languages = user.languages;
+            token.doctorSpecialty = user.doctorSpecialty;
+          }
           token.firstName = user.firstName;
           token.lastName = user.lastName;
           token.image = user.image;
@@ -91,6 +102,10 @@ const handler = NextAuth({
       }
       if (trigger === 'update') {
         token.accountType = session.user?.accountType;
+        if (session.user?.accountType === 'Doctor') {
+          token.languages = session.user?.languages;
+          token.doctorSpecialty = session.user?.doctorSpecialty;
+        }
       }
       return token;
     },
@@ -101,6 +116,10 @@ const handler = NextAuth({
         session.user.firstName = token.firstName;
         session.user.lastName = token.lastName;
         session.user.image = token.image;
+        if (token.accountType === 'Doctor') {
+          session.user.languages = token.languages;
+          session.user.doctorSpecialty = token.doctorSpecialty;
+        }
       }
       return session;
     },

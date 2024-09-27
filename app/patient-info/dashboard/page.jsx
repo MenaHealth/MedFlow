@@ -35,7 +35,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdownMenu";
-import DescriptionIcon from '@mui/icons-material/Description';
 
 
 import { PRIORITIES, SPECIALTIES, STATUS } from '@/data/data';
@@ -77,6 +76,8 @@ export default function PatientTriage() {
       statusFilter,
       specialtyFilter
   ) => {
+    if (!session) return;
+
     let filteredRows = rows;
 
     if (priorityFilter !== "all") {
@@ -97,14 +98,23 @@ export default function PatientTriage() {
       );
     }
 
+    if (session?.user?.accountType === "Doctor") {
+      console.log('filtering for doctor')
+      filteredRows = filteredRows.filter(
+          (row) => row.triagedBy ? Object.keys(row.triagedBy).length !== 0 : false
+      )
+    }
+
     let sortedRows = [...filteredRows].sort((a, b) => {
       const dateA = new Date(a.surgeryDate);
       const dateB = new Date(b.surgeryDate);
       return dateB - dateA;
     });
 
+
     return sortedRows;
   };
+
 
   useEffect(() => {
     const fetchAndSortRows = async () => {
@@ -124,7 +134,45 @@ export default function PatientTriage() {
     };
 
     fetchAndSortRows();
-  }, [priorityFilter, statusFilter, specialtyFilter]);
+  }, [priorityFilter, statusFilter, specialtyFilter, session]);
+
+  const handleStatusChange = async (value, row, index) => {
+    let triagedBy = row.triagedBy ?? {};
+    let doctor = row.doctor ?? {};
+    if (value === 'Not Started') {
+      doctor = {};
+      triagedBy = {};
+    } else if (value === 'Triaged') {
+      if (session.user.accountType !== 'Triage') {
+        triggerToast('You do not have the correct permissions to triage patients');
+        return;
+      }
+      triagedBy = { firstName: session.user?.firstName, lastName: session.user?.lastName, email: session.user?.email };
+    }
+    console.log(value, row);
+
+    try {
+      await fetch('/api/patient/', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          _id: rows[index]["_id"],
+          status: value,
+          triagedBy,
+          doctor
+        }),
+      });
+      const updatedRows = [...rows];
+      updatedRows[index].status = value;
+      updatedRows[index].triagedBy = triagedBy;
+      updatedRows[index].doctor = doctor;
+      setRows(updatedRows);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const formatLocation = (city, country) => {
     if (!city && !country) {
@@ -137,6 +185,18 @@ export default function PatientTriage() {
       return `${city}, ${country}`;
     }
   };
+
+  const getInitials = (firstName, lastName) => {
+    if (!firstName && !lastName) {
+      return "";
+    } else if (!firstName) {
+      return lastName[0];
+    } else if (!lastName) {
+      return firstName[0];
+    } else {
+      return `${firstName[0]}${lastName[0]}`;
+    }
+  }
 
   return (
       <>
@@ -349,7 +409,7 @@ export default function PatientTriage() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {rows.map((row, index) => (
+                {rows?.map((row, index) => (
                     <TableRow
                         key={index}
                         sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
@@ -382,37 +442,7 @@ export default function PatientTriage() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent className="w-46">
                               <DropdownMenuSeparator />
-                              <DropdownMenuRadioGroup value={row.status} onValueChange={async (value) => {
-                                let triagedBy = {};
-                                if (value === 'Triaged') {
-                                  if (session.user.accountType !== 'Triage') {
-                                    triggerToast('You do not have the correct permissions to triage patients');
-                                    return;
-                                  }
-                                  triagedBy = { name: session.user?.name, email: session.user?.email };
-                                }
-                                try {
-                                  await fetch('/api/patient/', {
-                                    method: 'PATCH',
-                                    headers: {
-                                      'Content-Type': 'application/json',
-                                    },
-                                    body: JSON.stringify({
-                                      _id: rows[index]["_id"],
-                                      status: value,
-                                      triagedBy
-                                    }),
-                                  });
-                                  const updatedRows = [...rows];
-                                  updatedRows[index].status = value;
-                                  if (value === 'Triaged') {
-                                    updatedRows[index].triagedBy = triagedBy;
-                                  }
-                                  setRows(updatedRows);
-                                } catch (error) {
-                                  console.log(error);
-                                }
-                              }}>
+                              <DropdownMenuRadioGroup value={row.status} onValueChange={(value) => handleStatusChange(value, row, index)}>
                                 {STATUS.map((status) => (
                                     <DropdownMenuRadioItem key={status} value={status}>{status}</DropdownMenuRadioItem>
                                 ))}
@@ -514,14 +544,10 @@ export default function PatientTriage() {
                       />
                       <TableCell align="center">
                         {
-                          row.triagedBy?.name ? 
-                            row.triagedBy?.name.indexOf(' ') === -1 ? 
-                              row.triagedBy?.name[0] : 
-                                `${row.triagedBy.name?.split(' ')[0][0]}${row.triagedBy.name?.split(' ')[1][0]}`
-                            : ''
+                          getInitials(row.triagedBy?.firstName, row.triagedBy?.lastName)
                         }
                       </TableCell>
-                      <TableCell align="center">{row.doctor}</TableCell>
+                      <TableCell align="center">{getInitials(row.doctor?.firstName, row.doctor?.lastName)}</TableCell>
                     </TableRow>
                 ))}
               </TableBody>

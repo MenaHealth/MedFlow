@@ -44,6 +44,17 @@ const NotesForm: React.FC<NotesFormProps> = ({ patientId, username }) => {
         frequency: '',
     });
 
+    const pharmacies = [
+        'EGH, Khan Younis',
+        'Shuhada Al Aqsa, Dier El Balah',
+        'Abu Yousif Najjar, Rafah',
+        'Al Emarati, Rafah',
+        'Tal Sultan, Rafah',
+        'Kuwaiti Hospital, Rafah',
+        'Jordanian Field Hospital, Khan Younis',
+        'Nusseirat, Al Awda',
+    ];
+
     const [notesList, setNotesList] = useState<Note[]>([]);
     const [selectedNote, setSelectedNote] = useState<Note | null>(null); // Track selected note
     const [templateType, setTemplateType] = useState('rxform'); // Default to rxform

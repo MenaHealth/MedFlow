@@ -1,8 +1,10 @@
 // app/api/signup/route.js
 import { NextResponse } from 'next/server';
 import User from '@/models/user';
+import Admin from '@/models/admin';  // Updated to "admin" collection
+import Settings from '@/models/settings'; // Settings model to track admin creation
 import dbConnect from '@/utils/database';
-import { sendGraphEmail } from '@/utils/email'; // Import your email utility
+import { sendGraphEmail } from '@/utils/email';
 
 export async function POST(request) {
     await dbConnect();
@@ -30,8 +32,8 @@ export async function POST(request) {
         const newUser = new User({
             accountType,
             email,
-            password, // DO NOT HASH Password in the API route. PW HASHING HAPPENS IN THE user model.
-            securityQuestions, // DO NOT HASH Security questions here
+            password, // Password hashing happens in the model
+            securityQuestions,
             firstName,
             lastName,
             dob: new Date(dob),
@@ -42,6 +44,26 @@ export async function POST(request) {
         });
 
         await newUser.save();
+
+        // Check if admin has already been created
+        let settings = await Settings.findOne();
+        if (!settings) {
+            settings = new Settings();  // Create the settings document if it doesn't exist
+        }
+
+        if (!settings.isAdminCreated) {
+            // Create the first admin and mark admin creation in settings
+            await Admin.create({
+                userId: newUser._id,
+                firstName: newUser.firstName,
+                lastName: newUser.lastName,
+                email: newUser.email,
+                adminStartDate: new Date(),
+            });
+
+            settings.isAdminCreated = true;  // Mark that admin has been created
+            await settings.save();  // Save the settings document
+        }
 
         await sendGraphEmail(email, firstName, lastName, accountType);
 

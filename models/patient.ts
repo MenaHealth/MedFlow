@@ -46,7 +46,7 @@
       firstName?: string;
       lastName?: string;
       email?: string;
-    }
+    };
     doctor?: {
       firstName?: string;
       lastName?: string;

@@ -49,6 +49,7 @@ const handler = NextAuth({
         if (user.accountType === 'Doctor') {
           session.doctorSpecialty = user.doctorSpecialty;
           session.languages = user.languages;
+          session.countries = user.countries;
         }
 
         return session;
@@ -94,6 +95,7 @@ const handler = NextAuth({
           if (user.accountType === 'Doctor') {
             token.languages = user.languages;
             token.doctorSpecialty = user.doctorSpecialty;
+            token.countries = user.countries;
           }
           token.firstName = user.firstName;
           token.lastName = user.lastName;
@@ -105,6 +107,7 @@ const handler = NextAuth({
         if (session.user?.accountType === 'Doctor') {
           token.languages = session.user?.languages;
           token.doctorSpecialty = session.user?.doctorSpecialty;
+          token.countries = session.user?.countries;
         }
       }
       return token;
@@ -119,6 +122,7 @@ const handler = NextAuth({
         if (token.accountType === 'Doctor') {
           session.user.languages = token.languages;
           session.user.doctorSpecialty = token.doctorSpecialty;
+          session.user.countries = token.countries;
         }
       }
       return session;

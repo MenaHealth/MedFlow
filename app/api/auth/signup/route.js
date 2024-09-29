@@ -4,7 +4,7 @@ import User from '@/models/user';
 import Admin from '@/models/admin';  // Updated to "admin" collection
 import Settings from '@/models/settings'; // Settings model to track admin creation
 import dbConnect from '@/utils/database';
-import { sendGraphEmail } from '@/utils/email';
+import { sendGraphEmail } from '@/utils/emails/user-signup';
 
 export async function POST(request) {
     await dbConnect();
@@ -29,6 +29,15 @@ export async function POST(request) {
             return NextResponse.json({ message: 'User with this email already exists' }, { status: 400 });
         }
 
+        // Check if an admin has been created already
+        let settings = await Settings.findOne();
+        if (!settings) {
+            settings = new Settings();  // Create the settings document if it doesn't exist
+        }
+
+        // If no admin has been created, the first user will be authorized automatically
+        const isAuthorized = !settings.isAdminCreated;
+
         const newUser = new User({
             accountType,
             email,
@@ -41,18 +50,13 @@ export async function POST(request) {
             languages,
             countries,
             gender,
+            authorized: isAuthorized,  // First user authorized, others are not
         });
 
         await newUser.save();
 
-        // Check if admin has already been created
-        let settings = await Settings.findOne();
-        if (!settings) {
-            settings = new Settings();  // Create the settings document if it doesn't exist
-        }
-
+        // If this is the first user, create admin and mark admin creation in settings
         if (!settings.isAdminCreated) {
-            // Create the first admin and mark admin creation in settings
             await Admin.create({
                 userId: newUser._id,
                 firstName: newUser.firstName,

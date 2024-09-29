@@ -1,4 +1,4 @@
-// utils/email.ts
+// utils/emails/user-signup.ts
 import fetch from 'node-fetch';
 import { ClientCredentials } from 'simple-oauth2';
 

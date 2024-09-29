@@ -29,6 +29,11 @@ const handler = NextAuth({
           throw new Error('That email does not exist in our database.');
         }
 
+        // Check if the user is authorized to log in
+        if (!user.authorized) {
+          throw new Error('Your account has not been approved yet.');
+        }
+
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
           throw new Error('Invalid password');

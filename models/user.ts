@@ -82,6 +82,10 @@ const UserSchema = new Schema<IUser>({
       required: [true, 'Answer is required!'],
     },
   }],
+  authorized: {
+    type: Boolean,
+    default: false,  // Set to false by default for new users
+  },
 });
 
 UserSchema.pre('save', async function (next) {

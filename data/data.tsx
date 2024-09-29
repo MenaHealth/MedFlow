@@ -22,7 +22,8 @@ export const STATUS = [
     "Not Started",
     "Triaged",
     "In-Progress",
-    "Completed"
+    "Completed",
+    "Archived"
 ]
 
 export const SPECIALTIES = [

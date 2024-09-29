@@ -1,6 +1,6 @@
   // models/patient.ts
   import { Schema, model, models, Document, Types } from 'mongoose';
-  import { SPECIALTIES } from '@/data/data';
+  import { DoctorSpecialties as SPECIALTIES } from '@/data/doctorSpecialty.enum';
 
   interface Prescription {
     medName: string;
@@ -29,7 +29,7 @@
     hospital?: 'Not Selected' | 'PMC' | 'PRCS' | 'Hugo Chavez';
     priority?: 'Not Selected' | 'Routine' | 'Moderate' | 'Urgent' | 'Emergency';
     specialty?: typeof SPECIALTIES[number];
-    status?: 'Not Selected' | 'Not Started' | 'Triaged' | 'In-Progress' | 'Completed';
+    status?: 'Not Selected' | 'Not Started' | 'Triaged' | 'In-Progress' | 'Completed' | 'Archived';
     complaint?: string;
     icd10?: string;
     surgeryDate?: Date;
@@ -43,10 +43,15 @@
     otherDrugs?: string;
     allergies?: string;
     triagedBy?: {
-      name?: string;
+      firstName?: string;
+      lastName?: string;
       email?: string;
     }
-    doctor?: string;
+    doctor?: {
+      firstName?: string;
+      lastName?: string;
+      email?: string;
+    };
     notes?: string;
     visits?: Types.ObjectId[];
   }
@@ -71,8 +76,8 @@
     diagnosisCat: { type: String },
     hospital: { type: String, enum: ['Not Selected', 'PMC', 'PRCS', 'Hugo Chavez'], default: 'Not Selected' },
     priority: { type: String, enum: ['Not Selected', 'Routine', 'Moderate', 'Urgent', 'Emergency'], default: 'Not Selected' },
-    specialty: { type: String, enum: ['Not Selected', 'Podiatry', 'Sports', 'Vascular', 'General', 'Urology', 'OBGYN', 'Opthalmology', 'ENT', 'Joints', 'Pediatrics', 'Spine/Neurosurgery', 'Internal Medicine'], default: 'Not Selected' },
-    status: { type: String, enum: ['Not Selected', 'Not Started', 'Triaged', 'In-Progress', 'Completed'], default: 'Not Started' },
+    specialty: { type: String, enum: ['Not Selected', ...SPECIALTIES], default: 'Not Selected' },
+    status: { type: String, enum: ['Not Selected', 'Not Started', 'Triaged', 'In-Progress', 'Completed', 'Archived'], default: 'Not Started' },
     icd10: { type: String },
     surgeryDate: { type: Date },
     occupation: { type: String },
@@ -91,6 +96,7 @@
     notes: { type: String },
     visits: [{ type: Schema.Types.ObjectId, ref: 'Visit' }],
     triagedBy: { type: Object },
+    doctor: { type: Object },
   });
 
   const Patient = models.Patient || model<IPatient>('Patient', PatientSchema);

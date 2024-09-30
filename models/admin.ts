@@ -1,3 +1,4 @@
+// models/admin.ts
 import mongoose from 'mongoose';
 
 const AdminsSchema = new mongoose.Schema({
@@ -20,7 +21,7 @@ const AdminsSchema = new mongoose.Schema({
     },
     adminStartDate: {
         type: Date,
-        default: Date.now,  // Automatically sets the start date to now
+        default: Date.now,
     },
 });
 

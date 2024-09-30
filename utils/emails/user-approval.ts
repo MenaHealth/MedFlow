@@ -30,7 +30,7 @@ const getAccessToken = async () => {
     try {
         console.log('Fetching access token...');
         const tokenParams = {
-            scope: 'https://graph.microsoft.com/.default',  // For Graph API usage
+            scope: 'https://graph.microsoft.com/.default',
         };
 
         const result = await oauth2Client.getToken(tokenParams);
@@ -47,7 +47,6 @@ const sendApprovalEmail = async (email: string, firstName: string, lastName: str
         const accessToken = await getAccessToken();
         console.log(`Sending approval email to: ${email}`);
 
-        // Customize the greeting based on accountType
         let greeting;
         if (accountType === 'Doctor') {
             greeting = `Hello Dr. ${lastName},`;
@@ -55,7 +54,6 @@ const sendApprovalEmail = async (email: string, firstName: string, lastName: str
             greeting = `Hello ${firstName},`;
         }
 
-        // HTML email template for account approval
         const mailBody = {
             message: {
                 subject: 'Account Approved - MedFlow',

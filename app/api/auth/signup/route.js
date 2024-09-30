@@ -4,7 +4,7 @@ import User from '@/models/user';
 import Admin from '@/models/admin';  // Updated to "admin" collection
 import Settings from '@/models/settings'; // Settings model to track admin creation
 import dbConnect from '@/utils/database';
-import { sendGraphEmail } from '@/utils/emails/user-signup';
+import { sendWelcomeEmail } from '@/utils/emails/user-signup';
 
 export async function POST(request) {
     await dbConnect();
@@ -69,7 +69,7 @@ export async function POST(request) {
             await settings.save();  // Save the settings document
         }
 
-        await sendGraphEmail(email, firstName, lastName, accountType);
+        await sendWelcomeEmail(email, firstName, lastName, accountType);
 
         return NextResponse.json({ message: 'Signup successful' }, { status: 201 });
     } catch (error) {

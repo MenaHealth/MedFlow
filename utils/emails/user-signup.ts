@@ -39,13 +39,13 @@ const getAccessToken = async () => {
     }
 };
 
-const sendGraphEmail = async (email: string, firstName: string, lastName: string, accountType: string) => {
+const sendWelcomeEmail = async (email: string, firstName: string, lastName: string, accountType: string) => {
     try {
         const accessToken = await getAccessToken();
 
         // Customize the greeting based on accountType
         let greeting;
-        if (accountType === 'Doctor') {
+        if (accountType === 'Doctor-Pending') {
             greeting = `Hello Dr. ${lastName},`;
         } else {
             greeting = `Hello ${firstName},`;
@@ -65,7 +65,7 @@ const sendGraphEmail = async (email: string, firstName: string, lastName: string
                             <p style="color: #ffffff; font-size: 16px; line-height: 1.6;">
                                 Thank you for signing up for MedFlow!<br><br>
                                 We're excited to have you on board. Your account has been created successfully.<br><br>
-                                If you have any questions or need assistance, please don't hesitate to contact our support team.<br><br>
+                                Your account is pending administrator approval. You will receive a confirmation email once you've been authorized.<br><br>
                                 <strong>Best regards,</strong><br>
                                 <strong>The MedFlow Team</strong>
                             </p>
@@ -100,4 +100,4 @@ const sendGraphEmail = async (email: string, firstName: string, lastName: string
     }
 };
 
-export { sendGraphEmail };
+export { sendWelcomeEmail };

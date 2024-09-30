@@ -4,24 +4,14 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Session } from 'next-auth';
 
-interface CustomSession extends Session {
-    user: {
-        id?: string;
-        email?: string | null;
-        name?: string | null;
-        image?: string | null;
-        accountType?: 'Doctor' | 'Triage' | 'Admin' | 'Pending';
-    };
-}
-
 const HomePage = () => {
     const router = useRouter();
     const { data: session, status } = useSession();
 
     useEffect(() => {
         if (status === 'authenticated') {
-            const customSession = session as CustomSession;
-            const userCompletedSignup = customSession?.user?.accountType && customSession?.user?.accountType !== 'Pending';
+            const activeSession = session as Session;
+            const userCompletedSignup = activeSession?.user?.accountType === 'Doctor' || activeSession?.user?.accountType === 'Triage';
 
             if (!userCompletedSignup) {
                 router.replace('/complete-signup');

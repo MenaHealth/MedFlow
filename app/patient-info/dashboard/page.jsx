@@ -39,7 +39,8 @@ import {
 } from "@/components/ui/dropdownMenu";
 import DescriptionIcon from '@mui/icons-material/Description';
 
-import { PRIORITIES, SPECIALTIES, STATUS } from '@/data/data';
+import { PRIORITIES, STATUS } from '@/data/data';
+import { DoctorSpecialties as DOCTOR_SPECIALTIES } from '@/data/doctorSpecialty.enum';
 import Link from 'next/link';
 
 export default function PatientTriage() {
@@ -78,6 +79,7 @@ export default function PatientTriage() {
       statusFilter,
       specialtyFilter
   ) => {
+    if (!session) return [];
     let filteredRows = rows;
 
     if (priorityFilter !== "all") {
@@ -96,6 +98,26 @@ export default function PatientTriage() {
       filteredRows = filteredRows.filter(
           (row) => row.specialty === specialtyFilter
       );
+    }
+
+    // Filter for specific doctor - expand logic?
+    if (session?.user?.accountType === "Doctor") {
+      filteredRows = filteredRows.filter(
+          (row) => 
+            // Only patients who are at least triaged
+            row.triagedBy && Object.keys(row.triagedBy).length !== 0 &&
+            // Only patients who speak the same language
+            session.user.languages.indexOf(row?.language) !== -1 && 
+            // Only patients who have needs matching the doctor's specialty
+            session.user.doctorSpecialty === row.specialty
+          
+      );
+    }
+
+    if (statusFilter !== "Archived") {
+      filteredRows = filteredRows.filter(
+          (row) => row.status !== "Archived"
+      )
     }
 
     let sortedRows = [...filteredRows].sort((a, b) => {
@@ -125,7 +147,44 @@ export default function PatientTriage() {
     };
 
     fetchAndSortRows();
-  }, [priorityFilter, statusFilter, specialtyFilter]);
+  }, [priorityFilter, statusFilter, specialtyFilter, session]);
+
+  const handleStatusChange = async (value, row, index) => {
+    let triagedBy = row.triagedBy ?? {};
+    let doctor = row.doctor ?? {};
+    if (value === 'Not Started') {
+      doctor = {};
+      triagedBy = {};
+    } else if (value === 'Triaged') {
+      if (session.user.accountType !== 'Triage') {
+        triggerToast('You do not have the correct permissions to triage patients');
+        return;
+      }
+      triagedBy = { firstName: session.user?.firstName, lastName: session.user?.lastName, email: session.user?.email };
+    }
+
+    try {
+      await fetch('/api/patient/', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          _id: rows[index]["_id"],
+          status: value,
+          triagedBy,
+          doctor
+        }),
+      });
+      const updatedRows = [...rows];
+      updatedRows[index].status = value;
+      updatedRows[index].triagedBy = triagedBy;
+      updatedRows[index].doctor = doctor;
+      setRows(updatedRows);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const formatLocation = (city, country) => {
     if (!city && !country) {
@@ -138,6 +197,62 @@ export default function PatientTriage() {
       return `${city}, ${country}`;
     }
   };
+
+  const getInitials = (firstName, lastName) => {
+    if (!firstName && !lastName) {
+      return "";
+    } else if (!firstName) {
+      return lastName[0];
+    } else if (!lastName) {
+      return firstName[0];
+    } else {
+      return `${firstName[0]}${lastName[0]}`;
+    }
+  }
+
+  const handleTakeCase = async (index) => {
+    let doctor = { firstName: session.user?.firstName, lastName: session.user?.lastName, email: session.user?.email };
+
+    try {
+      await fetch('/api/patient/', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          _id: rows[index]["_id"],
+          status: "In-Progress",
+          doctor
+        }),
+      });
+      const updatedRows = [...rows];
+      updatedRows[index].status = "In-Progress";
+      updatedRows[index].doctor = doctor;
+      setRows(updatedRows);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const handleArchive = async (index) => {
+    try {
+      await fetch('/api/patient/', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          _id: rows[index]["_id"],
+          status: "Archived",
+        }),
+      });
+      const updatedRows = [...rows];
+      updatedRows[index].status = "Archived";
+      setRows(updatedRows);
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   return (
       <>
@@ -314,10 +429,10 @@ export default function PatientTriage() {
                           <KeyboardArrowDownIcon className="ml-2 h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
+                      <DropdownMenuContent align="end" style={{ maxWidth: "20rem", maxHeight: "30rem", overflowY: "auto" }}>
                         <DropdownMenuRadioGroup value={specialtyFilter} onValueChange={setSpecialtyFilter}>
                           <DropdownMenuRadioItem value="all">All</DropdownMenuRadioItem>
-                          {SPECIALTIES.map((specialty) => (
+                          {DOCTOR_SPECIALTIES.map((specialty) => (
                               <DropdownMenuRadioItem key={specialty} value={specialty}>{specialty}</DropdownMenuRadioItem>
                           ))}
                         </DropdownMenuRadioGroup>
@@ -339,7 +454,7 @@ export default function PatientTriage() {
                     </div>
                   </TableCell>
                   <TableCell align="center">Triaged By</TableCell>
-                  <TableCell align="center">Doctor Assigned</TableCell>
+                  <TableCell align="center">Doctor</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -375,37 +490,7 @@ export default function PatientTriage() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent className="w-46">
                               <DropdownMenuSeparator />
-                              <DropdownMenuRadioGroup value={row.status} onValueChange={async (value) => {
-                                let triagedBy = {};
-                                if (value === 'Triaged') {
-                                  if (session.user.accountType !== 'Triage') {
-                                    triggerToast('You do not have the correct permissions to triage patients');
-                                    return;
-                                  }
-                                  triagedBy = { name: session.user?.name, email: session.user?.email };
-                                }
-                                try {
-                                  await fetch("/api/patient/assign", {
-                                    method: 'PATCH',
-                                    headers: {
-                                      'Content-Type': 'application/json',
-                                    },
-                                    body: JSON.stringify({
-                                      _id: rows[index]["_id"],
-                                      status: value,
-                                      triagedBy
-                                    }),
-                                  });
-                                  const updatedRows = [...rows];
-                                  updatedRows[index].status = value;
-                                  if (value === 'Triaged') {
-                                    updatedRows[index].triagedBy = triagedBy;
-                                  }
-                                  setRows(updatedRows);
-                                } catch (error) {
-                                  console.log(error);
-                                }
-                              }}>
+                              <DropdownMenuRadioGroup value={row.status} onValueChange={(value) => handleStatusChange(value, row, index)}>
                                 {STATUS.map((status) => (
                                     <DropdownMenuRadioItem key={status} value={status}>{status}</DropdownMenuRadioItem>
                                 ))}
@@ -455,11 +540,11 @@ export default function PatientTriage() {
                           <DropdownMenuTrigger asChild>
                             <Button variant="outline">{row.specialty}</Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent className="w-46">
+                          <DropdownMenuContent style={{ maxWidth: "20rem", maxHeight: "25rem", overflowY: "auto" }}>
                             <DropdownMenuSeparator />
                             <DropdownMenuRadioGroup value={row.specialty} onValueChange={async (value) => {
                               try {
-                                await fetch("/api/patient/assign", {
+                                await fetch("/api/patient/", {
                                   method: 'PATCH',
                                   headers: {
                                     'Content-Type': 'application/json',
@@ -468,15 +553,16 @@ export default function PatientTriage() {
                                     _id: rows[index]["_id"],
                                     specialty: value,
                                   }),
-                                });
-                                const updatedRows = [...rows];
-                                updatedRows[index].specialty = value;
-                                setRows(updatedRows);
+                                }).then(() => {
+                                  const updatedRows = [...rows];
+                                  updatedRows[index].specialty = value;
+                                  setRows(updatedRows);
+                                })
                               } catch (error) {
                                 console.log(error);
                               }
                             }}>
-                              {SPECIALTIES.map((specialty) => (
+                              {DOCTOR_SPECIALTIES.map((specialty) => (
                                   <DropdownMenuRadioItem key={specialty} value={specialty}>{specialty}</DropdownMenuRadioItem>
                               ))}
                             </DropdownMenuRadioGroup>
@@ -507,74 +593,54 @@ export default function PatientTriage() {
                       />
                       <TableCell align="center">
                         {
-                          row.triagedBy?.name ? 
-                            row.triagedBy?.name.indexOf(' ') === -1 ? 
-                              row.triagedBy?.name[0] : 
-                                `${row.triagedBy.name?.split(' ')[0][0]}${row.triagedBy.name?.split(' ')[1][0]}`
-                            : ''
+                          getInitials(row.triagedBy?.firstName, row.triagedBy?.lastName)
                         }
                       </TableCell>
-                      
-                      {/* Doctor Assigned */}
                       <TableCell align="center">
-  {
-    row.doctor ? (
-      <>
-        {row.doctor.firstName} {row.doctor.lastName}
-      </>
-    ) : (
-<Button
-  variant="contained"
-  color="primary"
-  style={{
-    backgroundColor: 'black',
-    color: 'white',
-    borderRadius: '4px',
-    padding: '8px 16px',
-    fontSize: '14px',
-    //fontWeight: 'regular',
-    textTransform: 'none',
-    boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
-  }}
-  onClick={async () => {
-    const doctor = { firstName: session.user?.firstName, lastName: session.user?.lastName, email: session.user?.email };
-
-    try {
-      await fetch('/api/patient/', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          _id: row._id,    // Use the patient ID
-          status: 'In Progress',   // Update the status to 'In Progress'
-          doctor: doctor           // Assign the current doctor
-        }),
-      });
-
-      // Update the rows state to reflect the changes
-      const updatedRows = [...rows];
-      const index = rows.findIndex((r) => r._id === row._id);
-      updatedRows[index].status = 'In Progress';
-      updatedRows[index].doctor = doctor;
-      setRows(updatedRows);
-
-      triggerToast('Case assigned successfully');
-    } catch (error) {
-      console.log("Error assigning case:", error);
-      triggerToast('Failed to assign case');
-    }
-  }}
->
-  Take Case
-</Button>
-  )}
-</TableCell>
+                        {
+                          row.status === 'Not Started'
+                            ? '' 
+                            : row.status === 'In-Progress' || row.status === 'Archived'
+                              ? getInitials(row.doctor?.firstName, row.doctor?.lastName) 
+                              : row.status === 'Triaged'
+                                ? session.user.accountType === 'Doctor'
+                                  ?  (
+                                        <Button onClick={() => handleTakeCase(index)}
+                                          variant="contained"
+                                          color="primary"
+                                          style={{
+                                            backgroundColor: 'black',
+                                            color: 'white',
+                                            borderRadius: '4px',
+                                            padding: '8px 16px',
+                                            fontSize: '14px',
+                                            //fontWeight: 'regular',
+                                            textTransform: 'none',
+                                            boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)'
+                                        }}>
+                                          Take Case
+                                        </Button>
+                                      )
+                                    : ''
+                                : (
+                                      <Button onClick={() => handleArchive(index)}>
+                                        Archive
+                                      </Button>
+                                  )
+                        }
+                      </TableCell>
                     </TableRow>
                 ))}
               </TableBody>
             </Table>
           </TableContainer>
+          {
+            rows.length === 0 && (
+              <div className="text-center text-gray-500 my-6">
+                <p>No patient data found matching your expertise.</p>
+              </div>
+            )
+          }
         </div>
         <Toast.Provider>
         <Toast.Root 

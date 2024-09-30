@@ -149,7 +149,7 @@ export default function PatientTriage() {
     };
 
     fetchAndSortRows();
-  }, [priorityFilter, statusFilter, specialtyFilter, session]);
+  }, [priorityFilter, statusFilter, specialtyFilter, session, sortAndFilterRows]);
 
   const handleStatusChange = async (value, row, index) => {
     let triagedBy = row.triagedBy ?? {};

@@ -12,7 +12,7 @@ import dbConnect from '@/utils/database';
 
 const handler = NextAuth({
     session: {
-        strategy: 'jwt',  // Use JWT strategy for sessions
+        strategy: 'jwt', 
     },
     providers: [
         CredentialsProvider({
@@ -24,15 +24,12 @@ const handler = NextAuth({
             async authorize(credentials) {
                 await dbConnect();
                 const { email, password } = credentials;
-
-                // Find the user in the database
                 const user = await User.findOne({ email });
 
                 if (!user) {
                     throw new Error('That email does not exist in our database.');
                 }
 
-                // Check if the user is authorized to log in
                 if (!user.authorized) {
                     throw new Error('Your account has not been approved yet.');
                 }
@@ -42,14 +39,11 @@ const handler = NextAuth({
                     throw new Error('Invalid password');
                 }
 
-                // Update last login timestamp
                 user.lastLogin = new Date();
                 await user.save();
 
-                // Check if the user is an admin
                 const isAdmin = await Admin.findOne({ userId: user._id });
 
-                // Build session object with optional Doctor data
                 const session = {
                     id: user._id.toString(),
                     email: user.email,
@@ -57,7 +51,7 @@ const handler = NextAuth({
                     lastName: user.lastName,
                     accountType: user.accountType,
                     image: user.image,
-                    isAdmin: !!isAdmin,  // Add admin status
+                    isAdmin: !!isAdmin,
                 };
 
                 if (user.accountType === 'Doctor') {
@@ -73,7 +67,6 @@ const handler = NextAuth({
         async signIn({ user, account, profile }) {
             await dbConnect();
 
-            // Handle Google sign-in
             if (account.provider === 'google') {
                 const existingGoogleUser = await GoogleUser.findOne({ email: user.email });
                 if (!existingGoogleUser) {
@@ -82,14 +75,13 @@ const handler = NextAuth({
                         email: user.email,
                         firstName: user.name,
                         image: user.image,
-                        accountType: 'Pending',  // Default state for Google users
+                        accountType: 'Pending',
                     });
                 }
             }
 
             return true;
         },
-        // Updated jwt callback to include the accessToken
         // Updated jwt callback to include the accessToken
         async jwt({ token, user, account }) {
             if (account) {
@@ -105,7 +97,6 @@ const handler = NextAuth({
                         token.accountType = 'Pending';
                     }
                 } else if (user) {
-                    // Handle credentials login (add JWT manually)
                     token.id = user._id;
                     token.accountType = user.accountType;
                     token.firstName = user.firstName;
@@ -113,10 +104,9 @@ const handler = NextAuth({
                     token.image = user.image;
                     token.isAdmin = user.isAdmin;
 
-                    // Generate a JWT token for the user (if needed)
                     token.accessToken = jwt.sign(
                         { id: user._id, email: user.email, isAdmin: user.isAdmin },
-                        process.env.JWT_SECRET, // Your secret from the environment variable
+                        process.env.JWT_SECRET, 
                         { expiresIn: '1d' } // Set expiration time for the JWT
                     );
 
@@ -127,10 +117,9 @@ const handler = NextAuth({
                 }
             }
 
-            // Return the token object
             return token;
         },
-        // Updated session callback to store the accessToken in session
+      
         async session({ session, token }) {
             if (token) {
                 session.user.id = token.id;
@@ -139,7 +128,7 @@ const handler = NextAuth({
                 session.user.lastName = token.lastName;
                 session.user.image = token.image;
                 session.user.isAdmin = token.isAdmin;
-                session.user.token = token.accessToken;  // Store JWT token in session
+                session.user.token = token.accessToken;
 
                 if (token.accountType === 'Doctor') {
                     session.user.languages = token.languages;

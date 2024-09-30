@@ -103,16 +103,15 @@ export default function PatientTriage() {
     // Filter for specific doctor - expand logic?
     if (session?.user?.accountType === "Doctor") {
       filteredRows = filteredRows.filter(
-          (row) =>
+          (row) => 
             // Only patients who are at least triaged
             row.triagedBy && Object.keys(row.triagedBy).length !== 0 &&
             // Only patients who speak the same language
-            session.user.languages.indexOf(row?.language) !== -1 &&
+            session.user.languages.indexOf(row?.language) !== -1 && 
             // Only patients who have needs matching the doctor's specialty
             session.user.doctorSpecialty === row.specialty &&
             // Only patients who live in the same country
             session.user.countries.indexOf(row.country) !== -1
-
       );
     }
 
@@ -149,6 +148,7 @@ export default function PatientTriage() {
     };
 
     fetchAndSortRows();
+
   }, [priorityFilter, statusFilter, specialtyFilter, session, sortAndFilterRows]);
 
   const handleStatusChange = async (value, row, index) => {
@@ -601,9 +601,9 @@ export default function PatientTriage() {
                       <TableCell align="center">
                         {
                           row.status === 'Not Started'
-                            ? ''
+                            ? '' 
                             : row.status === 'In-Progress' || row.status === 'Archived'
-                              ? getInitials(row.doctor?.firstName, row.doctor?.lastName)
+                              ? getInitials(row.doctor?.firstName, row.doctor?.lastName) 
                               : row.status === 'Triaged'
                                 ? session.user.accountType === 'Doctor'
                                   ?  (

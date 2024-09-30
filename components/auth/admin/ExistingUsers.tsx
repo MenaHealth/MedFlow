@@ -1,4 +1,6 @@
 // components/auth/admin/ExistingUsers.tsx
+'use client';
+
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import useToast from '@/components/hooks/useToast';
@@ -101,8 +103,8 @@ export default function ExistingUsers({ data }: ExistingUsersProps) {
     }
 
     return (
-        <div className="container mx-auto px-4 py-8">
-            <table className="min-w-full bg-white">
+        <div className="container mx-auto px-4 py-8 bg-orange-100 text-darkBlue">
+            <table className="min-w-full">
                 <thead>
                 <tr>
                     <th className="py-2 px-4 border-b">Name</th>
@@ -118,7 +120,7 @@ export default function ExistingUsers({ data }: ExistingUsersProps) {
                     users.map((user, index) => (
                         <tr key={user._id}>
                             <td className="py-2 px-4 border-b">
-                                {user.firstName} {user.lastName} {index === 0 && <span className="text-blue-500">(Admin)</span>}
+                                {user.firstName} {user.lastName} {index === 0 && <span className="text-orange-500">(Admin)</span>}
                             </td>
                             <td className="py-2 px-4 border-b">{user.email}</td>
                             <td className="py-2 px-4 border-b">{user.accountType}</td>
@@ -130,7 +132,7 @@ export default function ExistingUsers({ data }: ExistingUsersProps) {
                                 {index !== 0 ? (
                                     <button
                                         onClick={() => handleMoveToDenied(user._id)}
-                                        className="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-2 rounded"
+                                        className="border-2 border-darkBlue hover:bg-darkBlue hover:text-orange-50 text-darkBlue font-bold py-2 px-4 rounded"
                                     >
                                         Move to Denied
                                     </button>

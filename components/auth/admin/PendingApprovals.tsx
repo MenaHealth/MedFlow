@@ -1,4 +1,6 @@
 // components/auth/admin/PendingApprovals.tsx
+'use client';
+
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import useToast from '@/components/hooks/useToast';
@@ -120,18 +122,18 @@ export default function PendingApprovals({ data }: PendingApprovalsProps) {
     };
 
     return (
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-8 bg-orange-50">
             <div className="mb-4">
                 <button
                     onClick={() => handleBulkAction('approve')}
-                    className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mr-2"
+                    className="border-2 border-darkBlue hover:bg-darkBlue hover:text-orange-50 text-darkBlue font-bold py-2 px-4 rounded mr-2"
                     disabled={selectedUsers.length === 0}
                 >
                     Approve Selected
                 </button>
                 <button
                     onClick={() => handleBulkAction('deny')}
-                    className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
+                    className="border-2 border-darkBlue hover:bg-darkBlue hover:text-orange-50 text-darkBlue font-bold py-2 px-4 rounded mr-2"
                     disabled={selectedUsers.length === 0}
                 >
                     Deny Selected
@@ -139,7 +141,7 @@ export default function PendingApprovals({ data }: PendingApprovalsProps) {
             </div>
 
             {/* Users Table */}
-            <table className="min-w-full bg-white">
+            <table className="min-w-full">
                 <thead>
                 <tr>
                     <th className="py-2 px-4 border-b">

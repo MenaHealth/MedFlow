@@ -1,4 +1,6 @@
 // components/auth/admin/AdminDashboard.tsx
+'use client';
+
 import { useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import useToast from '@/components/hooks/useToast';
@@ -8,35 +10,33 @@ import PendingApprovals from './PendingApprovals';
 import ExistingUsers from './ExistingUsers';
 import DeniedUsers from './DeniedUsers';
 import { BarLoader } from 'react-spinners';
+import AdminManagement from "@/components/auth/admin/AdminManagement";
 
 export default function AdminDashboard() {
     const { data: session, status } = useSession();
     const router = useRouter();
     const { setToast } = useToast();
 
-    // State to control whether each section is open or collapsed
     const [isPendingApprovalsOpen, setIsPendingApprovalsOpen] = useState(false);
     const [isExistingUsersOpen, setIsExistingUsersOpen] = useState(false);
     const [isDeniedUsersOpen, setIsDeniedUsersOpen] = useState(false);
+    const [isAddAdminUsersOpen, setIsAddAdminUsersOpen] = useState(false);
 
-    // Loading states
     const [loadingPendingApprovals, setLoadingPendingApprovals] = useState(false);
     const [loadingExistingUsers, setLoadingExistingUsers] = useState(false);
     const [loadingDeniedUsers, setLoadingDeniedUsers] = useState(false);
 
-    // States to store the data fetched from the API calls
     const [pendingApprovalsData, setPendingApprovalsData] = useState(null);
     const [existingUsersData, setExistingUsersData] = useState(null);
     const [deniedUsersData, setDeniedUsersData] = useState(null);
 
-    // Toggle section and fetch data if not already loaded
     const toggleSection = async (section: 'pending' | 'existing' | 'denied') => {
         if (section === 'pending') {
             setIsPendingApprovalsOpen((prev) => !prev);
             if (!pendingApprovalsData && !loadingPendingApprovals) {
                 setLoadingPendingApprovals(true);
                 const data = await fetchPendingApprovals();
-                setPendingApprovalsData(data); // Store data in state
+                setPendingApprovalsData(data);
                 setLoadingPendingApprovals(false);
             }
         } else if (section === 'existing') {
@@ -44,7 +44,7 @@ export default function AdminDashboard() {
             if (!existingUsersData && !loadingExistingUsers) {
                 setLoadingExistingUsers(true);
                 const data = await fetchExistingUsers();
-                setExistingUsersData(data); // Store data in state
+                setExistingUsersData(data);
                 setLoadingExistingUsers(false);
             }
         } else if (section === 'denied') {
@@ -52,13 +52,14 @@ export default function AdminDashboard() {
             if (!deniedUsersData && !loadingDeniedUsers) {
                 setLoadingDeniedUsers(true);
                 const data = await fetchDeniedUsers();
-                setDeniedUsersData(data); // Store data in state
+                setDeniedUsersData(data);
                 setLoadingDeniedUsers(false);
             }
+        } else if (section === 'addAdmin') {
+            setIsAddAdminUsersOpen((prev) => !prev); // Toggle the new Add Admin Users section
         }
     };
 
-    // Fetch functions for API calls (these can be moved to separate files)
     const fetchPendingApprovals = async () => {
         try {
             const res = await fetch('/api/admin/pending-users');
@@ -107,7 +108,6 @@ export default function AdminDashboard() {
         }
     };
 
-    // Handle user permissions and loading state for the session
     if (status === 'loading') {
         return <div>Loading...</div>;
     }
@@ -124,72 +124,88 @@ export default function AdminDashboard() {
 
     return (
         <div className="container mx-auto px-4 py-8">
-            <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
+            <h1 className="text-4xl font-bold mb-8 text-darkBlue text-center">Admin Dashboard</h1>
 
             {/* Pending Approvals */}
-            <div>
+            <div className="mb-8 bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 ease-in-out">
                 <div
-                    className="flex justify-between items-center cursor-pointer"
+                    className="flex justify-between items-center cursor-pointer p-4 bg-orange-50"
                     onClick={() => toggleSection('pending')}
                 >
-                    <h2 className="text-2xl font-semibold mb-4">Pending User Approvals</h2>
-                    {isPendingApprovalsOpen ? <ChevronUpIcon className="w-5 h-5" /> : <ChevronDownIcon className="w-5 h-5" />}
+                    <h2 className="text-2xl font-semibold text-orange-800">Pending User Approvals</h2>
+                    {isPendingApprovalsOpen ? <ChevronUpIcon className="w-6 h-6 text-orange-500" /> : <ChevronDownIcon className="w-6 h-6 text-orange-800" />}
                 </div>
-                {isPendingApprovalsOpen && (
-                    <div>
+                <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isPendingApprovalsOpen ? 'max-h-[1000px]' : 'max-h-0'}`}>
+                    <div className="p-4 overflow-x-auto bg-orange-50">
                         {loadingPendingApprovals ? (
                             <div className="flex justify-center items-center py-4">
-                                <BarLoader color="var(--orange)" />
+                                <BarLoader color="var(--orange-500)" />
                             </div>
                         ) : (
                             <PendingApprovals data={pendingApprovalsData} />
                         )}
                     </div>
-                )}
+                </div>
             </div>
 
             {/* Existing Users */}
-            <div>
+            <div className="mb-8 bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 ease-in-out">
                 <div
-                    className="flex justify-between items-center cursor-pointer mt-6"
+                    className="flex justify-between items-center cursor-pointer p-4 bg-orange-100"
                     onClick={() => toggleSection('existing')}
                 >
-                    <h2 className="text-2xl font-semibold mb-4">Existing Users</h2>
-                    {isExistingUsersOpen ? <ChevronUpIcon className="w-5 h-5" /> : <ChevronDownIcon className="w-5 h-5" />}
+                    <h2 className="text-2xl font-semibold text-orange-600">Existing Users</h2>
+                    {isExistingUsersOpen ? <ChevronUpIcon className="w-6 h-6 text-orange-500" /> : <ChevronDownIcon className="w-6 h-6 text-orange-600" />}
                 </div>
-                {isExistingUsersOpen && (
-                    <div>
+                <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isExistingUsersOpen ? 'max-h-[1000px]' : 'max-h-0'}`}>
+                    <div className="p-4 overflow-x-auto bg-orange-100">
                         {loadingExistingUsers ? (
                             <div className="flex justify-center items-center py-4">
-                                <BarLoader color="var(--orange)" />
+                                <BarLoader color="var(--yellow-500)" />
                             </div>
                         ) : (
                             <ExistingUsers data={existingUsersData} />
                         )}
                     </div>
-                )}
+                </div>
             </div>
 
             {/* Denied Users */}
-            <div>
+            <div className="mb-8 bg-grey-200 rounded-lg shadow-md overflow-hidden transition-all duration-300 ease-in-out">
                 <div
-                    className="flex justify-between items-center cursor-pointer mt-6"
+                    className="flex justify-between items-center cursor-pointer p-4 bg-grey-200"
                     onClick={() => toggleSection('denied')}
                 >
-                    <h2 className="text-2xl font-semibold mb-4">Denied Users</h2>
-                    {isDeniedUsersOpen ? <ChevronUpIcon className="w-5 h-5" /> : <ChevronDownIcon className="w-5 h-5" />}
+                    <h2 className="text-2xl font-semibold text-grey-700">Denied Users</h2>
+                    {isDeniedUsersOpen ? <ChevronUpIcon className="w-6 h-6 text-orange-500" /> : <ChevronDownIcon className="w-6 h-6 text-grey-700" />}
                 </div>
-                {isDeniedUsersOpen && (
-                    <div>
+                <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isDeniedUsersOpen ? 'max-h-[1000px]' : 'max-h-0'}`}>
+                    <div className="p-4 overflow-x-auto bg-grey-200">
                         {loadingDeniedUsers ? (
                             <div className="flex justify-center items-center py-4">
-                                <BarLoader color="var(--orange)" />
+                                <BarLoader color="var(--grey-500)" />
                             </div>
                         ) : (
                             <DeniedUsers data={deniedUsersData} />
                         )}
                     </div>
-                )}
+                </div>
+            </div>
+
+            {/* Add Admin Users */}
+            <div className="mb-8 bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 ease-in-out">
+                <div
+                    className="flex justify-between items-center cursor-pointer p-4 bg-darkBlue"
+                    onClick={() => toggleSection('addAdmin')}
+                >
+                    <h2 className="text-2xl font-semibold text-orange-100">Admin Management</h2>
+                    {isAddAdminUsersOpen ? <ChevronUpIcon className="w-6 h-6 text-orange-500" /> : <ChevronDownIcon className="w-6 h-6 text-orange-100" />}
+                </div>
+                <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isAddAdminUsersOpen ? 'max-h-[1000px]' : 'max-h-0'}`}>
+                    {/*<div className="p-4 overflow-x-auto">*/}
+                        <AdminManagement />
+                    {/*</div>*/}
+                </div>
             </div>
         </div>
     );

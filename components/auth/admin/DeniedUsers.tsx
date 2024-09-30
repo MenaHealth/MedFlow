@@ -1,4 +1,6 @@
 // components/auth/admin/DeniedUsers.tsx
+'use client';
+
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import useToast from '@/components/hooks/useToast';
@@ -51,15 +53,15 @@ export default function DeniedUsers({ data }: DeniedUsersProps) {
     }, [session, currentPage, setToast]);
 
     return (
-        <div className="container mx-auto px-4 py-8">
-            <table className="min-w-full bg-white">
+        <div className="container bg mx-auto px-4 py-8">
+            <table className="min-w-full bg-grey-200">
                 <thead>
                 <tr>
-                    <th className="py-2 px-4 border-b">Name</th>
-                    <th className="py-2 px-4 border-b">Email</th>
-                    <th className="py-2 px-4 border-b">User Type</th>
-                    <th className="py-2 px-4 border-b">Country</th>
-                    <th className="py-2 px-4 border-b">Denial Date</th>
+                    <th className="py-2 px-4 border-b text-grey-800">Name</th>
+                    <th className="py-2 px-4 border-b text-grey-800">Email</th>
+                    <th className="py-2 px-4 border-b text-grey-800">User Type</th>
+                    <th className="py-2 px-4 border-b text-grey-800">Country</th>
+                    <th className="py-2 px-4 border-b text-grey-800">Denial Date</th>
                 </tr>
                 </thead>
                 <tbody>

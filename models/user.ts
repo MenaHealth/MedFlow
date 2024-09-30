@@ -9,7 +9,7 @@ interface IUser extends Document {
   firstName: string;
   lastName: string;
   email: string;
-  accountType: 'Doctor' | 'Triage' | 'Admin' | 'Pending';
+  accountType: 'Doctor' | 'Triage';
   password: string;
   doctorSpecialty?: DoctorSpecialtyList;
   languages?: string[];
@@ -21,6 +21,9 @@ interface IUser extends Document {
     question: SecurityQuestion;
     answer: string;
   }[];
+  authorized: boolean;
+  approvalDate?: Date;
+  denialDate?: Date;
 }
 
 const UserSchema = new Schema<IUser>({
@@ -44,7 +47,7 @@ const UserSchema = new Schema<IUser>({
   accountType: {
     type: String,
     required: [true, 'Account type is required!'],
-    enum: ['Doctor', 'Triage', 'Admin', 'Pending'],
+    enum: ['Doctor', 'Triage'],
   },
   doctorSpecialty: {
     type: String,
@@ -82,6 +85,16 @@ const UserSchema = new Schema<IUser>({
       required: [true, 'Answer is required!'],
     },
   }],
+  authorized: {
+    type: Boolean,
+    default: false,
+  },
+  approvalDate: {
+    type: Date,
+  },
+  denialDate: {
+    type: Date,
+  },
 });
 
 UserSchema.pre('save', async function (next) {

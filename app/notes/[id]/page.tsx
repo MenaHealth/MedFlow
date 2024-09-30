@@ -3,18 +3,30 @@
 
 import React from 'react';
 import { useSession } from "next-auth/react";
+import { useRouter } from 'next/navigation';
 import NotesForm from "@/components/form/NotesForm";
 import PatientSubmenu from "@/components/PatientSubmenu";
 
 interface NotesPageProps {
     params: {
         id: string;
-    }
+    };
 }
 
 const NotesPage: React.FC<NotesPageProps> = ({ params }) => {
-    const { data: session } = useSession();
-    const username = session?.user?.name || session?.user?.email || 'Anonymous';
+    const { data: session, status } = useSession();
+    const router = useRouter();
+
+    if (status === 'unauthenticated') {
+        router.push('/auth');
+        return null;
+    }
+
+    if (status === 'loading') {
+        return <p>Loading...</p>;
+    }
+
+    const username = `${session?.user?.firstName} ${session?.user?.lastName}`;
 
     return (
         <div className="w-full max-w-4xl mx-auto pb-16">
@@ -25,6 +37,6 @@ const NotesPage: React.FC<NotesPageProps> = ({ params }) => {
             </div>
         </div>
     );
-}
+};
 
 export default NotesPage;

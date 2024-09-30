@@ -4,7 +4,7 @@
 
 
 import * as React from 'react';
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
@@ -73,7 +73,7 @@ export default function PatientTriage() {
     ].filter(Boolean).length >= 2);
   }, [priorityFilter, statusFilter, specialtyFilter]);
 
-  const sortAndFilterRows = (
+  const sortAndFilterRows = useCallback((
       rows,
       priorityFilter,
       statusFilter,
@@ -112,7 +112,6 @@ export default function PatientTriage() {
             session.user.doctorSpecialty === row.specialty &&
             // Only patients who live in the same country
             session.user.countries.indexOf(row.country) !== -1
-          
       );
     }
 
@@ -129,7 +128,7 @@ export default function PatientTriage() {
     });
 
     return sortedRows;
-  };
+  }, [session]);
 
   useEffect(() => {
     const fetchAndSortRows = async () => {
@@ -149,7 +148,8 @@ export default function PatientTriage() {
     };
 
     fetchAndSortRows();
-  }, [priorityFilter, statusFilter, specialtyFilter, session]);
+
+  }, [priorityFilter, statusFilter, specialtyFilter, session, sortAndFilterRows]);
 
   const handleStatusChange = async (value, row, index) => {
     let triagedBy = row.triagedBy ?? {};

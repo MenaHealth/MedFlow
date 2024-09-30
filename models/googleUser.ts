@@ -5,7 +5,7 @@ interface IGoogleUser extends Document {
     userID?: string;
     name: string;
     email: string;
-    accountType: 'Doctor' | 'Triage' | 'Admin' | 'Pending';
+    accountType: 'Doctor' | 'Triage' | 'Pending';
     specialties?: string[];
     image?: string;
 }
@@ -27,7 +27,7 @@ const GoogleUserSchema = new Schema<IGoogleUser>({
     accountType: {
         type: String,
         required: [true, 'Account type is required!'],
-        enum: ['Doctor', 'Triage', 'Admin', 'Pending'],
+        enum: ['Doctor', 'Triage'],
     },
     image: {
         type: String,

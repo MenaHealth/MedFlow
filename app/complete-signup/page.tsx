@@ -10,7 +10,7 @@ import { RadioCard } from '@/components/ui/radio-card';
 import { Button } from "@/components/ui/button";
 
 
-const CompleteSignup = () => {
+const SignupSuccess = () => {
     const { data: session, update } = useSession();
     const router = useRouter();
     const [accountType, setAccountType] = useState<'Doctor' | 'Triage'>('Doctor');
@@ -107,4 +107,4 @@ const CompleteSignup = () => {
     );
 };
 
-export default CompleteSignup;
+export default SignupSuccess;

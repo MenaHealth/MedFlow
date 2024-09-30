@@ -1,4 +1,4 @@
-// app/api/auth/forgot-password/answer-security-question/route.js
+// app/api/auth/forgot-password/answer-security-question/route.ts
 import User from '@/models/user';
 import dbConnect from '@/utils/database';
 import bcrypt from 'bcryptjs';

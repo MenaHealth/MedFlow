@@ -1,6 +1,6 @@
-// app/api/auth/email/welcome/route.js
+// app/api/auth/email/welcome/route.ts
 import { NextResponse } from 'next/server';
-import { sendGraphEmail } from '@/utils/email';  // Use the new sendGraphEmail function
+import { sendWelcomeEmail } from '@/utils/emails/user-signup';
 // this API route sends an email after a signup is processed
 export async function POST(request) {
     const { email } = await request.json();
@@ -10,7 +10,7 @@ export async function POST(request) {
     }
 
     try {
-        await sendGraphEmail(email);  // Use the Graph API to send the email
+        await sendWelcomeEmail(email);  // Use the Graph API to send the email
         return NextResponse.json({ message: 'Welcome email sent successfully' }, { status: 200 });
     } catch (error) {
         console.error('Error sending welcome email:', error);

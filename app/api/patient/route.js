@@ -1,4 +1,4 @@
-// app/api/patient/route.js
+// app/api/patient/route.ts
 import Patient from "@/models/patient";
 // import { connectToDB } from "@/utils/database";
 import dbConnect from "@/utils/database";
@@ -26,7 +26,8 @@ export const PATCH = async (request, { params }) => {
         coordinatorId,
         status,
         triagedBy,
-        notes
+        notes,
+        doctor
     } = await request.json();
 
     try {
@@ -45,6 +46,7 @@ export const PATCH = async (request, { params }) => {
         existingPatient.status = status ?? existingPatient.status;
         existingPatient.triagedBy = triagedBy ?? existingPatient.triagedBy;
         existingPatient.notes = notes ?? existingPatient.notes;
+        existingPatient.doctor = doctor ?? existingPatient.doctor;
 
         if (assignedDocId) {
             existingPatient.assignedDocId = assignedDocId === "unassign" ? null : assignedDocId;

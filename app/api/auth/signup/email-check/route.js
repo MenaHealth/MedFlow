@@ -1,4 +1,4 @@
-// app/api/auth/signup/email-check/route.js
+// app/api/auth/signup/email-check/route.ts
 export const dynamic = 'force-dynamic';
 // have this line ^^ to stop the Dynamic server usage errors when running `npm run build`
 

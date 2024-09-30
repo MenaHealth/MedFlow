@@ -1,3 +1,4 @@
+// components/Nav.jsx
 "use client";
 
 import Link from "next/link";
@@ -34,9 +35,9 @@ const Nav = () => {
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (
-                dropdownRef.current && 
+                dropdownRef.current &&
                 !dropdownRef.current.contains(event.target) &&
-                avatarRef.current && 
+                avatarRef.current &&
                 !avatarRef.current.contains(event.target)
             ) {
                 setToggleDropdown(false);
@@ -79,6 +80,11 @@ const Nav = () => {
                     )}
                     {session?.user && (
                         <>
+                            {session?.user?.isAdmin && (
+                                <Link href="/admin" className="outline_btn">
+                                    Admin Dashboard
+                                </Link>
+                            )}
                             <div className="relative">
                                 <div
                                     className="cursor-pointer"
@@ -157,6 +163,11 @@ const Nav = () => {
                                 <Link href="/my-profile" className="outline_btn mobile_link">
                                     My Profile
                                 </Link>
+                                {session?.user?.isAdmin && (
+                                    <Link href="/admin" className="outline_btn mobile_link">
+                                        Admin Dashboard
+                                    </Link>
+                                )}
                                 <button
                                     type="button"
                                     onClick={() => {

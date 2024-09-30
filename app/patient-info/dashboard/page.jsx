@@ -4,7 +4,7 @@
 
 
 import * as React from 'react';
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
@@ -73,7 +73,7 @@ export default function PatientTriage() {
     ].filter(Boolean).length >= 2);
   }, [priorityFilter, statusFilter, specialtyFilter]);
 
-  const sortAndFilterRows = (
+  const sortAndFilterRows = useCallback((
       rows,
       priorityFilter,
       statusFilter,
@@ -100,24 +100,21 @@ export default function PatientTriage() {
       );
     }
 
-    // Filter for specific doctor - expand logic?
+    // Additional filtering for doctors
     if (session?.user?.accountType === "Doctor") {
       filteredRows = filteredRows.filter(
-          (row) => 
-            // Only patients who are at least triaged
-            row.triagedBy && Object.keys(row.triagedBy).length !== 0 &&
-            // Only patients who speak the same language
-            session.user.languages.indexOf(row?.language) !== -1 && 
-            // Only patients who have needs matching the doctor's specialty
-            session.user.doctorSpecialty === row.specialty
-          
+          (row) =>
+              row.triagedBy && Object.keys(row.triagedBy).length !== 0 &&
+              session.user.languages.includes(row?.language) &&
+              session.user.doctorSpecialty === row.specialty &&
+              session.user.countries.includes(row.country)
       );
     }
 
     if (statusFilter !== "Archived") {
       filteredRows = filteredRows.filter(
           (row) => row.status !== "Archived"
-      )
+      );
     }
 
     let sortedRows = [...filteredRows].sort((a, b) => {
@@ -127,7 +124,7 @@ export default function PatientTriage() {
     });
 
     return sortedRows;
-  };
+  }, [session]);
 
   useEffect(() => {
     const fetchAndSortRows = async () => {
@@ -147,7 +144,7 @@ export default function PatientTriage() {
     };
 
     fetchAndSortRows();
-  }, [priorityFilter, statusFilter, specialtyFilter, session]);
+  }, [priorityFilter, statusFilter, specialtyFilter, session, sortAndFilterRows]);
 
   const handleStatusChange = async (value, row, index) => {
     let triagedBy = row.triagedBy ?? {};
@@ -222,7 +219,7 @@ export default function PatientTriage() {
         body: JSON.stringify({
           _id: rows[index]["_id"],
           status: "In-Progress",
-          doctor
+          doctor: doctor
         }),
       });
       const updatedRows = [...rows];

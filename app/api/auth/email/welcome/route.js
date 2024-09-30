@@ -1,4 +1,4 @@
-// app/api/auth/email/welcome/route.js
+// app/api/auth/email/welcome/route.ts
 import { NextResponse } from 'next/server';
 import { sendWelcomeEmail } from '@/utils/emails/user-signup';
 // this API route sends an email after a signup is processed

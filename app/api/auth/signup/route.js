@@ -1,4 +1,4 @@
-// app/api/signup/route.js
+// app/api/signup/route.ts
 import { NextResponse } from 'next/server';
 import User from '@/models/user';
 import Admin from '@/models/admin';  // Updated to "admin" collection

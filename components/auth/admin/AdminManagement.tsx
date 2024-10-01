@@ -251,7 +251,7 @@ export default function AdminManagement() {
                                         Remove Admin
                                     </Button>
                                 ) : (
-                                    <span className="text-grey-500">Cannot remove last admin</span>
+                                    <span className="text-orange-50 border-2 border-orange-50">root admin</span>
                                 )}
                             </td>
                         </tr>

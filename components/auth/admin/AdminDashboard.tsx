@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import useToast from '@/components/hooks/useToast';
 import { useRouter } from 'next/navigation';
 import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
-import PendingApprovals from './PendingApprovals';
+import PendingUsers from './PendingUsers';
 import ExistingUsers from './ExistingUsers';
 import DeniedUsers from './DeniedUsers';
 import { BarLoader } from 'react-spinners';
@@ -144,7 +144,7 @@ export default function AdminDashboard() {
                                 <BarLoader color="var(--orange-500)" />
                             </div>
                         ) : (
-                            <PendingApprovals data={pendingApprovalsData} />
+                            <PendingUsers data={pendingApprovalsData} />
                         )}
                     </div>
                 </div>

@@ -1,4 +1,4 @@
-// components/auth/admin/PendingApprovals.tsx
+// components/auth/admin/PendingUsers.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -19,7 +19,7 @@ interface PendingApprovalsProps {
     data: User[] | null;
 }
 
-export default function PendingApprovals({ data }: PendingApprovalsProps) {
+export default function PendingUsers({ data }: PendingApprovalsProps) {
     const { data: session } = useSession();
     const [users, setUsers] = useState<User[]>([]);
     const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
@@ -28,6 +28,7 @@ export default function PendingApprovals({ data }: PendingApprovalsProps) {
     const [totalPages, setTotalPages] = useState(1);
     const { setToast } = useToast();
 
+    // Fetch pending users from the server
     // Fetch pending users from the server
     useEffect(() => {
         const fetchPendingUsers = async () => {

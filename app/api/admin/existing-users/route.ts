@@ -27,7 +27,7 @@ export async function GET(request: Request) {
 
         // Fetch matching users with pagination
         const existingUsers = await User.find(query)
-            .select('firstName lastName email')
+            .select('firstName lastName email accountType countries approvalDate')
             .skip(skip)
             .limit(limit);
 

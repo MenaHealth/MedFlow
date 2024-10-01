@@ -68,12 +68,13 @@ export default function ExistingUsers({ data }: ExistingUsersProps) {
         }
 
         try {
-            const response = await fetch('/api/admin/move-to-denied', {
+            const response = await fetch('/api/admin/deny', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    Authorization: `Bearer ${session.user.token}`, // Add authorization header
                 },
-                body: JSON.stringify({ userId }),
+                body: JSON.stringify({ userIds: [userId] }),  // Pass userId in an array
             });
 
             if (!response.ok) {
@@ -120,7 +121,7 @@ export default function ExistingUsers({ data }: ExistingUsersProps) {
                     users.map((user, index) => (
                         <tr key={user._id}>
                             <td className="py-2 px-4 border-b">
-                                {user.firstName} {user.lastName} {index === 0 && <span className="text-orange-500">(Admin)</span>}
+                                {user.firstName} {user.lastName}
                             </td>
                             <td className="py-2 px-4 border-b">{user.email}</td>
                             <td className="py-2 px-4 border-b">{user.accountType}</td>
@@ -137,7 +138,7 @@ export default function ExistingUsers({ data }: ExistingUsersProps) {
                                         <Minus className="w-5 h-5" />
                                     </button>
                                 ) : (
-                                    <span className="text-gray-500">Admin</span>
+                                    <span className="text-orange-50 bg-orange-600"> Root</span>
                                 )}
                             </td>
                         </tr>

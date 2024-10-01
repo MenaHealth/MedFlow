@@ -13,10 +13,14 @@ export async function GET(request: Request) {
     const skip = (page - 1) * limit;
 
     try {
-        // Fetch users who are not authorized (pending approval)
-        const totalUsers = await User.countDocuments({ authorized: false });
-        const pendingUsers = await User.find({ authorized: false })
-            .select('firstName lastName email accountType countries')
+        // Query for users who haven't been approved or denied yet (authorized is not set)
+        const query = {
+            authorized: { $exists: false },
+        };
+
+        const totalUsers = await User.countDocuments(query);
+        const pendingUsers = await User.find(query)
+            .select('firstName lastName email accountType countries')  // Fetch only required fields
             .skip(skip)
             .limit(limit);
 

@@ -1,10 +1,14 @@
+// app/api/auth/[...nextauth]/route.ts
+
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 import User from '@/models/user';
 import GoogleUser from '@/models/googleUser';
+import Admin from '@/models/admin';
 import dbConnect from '@/utils/database';
 
 const handler = NextAuth({
@@ -25,37 +29,58 @@ const handler = NextAuth({
       async authorize(credentials) {
         await dbConnect();
         const { email, password } = credentials;
-        let user;
 
-        // Check account type and query the correct collection
-        user = await User.findOne({ email });
+                // Find the user by email, and explicitly select the "authorized" field
+                const user = await User.findOne({ email }).select('+authorized');
 
-        if (!user) {
-          throw new Error('That email does not exist in our database.');
-        }
+                // If no user found, throw an error
+                if (!user) {
+                    console.error('No user found for email:', email); // Debugging
+                    throw new Error('That email does not exist in our database.');
+                }
 
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) {
-          throw new Error('Invalid password');
-        }
+                // Log user authorization status for debugging
+                console.log('User authorization status:', user.authorized);
 
-        user.lastLogin = new Date();
-        await user.save();
+                // If the user is not authorized, throw an error
+                if (!user.authorized) {
+                    console.error('User not authorized:', email); // Debugging
+                    throw new Error('Your account has not been approved yet.');
+                }
 
-        const session = {
-          id: user._id.toString(),
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          accountType: user.accountType,
-          image: user.image,
-        };
+                // Validate the password
+                const isPasswordValid = await bcrypt.compare(password, user.password);
 
-        if (user.accountType === 'Doctor') {
-          session.doctorSpecialty = user.doctorSpecialty;
-          session.languages = user.languages;
-          session.countries = user.countries;
-        }
+                // Log password validation for debugging
+                console.log('Password validation result:', isPasswordValid);
+
+                if (!isPasswordValid) {
+                    console.error('Invalid password for user:', email); // Debugging
+                    throw new Error('Invalid password');
+                }
+
+                // Update last login date
+                user.lastLogin = new Date();
+                await user.save();
+
+                // Check if the user is an admin
+                const isAdmin = await Admin.findOne({ userId: user._id });
+
+                const session = {
+                    id: user._id.toString(),
+                    email: user.email,
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    accountType: user.accountType,
+                    image: user.image,
+                    isAdmin: !!isAdmin,
+                };
+
+                if (user.accountType === 'Doctor') {
+                    session.doctorSpecialty = user.doctorSpecialty;
+                    session.languages = user.languages;
+                    session.countries = user.countries;
+                }
 
         return session;
       }
@@ -66,7 +91,6 @@ const handler = NextAuth({
       console.log("user", user);
       console.log("account", account);
       console.log("profile", profile);
-
       if (account.provider === "google") {
         await dbConnect(); 
         const existingGoogleUser = await GoogleUser.findOne({ email: user.email });
@@ -77,6 +101,7 @@ const handler = NextAuth({
             firstName: profile.given_name,
             lastName: profile.family_name,
             image: user.image,
+            accountType: "Pending",
           });
         }
       }
@@ -99,17 +124,23 @@ const handler = NextAuth({
             // You can set default token values or indicate that the user is in a 'Pending' state
             token.accountType = 'Pending';  // Or any default value
           }
-        } else {
+        } else if (user) {
           token.id = user.id;
           token.accountType = user.accountType;
+          token.firstName = user.firstName;
+          token.lastName = user.lastName;
+          token.image = user.image;
+          token.isAdmin = user.isAdmin;
+          token.accessToken = jwt.sign(
+            { id: user._id, email: user.email, isAdmin: user.isAdmin },
+            process.env.JWT_SECRET, 
+            { expiresIn: '1d' } // Set expiration time for the JWT
+        );
           if (user.accountType === 'Doctor') {
             token.languages = user.languages;
             token.doctorSpecialty = user.doctorSpecialty;
             token.countries = user.countries;
           }
-          token.firstName = user.firstName;
-          token.lastName = user.lastName;
-          token.image = user.image;
         }
       }
       if (trigger === 'update') {

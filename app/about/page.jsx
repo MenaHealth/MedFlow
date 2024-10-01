@@ -179,14 +179,14 @@ export default function AboutPage() {
                                         <li>Provide the following information:
                                             <ul className="list-disc list-inside ml-4 mt-2">
                                                 <li>Full Name</li>
-                                                <li>Position: Physician</li>
+                                                <li>Doctor Specialty</li>
                                                 <li>Date of Birth</li>
                                                 <li>Email Address</li>
                                                 <li>Languages Spoken</li>
                                                 <li>Countries Seeing Patients</li>
                                             </ul>
                                         </li>
-                                        <li><b>Await approval from a <u>Triage Coordinator</u></b></li>
+                                        <li><b>Await approval from a <u>site administrator</u></b></li>
                                     </ul>
                                 </div>
                                 <div>
@@ -223,7 +223,7 @@ export default function AboutPage() {
 
                 <div className="mt-20">
                     <Card className="p-8 bg-white">
-                        <div className="flex flex-col md:flex-row items-start">
+                        <div className="flex flex-col items-start">
                             <div className="flex-1">
                                 <h2 className="text-3xl font-bold text-black mb-4">Patient Care</h2>
                                 <p className="text-lg text-darkBlue mb-6">
@@ -242,13 +242,6 @@ export default function AboutPage() {
                                 </div>
                             </div>
                             <div className="flex-1 mt-8 md:mt-0 md:ml-8">
-                                <div className="relative w-full h-64 bg-gray-100 rounded-lg overflow-hidden">
-                                    {/* Placeholder for an image or illustration */}
-                                    <div className="absolute inset-0 flex items-center justify-center text-gray-400">
-                                        image placeholder
-                                        <Stethoscope className="w-24 h-24" />
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </Card>

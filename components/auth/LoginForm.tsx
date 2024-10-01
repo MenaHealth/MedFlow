@@ -78,19 +78,25 @@ export function LoginForm() {
             const response = await signIn('credentials', {
                 email: data.email,
                 password: data.password,
-                redirect: false
+                redirect: false,
             });
 
             if (response && !response.error) {
+                // Successful login
                 setToast?.({ title: '✓', description: 'You have successfully logged in.', variant: 'default' });
                 router.replace('/patient-info/dashboard');
-                // Optionally, redirect to a protected route
-            } else if (response && response.status === 401) {
-                // 401 Unauthorized means incorrect login credentials
-                setToast?.({ title: 'Login Error', description: 'Incorrect login credentials.', variant: 'destructive' });
-            } else {
-                // const result = await response.json();
-                // setToast?.({ title: 'Login Error', description: result.message, variant: 'error' });
+            } else if (response?.error) {
+                // Check for the specific error message returned by the API
+                if (response.error.includes('Your account has not been approved yet')) {
+                    setToast?.({ title: 'Account not approved', description: response.error, variant: 'default' });
+                } else if (response.error.includes('Invalid password')) {
+                    setToast?.({ title: 'Login Error', description: 'Incorrect password.', variant: 'destructive' });
+                } else if (response.status === 401) {
+                    // Handle incorrect login credentials
+                    setToast?.({ title: 'Login Error', description: 'Incorrect login credentials.', variant: 'destructive' });
+                } else {
+                    setToast?.({ title: 'Login Error', description: response.error, variant: 'error' });
+                }
             }
         } catch (error) {
             setToast?.({ title: 'Login Error', description: 'An unexpected error occurred. Please try again.', variant: 'error' });

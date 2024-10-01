@@ -1,4 +1,4 @@
-// app/api/patient/notes/[id]/route.js
+// app/api/patient/notes/[id]/route.ts
 export const dynamic = 'force-dynamic';
 // have this line ^^ to stop the Dynamic server usage errors when running `npm run build`
 

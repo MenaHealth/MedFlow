@@ -1,4 +1,4 @@
-// app/api/auth/forgot-password/get-security-questions/route.js
+// app/api/auth/forgot-password/get-security-questions/route.ts
 import User from '@/models/user';
 import dbConnect from '@/utils/database';
 

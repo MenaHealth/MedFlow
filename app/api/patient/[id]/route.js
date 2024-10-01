@@ -1,4 +1,4 @@
-// app/api/patient/[id]/route.js
+// app/api/patient/[id]/route.ts
 import Patient from "@/models/patient";
 import dbConnect from "@/utils/database";
 import { Types } from "mongoose";

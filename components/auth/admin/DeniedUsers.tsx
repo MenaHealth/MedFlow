@@ -16,14 +16,18 @@ interface User {
     denialDate?: string;
 }
 
-export default function DeniedUsers() {
+interface DeniedUsersProps {
+    data: User[] | null;
+}
+
+export default function DeniedUsers({ data }: DeniedUsersProps) {
     const { data: session } = useSession();
     const [users, setUsers] = useState<User[]>([]);
     const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const { setToast } = useToast();
-    const [isSelecting, setIsSelecting] = useState(false);  // Toggle for selection mode
+    const [isSelecting, setIsSelecting] = useState(false);
 
     useEffect(() => {
         const fetchDeniedUsers = async () => {

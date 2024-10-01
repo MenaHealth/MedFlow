@@ -30,7 +30,7 @@ export default function AdminDashboard() {
     const [existingUsersData, setExistingUsersData] = useState(null);
     const [deniedUsersData, setDeniedUsersData] = useState(null);
 
-    const toggleSection = async (section: 'pending' | 'existing' | 'denied') => {
+    const toggleSection = async (section: 'pending' | 'existing' | 'denied' | 'addAdmin' ) => {
         if (section === 'pending') {
             setIsPendingApprovalsOpen((prev) => !prev);
             if (!pendingApprovalsData && !loadingPendingApprovals) {
@@ -56,7 +56,7 @@ export default function AdminDashboard() {
                 setLoadingDeniedUsers(false);
             }
         } else if (section === 'addAdmin') {
-            setIsAddAdminUsersOpen((prev) => !prev); // Toggle the new Add Admin Users section
+            setIsAddAdminUsersOpen((prev) => !prev);
         }
     };
 

@@ -1,3 +1,4 @@
+// app/api/admin/management/route.ts
 import { NextResponse } from 'next/server';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import User from '@/models/user';
@@ -72,7 +73,13 @@ export async function POST(request: Request) {
 
     } catch (error) {
         console.error('Error during admin addition:', error);
-        return NextResponse.json({ message: `Failed to add user as admin: ${error.message}` }, { status: 500 });
+
+        // Type guard to check if error is an instance of Error
+        if (error instanceof Error) {
+            return NextResponse.json({ message: `Failed to add user as admin: ${error.message}` }, { status: 500 });
+        } else {
+            return NextResponse.json({ message: 'Failed to add user as admin due to an unknown error' }, { status: 500 });
+        }
     }
 }
 
@@ -86,11 +93,15 @@ export async function GET() {
         return NextResponse.json({ admins }, { status: 200 });
     } catch (error) {
         console.error('Error fetching admins:', error);
-        return NextResponse.json({ message: `Failed to fetch admins: ${error.message}` }, { status: 500 });
+
+        if (error instanceof Error) {
+            return NextResponse.json({ message: `Failed to fetch admins: ${error.message}` }, { status: 500 });
+        } else {
+            return NextResponse.json({ message: 'Failed to fetch admins due to an unknown error' }, { status: 500 });
+        }
     }
 }
 
-// DELETE: Remove a user from the admin collection
 export async function DELETE(request: Request) {
     try {
         console.log('API request received. Connecting to database...');
@@ -129,6 +140,11 @@ export async function DELETE(request: Request) {
         return NextResponse.json({ message: 'Admin removed successfully' }, { status: 200 });
     } catch (error) {
         console.error('Error removing admin:', error);
-        return NextResponse.json({ message: `Failed to remove admin: ${error.message}` }, { status: 500 });
+
+        if (error instanceof Error) {
+            return NextResponse.json({ message: `Failed to remove admin: ${error.message}` }, { status: 500 });
+        } else {
+            return NextResponse.json({ message: 'Failed to remove admin due to an unknown error' }, { status: 500 });
+        }
     }
 }

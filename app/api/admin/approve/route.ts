@@ -58,19 +58,20 @@ export async function POST(request: Request) {
                 return NextResponse.json({ message: `User not found: ${userId}` }, { status: 404 });
             }
 
-            // Approve the user
-            console.log(`Approving user with ID: ${userId}`);
-            user.authorized = true;  // Set the authorized field to true
+            // Approve the user by setting authorized to true and clearing the denialDate
+            console.log(`Re-approving user with ID: ${userId}`);
+            user.authorized = true;  // Re-authorize the user
             user.approvalDate = new Date();  // Set the approval date to the current date
+            user.denialDate = undefined;  // Remove the denialDate
             await user.save();  // Save the updated user document
 
-            // Send the approval email to the user
+            // Optionally send the approval email again
             console.log(`Sending approval email to user: ${user.email}`);
             await sendApprovalEmail(user.email, user.firstName, user.lastName, user.accountType);
         }
 
         console.log('Users approved and emails sent successfully.');
-        return NextResponse.json({ message: 'Users approved successfully' }, { status: 200 });
+        return NextResponse.json({ message: 'Users re-approved successfully' }, { status: 200 });
     } catch (error) {
         console.error('Error during user approval:', error);
         const err = error as Error;

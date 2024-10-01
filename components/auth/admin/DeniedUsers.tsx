@@ -53,8 +53,8 @@ export default function DeniedUsers({ data }: DeniedUsersProps) {
     }, [session, currentPage, setToast]);
 
     return (
-        <div className="container bg mx-auto px-4 py-8">
-            <table className="min-w-full bg-grey-200">
+        <div className="container bg mx-auto px-4 py-8 bg-grey-100">
+            <table className="min-w-full">
                 <thead>
                 <tr>
                     <th className="py-2 px-4 border-b text-grey-800">Name</th>
@@ -93,7 +93,7 @@ export default function DeniedUsers({ data }: DeniedUsersProps) {
                     <button
                         onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                         disabled={currentPage === 1}
-                        className="p-2 rounded-full bg-gray-200 disabled:opacity-50"
+                        className="p-2 rounded-full bg-gray-100 disabled:opacity-50"
                     >
                         <ChevronLeftIcon className="h-5 w-5" />
                     </button>
@@ -103,7 +103,7 @@ export default function DeniedUsers({ data }: DeniedUsersProps) {
                     <button
                         onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                         disabled={currentPage === totalPages}
-                        className="p-2 rounded-full bg-gray-200 disabled:opacity-50"
+                        className="p-2 rounded-full bg-gray-100 disabled:opacity-50"
                     >
                         <ChevronRightIcon className="h-5 w-5" />
                     </button>

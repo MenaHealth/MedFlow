@@ -1,10 +1,10 @@
 // components/auth/admin/ExistingUsers.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import useToast from '@/components/hooks/useToast';
-import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
+import {ChevronLeft, ChevronRight, Minus} from 'lucide-react';
 
 interface User {
     _id: string;
@@ -107,12 +107,12 @@ export default function ExistingUsers({ data }: ExistingUsersProps) {
             <table className="min-w-full">
                 <thead>
                 <tr>
-                    <th className="py-2 px-4 border-b">Name</th>
-                    <th className="py-2 px-4 border-b">Email</th>
-                    <th className="py-2 px-4 border-b">User Type</th>
-                    <th className="py-2 px-4 border-b">Country</th>
-                    <th className="py-2 px-4 border-b">Approval Date</th>
-                    <th className="py-2 px-4 border-b">Actions</th>
+                    <th className="py-2 px-4 border-b text-orange-600">Name</th>
+                    <th className="py-2 px-4 border-b text-orange-600">Email</th>
+                    <th className="py-2 px-4 border-b text-orange-600">User Type</th>
+                    <th className="py-2 px-4 border-b text-orange-600">Country</th>
+                    <th className="py-2 px-4 border-b text-orange-600">Approval Date</th>
+                    <th className="py-2 px-4 border-b text-orange-600">Actions</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -132,9 +132,9 @@ export default function ExistingUsers({ data }: ExistingUsersProps) {
                                 {index !== 0 ? (
                                     <button
                                         onClick={() => handleMoveToDenied(user._id)}
-                                        className="border-2 border-darkBlue hover:bg-darkBlue hover:text-orange-50 text-darkBlue font-bold py-2 px-4 rounded"
+                                        className="border-2 border-orange-600 text-orange-600 font-bold hover:bg-orange-600 hover:text-orange-50  py-2 px-4 rounded mr-2"
                                     >
-                                        Move to Denied
+                                        <Minus className="w-5 h-5" />
                                     </button>
                                 ) : (
                                     <span className="text-gray-500">Admin</span>
@@ -158,7 +158,7 @@ export default function ExistingUsers({ data }: ExistingUsersProps) {
                         disabled={currentPage === 1}
                         className="p-2 rounded-full bg-gray-200 disabled:opacity-50"
                     >
-                        <ChevronLeftIcon className="h-5 w-5" />
+                        <ChevronLeft className="h-5 w-5" />
                     </button>
                     <span>
             Page {currentPage} of {totalPages}
@@ -168,7 +168,7 @@ export default function ExistingUsers({ data }: ExistingUsersProps) {
                         disabled={currentPage === totalPages}
                         className="p-2 rounded-full bg-gray-200 disabled:opacity-50"
                     >
-                        <ChevronRightIcon className="h-5 w-5" />
+                        <ChevronRight className="h-5 w-5" />
                     </button>
                 </div>
             )}

@@ -126,6 +126,8 @@ export default function AdminDashboard() {
         <div className="container mx-auto px-4 py-8">
             <h1 className="text-4xl font-bold mb-8 text-darkBlue text-center">Admin Dashboard</h1>
 
+
+
             {/* Pending Approvals */}
             <div className="mb-8 bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 ease-in-out">
                 <div
@@ -171,16 +173,16 @@ export default function AdminDashboard() {
             </div>
 
             {/* Denied Users */}
-            <div className="mb-8 bg-grey-200 rounded-lg shadow-md overflow-hidden transition-all duration-300 ease-in-out">
+            <div className="mb-8 bg-grey-100 rounded-lg shadow-md overflow-hidden transition-all duration-300 ease-in-out">
                 <div
-                    className="flex justify-between items-center cursor-pointer p-4 bg-grey-200"
+                    className="flex justify-between items-center cursor-pointer p-4 bg-grey-100"
                     onClick={() => toggleSection('denied')}
                 >
-                    <h2 className="text-2xl font-semibold text-grey-700">Denied Users</h2>
+                    <h2 className="text-2xl font-semibold text-grey-800">Denied Users</h2>
                     {isDeniedUsersOpen ? <ChevronUpIcon className="w-6 h-6 text-orange-500" /> : <ChevronDownIcon className="w-6 h-6 text-grey-700" />}
                 </div>
                 <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isDeniedUsersOpen ? 'max-h-[1000px]' : 'max-h-0'}`}>
-                    <div className="p-4 overflow-x-auto bg-grey-200">
+                    <div className="p-4 overflow-x-auto bg-grey-100">
                         {loadingDeniedUsers ? (
                             <div className="flex justify-center items-center py-4">
                                 <BarLoader color="var(--grey-500)" />

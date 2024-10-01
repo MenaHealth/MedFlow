@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import useToast from '@/components/hooks/useToast';
-import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
+import {ChevronLeftIcon, ChevronRightIcon, UserRoundCheck, UserRoundMinus} from 'lucide-react';
 
 interface User {
     _id: string;
@@ -123,20 +123,20 @@ export default function PendingApprovals({ data }: PendingApprovalsProps) {
 
     return (
         <div className="container mx-auto px-4 py-8 bg-orange-50">
-            <div className="mb-4">
+            <div className="flex justify-between items-center mb-4">
                 <button
                     onClick={() => handleBulkAction('approve')}
-                    className="border-2 border-darkBlue hover:bg-darkBlue hover:text-orange-50 text-darkBlue font-bold py-2 px-4 rounded mr-2"
+                    className="border-2 border-orange-800 text-orange-800 font-bold hover:bg-orange-800 hover:text-orange-50  py-2 px-4 rounded mr-2"
                     disabled={selectedUsers.length === 0}
                 >
-                    Approve Selected
+                    <UserRoundCheck className="w-5 h-5" />
                 </button>
                 <button
                     onClick={() => handleBulkAction('deny')}
-                    className="border-2 border-darkBlue hover:bg-darkBlue hover:text-orange-50 text-darkBlue font-bold py-2 px-4 rounded mr-2"
+                    className="border-2 border-orange-800 text-orange-800 font-bold hover:bg-orange-800 hover:text-orange-50  py-2 px-4 rounded mr-2"
                     disabled={selectedUsers.length === 0}
                 >
-                    Deny Selected
+                    <UserRoundMinus className="w-5 h-5" />
                 </button>
             </div>
 
@@ -151,10 +151,10 @@ export default function PendingApprovals({ data }: PendingApprovalsProps) {
                             checked={selectedUsers.length === users.length && users.length > 0}
                         />
                     </th>
-                    <th className="py-2 px-4 border-b">Name</th>
-                    <th className="py-2 px-4 border-b">Email</th>
-                    <th className="py-2 px-4 border-b">User Type</th>
-                    <th className="py-2 px-4 border-b">Country</th>
+                    <th className="py-2 px-4 border-b text-orange-800">Name</th>
+                    <th className="py-2 px-4 border-b text-orange-800">Email</th>
+                    <th className="py-2 px-4 border-b text-orange-800">User Type</th>
+                    <th className="py-2 px-4 border-b text-orange-800">Country</th>
                 </tr>
                 </thead>
                 <tbody>

@@ -4,7 +4,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import useToast from '@/components/hooks/useToast';
-import {ChevronLeftIcon, ChevronRightIcon, MinusIcon, PlusIcon, SearchIcon} from 'lucide-react';
+import {ChevronLeft, ChevronRight, Minus, Plus, SearchIcon} from 'lucide-react';
 import { SingleChoiceFormField } from '@/components/form/SingleChoiceFormField';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -179,16 +179,16 @@ export default function AdminManagement() {
         <div className="container mx-auto px-4 py-8 bg-darkBlue text-orange-50">
             <div className="flex justify-between items-center mb-4">
                 <Button
-                    className="bg-orange-100 hover:bg-orange-500 hover:text-orange-50 text-orange-500"
+                    className="border-2 border-orange-50 text-orange-50 font-bold hover:bg-orange-50 hover:text-darkBlue  py-2 px-4 rounded mr-2"
                     onClick={() => setShowAddAdmin(true)}
                 >
-                    <PlusIcon className="w-5 h-5" />
+                    <Plus className="w-5 h-5" />
                 </Button>
                 <Button
-                    className="bg-orange-100 hover:bg-orange-500 hover:text-orange-50 text-orange-500"
+                    className="border-2 border-orange-50 text-orange-50 font-bold hover:bg-orange-50 hover:text-darkBlue  py-2 px-4 rounded mr-2"
                     // onClick={() => setShowAddAdmin(true)}
                 >
-                    <MinusIcon className="w-5 h-5" />
+                    <Minus className="w-5 h-5" />
                 </Button>
             </div>
             {showAddAdmin && (
@@ -272,7 +272,7 @@ export default function AdminManagement() {
                         disabled={currentPage === 1}
                         className="p-2 rounded-full bg-grey-700 disabled:opacity-50"
                     >
-                        <ChevronLeftIcon className="h-5 w-5" />
+                        <ChevronLeft className="h-5 w-5" />
                     </Button>
                     <span>
                         Page {currentPage} of {totalPages}
@@ -282,7 +282,7 @@ export default function AdminManagement() {
                         disabled={currentPage === totalPages}
                         className="p-2 rounded-full bg-grey-700 disabled:opacity-50"
                     >
-                        <ChevronRightIcon className="h-5 w-5" />
+                        <ChevronRight className="h-5 w-5" />
                     </Button>
                 </div>
             )}

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSignupContext } from './SignupContext';
 import UserTypeForm from './UserTypeForm';
 import PasswordEmailForm from './PasswordEmailForm';
@@ -9,9 +9,22 @@ import NextButton from '@/components/auth/NextButton';
 import Submit from '@/components/auth/Submit';
 import ProgressBar from './progressBar';
 import BackButton from "@/components/auth/BackButton";
+import { useSession } from "next-auth/react";
 
 const SignupSection = () => {
-    const { currentStep, accountType, handleBack, progress } = useSignupContext();
+    const { currentStep, setCurrentStep, accountType, setAccountType, handleBack, progress } = useSignupContext();
+
+    const { data: session } = useSession();
+    console.log(session);
+
+    useEffect(() => {
+        const storedAccountType = localStorage.getItem('accountType') as 'Doctor' | 'Triage' | 'Admin' | 'Pending' | null;
+        if (storedAccountType) {
+            setAccountType(storedAccountType);
+            setCurrentStep(2);
+            localStorage.removeItem('accountType');
+        }
+    }, []);
 
     const renderForm = () => {
         switch (currentStep) {

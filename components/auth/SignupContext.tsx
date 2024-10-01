@@ -36,8 +36,8 @@ interface SignupContextValue {
     updateAnsweredQuestions: (step: number, count: number) => void;
     stepAnswers: number[];
     // userTypeForm
-    accountType: 'Doctor' | 'Triage' | null;
-    setAccountType: (accountType: 'Doctor' | 'Triage') => void;
+    accountType: 'Doctor' | 'Triage' | 'Admin' | 'Pending' | null;
+    setAccountType: (accountType: 'Doctor' | 'Triage' | 'Admin' | 'Pending' | null) => void;
     //PasswordEmailForm
     validEmail: boolean;
     setValidEmail: React.Dispatch<React.SetStateAction<boolean>>;
@@ -69,8 +69,8 @@ export const useSignupContext = () => {
 export const SignupProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [formData, setFormData] = useState<FormData>({});
     const [currentStep, setCurrentStep] = useState(0);
-    const [progress, setProgress] = useState(0);
-    const [accountType, setAccountType] = useState<'Doctor' | 'Triage' | null>(null);
+    const [progress, setProgress] = useState(2);
+    const [accountType, setAccountType] = useState<'Doctor' | 'Triage' | 'Admin' | 'Pending' | null>(null);
     const [answeredQuestions, setAnsweredQuestions] = useState(0);
     const [stepAnswers, setStepAnswers] = useState<number[]>(new Array(4).fill(0));
     // step 1: user type selection, step 2: email password, step 3: security questions, step 4: doctor / triage sign up
@@ -86,7 +86,7 @@ export const SignupProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }, [accountType]);
 
     const updateProgress = useCallback(() => {
-        const newProgress = (answeredQuestions / totalQuestions) * 100;
+        const newProgress = answeredQuestions ?((answeredQuestions / totalQuestions) * 100) : 2;
         console.log(`Answered Questions: ${answeredQuestions}, Total Questions: ${totalQuestions}, New Progress: ${newProgress}%`); // Log for debugging
         setProgress(newProgress);
     }, [answeredQuestions, totalQuestions]);
@@ -155,7 +155,6 @@ export const SignupProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                 setAnsweredQuestions,
                 updateAnsweredQuestions,
                 stepAnswers,
-
                 accountType,
                 setAccountType,
                 validEmail,

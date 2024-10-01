@@ -1,7 +1,7 @@
 // app/auth/page.tsx
 "use client"
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import LoginForm from '@/components/auth/LoginForm';
 import { RadioCard } from '@/components/ui/radio-card';
 import Flex from "@/components/ui/flex";
@@ -11,6 +11,7 @@ import SignupSection from '@/components/auth/SignupSection';
 import { ChevronUpIcon, ChevronDownIcon } from 'lucide-react';
 
 export default function AuthPage() {
+    const [accountType, setAccountType] = useState<'Doctor' | 'Triage' | 'Admin' | 'Pending' | null>(null);
     const [authType, setAuthType] = useState<'Login' | 'Signup'>('Login');
     const [isHeaderVisible, setIsHeaderVisible] = useState(true);
 
@@ -25,18 +26,31 @@ export default function AuthPage() {
         setIsHeaderVisible(!isHeaderVisible);
     };
 
+    useEffect(() => {
+        const storedAccountType = localStorage.getItem('accountType') as 'Doctor' | 'Triage' | 'Admin' | 'Pending' | null;
+        if (storedAccountType) {
+            setAccountType(storedAccountType);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (accountType) {
+            setAuthType('Signup');
+        }
+    }, [accountType]);
+
     return (
         // Set pointer-events-none on the entire wrapper, to allow interaction with Nav and Footer
         <div className="absolute inset-0 z-10 pointer-events-none flex items-center justify-center">
             {/* Only this section should be clickable */}
-            <div className="relative w-full md:w-[80vw] h-[80vh] bg-white rounded-lg shadow-md flex flex-col overflow-y-auto z-20 pointer-events-auto">
+            <div className="relative w-full md:w-[40vw] h-[80vh] bg-white flex flex-col overflow-y-auto z-20 pointer-events-auto">
                 {/* Header section */}
                 <div
                     className={`transition-all duration-300 ease-in-out ${
                         isHeaderVisible ? 'h-16' : 'h-0 overflow-hidden'
                     }`}
                 >
-                    <div className="p-4 bg-gray-100 h-full">
+                    <div className="p-4 h-full">
                         <RadioCard.Root
                             value={authType}
                             onValueChange={handleAuthTypeChange}
@@ -57,16 +71,18 @@ export default function AuthPage() {
                 </div>
 
                 {/* Toggle button */}
-                <button
-                    onClick={toggleHeader}
-                    className="absolute top-2 left-1/2 transform -translate-x-1/2 z-30 bg-white rounded-full p-1 shadow-md"
-                >
-                    {isHeaderVisible ? (
-                        <ChevronUpIcon size={24} />
-                    ) : (
-                        <ChevronDownIcon size={24} />
-                    )}
-                </button>
+                {authType === 'Signup' && (
+                    <button
+                        onClick={toggleHeader}
+                        className="absolute top-2 left-1/2 transform -translate-x-1/2 z-30 bg-white rounded-full p-1 shadow-md"
+                    >
+                        {isHeaderVisible ? (
+                            <ChevronUpIcon size={24} />
+                        ) : (
+                            <ChevronDownIcon size={24} />
+                        )}
+                    </button>
+                )}
 
                 {/* Content section */}
                 <div className="flex-grow overflow-y-auto md:p-8 p-4">

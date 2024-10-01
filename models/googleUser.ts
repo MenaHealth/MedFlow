@@ -3,9 +3,10 @@ import { Schema, model, models, Document } from 'mongoose';
 
 interface IGoogleUser extends Document {
     userID?: string;
-    name: string;
+    firstName?: string;
+    lastName?: string;
     email: string;
-    accountType: 'Doctor' | 'Triage' | 'Admin' | 'Pending';
+    accountType?: 'Doctor' | 'Triage' | 'Admin' | 'Pending';
     specialties?: string[];
     image?: string;
 }
@@ -15,9 +16,11 @@ const GoogleUserSchema = new Schema<IGoogleUser>({
         type: "String",
         required: [true, 'userID is required!'],
     },
-    name: {
+    firstName: {
         type: String,
-        required: [true, 'Name is required!'],
+    },
+    lastName: {
+        type: String,
     },
     email: {
         type: String,
@@ -26,7 +29,6 @@ const GoogleUserSchema = new Schema<IGoogleUser>({
     },
     accountType: {
         type: String,
-        required: [true, 'Account type is required!'],
         enum: ['Doctor', 'Triage', 'Admin', 'Pending'],
     },
     image: {

@@ -1,5 +1,6 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import GoogleProvider from 'next-auth/providers/google';
 import bcrypt from 'bcryptjs';
 
 import User from '@/models/user';
@@ -11,6 +12,10 @@ const handler = NextAuth({
     strategy: 'jwt',
   },
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
@@ -58,6 +63,10 @@ const handler = NextAuth({
   ],
   callbacks: {
     async signIn({ user, account, profile }) {
+      console.log("user", user);
+      console.log("account", account);
+      console.log("profile", profile);
+
       if (account.provider === "google") {
         await dbConnect(); 
         const existingGoogleUser = await GoogleUser.findOne({ email: user.email });
@@ -65,9 +74,9 @@ const handler = NextAuth({
           await GoogleUser.create({
             userID: profile?.sub || null,
             email: user.email,
-            firstName: user.name,
+            firstName: profile.given_name,
+            lastName: profile.family_name,
             image: user.image,
-            accountType: "Pending",
           });
         }
       }
@@ -84,6 +93,7 @@ const handler = NextAuth({
             token.id = googleUser.userID;
             token.accountType = googleUser.accountType;
             token.firstName = googleUser.firstName;
+            token.lastName = googleUser.lastName;
           } else {
             // Handle the case when the GoogleUser hasn't been created yet
             // You can set default token values or indicate that the user is in a 'Pending' state

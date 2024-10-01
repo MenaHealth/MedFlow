@@ -97,9 +97,9 @@ const SecurityQuestionsForm: React.FC = () => {
     };
 
     return (
-        <div className="w-full max-w-md mx-auto p-8">
+        <div className="w-full max-w-md mx-auto px-8">
             <FormProvider {...form}>
-                <form className="space-y-8 w-full">
+                <form className="w-full">
                     {[1, 2, 3].map((num, index) => (
                         <Card
                             key={num}
@@ -107,7 +107,7 @@ const SecurityQuestionsForm: React.FC = () => {
                             className={`p-6 transition-shadow duration-300 ${
                                 isCompleted[index] ? "opacity-100 shadow-lg border-orange-500" : "opacity-50 border-yellow-50"
                             } bg-white`}
-                            style={{ marginBottom: "24px" }}
+                            style={{ marginBottom: "12px" }}
                         >
                             <div className="space-y-4">
                                 <h2 className="text-lg font-semibold">Security Question {num}</h2>

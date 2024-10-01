@@ -15,7 +15,7 @@ const features = [
     { icon: FileText, title: "Prescription Management", description: "Generate and manage drug prescription paperwork" },
 ]
 
-const baseURL = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://gaza-meds.vercel.app/';
+const baseURL = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://medflow-mena-health.vercel.app/';
 
 export default function AboutPage() {
     return (

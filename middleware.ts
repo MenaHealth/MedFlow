@@ -23,7 +23,7 @@ export async function middleware(req: any) {
     if (pathname.startsWith('/admin')) {
         // Redirect if no token or user is not an admin
         if (!token || !token.isAdmin) {
-            return NextResponse.redirect(new URL('/auth', req.url));
+            return NextResponse.redirect(new URL('/', req.url));
         }
     }
 

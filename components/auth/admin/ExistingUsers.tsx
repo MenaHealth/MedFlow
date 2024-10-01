@@ -1,8 +1,10 @@
 // components/auth/admin/ExistingUsers.tsx
-import { useState, useEffect } from 'react';
+'use client';
+
+import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import useToast from '@/components/hooks/useToast';
-import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
+import {ChevronLeft, ChevronRight, Minus} from 'lucide-react';
 
 interface User {
     _id: string;
@@ -66,12 +68,13 @@ export default function ExistingUsers({ data }: ExistingUsersProps) {
         }
 
         try {
-            const response = await fetch('/api/admin/move-to-denied', {
+            const response = await fetch('/api/admin/deny', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    Authorization: `Bearer ${session.user.token}`, // Add authorization header
                 },
-                body: JSON.stringify({ userId }),
+                body: JSON.stringify({ userIds: [userId] }),  // Pass userId in an array
             });
 
             if (!response.ok) {
@@ -101,16 +104,16 @@ export default function ExistingUsers({ data }: ExistingUsersProps) {
     }
 
     return (
-        <div className="container mx-auto px-4 py-8">
-            <table className="min-w-full bg-white">
+        <div className="container mx-auto px-4 py-8 bg-orange-100 text-darkBlue">
+            <table className="min-w-full">
                 <thead>
                 <tr>
-                    <th className="py-2 px-4 border-b">Name</th>
-                    <th className="py-2 px-4 border-b">Email</th>
-                    <th className="py-2 px-4 border-b">User Type</th>
-                    <th className="py-2 px-4 border-b">Country</th>
-                    <th className="py-2 px-4 border-b">Approval Date</th>
-                    <th className="py-2 px-4 border-b">Actions</th>
+                    <th className="py-2 px-4 border-b text-orange-500">Name</th>
+                    <th className="py-2 px-4 border-b text-orange-500">Email</th>
+                    <th className="py-2 px-4 border-b text-orange-500">User Type</th>
+                    <th className="py-2 px-4 border-b text-orange-500">Country</th>
+                    <th className="py-2 px-4 border-b text-orange-500">Approval Date</th>
+                    <th className="py-2 px-4 border-b text-orange-500">Actions</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -118,7 +121,7 @@ export default function ExistingUsers({ data }: ExistingUsersProps) {
                     users.map((user, index) => (
                         <tr key={user._id}>
                             <td className="py-2 px-4 border-b">
-                                {user.firstName} {user.lastName} {index === 0 && <span className="text-blue-500">(Admin)</span>}
+                                {user.firstName} {user.lastName}
                             </td>
                             <td className="py-2 px-4 border-b">{user.email}</td>
                             <td className="py-2 px-4 border-b">{user.accountType}</td>
@@ -130,12 +133,12 @@ export default function ExistingUsers({ data }: ExistingUsersProps) {
                                 {index !== 0 ? (
                                     <button
                                         onClick={() => handleMoveToDenied(user._id)}
-                                        className="bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-2 rounded"
+                                        className="border-2 border-orange-500 text-orange-500 font-bold hover:bg-orange-500 hover:text-orange-50  py-2 px-4 rounded mr-2"
                                     >
-                                        Move to Denied
+                                        <Minus className="w-5 h-5" />
                                     </button>
                                 ) : (
-                                    <span className="text-gray-500">Admin</span>
+                                    <span className="text-orange-50 bg-orange-500"> Root</span>
                                 )}
                             </td>
                         </tr>
@@ -156,7 +159,7 @@ export default function ExistingUsers({ data }: ExistingUsersProps) {
                         disabled={currentPage === 1}
                         className="p-2 rounded-full bg-gray-200 disabled:opacity-50"
                     >
-                        <ChevronLeftIcon className="h-5 w-5" />
+                        <ChevronLeft className="h-5 w-5" />
                     </button>
                     <span>
             Page {currentPage} of {totalPages}
@@ -166,7 +169,7 @@ export default function ExistingUsers({ data }: ExistingUsersProps) {
                         disabled={currentPage === totalPages}
                         className="p-2 rounded-full bg-gray-200 disabled:opacity-50"
                     >
-                        <ChevronRightIcon className="h-5 w-5" />
+                        <ChevronRight className="h-5 w-5" />
                     </button>
                 </div>
             )}

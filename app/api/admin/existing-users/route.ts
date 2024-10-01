@@ -11,13 +11,22 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = parseInt(searchParams.get('limit') || '20', 10);
     const skip = (page - 1) * limit;
+    const search = searchParams.get('search') || '';
 
     try {
-        // Count the total number of authorized users
-        const totalUsers = await User.countDocuments({ authorized: true });
+        const query = {
+            authorized: true,
+            $or: [
+                { lastName: { $regex: search, $options: 'i' } },
+                { email: { $regex: search, $options: 'i' } }
+            ]
+        };
 
-        // Fetch authorized users with pagination
-        const existingUsers = await User.find({ authorized: true })
+        // Count the total number of matching users
+        const totalUsers = await User.countDocuments(query);
+
+        // Fetch matching users with pagination
+        const existingUsers = await User.find(query)
             .select('firstName lastName email accountType countries approvalDate')
             .skip(skip)
             .limit(limit);

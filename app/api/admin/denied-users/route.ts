@@ -1,4 +1,5 @@
 // app/api/admin/denied-users/route.ts
+
 import { NextResponse } from 'next/server';
 import dbConnect from '@/utils/database';
 import User from '@/models/user';
@@ -12,8 +13,8 @@ export async function GET(request: Request) {
     const skip = (page - 1) * limit;
 
     try {
-        const totalUsers = await User.countDocuments({ denied: true });
-        const deniedUsers = await User.find({ denied: true })
+        const totalUsers = await User.countDocuments({ denialDate: { $exists: true } });
+        const deniedUsers = await User.find({ denialDate: { $exists: true } })
             .select('firstName lastName email accountType countries denialDate')
             .skip(skip)
             .limit(limit);

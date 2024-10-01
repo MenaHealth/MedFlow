@@ -87,7 +87,8 @@ const UserSchema = new Schema<IUser>({
   }],
   authorized: {
     type: Boolean,
-    default: false,
+    select: false,
+    default: undefined,
   },
   approvalDate: {
     type: Date,
@@ -97,6 +98,11 @@ const UserSchema = new Schema<IUser>({
   },
 });
 
+UserSchema.virtual('denied').get(function () {
+  return !!this.denialDate;
+});
+
+// Pre-save hook for password hashing (already present)
 UserSchema.pre('save', async function (next) {
   const user = this;
   if (!user.isModified('password')) return next();

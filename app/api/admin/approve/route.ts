@@ -16,6 +16,7 @@ export async function POST(request: Request) {
         console.log('API request received. Connecting to database...');
         await dbConnect();
 
+        // Ensure the request is authenticated with a valid JWT token
         const authHeader = request.headers.get('authorization');
         if (!authHeader) {
             console.error('Authorization header missing');
@@ -31,19 +32,16 @@ export async function POST(request: Request) {
         console.log('Verifying JWT token...');
         const decoded = jwt.verify(token, SECRET) as string | JwtPayload;
 
-        // Ensure that the decoded token is an object and has isAdmin
+        // Ensure the decoded token is an object and the user is an admin
         if (typeof decoded === 'object' && decoded?.isAdmin) {
-            console.log('Admin authenticated successfully. Fetching user data...');
+            console.log('Admin authenticated successfully.');
         } else {
             console.error('Unauthorized: Admin access required');
             return NextResponse.json({ message: 'Admin access required' }, { status: 403 });
         }
 
+        // Extract userIds from the request body
         const body = await request.json();
-
-        // Log the body to check what is being received
-        console.log('Request body received:', body);
-
         const { userIds } = body;
 
         if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
@@ -51,6 +49,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ message: 'User IDs are required' }, { status: 400 });
         }
 
+        // Process each user for approval
         for (const userId of userIds) {
             console.log(`Searching for user with ID: ${userId}`);
             const user = await User.findById(userId);
@@ -59,18 +58,20 @@ export async function POST(request: Request) {
                 return NextResponse.json({ message: `User not found: ${userId}` }, { status: 404 });
             }
 
-            console.log(`Approving user with ID: ${userId}`);
-            user.authorized = true;
-            user.approvalDate = new Date();
-            await user.save();
+            // Approve the user by setting authorized to true and clearing the denialDate
+            console.log(`Re-approving user with ID: ${userId}`);
+            user.authorized = true;  // Re-authorize the user
+            user.approvalDate = new Date();  // Set the approval date to the current date
+            user.denialDate = undefined;  // Remove the denialDate
+            await user.save();  // Save the updated user document
 
+            // Optionally send the approval email again
             console.log(`Sending approval email to user: ${user.email}`);
-            console.log(`User data before approval: ${JSON.stringify(user)}`);
             await sendApprovalEmail(user.email, user.firstName, user.lastName, user.accountType);
         }
 
         console.log('Users approved and emails sent successfully.');
-        return NextResponse.json({ message : 'Users approved successfully' }, { status: 200 });
+        return NextResponse.json({ message: 'Users re-approved successfully' }, { status: 200 });
     } catch (error) {
         console.error('Error during user approval:', error);
         const err = error as Error;

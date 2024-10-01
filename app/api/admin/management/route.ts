@@ -10,24 +10,30 @@ if (!SECRET) {
 }
 
 // POST: Add a user to the admin collection
+
 export async function POST(request: Request) {
     try {
         console.log('API request received. Connecting to database...');
-        await dbConnect();
+        await dbConnect(); // Ensure connection to the database
 
+        // Authorization header check
         const authHeader = request.headers.get('authorization');
         if (!authHeader) {
+            console.error('Authorization header missing');
             return NextResponse.json({ message: 'Authorization header missing' }, { status: 401 });
         }
 
         const token = authHeader.split(' ')[1];
         if (!token) {
+            console.error('Token missing');
             return NextResponse.json({ message: 'Token missing' }, { status: 401 });
         }
 
-        const decoded = jwt.verify(token, SECRET) as string | JwtPayload;
+        const decoded = jwt.verify(token, SECRET) as JwtPayload;
 
+        // Ensure the user making the request is an admin
         if (typeof decoded !== 'object' || !decoded?.isAdmin) {
+            console.error('Admin access required');
             return NextResponse.json({ message: 'Admin access required' }, { status: 403 });
         }
 
@@ -35,32 +41,37 @@ export async function POST(request: Request) {
         const { userId } = body;
 
         if (!userId) {
+            console.error('User ID is missing in the request body');
             return NextResponse.json({ message: 'User ID is required' }, { status: 400 });
         }
 
         const user = await User.findById(userId);
         if (!user) {
+            console.error(`User not found for ID: ${userId}`);
             return NextResponse.json({ message: `User not found: ${userId}` }, { status: 404 });
         }
 
         // Check if the user is already an admin
         const existingAdmin = await Admin.findOne({ userId: user._id });
         if (existingAdmin) {
+            console.error('User is already an admin');
             return NextResponse.json({ message: 'User is already an admin' }, { status: 400 });
         }
 
-        // Add user to the admin collection
+        // Add the user to the admin collection
         const newAdmin = new Admin({
             userId: user._id,
             firstName: user.firstName,
             lastName: user.lastName,
             email: user.email,
         });
-        await newAdmin.save();
 
+        await newAdmin.save();
+        console.log('User added as admin successfully');
         return NextResponse.json({ message: 'User added as admin successfully' }, { status: 200 });
+
     } catch (error) {
-        console.error('Error adding user as admin:', error);
+        console.error('Error during admin addition:', error);
         return NextResponse.json({ message: `Failed to add user as admin: ${error.message}` }, { status: 500 });
     }
 }

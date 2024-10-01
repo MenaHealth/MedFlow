@@ -156,8 +156,8 @@ export default function AdminDashboard() {
                     className="flex justify-between items-center cursor-pointer p-4 bg-orange-100"
                     onClick={() => toggleSection('existing')}
                 >
-                    <h2 className="text-2xl font-semibold text-orange-600">Existing Users</h2>
-                    {isExistingUsersOpen ? <ChevronUpIcon className="w-6 h-6 text-orange-500" /> : <ChevronDownIcon className="w-6 h-6 text-orange-600" />}
+                    <h2 className="text-2xl font-semibold text-orange-500">Existing Users</h2>
+                    {isExistingUsersOpen ? <ChevronUpIcon className="w-6 h-6 text-orange-500" /> : <ChevronDownIcon className="w-6 h-6 text-orange-500" />}
                 </div>
                 <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isExistingUsersOpen ? 'max-h-[1000px]' : 'max-h-0'}`}>
                     <div className="p-4 overflow-x-auto bg-orange-100">

@@ -87,7 +87,8 @@ const UserSchema = new Schema<IUser>({
   }],
   authorized: {
     type: Boolean,
-    select: false,  // Exclude this field by default
+    select: false,
+    default: undefined,
   },
   approvalDate: {
     type: Date,

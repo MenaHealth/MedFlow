@@ -1,8 +1,8 @@
 // app/api/signup/route.ts
 import { NextResponse } from 'next/server';
 import User from '@/models/user';
-import Admin from '@/models/admin';  // Updated to "admin" collection
-import Settings from '@/models/settings'; // Settings model to track admin creation
+import Admin from '@/models/admin';
+import Settings from '@/models/settings';
 import dbConnect from '@/utils/database';
 import { sendWelcomeEmail } from '@/utils/emails/user-signup';
 
@@ -38,7 +38,8 @@ export async function POST(request) {
         // If no admin has been created, the first user will be authorized automatically
         const isAuthorized = !settings.isAdminCreated;
 
-        const newUser = new User({
+        // Create the user object
+        const newUserData = {
             accountType,
             email,
             password, // Password hashing happens in the model
@@ -50,13 +51,18 @@ export async function POST(request) {
             languages,
             countries,
             gender,
-            authorized: isAuthorized,  // First user authorized, others are not
-        });
+        };
 
+        // Add authorized field only for the first user
+        if (isAuthorized) {
+            newUserData.authorized = true;
+        }
+
+        const newUser = new User(newUserData);
         await newUser.save();
 
         // If this is the first user, create admin and mark admin creation in settings
-        if (!settings.isAdminCreated) {
+        if (isAuthorized) {
             await Admin.create({
                 userId: newUser._id,
                 firstName: newUser.firstName,

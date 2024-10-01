@@ -24,24 +24,41 @@ const handler = NextAuth({
             async authorize(credentials) {
                 await dbConnect();
                 const { email, password } = credentials;
-                const user = await User.findOne({ email });
 
+                // Find the user by email, and explicitly select the "authorized" field
+                const user = await User.findOne({ email }).select('+authorized');
+
+                // If no user found, throw an error
                 if (!user) {
+                    console.error('No user found for email:', email); // Debugging
                     throw new Error('That email does not exist in our database.');
                 }
 
+                // Log user authorization status for debugging
+                console.log('User authorization status:', user.authorized);
+
+                // If the user is not authorized, throw an error
                 if (!user.authorized) {
+                    console.error('User not authorized:', email); // Debugging
                     throw new Error('Your account has not been approved yet.');
                 }
 
+                // Validate the password
                 const isPasswordValid = await bcrypt.compare(password, user.password);
+
+                // Log password validation for debugging
+                console.log('Password validation result:', isPasswordValid);
+
                 if (!isPasswordValid) {
+                    console.error('Invalid password for user:', email); // Debugging
                     throw new Error('Invalid password');
                 }
 
+                // Update last login date
                 user.lastLogin = new Date();
                 await user.save();
 
+                // Check if the user is an admin
                 const isAdmin = await Admin.findOne({ userId: user._id });
 
                 const session = {

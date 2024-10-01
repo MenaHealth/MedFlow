@@ -108,12 +108,12 @@ export default function ExistingUsers({ data }: ExistingUsersProps) {
             <table className="min-w-full">
                 <thead>
                 <tr>
-                    <th className="py-2 px-4 border-b text-orange-600">Name</th>
-                    <th className="py-2 px-4 border-b text-orange-600">Email</th>
-                    <th className="py-2 px-4 border-b text-orange-600">User Type</th>
-                    <th className="py-2 px-4 border-b text-orange-600">Country</th>
-                    <th className="py-2 px-4 border-b text-orange-600">Approval Date</th>
-                    <th className="py-2 px-4 border-b text-orange-600">Actions</th>
+                    <th className="py-2 px-4 border-b text-orange-500">Name</th>
+                    <th className="py-2 px-4 border-b text-orange-500">Email</th>
+                    <th className="py-2 px-4 border-b text-orange-500">User Type</th>
+                    <th className="py-2 px-4 border-b text-orange-500">Country</th>
+                    <th className="py-2 px-4 border-b text-orange-500">Approval Date</th>
+                    <th className="py-2 px-4 border-b text-orange-500">Actions</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -133,12 +133,12 @@ export default function ExistingUsers({ data }: ExistingUsersProps) {
                                 {index !== 0 ? (
                                     <button
                                         onClick={() => handleMoveToDenied(user._id)}
-                                        className="border-2 border-orange-600 text-orange-600 font-bold hover:bg-orange-600 hover:text-orange-50  py-2 px-4 rounded mr-2"
+                                        className="border-2 border-orange-500 text-orange-500 font-bold hover:bg-orange-500 hover:text-orange-50  py-2 px-4 rounded mr-2"
                                     >
                                         <Minus className="w-5 h-5" />
                                     </button>
                                 ) : (
-                                    <span className="text-orange-50 bg-orange-600"> Root</span>
+                                    <span className="text-orange-50 bg-orange-500"> Root</span>
                                 )}
                             </td>
                         </tr>

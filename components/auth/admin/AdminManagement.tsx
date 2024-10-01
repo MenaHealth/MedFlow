@@ -4,8 +4,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import useToast from '@/components/hooks/useToast';
-import {ChevronLeft, ChevronRight, Minus, Plus, SearchIcon} from 'lucide-react';
-import { SingleChoiceFormField } from '@/components/form/SingleChoiceFormField';
+import {ChevronLeft, ChevronRight, Minus, Plus, Search, UserRoundCheck} from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -34,8 +33,9 @@ export default function AdminManagement() {
     const [showAddAdmin, setShowAddAdmin] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [users, setUsers] = useState<User[]>([]);
-    const [selectedUser, setSelectedUser] = useState<string | null>(null);
+    const [selectedUser, setSelectedUser] = useState<string | null>(null);  // Store user ID
 
+    // Fetch existing admins
     const fetchAdmins = useCallback(async () => {
         if (session?.user?.isAdmin) {
             setIsLoading(true);
@@ -65,6 +65,7 @@ export default function AdminManagement() {
         }
     }, [session, fetchAdmins]);
 
+    // Add new admin
     const handleAddAdmin = async () => {
         if (!selectedUser) {
             setToast?.({
@@ -82,7 +83,7 @@ export default function AdminManagement() {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${session?.user?.token}`,
                 },
-                body: JSON.stringify({ userId: selectedUser }),
+                body: JSON.stringify({ userId: selectedUser }),  // Send selected user ID
             });
 
             if (!response.ok) {
@@ -108,6 +109,7 @@ export default function AdminManagement() {
         }
     };
 
+    // Remove an admin
     const handleRemoveAdmin = async (adminId: string) => {
         if (admins.length <= 1) {
             setToast?.({
@@ -149,7 +151,10 @@ export default function AdminManagement() {
         }
     };
 
+    // Search users by email
     const handleSearch = useCallback(async () => {
+        if (!searchQuery) return;
+
         try {
             const res = await fetch(`/api/admin/existing-users?search=${searchQuery}`);
             if (!res.ok) throw new Error('Failed to fetch users');
@@ -165,12 +170,7 @@ export default function AdminManagement() {
         }
     }, [searchQuery, setToast]);
 
-    useEffect(() => {
-        if (searchQuery) {
-            handleSearch();
-        }
-    }, [searchQuery, handleSearch]);
-
+    // UI for loading state
     if (isLoading) {
         return <div className="text-center py-4">Loading...</div>;
     }
@@ -179,49 +179,58 @@ export default function AdminManagement() {
         <div className="container mx-auto px-4 py-8 bg-darkBlue text-orange-50">
             <div className="flex justify-between items-center mb-4">
                 <Button
-                    className="border-2 border-orange-50 text-orange-50 font-bold hover:bg-orange-50 hover:text-darkBlue  py-2 px-4 rounded mr-2"
-                    onClick={() => setShowAddAdmin(true)}
+                    className="border-2 border-orange-50 text-orange-50 font-bold hover:bg-orange-50 hover:text-darkBlue py-2 px-4 rounded mr-2"
+                    onClick={() => setShowAddAdmin(!showAddAdmin)}
                 >
                     <Plus className="w-5 h-5" />
                 </Button>
-                <Button
-                    className="border-2 border-orange-50 text-orange-50 font-bold hover:bg-orange-50 hover:text-darkBlue  py-2 px-4 rounded mr-2"
-                    // onClick={() => setShowAddAdmin(true)}
-                >
-                    <Minus className="w-5 h-5" />
-                </Button>
             </div>
+
             {showAddAdmin && (
-                <div className="mb-4 p-4 bg-grey-800 rounded-lg">
+                <div className="mb-4 p-4 border-2 border-orange-50 rounded-lg">
                     <h3 className="text-xl mb-2">Add New Admin</h3>
-                    <div className="flex items-center space-x-2 mb-4">
+                    <div className="flex items-center bg-orange-50 text-darkBlue">
                         <Input
                             type="text"
-                            placeholder="Search by last name or email"
+                            placeholder="Search by email"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="flex-grow"
                         />
-                        <Button onClick={handleSearch} className="bg-yellow-500 hover:bg-yellow-600 text-grey-900">
-                            <SearchIcon className="w-5 h-5" />
+                        <Button onClick={handleSearch} className="border-2 border-darkBlue bg-orange-50 hover:bg-darkBlue hover:text-orange-50 text-darkBlue">
+                            <Search className="w-5 h-5" />
                         </Button>
                     </div>
+
+                    {/* Display user search results */}
                     {users.length > 0 && (
-                        <SingleChoiceFormField
-                            fieldName="selectedUser"
-                            fieldLabel="Select User"
-                            choices={users.map(user => `${user.firstName} ${user.lastName} (${user.email})`)}
-                        />
+                        <div>
+                            <label>Select User:</label>
+                            <select
+                                onChange={(e) => setSelectedUser(e.target.value)}  // Store the selected user's ID
+                                className="w-full p-2 mt-2 border rounded-md bg-darkBlue"
+                            >
+                                <option value="">-- Select a user --</option>
+                                {users.map(user => (
+                                    <option key={user._id} value={user._id}>
+                                        {user.firstName} {user.lastName} ({user.email})
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                     )}
+
                     <Button
                         onClick={handleAddAdmin}
-                        className="mt-2 bg-green-500 hover:bg-green-600 text-white"
+                        className="border-2 border-darkBlue bg-orange-50 hover:bg-darkBlue hover:text-orange-500 text-darkBlue hover:border-orange-500"
                         disabled={!selectedUser}
                     >
-                        Add as Admin
+                        <UserRoundCheck className="w-5 h-5" />
                     </Button>
                 </div>
             )}
+
+            {/* Admins Table */}
             <table className="min-w-full">
                 <thead>
                 <tr>
@@ -245,10 +254,10 @@ export default function AdminManagement() {
                             <td className="py-2 px-4 border-b border-grey-700">
                                 {admins.length > 1 ? (
                                     <Button
-                                        className="bg-red-500 hover:bg-red-600 text-white"
+                                        className="border-2 border-orange-50 text-orange-50 font-bold hover:bg-orange-50 hover:text-darkBlue  py-2 px-4 rounded mr-2"
                                         onClick={() => handleRemoveAdmin(admin._id)}
                                     >
-                                        Remove Admin
+                                        <Minus className="w-5 h-5" />
                                     </Button>
                                 ) : (
                                     <span className="text-orange-50 border-2 border-orange-50">root admin</span>

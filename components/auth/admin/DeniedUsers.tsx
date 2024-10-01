@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import useToast from '@/components/hooks/useToast';
-import { ChevronLeftIcon, ChevronRightIcon, UserRoundPen, UserRoundCheck } from 'lucide-react';
+import { ChevronLeft, ChevronRight, UserRoundPen, UserRoundCheck } from 'lucide-react';
 
 interface User {
     _id: string;
@@ -186,7 +186,7 @@ export default function DeniedUsers() {
                         disabled={currentPage === 1}
                         className="p-2 rounded-full bg-gray-100 disabled:opacity-50"
                     >
-                        <ChevronLeftIcon className="h-5 w-5" />
+                        <ChevronLeft className="h-5 w-5" />
                     </button>
                     <span>
                         Page {currentPage} of {totalPages}
@@ -196,7 +196,7 @@ export default function DeniedUsers() {
                         disabled={currentPage === totalPages}
                         className="p-2 rounded-full bg-gray-100 disabled:opacity-50"
                     >
-                        <ChevronRightIcon className="h-5 w-5" />
+                        <ChevronRight className="h-5 w-5" />
                     </button>
                 </div>
             )}

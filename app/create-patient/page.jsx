@@ -85,6 +85,7 @@ const CreatePatient = () => {
               <NewPatientForm
                   handleSubmit={createPatient}
                   submitting={submitting}
+                  language="english"
               />
           )}
         </div>
@@ -95,6 +96,7 @@ const CreatePatient = () => {
                 submittingFromNoSession={submittingFromNoSession}
                 setSubmittingFromNoSession={setSubmittingFromNoSession}
                 submit={createPatient}
+                language="english"
             />
         )}
         {showErrorModal && (

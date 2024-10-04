@@ -14,7 +14,7 @@ interface Props {
     disabled?: boolean;
 }
 
-const PasswordField = ({
+const PasswordFormField = ({
                            form,
                            fieldName,
                            fieldLabel,
@@ -101,4 +101,4 @@ const PasswordField = ({
     );
 };
 
-export default PasswordField;
+export default PasswordFormField;

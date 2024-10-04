@@ -24,6 +24,8 @@ interface IUser extends Document {
   authorized: boolean;
   approvalDate?: Date;
   denialDate?: Date;
+  tempPasswordResetCode?: string;
+  tempCodeExpiry?: Date;
 }
 
 const UserSchema = new Schema<IUser>({
@@ -96,13 +98,19 @@ const UserSchema = new Schema<IUser>({
   denialDate: {
     type: Date,
   },
+  tempPasswordResetCode: {
+    type: String,
+  },
+  tempCodeExpiry: {
+    type: Date,
+  },
 });
 
 UserSchema.virtual('denied').get(function () {
   return !!this.denialDate;
 });
 
-// Pre-save hook for password hashing (already present)
+// Pre-save hook for password hashing
 UserSchema.pre('save', async function (next) {
   const user = this;
   if (!user.isModified('password')) return next();
@@ -121,7 +129,7 @@ UserSchema.pre('save', async function (next) {
 
     next();
   } catch (error) {
-    return next(error as CallbackError); // Cast error to CallbackError
+    return next(error as CallbackError);
   }
 });
 

@@ -8,19 +8,16 @@ import { Form } from "@/components/ui/form";
 import { useState } from "react";
 import useToast from '../hooks/useToast';
 import { ClipLoader } from 'react-spinners';
+import PasswordFormField from "@/components/ui/passwordFormField";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const forgotPasswordSchema = z.object({
-    email: z
-        .string()
-        .nonempty("Email is required.")
-        .regex(emailRegex, "Please enter a valid email address."),
+    email: z.string().nonempty("Email is required").email("Invalid email address"),
+    tempCode: z.string().nonempty("Verification code is required").min(6, "Verification code must be 6 characters long"),
     securityAnswer: z.string().nonempty("Security answer is required."),
-    newPassword: z
-        .string()
-        .min(8, "Password requires 7+ letters and at least one number"),
-    confirmNewPassword: z.string(),
+    newPassword: z.string().min(8, "Password must be at least 8 characters and contain at least one number"),
+    confirmNewPassword: z.string().nonempty("Confirm Password is required"),
 }).refine((data) => data.newPassword === data.confirmNewPassword, {
     message: "Passwords do not match",
     path: ["confirmNewPassword"],
@@ -33,6 +30,7 @@ export function ForgotPasswordForm() {
         resolver: zodResolver(forgotPasswordSchema),
         defaultValues: {
             email: '',
+            tempCode: '',
             securityAnswer: '',
             newPassword: '',
             confirmNewPassword: ''
@@ -44,36 +42,37 @@ export function ForgotPasswordForm() {
     const [step, setStep] = useState(1);
     const [securityQuestion, setSecurityQuestion] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
-    const [showTooltip, setShowTooltip] = useState(false);
 
-    // Step 1: Fetch the security question for the email
-    const fetchSecurityQuestion = async (email: string) => {
+    // Step 1: Send the verification code to the email
+    const sendVerificationCode = async (email: string) => {
         setLoading(true);
         try {
-            const response = await fetch(`/api/auth/forgot-password/get-security-questions?email=${email}`);
+            const response = await fetch('/api/auth/forgot-password/send-verification-code', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email }),
+            });
+            const result = await response.json();
+
             if (!response.ok) {
-                const result = await response.json();
-                if (response.status === 404) {
-                    setToast({
-                        title: 'Error',
-                        description: 'User not found.',
-                        variant: 'destructive'
-                    });
-                } else {
-                    setToast({
-                        title: 'Error',
-                        description: result.error || 'Failed to retrieve security question.',
-                        variant: 'destructive'
-                    });
-                }
-                setSecurityQuestion(null);
+                setToast({
+                    title: 'Error',
+                    description: result.error || 'Failed to send verification code.',
+                    variant: 'destructive'
+                });
                 return;
             }
-            const data = await response.json();
-            setSecurityQuestion(data.question);
-            setStep(2);  // Move to step 2 after successfully retrieving the security question
+
+            setToast({
+                title: 'Success',
+                description: 'Verification code sent to your email.',
+                variant: 'success'
+            });
+            setStep(2); // Move to code verification step
         } catch (error) {
-            console.error('Error retrieving security question:', error);
+            console.error('Error sending verification code:', error);
             setToast({
                 title: 'Error',
                 description: 'An unexpected error occurred. Please try again.',
@@ -84,6 +83,79 @@ export function ForgotPasswordForm() {
         }
     };
 
+    // Step 2: Verify the temporary code and fetch security question
+    const verifyCode = async (email: string, tempCode: string) => {
+        setLoading(true);
+        try {
+            const response = await fetch('/api/auth/forgot-password/verify-code', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, tempCode }),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                setToast({
+                    title: 'Error',
+                    description: result.error || 'Invalid or expired code.',
+                    variant: 'destructive'
+                });
+                return;
+            }
+
+            setToast({
+                title: 'Success',
+                description: 'Code verified. Proceed to the security question.',
+                variant: 'success'
+            });
+
+            // Fetch the security question after code is verified
+            await fetchSecurityQuestion(email);
+
+            setStep(3); // Move to security question step
+        } catch (error) {
+            console.error('Error verifying code:', error);
+            setToast({
+                title: 'Error',
+                description: 'An unexpected error occurred. Please try again.',
+                variant: 'destructive'
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // step 3: Fetch the security question after the code is verified
+    const fetchSecurityQuestion = async (email: string) => {
+        setLoading(true);
+        try {
+            const response = await fetch(`/api/auth/forgot-password/get-security-questions?email=${email}`);
+            const data = await response.json();
+            if (!response.ok) {
+                setToast({
+                    title: 'Error',
+                    description: data.error || 'Failed to retrieve security question.',
+                    variant: 'destructive'
+                });
+                return;
+            }
+            setSecurityQuestion(data.question); // Set the security question in the state
+        } catch (error) {
+            console.error('Error fetching security question:', error);
+            setToast({
+                title: 'Error',
+                description: 'An unexpected error occurred. Please try again.',
+                variant: 'destructive'
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Step 3: validate security answer and move to step 4
     const validateSecurityAnswer = async (data: ForgotPasswordFormValues) => {
         setLoading(true);
         try {
@@ -107,7 +179,8 @@ export function ForgotPasswordForm() {
 
             const result = await response.json();
             if (result.success) {
-                setStep(3);
+                // If the security answer is correct, move to step 4 (password reset)
+                setStep(4);
             } else {
                 setToast({
                     title: 'Error',
@@ -129,6 +202,7 @@ export function ForgotPasswordForm() {
 
     const handleNextStep = async () => {
         if (step === 1) {
+            // Step 1: Validate email and send verification code
             const emailIsValid = await form.trigger("email");
             if (!emailIsValid) {
                 setToast({
@@ -139,8 +213,25 @@ export function ForgotPasswordForm() {
                 return;
             }
             const email = form.getValues("email");
-            await fetchSecurityQuestion(email);
+            await sendVerificationCode(email);
+
         } else if (step === 2) {
+            // Step 2: Validate the verification code
+            const codeIsValid = await form.trigger("tempCode");
+            if (!codeIsValid) {
+                setToast({
+                    title: 'Error',
+                    description: form.formState.errors.tempCode?.message || 'Please enter a valid verification code.',
+                    variant: 'destructive'
+                });
+                return;
+            }
+            const email = form.getValues("email");
+            const tempCode = form.getValues("tempCode");
+            await verifyCode(email, tempCode);
+
+        } else if (step === 3) {
+            // Step 3: Validate the security answer and transition to Step 4
             const securityAnswerIsValid = await form.trigger("securityAnswer");
             if (!securityAnswerIsValid) {
                 setToast({
@@ -151,55 +242,68 @@ export function ForgotPasswordForm() {
                 return;
             }
             await validateSecurityAnswer(form.getValues());
+
+        } else if (step === 4) {
+            // Step 4: Proceed with password reset
+            const passwordsValid = await form.trigger(["newPassword", "confirmNewPassword"]);
+            if (!passwordsValid) {
+                setToast({
+                    title: 'Error',
+                    description: form.formState.errors.newPassword?.message || form.formState.errors.confirmNewPassword?.message || 'Invalid password.',
+                    variant: 'destructive',
+                });
+                return;
+            }
+            await form.handleSubmit(onSubmit)();  // Trigger the form submission
         }
     };
 
     const onSubmit = async (data: ForgotPasswordFormValues) => {
-        if (step === 3) {
-            try {
-                setSubmitting(true);
-                // The form.handleSubmit will automatically trigger validation
-                // and call onError if there are any issues, so we don't need to do it here
+        try {
+            setSubmitting(true);
 
-                // Submit the form
-                const response = await fetch('/api/auth/forgot-password/reset-password', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        ...data,
-                        newPassword: data.newPassword,
-                        confirmNewPassword: data.confirmNewPassword,
-                    }),
+            // Submit the form
+            const response = await fetch('/api/auth/forgot-password/reset-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: data.email,
+                    newPassword: data.newPassword, // We only need the newPassword here, no need for confirmNewPassword
+                }),
+            });
+
+            const result = await response.json();
+
+            // Handle the response
+            if (response.ok) {
+                setToast({
+                    title: 'Success',
+                    description: 'Password has been reset successfully.',
+                    variant: 'success',
                 });
+                console.log('Password reset successfully:', result); // Logging success for debugging
 
-                // Handle the response
-                if (response.ok) {
-                    setToast({
-                        title: 'Success',
-                        description: 'Password has been reset successfully.',
-                        variant: 'success'
-                    });
-                    // Optionally, redirect the user to a different page
-                } else {
-                    const result = await response.json();
-                    setToast({
-                        title: 'Error',
-                        description: result.message || 'Failed to reset password.',
-                        variant: 'destructive'
-                    });
-                }
-            } catch (error) {
-                console.error('Error resetting password:', error);
+                // Optionally, redirect the user to a login page
+                // router.push('/login');
+            } else {
                 setToast({
                     title: 'Error',
-                    description: 'An unexpected error occurred. Please try again.',
-                    variant: 'destructive'
+                    description: result.message || 'Failed to reset password.',
+                    variant: 'destructive',
                 });
-            } finally {
-                setSubmitting(false);
+                console.error('Password reset error:', result.message); // Logging error for debugging
             }
+        } catch (error) {
+            console.error('Error resetting password:', error);
+            setToast({
+                title: 'Error',
+                description: 'An unexpected error occurred. Please try again.',
+                variant: 'destructive',
+            });
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -248,7 +352,7 @@ export function ForgotPasswordForm() {
     return (
         <div className="w-full max-w-md">
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-4">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                     {step === 1 && (
                         <div>
                             <TextFormField
@@ -263,13 +367,31 @@ export function ForgotPasswordForm() {
 
                     {step === 2 && (
                         <div>
+                            <TextFormField
+                                fieldName="tempCode"
+                                fieldLabel="Verification Code"
+                                autoComplete="off"
+                                error={form.formState.errors.tempCode?.message}
+                            />
+                            <Button onClick={handleNextStep}>Verify Code</Button>
+                        </div>
+                    )}
+
+                    {step === 3 && (
+                        <div>
                             {loading ? (
                                 <div className="flex justify-center">
                                     <ClipLoader size={35} color="#4A90E2" />
                                 </div>
                             ) : (
                                 <div>
-                                    <p>{securityQuestion}</p>
+                                    {/* Display the fetched security question */}
+                                    {securityQuestion ? (
+                                        <p><strong>Security Question:</strong> {securityQuestion}</p>
+                                    ) : (
+                                        <p>Loading security question...</p>
+                                    )}
+
                                     <TextFormField
                                         fieldName="securityAnswer"
                                         fieldLabel="Security answer"
@@ -281,22 +403,18 @@ export function ForgotPasswordForm() {
                         </div>
                     )}
 
-                    {step === 3 && (
+                    {step === 4 && (
                         <div>
-                            <TextFormField
+                            <PasswordFormField
+                                form={form}
                                 fieldName="newPassword"
                                 fieldLabel="New Password"
-                                type="password"
                                 error={form.formState.errors.newPassword?.message}
-                                tooltip="At least 1 number and 8 characters"
-                                showTooltip={showTooltip}
-                                onFocus={() => setShowTooltip(true)}
-                                onBlur={() => setShowTooltip(false)}
                             />
-                            <TextFormField
+                            <PasswordFormField
+                                form={form}
                                 fieldName="confirmNewPassword"
                                 fieldLabel="Confirm New Password"
-                                type="password"
                                 error={form.formState.errors.confirmNewPassword?.message}
                             />
                             <div className="flex justify-center mt-6">

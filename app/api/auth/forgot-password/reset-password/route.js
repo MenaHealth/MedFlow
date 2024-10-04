@@ -1,50 +1,35 @@
 // app/api/auth/forgot-password/reset-password/route.ts
-
+import { NextResponse } from 'next/server';
+import bcrypt from 'bcryptjs';
 import User from '@/models/user';
 import dbConnect from '@/utils/database';
-import bcrypt from 'bcryptjs';
-import { NextResponse } from 'next/server';
 
 export async function POST(request) {
     await dbConnect();
 
-    const { email, securityAnswer, newPassword } = await request.json();
+    const { email, newPassword } = await request.json();
 
-    console.log('Request body:', { email, securityAnswer, newPassword });
+    if (!email || !newPassword) {
+        return NextResponse.json({ message: 'Email and new password are required' }, { status: 400 });
+    }
 
     try {
         const user = await User.findOne({ email });
-
         if (!user) {
-            console.log('User not found:', email);
             return NextResponse.json({ message: 'User not found' }, { status: 404 });
         }
 
-        console.log('User found:', user);
+        // Hash the new password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-        const securityQuestion = user.securityQuestions.find((question) => {
-            console.log('Comparing security answer:', securityAnswer, question.answer);
-            return bcrypt.compareSync(securityAnswer, question.answer);
-        });
-
-        if (!securityQuestion) {
-            console.log('Incorrect security answer');
-            return NextResponse.json({ message: 'Incorrect security answer' }, { status: 401 });
-        }
-
-        console.log('Security question found:', securityQuestion);
-
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-        console.log('Hashed password:', hashedPassword);
-
-        await User.findByIdAndUpdate(user._id, { password: hashedPassword });
-
-        console.log('Password reset successfully');
+        // Save the new hashed password
+        user.password = hashedPassword;
+        await user.save();
 
         return NextResponse.json({ message: 'Password reset successfully' }, { status: 200 });
     } catch (error) {
-        console.error('Password reset error:', error);
-        return NextResponse.json({ message: 'Server error' }, { status: 500 });
+        console.error('Error resetting password:', error);
+        return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
     }
 }

@@ -60,20 +60,31 @@ const sendApprovalEmail = async (email: string, firstName: string, lastName: str
                 body: {
                     contentType: 'HTML',
                     content: `
-                        <div style="background-color: #120f0b; padding: 20px; color: #ffffff;">
-                            <h3 style="color: #ff5722; background-color: #ffffff; padding: 10px 20px; border-radius: 5px;">
-                                ${greeting}
-                            </h3>
-                            <p style="color: #ffffff; font-size: 16px; line-height: 1.6;">
-                                Your account has been approved! You can now log in to your MedFlow account.<br><br>
-                                Click the link below to log in:<br>
-                                <a href="https://medflow-mena-health.vercel.app/auth/login" style="color: #ff5722;">Login to MedFlow</a><br><br>
-                                If you have any questions or need assistance, feel free to reach out to our support team.<br><br>
-                                <strong>Best regards,</strong><br>
-                                <strong>The MedFlow Team</strong>
-                            </p>
-                        </div>
-                    `,
+                <div style="background-color: #120f0b; padding: 20px; color: #ffffff;">
+                    <h3 style="color: #ff5722; background-color: #ffffff; padding: 10px 20px; border-radius: 5px;">
+                        ${greeting}
+                    </h3>
+                    <p style="color: #ffffff; font-size: 16px; line-height: 1.6;">
+                        Your account has been approved! You can now log in to your MedFlow account.<br><br>
+                        Click the link below to log in:<br>
+                        <a href="https://medflow-mena-health.vercel.app/auth/login" style="color: #ff5722;">Login to MedFlow</a><br><br>
+                        If you have any questions or need assistance, feel free to reach out to our support team.<br><br>
+                        <strong>Best regards,</strong><br>
+                        <strong>The MedFlow Team</strong>
+                    </p>
+                </div>
+
+                <style>
+                    @keyframes dash {
+                        from {
+                            stroke-dashoffset: 1000;
+                        }
+                        to {
+                            stroke-dashoffset: 0;
+                        }
+                    }
+                </style>
+            `,
                 },
                 toRecipients: [
                     {

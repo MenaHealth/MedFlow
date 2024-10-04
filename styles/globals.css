@@ -188,18 +188,6 @@ a {
   font-size: 18px;
 }
 
-/* navbar */
-.navbar {
-  background-color: aliceblue;
-  padding: 10px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 40px;
-  min-height: 70px;
-}
-
-
 /* logo  */
 .logo {
   font-size: 30px;

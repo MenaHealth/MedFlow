@@ -8,6 +8,7 @@ import { useEffect, useState, useCallback } from "react";
 
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import  { UserRoundPlus } from "lucide-react"
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -265,17 +266,8 @@ export default function PatientTriage() {
                 href="/create-patient"
                 className="flex items-center justify-center no-underline"
             >
-              <div className="relative group">
-                <PersonAddIcon
-                    className="text-5xl rounded-full shadow bg-white group-hover:shadow-lg transition-all duration-300"
-                    style={{
-                      color: "currentColor",
-                      transition: "color 0.15s ease-in-out",
-                      padding: "0.75rem"
-                    }}
-                    onMouseOver={(e) => (e.currentTarget.style.color = "#FF5722")}
-                    onMouseOut={(e) => (e.currentTarget.style.color = "currentColor")}
-                />
+              <div className="relative group ml-4 bg-darkBlue p-2">
+                <UserRoundPlus color={"white"} bsize={22}/>
                 <span className="absolute left-full ml-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap bg-white px-2 py-1 rounded shadow-lg">
                 Add New Patient
               </span>

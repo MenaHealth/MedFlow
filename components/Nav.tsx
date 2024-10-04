@@ -6,11 +6,13 @@ import Image from "next/image"
 import { useSession } from "next-auth/react"
 import { UserDrawer } from "../components/ui/userDrawer"
 import { Menu } from "lucide-react"
+import { usePathname } from "next/navigation"
 
 export default function Nav() {
     const { data: session } = useSession()
     const [isDrawerOpen, setIsDrawerOpen] = useState(false)
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+    const pathname = usePathname();
 
     const getInitials = (firstName: string | undefined, lastName: string | undefined) => {
         return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`
@@ -26,20 +28,34 @@ export default function Nav() {
         <nav className="w-full py-4 px-4 md:px-6 bg-white shadow-md">
             <div className="max-w-7xl mx-auto flex justify-between items-center">
                 <Link href="/" className="flex items-center gap-2">
-                    <Image
-                        src="/assets/images/logo.svg"
-                        alt="MedFlow logo"
-                        width={30}
-                        height={30}
-                        className="object-contain"
-                    />
-                    <p className="text-xl font-bold">MedFlow</p>
+                    {pathname === '/new-patient' ? (
+                        <>
+                            <Image
+                                src="/assets/images/mena_health_logo.jpeg"
+                                alt="Mena Health logo"
+                                width={100}
+                                height={100}
+                                className="object-contain"
+                            />
+                        </>
+                    ) : (
+                        <>
+                            <Image
+                                src="/assets/images/logo.svg"
+                                alt="MedFlow logo"
+                                width={30}
+                                height={30}
+                                className="object-contain"
+                            />
+                            <p className="text-xl font-bold">MedFlow</p>
+                        </>
+                    )}
                 </Link>
 
                 {!session?.user ? (
                     <>
                         <div className="hidden md:flex items-center space-x-4">
-                            <NavItem href="/create-patient">New Patient</NavItem>
+                            <NavItem href="/new-patient">New Patient</NavItem>
                             <NavItem href="/about">About</NavItem>
                             <NavItem href="/auth">Login</NavItem>
                         </div>
@@ -77,7 +93,7 @@ export default function Nav() {
             {/* Mobile menu */}
             {!session?.user && isMobileMenuOpen && (
                 <div className="md:hidden mt-4 space-y-2">
-                    <NavItem href="/create-patient">New Patient</NavItem>
+                    <NavItem href="/new-patient">New Patient</NavItem>
                     <NavItem href="/about">About</NavItem>
                     <NavItem href="/auth">Login</NavItem>
                 </div>

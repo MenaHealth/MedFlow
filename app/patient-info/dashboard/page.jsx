@@ -109,9 +109,9 @@ export default function PatientTriage() {
             // Only patients who speak the same language
             session.user.languages.indexOf(row?.language) !== -1 && 
             // Only patients who have needs matching the doctor's specialty
-            session.user.doctorSpecialty === row.specialty &&
+            session.user.doctorSpecialty === row.specialty
             // Only patients who live in the same country
-            session.user.countries.indexOf(row.country) !== -1
+            // session.user.countries.indexOf(row.country) !== -1
       );
     }
 

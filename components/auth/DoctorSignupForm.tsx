@@ -10,6 +10,7 @@
     import { LanguagesList } from '@/data/languages.enum';
     import { CountriesList } from '@/data/countries.enum';
     import { useSignupContext } from './SignupContext';
+    import { useSession } from "next-auth/react";
 
     const doctorSignupSchema = z.object({
         firstName: z.string().min(1, "First name is required"),
@@ -43,6 +44,8 @@
             },
             mode: "onChange",
         });
+
+        const { data: session } = useSession();
 
         useEffect(() => {
             const subscription = methods.watch((data) => {
@@ -87,11 +90,13 @@
                             fieldName="firstName"
                             fieldLabel="First Name"
                             autoComplete="given-name"
+                            value={session?.user?.firstName}
                         />
                         <TextFormField
                             fieldName="lastName"
                             fieldLabel="Last Name"
                             autoComplete="family-name"
+                            value={session?.user?.lastName}
                         />
                         <DatePickerFormField
                             name="dob"

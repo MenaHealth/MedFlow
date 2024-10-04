@@ -101,7 +101,7 @@ export default function PatientTriage() {
       );
     }
 
-    // Filter for specific doctor - expand logic?
+    // Filter for specific doctor
     if (session?.user?.accountType === "Doctor") {
       filteredRows = filteredRows.filter(
           (row) => 

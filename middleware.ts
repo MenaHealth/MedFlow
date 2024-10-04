@@ -13,7 +13,7 @@ export async function middleware(req: any) {
         pathname.startsWith('/api') ||
         pathname.startsWith('/auth') ||
         pathname.match(PUBLIC_FILE) ||
-        pathname === '/create-patient' ||
+        pathname === '/new-patient' ||
         pathname === '/about'
     ) {
         return NextResponse.next();

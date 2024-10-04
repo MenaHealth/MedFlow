@@ -9,3 +9,36 @@ export enum Countries {
 }
 
 export const CountriesList = Object.values(Countries);
+
+export enum CountriesArabic {
+    EGYPT = 'مصر',
+    PALESTINE_WEST_BANK = 'فلسطين - الضفة الغربية',
+    SYRIA = 'سوريا',
+    YEMEN = 'اليمن',
+    AFGHANISTAN = 'أفغانستان',
+    LEBANON = 'لبنان'
+}
+
+export const CountriesListArabic = Object.values(CountriesArabic);
+
+export enum CountriesFarsi {
+    EGYPT = 'مصر',
+    PALESTINE_WEST_BANK = 'فلسطین - کرانه باختری',
+    SYRIA = 'سوریه',
+    YEMEN = 'یمن',
+    AFGHANISTAN = 'افغانستان',
+    LEBANON = 'لبنان'
+}
+
+export const CountriesListFarsi = Object.values(CountriesFarsi)
+
+export enum CountriesPashto {
+    EGYPT = 'مصر',
+    PALESTINE_WEST_BANK = 'فلسطین - لویدیځه غاړه',
+    SYRIA = 'سوریه',
+    YEMEN = 'یمن',
+    AFGHANISTAN = 'افغانستان',
+    LEBANON = 'لبنان'
+}
+
+export const CountriesListPashto = Object.values(CountriesPashto)

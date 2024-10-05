@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { TextFormField } from "@/components/ui/TextFormField";
 import { Button } from "@/components/ui/button";
-import ForgotPasswordForm from "@/components/auth/ForgotPasswordForm";
+import ForgotPasswordForm from "@/components/auth/forgotPassword/ForgotPasswordForm";
 import { useRouter } from "next/navigation";
 import { signIn, getProviders } from "next-auth/react";
 import { BarLoader } from "react-spinners";
@@ -152,7 +152,7 @@ export function LoginForm() {
                             <span className="text-gray-600">or</span>
                         </div>
                         <div className="flex justify-center mt-2 mb-4">
-                            <button 
+                            <button
                                 className="gsi-material-button"
                                 onClick={() => {
                                     signIn(provider.id, { callbackUrl: '/patient-info/dashboard' });

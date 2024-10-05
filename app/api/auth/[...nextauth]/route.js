@@ -12,7 +12,7 @@ import dbConnect from '@/utils/database';
 
 const handler = NextAuth({
     session: {
-        strategy: 'jwt', 
+        strategy: 'jwt',
     },
     providers: [
         CredentialsProvider({
@@ -123,7 +123,7 @@ const handler = NextAuth({
 
                     token.accessToken = jwt.sign(
                         { id: user._id, email: user.email, isAdmin: user.isAdmin },
-                        process.env.JWT_SECRET, 
+                        process.env.JWT_SECRET,
                         { expiresIn: '1d' } // Set expiration time for the JWT
                     );
 
@@ -136,7 +136,7 @@ const handler = NextAuth({
 
             return token;
         },
-      
+
         async session({ session, token }) {
             if (token) {
                 session.user.id = token.id;

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
+import { FormProvider } from 'react-hook-form';
 
 interface EmailStepProps {
     onNext: () => void;
@@ -17,7 +18,11 @@ const EmailStep: React.FC<EmailStepProps> = ({ onNext }) => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!canSendVerificationCode()) {
-            setToast({ message: 'Please wait before requesting another verification code.', type: 'error' });
+            setToast({
+                title: 'Error',
+                description: 'Please wait before requesting another verification code.',
+                variant: 'error',
+            });
             return;
         }
         setLoading(true);
@@ -31,43 +36,56 @@ const EmailStep: React.FC<EmailStepProps> = ({ onNext }) => {
             const data = await response.json();
             if (response.ok) {
                 updateRateLimit();
-                setToast({ message: data.message, type: 'success' });
+                setToast({
+                    title: 'Error',
+                    description: data.message.stringify,
+                    variant: 'success',
+                });
                 onNext(); // Move to the next step
             } else {
-                setToast({ message: data.message, type: 'error' });
+                setToast({
+                    title: 'Error',
+                    description: data.message.stringify,
+                    variant: 'error',
+                });
             }
         } catch (error) {
-            setToast({ message: 'An error occurred. Please try again.', type: 'error' });
+            setToast({
+                title: 'Error',
+                description: 'An error occurred. Please try again.',
+                variant: 'error',
+            });
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <form onSubmit={handleSubmit}>
-            <div className="space-y-4">
-                <div>
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                        id="email"
-                        type="email"
-                        {...register('email')}
-                        className={errors.email ? 'border-red-500' : ''}
-                    />
-                    {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
+        <FormProvider {...form}>
+            <form onSubmit={handleSubmit}>
+                <div className="space-y-4">
+                    <div>
+                        <Label htmlFor="email">Email</Label>
+                        <Input
+                            id="email"
+                            type="email"
+                            {...register('email')}
+                            className={errors.email ? 'border-red-500' : ''}
+                        />
+                        {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
+                    </div>
+                    <Button type="submit" className="w-full" disabled={loading || !canSendVerificationCode()}>
+                        {loading ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            </>
+                        ) : (
+                            'Send Verification Code'
+                        )}
+                    </Button>
                 </div>
-                <Button type="submit" className="w-full" disabled={loading || !canSendVerificationCode()}>
-                    {loading ? (
-                        <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Sending...
-                        </>
-                    ) : (
-                        'Send Verification Code'
-                    )}
-                </Button>
-            </div>
-        </form>
+            </form>
+        </FormProvider>
     );
 };
 

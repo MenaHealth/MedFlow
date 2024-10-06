@@ -4,52 +4,80 @@ import { useForgotPasswordContext } from './ForgotPasswordContext';
 import { TextFormField } from "@/components/ui/TextFormField";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from 'lucide-react';
+import { z } from "zod";
+import { useForm, FormProvider } from 'react-hook-form';
+import { zodResolver } from "@hookform/resolvers/zod";
 
 interface SecurityQuestionStepProps {
     onNext: () => void;
 }
 
-export function SecurityQuestionStep({ onNext }: SecurityQuestionStepProps) {
-    const { form, loading, securityQuestion } = useForgotPasswordContext();
+const securityAnswerSchema = z.object({
+    securityAnswer: z.string().min(1, "Please enter an answer"),
+});
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        onNext();
+type SecurityQuestionFormValues = z.infer<typeof securityAnswerSchema>;
+
+export function SecurityQuestionStep({ onNext }: SecurityQuestionStepProps) {
+    const { loading, setLoading, setToast, handleSecurityQuestionStep, securityQuestion } = useForgotPasswordContext();
+
+    const form = useForm<SecurityQuestionFormValues>({
+        resolver: zodResolver(securityAnswerSchema),
+        defaultValues: {
+            securityAnswer: '',
+        },
+    });
+
+    const onSubmit = async (data: SecurityQuestionFormValues) => {
+        if (!securityQuestion) {
+            setToast?.({
+                title: 'Error',
+                description: 'Security question is missing. Please try again.',
+                variant: 'destructive',
+            });
+            return;
+        }
+
+        setLoading(true);
+        try {
+            await handleSecurityQuestionStep(data.securityAnswer, securityQuestion);
+            onNext();
+        } catch (error) {
+            console.error('Error during security question verification:', error);
+            // Error handling is now done in handleSecurityQuestionStep
+        } finally {
+            setLoading(false);
+        }
     };
 
-    if (loading) {
-        return (
-            <div className="flex justify-center">
-                <Loader2 className="h-8 w-8 animate-spin" />
-            </div>
-        );
+    if (!securityQuestion) {
+        return <p>Loading security question...</p>;
     }
 
     return (
-        <form onSubmit={handleSubmit}>
-            <div className="space-y-4">
-                {securityQuestion ? (
-                    <p><strong>Security Question:</strong> {securityQuestion}</p>
-                ) : (
-                    <p>Loading security question...</p>
-                )}
+        <FormProvider {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <p><strong>Security Question:</strong> {securityQuestion}</p>
 
                 <TextFormField
                     fieldName="securityAnswer"
                     fieldLabel="Security answer"
+                    autoComplete="off"
                     error={form.formState.errors.securityAnswer?.message}
                 />
                 <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? (
                         <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Submitting...
+                            Verifying...
                         </>
                     ) : (
                         'Submit Answer'
                     )}
                 </Button>
-            </div>
-        </form>
+            </form>
+        </FormProvider>
     );
 }
+
+export default SecurityQuestionStep;

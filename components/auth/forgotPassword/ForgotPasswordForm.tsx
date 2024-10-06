@@ -1,32 +1,32 @@
-// components/auth/ForgotPasswordForm.tsx
-import React from 'react';
-import dynamic from 'next/dynamic';
-import { ForgotPasswordProvider, useForgotPasswordContext } from './ForgotPasswordContext';
+    // components/auth/ForgotPasswordForm.tsx
+    import React from 'react';
+    import dynamic from 'next/dynamic';
+    import { ForgotPasswordProvider, useForgotPasswordContext } from './ForgotPasswordContext';
 
-const EmailStep = dynamic(() => import('./EmailStep'), { ssr: false });
-const VerificationStep = dynamic(() => import('./VerificationStep'), { ssr: false });
-const SecurityQuestionStep = dynamic(() => import('./SecurityQuestionStep'), { ssr: false });
-const ResetPasswordStep = dynamic(() => import('./ResetPasswordStep'), { ssr: false });
+    const EmailStep = dynamic(() => import('./EmailStep'), { ssr: false });
+    const VerificationStep = dynamic(() => import('./VerificationStep'), { ssr: false });
+    const SecurityQuestionStep = dynamic(() => import('./SecurityQuestionStep'), { ssr: false });
+    const ResetPasswordStep = dynamic(() => import('./ResetPasswordStep'), { ssr: false });
 
-function ForgotPasswordFormContent() {
-    const { step, handleNextStep } = useForgotPasswordContext();
+    function ForgotPasswordFormContent() {
+        const { step, handleNextStep, form, submitting, handleResetPassword } = useForgotPasswordContext();
 
-    return (
-        <div className="w-full max-w-md space-y-4">
-            {step === 1 && <EmailStep onNext={handleNextStep} />}
-            {step === 2 && <VerificationStep onNext={handleNextStep} />}
-            {step === 3 && <SecurityQuestionStep onNext={handleNextStep} />}
-            {step === 4 && <ResetPasswordStep onSubmit={handleNextStep} />}
-        </div>
-    );
-}
+        return (
+            <div className="w-full max-w-md space-y-4">
+                {step === 1 && <EmailStep onNext={handleNextStep} />}
+                {step === 2 && <VerificationStep onNext={handleNextStep} />}
+                {step === 3 && <SecurityQuestionStep onNext={handleNextStep} />}
+                {step === 4 && <ResetPasswordStep form={form} onSubmit={handleResetPassword} submitting={submitting} />}
+            </div>
+        );
+    }
 
-export function ForgotPasswordForm() {
-    return (
-        <ForgotPasswordProvider>
-            <ForgotPasswordFormContent />
-        </ForgotPasswordProvider>
-    );
-}
+    export function ForgotPasswordForm() {
+        return (
+            <ForgotPasswordProvider>
+                <ForgotPasswordFormContent />
+            </ForgotPasswordProvider>
+        );
+    }
 
-export default ForgotPasswordForm;
+    export default ForgotPasswordForm;

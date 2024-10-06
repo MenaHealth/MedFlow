@@ -1,7 +1,5 @@
-// components/ui/TextFormField.tsx
-
-import { useState } from 'react';
-import { Controller, UseFormRegister } from 'react-hook-form';
+import React, { useState } from 'react';
+import { useFormContext, Controller } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
 import { EyeOff, Eye } from "lucide-react";
 
@@ -18,24 +16,23 @@ interface Props {
     disabled?: boolean;
     autoComplete?: string;
     id?: string;
-    register?: UseFormRegister<any>;
 }
 
-const TextFormField = ({
-                           fieldName,
-                           fieldLabel,
-                           className,
-                           type,
-                           tooltip,
-                           showTooltip,
-                           onFocus,
-                           onBlur,
-                           autoComplete,
-                           register,
-                       }: Props) => {
+const TextFormField: React.FC<Props> = ({
+                                            fieldName,
+                                            fieldLabel,
+                                            className,
+                                            type = 'text',
+                                            tooltip,
+                                            showTooltip,
+                                            onFocus,
+                                            onBlur,
+                                            autoComplete,
+                                            error,
+                                        }) => {
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const [isFocused, setIsFocused] = useState(false);
-    const [hasValue, setHasValue] = useState(false);
+    const formContext = useFormContext();
 
     const id = `${fieldName}-input`;
 
@@ -46,29 +43,31 @@ const TextFormField = ({
 
     const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
         setIsFocused(false);
-        setHasValue(!!e.target.value);  // Check if the field has a value
         if (onBlur) onBlur();
     };
 
-    return (
+    const renderInput = ({ field }: any) => (
         <div className={`mt-6 mb-6 p-2 ${className}`}>
             <div className="relative">
                 <Input
-                    {...(register ? register(fieldName) : {})}
-                    type={type === 'password' && !isPasswordVisible ? 'password' : 'text'}
+                    {...field}
+                    type={type === 'password' && !isPasswordVisible ? 'password' : type}
                     onFocus={handleFocus}
-                    onBlur={handleBlur}
+                    onBlur={(e) => {
+                        field.onBlur();
+                        handleBlur(e);
+                    }}
                     id={id}
                     name={fieldName}
                     autoComplete={autoComplete}
                     className={`w-full pt-4 pb-2 pl-2 pr-10 ${
-                        isFocused || hasValue ? 'bg-white' : ''
+                        isFocused || field.value ? 'bg-white' : ''
                     }`}
                 />
                 <label
                     htmlFor={id}
                     className={`absolute transition-all ${
-                        (isFocused || hasValue) ? 'text-xs -top-6' : 'text-sm top-1/2 -translate-y-1/2'
+                        (isFocused || field.value) ? 'text-xs -top-6' : 'text-sm top-1/2 -translate-y-1/2'
                     } left-2 pointer-events-none`}
                 >
                     {fieldLabel}
@@ -76,8 +75,9 @@ const TextFormField = ({
 
                 {type === 'password' && (
                     <div
-                        className="absolute right-2 top-1/2 transform -translate-y-1/2"
-                        onMouseEnter={() => setIsPasswordVisible(true)}
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                        onMouseDown={() => setIsPasswordVisible(true)}
+                        onMouseUp={() => setIsPasswordVisible(false)}
                         onMouseLeave={() => setIsPasswordVisible(false)}
                     >
                         {isPasswordVisible ? (
@@ -94,8 +94,21 @@ const TextFormField = ({
                     </div>
                 )}
             </div>
+            {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
         </div>
     );
+
+    if (formContext) {
+        return (
+            <Controller
+                name={fieldName}
+                render={renderInput}
+            />
+        );
+    }
+
+    // Fallback for cases where FormProvider is not available
+    return renderInput({ field: { value: '', onChange: () => {}, onBlur: () => {} } });
 };
 
 export { TextFormField };

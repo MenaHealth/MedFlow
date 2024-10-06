@@ -3,7 +3,7 @@ import { TextField, Button, MenuItem, List, ListItem, ListItemText, Divider, Typ
 import { Publish as PublishIcon, Delete as DeleteIcon, GetApp as DownloadIcon } from '@mui/icons-material';
 import { SelectChangeEvent } from '@mui/material';
 
-interface NotesFormProps {
+interface RXFormProps {
     patientId: string;
     username: string;
 }
@@ -16,7 +16,7 @@ interface Note {
     title: string;
 }
 
-const NotesForm: React.FC<NotesFormProps> = ({ patientId, username }) => {
+const RXForm: React.FC<RXFormProps> = ({ patientId, username }) => {
     const [rxformNote, setrxformNote] = useState({
         patientName: '',
         phoneNumber: '',
@@ -699,4 +699,4 @@ const NotesForm: React.FC<NotesFormProps> = ({ patientId, username }) => {
     );
 }
 
-export default NotesForm;
+export default RXForm;

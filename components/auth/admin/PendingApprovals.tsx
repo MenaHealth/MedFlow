@@ -1,8 +1,11 @@
 // components/auth/admin/PendingApprovals.tsx
-import { useState, useEffect } from 'react';
+
+'use client';
+import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import useToast from '@/components/hooks/useToast';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
+import { useAdminDashboard } from '@/components/auth/admin/AdminDashboardContext';
 
 interface User {
     _id: string;
@@ -19,40 +22,12 @@ interface PendingApprovalsProps {
 
 export default function PendingApprovals({ data }: PendingApprovalsProps) {
     const { data: session } = useSession();
-    const [users, setUsers] = useState<User[]>([]);
+    const { pendingApprovalsData, totalPages, currentPage, setCurrentPage, isRefreshing } = useAdminDashboard();
     const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
     const [loadingUsers, setLoadingUsers] = useState<{ [key: string]: boolean }>({});
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
     const { setToast } = useToast();
 
-    // Fetch pending users from the server
-    useEffect(() => {
-        const fetchPendingUsers = async () => {
-            if (session?.user?.isAdmin) {
-                try {
-                    const res = await fetch(`/api/admin/pending-users?page=${currentPage}&limit=20`);
-                    if (!res.ok) throw new Error('Failed to fetch pending users');
-                    const data = await res.json();
-                    setUsers(data.users);
-                    setTotalPages(data.totalPages);
-                } catch (error) {
-                    console.error('Error fetching pending users:', error);
-                    setToast?.({
-                        title: 'Error',
-                        description: 'Failed to fetch pending users.',
-                        variant: 'error',
-                    });
-                }
-            }
-        };
-
-        if (session?.user?.isAdmin) {
-            fetchPendingUsers();
-        }
-    }, [session, currentPage, setToast]);
-
-    // Handle approve or deny action
+    // Handle approve-users or deny-users action
     async function handleBulkAction(actionType: 'approve' | 'deny') {
         if (!session?.user?.token || selectedUsers.length === 0) {
             setToast?.({
@@ -72,7 +47,7 @@ export default function PendingApprovals({ data }: PendingApprovalsProps) {
         });
 
         try {
-            const url = `/api/admin/${actionType}`;
+            const url = `/api/admin/POST/${actionType === 'approve' ? 'approve-users' : 'deny-users'}`;
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
@@ -92,8 +67,7 @@ export default function PendingApprovals({ data }: PendingApprovalsProps) {
                 variant: 'default',
             });
 
-            setUsers((prevUsers) => prevUsers.filter((user) => !selectedUsers.includes(user._id)));
-            setSelectedUsers([]);
+            setSelectedUsers([]); // Clear selection after action is complete
         } catch (error) {
             console.error(`Error in bulk ${actionType}:`, error);
             const errorMessage = error instanceof Error ? error.message : `An error occurred while trying to ${actionType} the users.`;
@@ -114,9 +88,9 @@ export default function PendingApprovals({ data }: PendingApprovalsProps) {
         );
     };
 
-    // Handle select all users in the list
+// Handle select all users in the list
     const handleSelectAll = () => {
-        setSelectedUsers((prev) => (prev.length === users.length ? [] : users.map((user) => user._id)));
+        setSelectedUsers((prev) => (prev.length === pendingApprovalsData.length ? [] : pendingApprovalsData.map((user: User) => user._id)));
     };
 
     return (
@@ -125,14 +99,14 @@ export default function PendingApprovals({ data }: PendingApprovalsProps) {
                 <button
                     onClick={() => handleBulkAction('approve')}
                     className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mr-2"
-                    disabled={selectedUsers.length === 0}
+                    disabled={selectedUsers.length === 0 || isRefreshing}
                 >
                     Approve Selected
                 </button>
                 <button
                     onClick={() => handleBulkAction('deny')}
                     className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
-                    disabled={selectedUsers.length === 0}
+                    disabled={selectedUsers.length === 0 || isRefreshing}
                 >
                     Deny Selected
                 </button>
@@ -146,7 +120,7 @@ export default function PendingApprovals({ data }: PendingApprovalsProps) {
                         <input
                             type="checkbox"
                             onChange={handleSelectAll}
-                            checked={selectedUsers.length === users.length && users.length > 0}
+                            checked={selectedUsers.length === pendingApprovalsData.length && pendingApprovalsData.length > 0}
                         />
                     </th>
                     <th className="py-2 px-4 border-b">Name</th>
@@ -156,8 +130,8 @@ export default function PendingApprovals({ data }: PendingApprovalsProps) {
                 </tr>
                 </thead>
                 <tbody>
-                {users.length > 0 ? (
-                    users.map((user) => (
+                {pendingApprovalsData.length > 0 ? (
+                    pendingApprovalsData.map((user: User) => (
                         <tr key={user._id}>
                             <td className="py-2 px-4 border-b">
                                 <input
@@ -185,7 +159,7 @@ export default function PendingApprovals({ data }: PendingApprovalsProps) {
             </table>
 
             {/* Pagination Controls */}
-            {users.length > 0 && totalPages > 1 && (
+            {pendingApprovalsData.length > 0 && totalPages > 1 && (
                 <div className="mt-4 flex justify-center items-center space-x-2">
                     <button
                         onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}

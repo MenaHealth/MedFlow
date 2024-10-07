@@ -38,7 +38,7 @@ export default function ExistingUsers({ data, totalPages, currentPage, setCurren
         }
 
         try {
-            const response = await fetch('/api/admin/deny', {
+            const response = await fetch('/api/admin/POST/deny-existing-users', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -54,6 +54,8 @@ export default function ExistingUsers({ data, totalPages, currentPage, setCurren
                 description: 'User moved to denied status successfully.',
                 variant: 'default',
             });
+
+            // Optionally, refresh data or remove the user from the UI after success
         } catch (error) {
             console.error('Error moving user to denied status:', error);
             setToast?.({

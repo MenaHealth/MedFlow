@@ -17,7 +17,11 @@ interface User {
     denialDate?: string;
 }
 
-export default function DeniedUsers() {
+interface DeniedUsersProps {
+    data: User[];
+}
+
+export default function DeniedUsers({ data }: DeniedUsersProps) {
     const { data: session } = useSession();
     const { setToast } = useToast();
     const {
@@ -26,12 +30,13 @@ export default function DeniedUsers() {
         currentPage,
         setCurrentPage,
         loadingDeniedUsers,
+        setDeniedUsersData, // Add this to update deniedUsersData in the context
     } = useAdminDashboard();
 
     const [selectedUsers, setSelectedUsers] = React.useState<string[]>([]);
     const [isSelecting, setIsSelecting] = React.useState(false);
 
-    // Handle the re-approve action
+    // Handle the re-approve-users action
     const handleReApprove = async () => {
         if (!session?.user?.isAdmin) {
             setToast?.({
@@ -43,7 +48,7 @@ export default function DeniedUsers() {
         }
 
         try {
-            const response = await fetch('/api/admin/approve', {
+            const response = await fetch('/api/admin/POST/re-approve-users', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -55,6 +60,10 @@ export default function DeniedUsers() {
             if (!response.ok) {
                 throw new Error('Failed to re-approve users');
             }
+
+            // Filter out re-approved users from the denied list
+            const updatedDeniedUsers = deniedUsersData.filter(user => !selectedUsers.includes(user._id));
+            setDeniedUsersData(updatedDeniedUsers); // Update context with new denied users list
 
             setToast?.({
                 title: 'Success',
@@ -100,7 +109,7 @@ export default function DeniedUsers() {
                     <UserRoundPen className="w-5 h-5"/>
                 </button>
 
-                {/* Re-approve button - visible in selection mode */}
+                {/* Re-approve-users button - visible in selection mode */}
                 {isSelecting && (
                     <button
                         onClick={handleReApprove}

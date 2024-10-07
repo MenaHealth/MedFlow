@@ -13,12 +13,15 @@ interface AdminDashboardContextType {
     loadingAdmins: boolean;
     pendingApprovalsData: any;
     existingUsersData: any;
-    deniedUsersData: any;
+    deniedUsersData: User[];
+    setDeniedUsersData: React.Dispatch<React.SetStateAction<User[]>>;
     adminsData: any;
     toggleSection: (section: 'pending' | 'existing' | 'denied' | 'addAdmin') => void;
     totalPages: number;
     currentPage: number;
     setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
+    handleRefresh: () => void;
+    isRefreshing: boolean;
 }
 
 interface User {
@@ -30,6 +33,7 @@ interface User {
     countries?: string[];
     denialDate?: string;
 }
+
 
 const AdminDashboardContext = createContext<AdminDashboardContextType | undefined>(undefined);
 
@@ -54,16 +58,29 @@ export const AdminDashboardProvider = ({ children }: { children: ReactNode }) =>
 
     const [pendingApprovalsData, setPendingApprovalsData] = useState<User[]>([]);
     const [existingUsersData, setExistingUsersData] = useState(null);
-    const [deniedUsersData, setDeniedUsersData] = useState<User[]>([]); // Initialize as an empty array
+    const [deniedUsersData, setDeniedUsersData] = useState<User[]>([]);
     const [adminsData, setAdminsData] = useState(null);
 
     const [totalPages, setTotalPages] = useState(1);
     const [currentPage, setCurrentPage] = useState(1);
 
+    const [refresh, setRefresh] = useState(false);
+    const [isRefreshing, setIsRefreshing] = useState(false);
+
+    const handleRefresh = async () => {
+        setIsRefreshing(true); // Set isRefreshing to true when refresh starts
+        await fetchPendingApprovals();
+        await fetchExistingUsers();
+        await fetchDeniedUsers();
+        await fetchAdmins();
+        setIsRefreshing(false);
+    };
+
+
     const fetchPendingApprovals = async () => {
         try {
             setLoadingPendingApprovals(true);
-            const res = await fetch(`/api/admin/pending-users?page=${currentPage}&limit=20`);
+            const res = await fetch(`/api/admin/GET/pending-users?page=${currentPage}&limit=20`);
             if (!res.ok) throw new Error('Failed to fetch pending approvals');
             const data = await res.json();
             setPendingApprovalsData(data.users || []);
@@ -78,7 +95,7 @@ export const AdminDashboardProvider = ({ children }: { children: ReactNode }) =>
     const fetchExistingUsers = async () => {
         try {
             setLoadingExistingUsers(true);
-            const res = await fetch(`/api/admin/existing-users?page=${currentPage}&limit=20`);
+            const res = await fetch(`/api/admin/GET/existing-users?page=${currentPage}&limit=20`);
             if (!res.ok) throw new Error('Failed to fetch existing users');
             const data = await res.json();
             setExistingUsersData(data.users || []);
@@ -93,12 +110,14 @@ export const AdminDashboardProvider = ({ children }: { children: ReactNode }) =>
     const fetchDeniedUsers = async () => {
         try {
             setLoadingDeniedUsers(true);
-            const res = await fetch('/api/admin/denied-users');
+            const res = await fetch('/api/admin/GET/denied-users');
             if (!res.ok) throw new Error('Failed to fetch denied users');
+
             const data = await res.json();
-            setDeniedUsersData(data);
+            console.log('Fetched Denied Users:', data);  // Debugging log
+            setDeniedUsersData(data.users || []); // Adjust based on actual response structure
         } catch (error) {
-            console.error(error);
+            console.error('Error fetching denied users:', error);
         } finally {
             setLoadingDeniedUsers(false);
         }
@@ -131,7 +150,20 @@ export const AdminDashboardProvider = ({ children }: { children: ReactNode }) =>
         async (section: 'pending' | 'existing' | 'denied' | 'addAdmin') => {
             let shouldFetch = false;
 
-            if (section === 'pending') {
+            if (refresh) {
+                if (section === 'pending') {
+                    await fetchPendingApprovals();
+                } else if (section === 'existing') {
+                    await fetchExistingUsers();
+                } else if (section === 'denied') {
+                    await fetchDeniedUsers();
+                } else if (section === 'addAdmin') {
+                    await fetchAdmins();
+                }
+                setRefresh(false);
+            }
+
+            else if (section === 'pending') {
                 setIsPendingApprovalsOpen(prev => {
                     shouldFetch = !prev && !fetchedSections.current.pending;
                     return !prev;
@@ -169,7 +201,7 @@ export const AdminDashboardProvider = ({ children }: { children: ReactNode }) =>
                 }
             }
         },
-        [fetchAdmins]
+        [fetchAdmins, refresh]
     );
     return (
         <AdminDashboardContext.Provider value={{
@@ -183,12 +215,15 @@ export const AdminDashboardProvider = ({ children }: { children: ReactNode }) =>
             loadingAdmins,
             pendingApprovalsData,
             existingUsersData,
+            setDeniedUsersData,
             deniedUsersData,
             adminsData,
             toggleSection,
             totalPages,
             currentPage,
-            setCurrentPage
+            setCurrentPage,
+            handleRefresh,
+            isRefreshing
         }}>
             {children}
         </AdminDashboardContext.Provider>

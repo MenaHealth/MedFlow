@@ -7,6 +7,7 @@
     import {ChevronLeftIcon, ChevronRightIcon, UserRoundCheck, UserRoundMinus} from 'lucide-react';
     import { useAdminDashboard } from './AdminDashboardContext';
 
+
     interface User {
         _id: string;
         firstName: string;
@@ -16,24 +17,72 @@
         countries?: string[];
     }
 
+    interface PendingUsersProps {
+        data: User[];
+    }
+
     interface PendingApprovalsProps {
         data: User[] | null;
     }
-    export default function PendingUsers() {
+    export default function PendingUsers({ data }: PendingUsersProps) {
+        const { data: session } = useSession();
         const {
             pendingApprovalsData,
             loadingPendingApprovals,
             totalPages,
             currentPage,
             setCurrentPage,
+            toggleSection,
         } = useAdminDashboard();
 
         const { setToast } = useToast();
         const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
 
-        // Handle approve or deny action
+        // Handle approve-users or deny-users action
+// components/auth/admin/PendingUsers.tsx
         async function handleBulkAction(actionType: 'approve' | 'deny') {
-            // ... existing code here ...
+            if (!session?.user?.token || selectedUsers.length === 0) {
+                setToast?.({
+                    title: 'Error',
+                    description: 'No users selected or no authentication token found.',
+                    variant: 'error',
+                });
+                return;
+            }
+
+            try {
+                const url = `/api/admin/${actionType}`;
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${session.user.token}`,
+                    },
+                    body: JSON.stringify({ userIds: selectedUsers }),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to ${actionType} users`);
+                }
+
+                setToast?.({
+                    title: 'Success',
+                    description: `Selected users ${actionType === 'approve' ? 'approved' : 'denied'} successfully.`,
+                    variant: 'default',
+                });
+
+                // Update the pending approvals data by removing approved/denied users
+                setSelectedUsers([]);
+                toggleSection('pending'); // Refresh pending approvals after action
+            } catch (error) {
+                console.error(`Error in bulk ${actionType}:`, error);
+                const errorMessage = error instanceof Error ? error.message : `An error occurred while trying to ${actionType} the users.`;
+                setToast?.({
+                    title: 'Error',
+                    description: errorMessage,
+                    variant: 'error',
+                });
+            }
         }
 
         // Handle individual checkbox selection

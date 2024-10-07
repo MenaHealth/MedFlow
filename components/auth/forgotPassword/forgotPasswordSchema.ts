@@ -1,4 +1,3 @@
-// components/auth/forgotPassword/forgotPasswordSchema.ts
 import { z } from "zod";
 
 export const forgotPasswordSchema = z.object({
@@ -12,4 +11,16 @@ export const forgotPasswordSchema = z.object({
     path: ["confirmNewPassword"],
 });
 
-export type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
+export interface ForgotPasswordFormValues {
+    email?: string;
+    tempCode?: string;
+    securityAnswer?: string;
+    newPassword: string;
+    confirmNewPassword: string;
+}
+
+// Define the SecurityQuestion interface here
+export interface SecurityQuestion {
+    question: string;
+    questionId: string;
+}

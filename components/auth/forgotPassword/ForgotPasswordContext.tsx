@@ -2,14 +2,14 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { UseFormReturn, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ForgotPasswordFormValues, forgotPasswordSchema } from './forgotPasswordSchema';
+import { ForgotPasswordFormValues, forgotPasswordSchema, SecurityQuestion } from './forgotPasswordSchema';
 import useToast, { Toast } from '../../hooks/useToast';
 
 interface ForgotPasswordContextType {
     step: number;
     setStep: (step: number) => void;
-    securityQuestion: string | null;
-    setSecurityQuestion: (question: string | null) => void;
+    securityQuestion: SecurityQuestion | null; // Update type here
+    setSecurityQuestion: (question: SecurityQuestion | null) => void;
     form: UseFormReturn<ForgotPasswordFormValues>;
     loading: boolean;
     setLoading: (loading: boolean) => void;
@@ -36,7 +36,7 @@ export const useForgotPasswordContext = () => {
 
 export const ForgotPasswordProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [step, setStep] = useState(1);
-    const [securityQuestion, setSecurityQuestion] = useState<string | null>(null);
+    const [securityQuestion, setSecurityQuestion] = useState<SecurityQuestion | null>(null);
     const [loading, setLoading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const { setToast } = useToast();
@@ -52,18 +52,19 @@ export const ForgotPasswordProvider: React.FC<{ children: ReactNode }> = ({ chil
     });
 
     const handleNextStep = async () => {
+        console.log(`handleNextStep called. Current step: ${step}`);
         try {
             setLoading(true);
             if (step === 1) {
+                console.log('Proceeding to step 2');
                 setStep(2);
             } else if (step === 2) {
-                // Verify the code entered by the user
+                console.log('Verifying code for step 3');
                 await form.trigger('tempCode');
                 if (form.formState.isValid) {
                     const email = form.getValues('email');
                     const code = form.getValues('tempCode');
-
-                    // Call verify-code route (this part should remain here)
+                    console.log('Code is valid, sending verification request', { email, code });
                     const verifyResponse = await fetch('/api/auth/forgot-password/verify-code', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -71,7 +72,7 @@ export const ForgotPasswordProvider: React.FC<{ children: ReactNode }> = ({ chil
                     });
 
                     if (verifyResponse.ok) {
-                        // Verification successful, now proceed to the next step (security question handled elsewhere)
+                        console.log('Code verification successful, moving to step 3');
                         setStep(3);
                     } else {
                         setToast({
@@ -82,11 +83,11 @@ export const ForgotPasswordProvider: React.FC<{ children: ReactNode }> = ({ chil
                     }
                 }
             } else if (step === 3) {
-                // Handle security question step (no fetching done here)
-            } else if (step === 4) {
-                // Handle password reset step
+                console.log('Proceeding to step 4');
+                setStep(4);
             }
         } catch (error) {
+            console.error('Error in handleNextStep:', error);
             setToast({
                 title: 'Error',
                 description: 'An error occurred. Please try again.',
@@ -151,7 +152,10 @@ export const ForgotPasswordProvider: React.FC<{ children: ReactNode }> = ({ chil
             }
 
             const questionData = await questionResponse.json();
-            setSecurityQuestion(questionData.question);
+            setSecurityQuestion({
+                question: questionData.question,
+                questionId: questionData.questionId
+            });
             setStep(3); // Move to the security question step
         } catch (error) {
             console.error('Error during verification step:', error);
@@ -165,68 +169,99 @@ export const ForgotPasswordProvider: React.FC<{ children: ReactNode }> = ({ chil
         }
     };
 
-    const handleSecurityQuestionStep = async (securityAnswer: string, securityQuestion: string) => {
+    const handleSecurityQuestionStep = async (securityAnswer: string): Promise<void> => {
         try {
             setLoading(true);
             const email = form.getValues('email');
 
-            console.log('Sending to /api/auth/forgot-password/verify-security-answer:', {
-                email,
-                securityAnswer,
-                securityQuestion
-            });
-
-            const verifyResponse = await fetch('/api/auth/forgot-password/verify-security-answer', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, securityAnswer, securityQuestion }),
-            });
-
-            if (!verifyResponse.ok) {
-                const errorData = await verifyResponse.json();
-                throw new Error(errorData.error || 'Incorrect answer to the security question.');
+            if (!securityQuestion) {
+                throw new Error('Security question is missing');
             }
 
+            console.log('Sending security answer verification request...');
+            console.log('Email:', email);
+            console.log('Question ID:', securityQuestion.questionId);
+            console.log('Provided answer (first 3 characters):', securityAnswer.slice(0, 3) + '...');
+
+            const response = await fetch('/api/auth/forgot-password/verify-security-answer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email,
+                    securityAnswer,
+                    questionId: securityQuestion.questionId
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                console.error('Security answer verification failed:', data);
+                throw new Error(data.error || 'Failed to verify security answer');
+            }
+
+            console.log('Security answer verified successfully');
+            localStorage.setItem('resetToken', data.token);
             setStep(4); // Move to password reset step
         } catch (error) {
             console.error('Error during security question verification:', error);
-            setToast({
-                title: 'Error',
-                description: error instanceof Error ? error.message : 'An error occurred. Please try again.',
-                variant: 'error',
-            });
+            throw error; // Re-throw the error to be caught in the component
         } finally {
             setLoading(false);
         }
     };
 
     const handleResetPassword = async (data: ForgotPasswordFormValues) => {
+        console.log('handleResetPassword called with data:', data);
         try {
             setSubmitting(true);
             const email = form.getValues('email');
+            const token = localStorage.getItem('resetToken'); // Retrieve the token
 
-            console.log('Sending reset password request with:', { email, newPassword: data.newPassword });
+            if (!email || !data.newPassword || !token) {
+                console.error('Missing email, password, or token');
+                setToast({
+                    title: 'Error',
+                    description: 'Email, new password, and a valid token are required.',
+                    variant: 'error'
+                });
+                return;
+            }
 
             const response = await fetch('/api/auth/forgot-password/reset-password', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`, // Include the token here
                 },
                 body: JSON.stringify({ email, newPassword: data.newPassword }),
             });
 
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+
             const result = await response.json();
-            if (response.ok) {
-                console.log('Password reset response:', result);
-                setToast({ title: 'Success', description: 'Password reset successfully.', variant: 'success' });
+            console.log('Reset password response body:', result);
+
+            if (result.message === 'Password reset successfully') {
+                setToast({
+                    title: 'Success',
+                    description: 'Password reset successfully.',
+                    variant: 'success'
+                });
                 setStep(5); // Success step
             } else {
-                console.error('Password reset error:', result.message);
-                setToast({ title: 'Error', description: result.message || 'Failed to reset password.', variant: 'error' });
+                throw new Error(result.message || 'Failed to reset password.');
             }
         } catch (error) {
             console.error('Error during password reset:', error);
-            setToast({ title: 'Error', description: 'An error occurred. Please try again.', variant: 'error' });
+            setToast({
+                title: 'Error',
+                description: error instanceof Error ? error.message : 'An error occurred. Please try again.',
+                variant: 'error'
+            });
         } finally {
             setSubmitting(false);
         }
@@ -252,7 +287,7 @@ export const ForgotPasswordProvider: React.FC<{ children: ReactNode }> = ({ chil
                 handleSecurityQuestionStep,
                 securityQuestion,
                 setSecurityQuestion,
-                handleResetPassword,
+                handleResetPassword
             }}
         >
             {children}

@@ -1,7 +1,8 @@
-// app/api/auth/forgot-password/get-security-questions/route.ts
+// app/api/auth/forgot-password/reset-password/route.ts
 import { NextResponse } from 'next/server';
 import User from '@/models/user';
 import dbConnect from '@/utils/database';
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
     try {
@@ -30,7 +31,10 @@ export async function GET(request: Request) {
 
         console.log('Selected security question:', selectedQuestion);
 
-        return NextResponse.json({ question: selectedQuestion.question }, { status: 200 });
+        return NextResponse.json({
+            question: selectedQuestion.question,
+            questionId: selectedQuestion._id
+        }, { status: 200 });
     } catch (error) {
         console.error('Error retrieving user or security question:', error);
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

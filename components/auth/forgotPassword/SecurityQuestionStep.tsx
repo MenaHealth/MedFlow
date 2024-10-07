@@ -1,12 +1,14 @@
 // components/auth/forgotPassword/SecurityQuestionStep.tsx
+'use client'
+
 import React from 'react';
+import { useForm, FormProvider } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { useForgotPasswordContext } from './ForgotPasswordContext';
 import { TextFormField } from "@/components/ui/TextFormField";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from 'lucide-react';
-import { z } from "zod";
-import { useForm, FormProvider } from 'react-hook-form';
-import { zodResolver } from "@hookform/resolvers/zod";
 
 interface SecurityQuestionStepProps {
     onNext: () => void;
@@ -38,13 +40,21 @@ export function SecurityQuestionStep({ onNext }: SecurityQuestionStepProps) {
             return;
         }
 
+        const trimmedAnswer = data.securityAnswer.trim();
+        console.log('Handling security question submission...');
+        console.log('Provided question:', securityQuestion.question);
+        console.log('Provided answer (first 3 characters):', trimmedAnswer.slice(0, 3) + '...');
         setLoading(true);
         try {
-            await handleSecurityQuestionStep(data.securityAnswer, securityQuestion);
+            await handleSecurityQuestionStep(trimmedAnswer, securityQuestion.question); // Pass both answer and question
             onNext();
         } catch (error) {
-            console.error('Error during security question verification:', error);
-            // Error handling is now done in handleSecurityQuestionStep
+            console.error('Security question verification error:', error);
+            setToast?.({
+                title: 'Verification Error',
+                description: 'Failed to verify the security answer. Please try again.',
+                variant: 'destructive',
+            });
         } finally {
             setLoading(false);
         }
@@ -57,11 +67,10 @@ export function SecurityQuestionStep({ onNext }: SecurityQuestionStepProps) {
     return (
         <FormProvider {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <p><strong>Security Question:</strong> {securityQuestion}</p>
-
+                <p className="font-medium mb-2">Security Question: {securityQuestion.question}</p>
                 <TextFormField
                     fieldName="securityAnswer"
-                    fieldLabel="Security answer"
+                    fieldLabel="Security Answer"
                     autoComplete="off"
                     error={form.formState.errors.securityAnswer?.message}
                 />

@@ -74,7 +74,7 @@ export default function PatientTriage() {
     ].filter(Boolean).length >= 2);
   }, [priorityFilter, statusFilter, specialtyFilter]);
 
-  const sortAndFilterRows = useCallback((
+  const sortAndFilterRows = (
       rows,
       priorityFilter,
       statusFilter,
@@ -83,17 +83,17 @@ export default function PatientTriage() {
     if (!session) return [];
     let filteredRows = rows;
 
-    if (priorityFilter !== "all") {
-      filteredRows = filteredRows.filter(
-          (row) => row.priority === priorityFilter
-      );
-    }
+  if (priorityFilter !== "all") {
+    filteredRows = filteredRows.filter(
+        (row) => row.priority === priorityFilter
+    );
+  }
 
-    if (statusFilter !== "all") {
-      filteredRows = filteredRows.filter(
-          (row) => row.status === statusFilter
-      );
-    }
+  if (statusFilter !== "all") {
+    filteredRows = filteredRows.filter(
+        (row) => row.status === statusFilter
+    );
+  }
 
     if (specialtyFilter !== "all") {
       filteredRows = filteredRows.filter(
@@ -110,47 +110,51 @@ export default function PatientTriage() {
             // Only patients who speak the same language
             session.user.languages.indexOf(row?.language) !== -1 && 
             // Only patients who have needs matching the doctor's specialty
-            session.user.doctorSpecialty === row.specialty &&
-            // Only patients who live in the same country
-            session.user.countries.indexOf(row.country) !== -1
+            session.user.doctorSpecialty === row.specialty
+          
       );
     }
 
-    if (statusFilter !== "Archived") {
-      filteredRows = filteredRows.filter(
-          (row) => row.status !== "Archived"
-      )
-    }
+  if (statusFilter !== "Archived") {
+    filteredRows = filteredRows.filter(
+        (row) => row.status !== "Archived"
+    )
+  }
 
-    let sortedRows = [...filteredRows].sort((a, b) => {
-      const dateA = new Date(a.surgeryDate);
-      const dateB = new Date(b.surgeryDate);
-      return dateB - dateA;
-    });
+  // Sorting by createdAt (or the field that tracks when patients were added)
+  let sortedRows = [...filteredRows].sort((a, b) => {
+    return b._id.localeCompare(a._id);  // Sorting by ID in descending order
+    const dateA = new Date(a.createdAt);
+    const dateB = new Date(b.createdAt);
+    return dateB - dateA;  // Show new patients at the top
+  });
 
     return sortedRows;
-  }, [session]);
+  };
 
-  useEffect(() => {
-    const fetchAndSortRows = async () => {
-      try {
-        const response = await fetch("/api/patient/");
-        const data = await response.json();
-        const sortedAndFilteredData = sortAndFilterRows(
-            data,
-            priorityFilter,
-            statusFilter,
-            specialtyFilter
-        );
-        setRows(sortedAndFilteredData);
-      } catch (error) {
-        console.log(error);
-      }
-    };
+useEffect(() => {
+  const fetchAndSortRows = async () => {
+    try {
+      const response = await fetch("/api/patient/");
+      const data = await response.json();
+      
+      // Check if data is fetched correctly
+      console.log(data);  // Ensure you are fetching the correct data
+      
+      const sortedAndFilteredData = sortAndFilterRows(
+        data,
+        priorityFilter,
+        statusFilter,
+        specialtyFilter
+      );
+      setRows(sortedAndFilteredData);  // Set sorted rows after sorting
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
     fetchAndSortRows();
-
-  }, [priorityFilter, statusFilter, specialtyFilter, session, sortAndFilterRows]);
+  }, [priorityFilter, statusFilter, specialtyFilter, session]);
 
   const handleStatusChange = async (value, row, index) => {
     let triagedBy = row.triagedBy ?? {};

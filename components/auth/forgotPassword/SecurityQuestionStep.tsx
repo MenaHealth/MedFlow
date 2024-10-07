@@ -30,6 +30,7 @@ export function SecurityQuestionStep({ onNext }: SecurityQuestionStepProps) {
         },
     });
 
+    // components/auth/forgotPassword/SecurityQuestionStep.tsx
     const onSubmit = async (data: SecurityQuestionFormValues) => {
         if (!securityQuestion) {
             setToast?.({
@@ -40,13 +41,12 @@ export function SecurityQuestionStep({ onNext }: SecurityQuestionStepProps) {
             return;
         }
 
-        const trimmedAnswer = data.securityAnswer.trim();
         console.log('Handling security question submission...');
         console.log('Provided question:', securityQuestion.question);
-        console.log('Provided answer (first 3 characters):', trimmedAnswer.slice(0, 3) + '...');
+        console.log('Provided answer (first 3 characters):', data.securityAnswer.slice(0, 3) + '...');
         setLoading(true);
         try {
-            await handleSecurityQuestionStep(trimmedAnswer, securityQuestion.question); // Pass both answer and question
+            await handleSecurityQuestionStep(data.securityAnswer, securityQuestion.question); // Pass both answer and question
             onNext();
         } catch (error) {
             console.error('Security question verification error:', error);

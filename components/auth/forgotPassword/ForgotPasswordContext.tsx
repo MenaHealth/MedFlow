@@ -2,14 +2,15 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { UseFormReturn, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ForgotPasswordFormValues, forgotPasswordSchema, SecurityQuestion } from './forgotPasswordSchema';
+import { ForgotPasswordFormValues, forgotPasswordSchema, SecurityQuestionData } from './forgotPasswordSchema';
 import useToast, { Toast } from '../../hooks/useToast';
+import bcrypt from "bcryptjs";
 
 interface ForgotPasswordContextType {
     step: number;
     setStep: (step: number) => void;
-    securityQuestion: SecurityQuestion | null; // Update type here
-    setSecurityQuestion: (question: SecurityQuestion | null) => void;
+    securityQuestion: SecurityQuestionData | null; // Update type here
+    setSecurityQuestion: (question: SecurityQuestionData | null) => void;
     form: UseFormReturn<ForgotPasswordFormValues>;
     loading: boolean;
     setLoading: (loading: boolean) => void;
@@ -36,7 +37,7 @@ export const useForgotPasswordContext = () => {
 
 export const ForgotPasswordProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [step, setStep] = useState(1);
-    const [securityQuestion, setSecurityQuestion] = useState<SecurityQuestion | null>(null);
+    const [securityQuestion, setSecurityQuestion] = useState<SecurityQuestionData | null>(null);
     const [loading, setLoading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const { setToast } = useToast();
@@ -180,16 +181,17 @@ export const ForgotPasswordProvider: React.FC<{ children: ReactNode }> = ({ chil
 
             console.log('Sending security answer verification request...');
             console.log('Email:', email);
-            console.log('Question ID:', securityQuestion.questionId);
-            console.log('Provided answer (first 3 characters):', securityAnswer.slice(0, 3) + '...');
+            console.log('Question:', securityQuestion.question);
+            console.log('Provided answer (first  characters):', securityAnswer);
 
+            const hashedAnswer = await bcrypt.hash(securityAnswer, 10);
             const response = await fetch('/api/auth/forgot-password/verify-security-answer', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     email,
                     securityAnswer,
-                    questionId: securityQuestion.questionId
+                    securityQuestion: securityQuestion.question,
                 }),
             });
 

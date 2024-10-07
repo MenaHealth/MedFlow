@@ -120,11 +120,9 @@ UserSchema.pre('save', async function (next) {
     const hash = await bcrypt.hash(user.password, salt);
     user.password = hash;
 
-    // Hash security question answers
+// Hash security question answers
     for (const question of user.securityQuestions) {
-      const salt = await bcrypt.genSalt(10);
-      const hash = await bcrypt.hash(question.answer, salt);
-      question.answer = hash;
+      question.answer = await bcrypt.hash(question.answer, 10);
     }
 
     next();

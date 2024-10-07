@@ -20,7 +20,7 @@ export interface ForgotPasswordFormValues {
 }
 
 // Define the SecurityQuestion interface here
-export interface SecurityQuestion {
+export interface SecurityQuestionData {
     question: string;
     questionId: string;
 }

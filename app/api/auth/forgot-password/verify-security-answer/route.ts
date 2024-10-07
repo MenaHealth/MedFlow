@@ -35,17 +35,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         console.log('Provided answer:', securityAnswer);
         console.log('Expected answer hash:', securityQuestionData.answer);
 
-        if (!email || !securityAnswer || !securityQuestion) {
-            const missingFields = [];
-            if (!email) missingFields.push('email');
-            if (!securityAnswer) missingFields.push('security answer');
-            if (!securityQuestion) missingFields.push('security question');
-            console.error(`Missing ${missingFields.join(', ')} in request`);
-            return NextResponse.json({ success: false, error: `Missing ${missingFields.join(', ')} in request` }, { status: 400 });
-        }
-
+        // Logging hash generation and comparison process
         const isValid = await bcrypt.compare(securityAnswer, securityQuestionData.answer);
-        console.log('Is answer valid?', isValid);
+        console.log(`bcrypt.compare(securityAnswer, securityQuestionData.answer) result: ${isValid}`);
+        console.log(`Plain answer provided: ${securityAnswer}`);
+        console.log(`Stored answer hash: ${securityQuestionData.answer}`);
 
         if (!isValid) {
             console.error('Incorrect security answer');

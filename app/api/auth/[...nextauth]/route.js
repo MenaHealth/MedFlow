@@ -45,6 +45,9 @@ const handler = NextAuth({
 
                 // Validate the password
                 const isPasswordValid = await bcrypt.compare(password, user.password);
+                console.log('Plain password:', password);
+                console.log('Hashed password from DB:', user.password);
+                console.log('Password validation result:', isPasswordValid);
 
                 // Log password validation for debugging
                 console.log('Password validation result:', isPasswordValid);

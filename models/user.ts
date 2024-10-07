@@ -110,25 +110,19 @@ UserSchema.virtual('denied').get(function () {
   return !!this.denialDate;
 });
 
-// Pre-save hook for password hashing
 UserSchema.pre('save', async function (next) {
   const user = this;
-  if (!user.isModified('password')) return next();
 
-  try {
-    const salt = await bcrypt.genSalt(10);
-    const hash = await bcrypt.hash(user.password, salt);
-    user.password = hash;
-
-// Hash security question answers
-    for (const question of user.securityQuestions) {
-      question.answer = await bcrypt.hash(question.answer, 10);
+  // Only hash if the password is modified and not already hashed
+  if (user.isModified('password') && !user.password.startsWith('$2a$')) {
+    try {
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(user.password, salt);
+    } catch (error) {
+      return next(error as CallbackError);
     }
-
-    next();
-  } catch (error) {
-    return next(error as CallbackError);
   }
+  next();
 });
 
 const User = models.User || model<IUser>('User', UserSchema);

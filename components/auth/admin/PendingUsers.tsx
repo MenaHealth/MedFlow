@@ -40,7 +40,7 @@
 
         // Handle approve-users or deny-users action
 // components/auth/admin/PendingUsers.tsx
-        async function handleBulkAction(actionType: 'approve' | 'deny') {
+        async function handleBulkAction(actionType: 'approve-users' | 'deny-users') {
             if (!session?.user?.token || selectedUsers.length === 0) {
                 setToast?.({
                     title: 'Error',
@@ -51,7 +51,7 @@
             }
 
             try {
-                const url = `/api/admin/${actionType}`;
+                const url = `/api/admin/POST/${actionType}`;
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: {
@@ -67,7 +67,7 @@
 
                 setToast?.({
                     title: 'Success',
-                    description: `Selected users ${actionType === 'approve' ? 'approved' : 'denied'} successfully.`,
+                    description: `Selected users ${actionType === 'approve-users' ? 'approved' : 'denied'} successfully.`,
                     variant: 'default',
                 });
 
@@ -108,14 +108,14 @@
             <div className="container mx-auto px-4 py-8 bg-orange-50">
                 <div className="flex justify-between items-center mb-4">
                     <button
-                        onClick={() => handleBulkAction('approve')}
+                        onClick={() => handleBulkAction('approve-users')}
                         className="border-2 border-orange-800 text-orange-800 font-bold hover:bg-orange-800 hover:text-orange-50  py-2 px-4 rounded mr-2"
                         disabled={selectedUsers.length === 0}
                     >
                         <UserRoundCheck className="w-5 h-5" />
                     </button>
                     <button
-                        onClick={() => handleBulkAction('deny')}
+                        onClick={() => handleBulkAction('deny-users')}
                         className="border-2 border-orange-800 text-orange-800 font-bold hover:bg-orange-800 hover:text-orange-50  py-2 px-4 rounded mr-2"
                         disabled={selectedUsers.length === 0}
                     >

@@ -37,3 +37,6 @@ export async function GET(request: Request) {
         return NextResponse.json({ message: 'Failed to fetch denied users' }, { status: 500 });
     }
 }
+
+export const dynamic = 'force-dynamic';
+// have this line ^^ to stop the Dynamic server usage errors when running `npm run build`

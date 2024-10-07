@@ -117,7 +117,7 @@ export default function AdminManagement() {
         if (!searchQuery) return;
 
         try {
-            const res = await fetch(`/api/admin/existing-users?search=${searchQuery}`);
+            const res = await fetch(`/api/admin/GET/existing-users?search=${searchQuery}`);
             if (!res.ok) throw new Error('Failed to fetch users');
             const data = await res.json();
             setUsers(data.users || []);
@@ -134,8 +134,6 @@ export default function AdminManagement() {
     if (loadingAdmins) {
         return <div className="text-center py-4">Loading...</div>;
     }
-
-    // Inside AdminManagement component
 
     return (
         <div className="container mx-auto px-4 py-8 bg-darkBlue text-orange-50">

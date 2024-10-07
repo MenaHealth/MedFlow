@@ -1,4 +1,4 @@
-// app/api/admin/pending-users/route.ts
+// app/api/admin/GET/existing-users/route.ts
 
 import { NextResponse } from 'next/server';
 import dbConnect from '@/utils/database';

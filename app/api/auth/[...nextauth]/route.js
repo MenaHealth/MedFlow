@@ -12,7 +12,7 @@ import dbConnect from '@/utils/database';
 
 const handler = NextAuth({
     session: {
-        strategy: 'jwt', 
+        strategy: 'jwt',
     },
     providers: [
         CredentialsProvider({
@@ -25,8 +25,8 @@ const handler = NextAuth({
                 await dbConnect();
                 const { email, password } = credentials;
 
-                // Find the user by email, and explicitly select the "authorized" field
-                const user = await User.findOne({ email }).select('+authorized');
+                // Find the user by email, case-insensitve, and explicitly select the "authorized" field
+                const user = await User.findOne({ email: { $regex: new RegExp(`^${email}$`, 'i') } }).select('+authorized');
 
                 // If no user found, throw an error
                 if (!user) {
@@ -45,6 +45,9 @@ const handler = NextAuth({
 
                 // Validate the password
                 const isPasswordValid = await bcrypt.compare(password, user.password);
+                console.log('Plain password:', password);
+                console.log('Hashed password from DB:', user.password);
+                console.log('Password validation result:', isPasswordValid);
 
                 // Log password validation for debugging
                 console.log('Password validation result:', isPasswordValid);
@@ -123,7 +126,7 @@ const handler = NextAuth({
 
                     token.accessToken = jwt.sign(
                         { id: user._id, email: user.email, isAdmin: user.isAdmin },
-                        process.env.JWT_SECRET, 
+                        process.env.JWT_SECRET,
                         { expiresIn: '1d' } // Set expiration time for the JWT
                     );
 
@@ -136,7 +139,7 @@ const handler = NextAuth({
 
             return token;
         },
-      
+
         async session({ session, token }) {
             if (token) {
                 session.user.id = token.id;

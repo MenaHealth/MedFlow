@@ -2,7 +2,8 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import { BarLoader } from "react-spinners";
-import RXForm from "@/components/form/RXForm";  // Importing the RXForm component
+import RXForm from "@/components/form/RXForm";  
+import PatientSubmenu from "@/components/PatientSubmenu";
 
 interface RXPageProps {
     params: {
@@ -28,6 +29,7 @@ const RXPage: React.FC<RXPageProps> = ({ params }) => {
 
     return (
         <div className="w-full max-w-4xl mx-auto pb-16">
+            <PatientSubmenu />
             <h1 className="text-3xl font-bold mb-8 text-center">RX Page</h1>
             <div className="border border-gray-300 p-8 bg-white shadow rounded-lg">
                 {/* Render the RXForm here */}

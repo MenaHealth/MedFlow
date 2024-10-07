@@ -73,12 +73,10 @@ const PasswordEmailForm = () => {
                 />
                 {/* Password Fields */}
                 <PasswordFormField
-                    form={form}
                     fieldName="password"
                     fieldLabel="Password"
                 />
                 <PasswordFormField
-                    form={form}
                     fieldName="confirmPassword"
                     fieldLabel="Confirm Password"
                 />

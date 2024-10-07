@@ -14,7 +14,7 @@ export async function GET(request: Request) {
 
     try {
         const totalUsers = await User.countDocuments({ denialDate: { $exists: true } });
-        const deniedUsers = await User.find({ denialDate: { $exists: true } })
+        const deniedUsers = await User.find({ authorized: false })
             .select('firstName lastName email accountType countries denialDate')
             .skip(skip)
             .limit(limit);

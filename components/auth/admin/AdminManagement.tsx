@@ -1,20 +1,14 @@
 // components/auth/admin/AdminManagement.tsx
+// components/auth/admin/AdminManagement.tsx
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import useToast from '@/components/hooks/useToast';
-import {ChevronLeft, ChevronRight, Minus, Plus, Search, UserRoundCheck} from 'lucide-react';
+import { ChevronLeft, ChevronRight, Minus, Plus, Search, UserRoundCheck } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
-interface Admin {
-    _id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    adminStartDate: string;
-}
+import { useAdminDashboard } from '@/components/auth/admin/AdminDashboardContext'; // Import the context
 
 interface User {
     _id: string;
@@ -25,47 +19,21 @@ interface User {
 
 export default function AdminManagement() {
     const { data: session } = useSession();
-    const [admins, setAdmins] = useState<Admin[]>([]);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const [isLoading, setIsLoading] = useState(true);
+    const {
+        adminsData,
+        loadingAdmins,
+        totalPages,
+        currentPage,
+        setCurrentPage,
+        isAddAdminUsersOpen,
+        toggleSection
+    } = useAdminDashboard();
+
     const { setToast } = useToast();
-    const [showAddAdmin, setShowAddAdmin] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [users, setUsers] = useState<User[]>([]);
-    const [selectedUser, setSelectedUser] = useState<string | null>(null);  // Store user ID
+    const [selectedUser, setSelectedUser] = useState<string | null>(null);
 
-    // Fetch existing admins
-    const fetchAdmins = useCallback(async () => {
-        if (session?.user?.isAdmin) {
-            setIsLoading(true);
-            try {
-                const res = await fetch(`/api/admin/management?page=${currentPage}&limit=20`);
-                if (!res.ok) throw new Error('Failed to fetch admins');
-                const data = await res.json();
-                setAdmins(data.admins || []);
-                setTotalPages(data.totalPages || 1);
-            } catch (error) {
-                console.error('Error fetching admins:', error);
-                setToast?.({
-                    title: 'Error',
-                    description: 'Failed to fetch admins.',
-                    variant: 'destructive',
-                });
-                setAdmins([]);
-            } finally {
-                setIsLoading(false);
-            }
-        }
-    }, [session, currentPage, setToast]);
-
-    useEffect(() => {
-        if (session?.user?.isAdmin) {
-            fetchAdmins();
-        }
-    }, [session, fetchAdmins]);
-
-    // Add new admin
     const handleAddAdmin = async () => {
         if (!selectedUser) {
             setToast?.({
@@ -83,12 +51,10 @@ export default function AdminManagement() {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${session?.user?.token}`,
                 },
-                body: JSON.stringify({ userId: selectedUser }),  // Send selected user ID
+                body: JSON.stringify({ userId: selectedUser }),
             });
 
-            if (!response.ok) {
-                throw new Error('Failed to add admin');
-            }
+            if (!response.ok) throw new Error('Failed to add admin');
 
             setToast?.({
                 title: 'Success',
@@ -96,9 +62,8 @@ export default function AdminManagement() {
                 variant: 'default',
             });
 
-            setShowAddAdmin(false);
             setSelectedUser(null);
-            fetchAdmins();
+            toggleSection('addAdmin'); // Refetch data after adding admin
         } catch (error) {
             console.error('Error adding admin:', error);
             setToast?.({
@@ -109,9 +74,8 @@ export default function AdminManagement() {
         }
     };
 
-    // Remove an admin
     const handleRemoveAdmin = async (adminId: string) => {
-        if (admins.length <= 1) {
+        if (adminsData.length <= 1) {
             setToast?.({
                 title: 'Error',
                 description: 'There must be at least one admin.',
@@ -130,9 +94,7 @@ export default function AdminManagement() {
                 body: JSON.stringify({ adminId }),
             });
 
-            if (!response.ok) {
-                throw new Error('Failed to remove admin');
-            }
+            if (!response.ok) throw new Error('Failed to remove admin');
 
             setToast?.({
                 title: 'Success',
@@ -140,7 +102,7 @@ export default function AdminManagement() {
                 variant: 'default',
             });
 
-            fetchAdmins();
+            toggleSection('addAdmin'); // Refetch data after removing admin
         } catch (error) {
             console.error('Error removing admin:', error);
             setToast?.({
@@ -151,12 +113,11 @@ export default function AdminManagement() {
         }
     };
 
-    // Search users by email
     const handleSearch = useCallback(async () => {
         if (!searchQuery) return;
 
         try {
-            const res = await fetch(`/api/admin/existing-users?search=${searchQuery}`);
+            const res = await fetch(`/api/admin/GET/existing-users?search=${searchQuery}`);
             if (!res.ok) throw new Error('Failed to fetch users');
             const data = await res.json();
             setUsers(data.users || []);
@@ -170,23 +131,13 @@ export default function AdminManagement() {
         }
     }, [searchQuery, setToast]);
 
-    // UI for loading state
-    if (isLoading) {
+    if (loadingAdmins) {
         return <div className="text-center py-4">Loading...</div>;
     }
 
     return (
         <div className="container mx-auto px-4 py-8 bg-darkBlue text-orange-50">
-            <div className="flex justify-between items-center mb-4">
-                <Button
-                    className="border-2 border-orange-50 text-orange-50 font-bold hover:bg-orange-50 hover:text-darkBlue py-2 px-4 rounded mr-2"
-                    onClick={() => setShowAddAdmin(!showAddAdmin)}
-                >
-                    <Plus className="w-5 h-5" />
-                </Button>
-            </div>
-
-            {showAddAdmin && (
+            {isAddAdminUsersOpen && (
                 <div className="mb-4 p-4 border-2 border-orange-50 rounded-lg">
                     <h3 className="text-xl mb-2">Add New Admin</h3>
                     <div className="flex items-center bg-orange-50 text-darkBlue">
@@ -202,12 +153,11 @@ export default function AdminManagement() {
                         </Button>
                     </div>
 
-                    {/* Display user search results */}
                     {users.length > 0 && (
                         <div>
                             <label>Select User:</label>
                             <select
-                                onChange={(e) => setSelectedUser(e.target.value)}  // Store the selected user's ID
+                                onChange={(e) => setSelectedUser(e.target.value)}
                                 className="w-full p-2 mt-2 border rounded-md bg-darkBlue"
                             >
                                 <option value="">-- Select a user --</option>
@@ -220,17 +170,12 @@ export default function AdminManagement() {
                         </div>
                     )}
 
-                    <Button
-                        onClick={handleAddAdmin}
-                        className="border-2 border-darkBlue bg-orange-50 hover:bg-darkBlue hover:text-orange-500 text-darkBlue hover:border-orange-500"
-                        disabled={!selectedUser}
-                    >
+                    <Button onClick={handleAddAdmin} disabled={!selectedUser} className="border-2 border-darkBlue bg-orange-50 hover:bg-darkBlue hover:text-orange-500 text-darkBlue hover:border-orange-500">
                         <UserRoundCheck className="w-5 h-5" />
                     </Button>
                 </div>
             )}
 
-            {/* Admins Table */}
             <table className="min-w-full">
                 <thead>
                 <tr>
@@ -241,8 +186,8 @@ export default function AdminManagement() {
                 </tr>
                 </thead>
                 <tbody>
-                {admins.length > 0 ? (
-                    admins.map((admin) => (
+                {adminsData?.length > 0 ? (
+                    adminsData.map((admin: any) => (
                         <tr key={admin._id}>
                             <td className="py-2 px-4 border-b border-grey-700">
                                 {admin.firstName} {admin.lastName}
@@ -252,9 +197,9 @@ export default function AdminManagement() {
                                 {new Date(admin.adminStartDate).toLocaleDateString()}
                             </td>
                             <td className="py-2 px-4 border-b border-grey-700">
-                                {admins.length > 1 ? (
+                                {adminsData.length > 1 ? (
                                     <Button
-                                        className="border-2 border-orange-50 text-orange-50 font-bold hover:bg-orange-50 hover:text-darkBlue  py-2 px-4 rounded mr-2"
+                                        className="border-2 border-orange-50 text-orange-50 font-bold hover:bg-orange-50 hover:text-darkBlue py-2 px-4 rounded mr-2"
                                         onClick={() => handleRemoveAdmin(admin._id)}
                                     >
                                         <Minus className="w-5 h-5" />
@@ -274,7 +219,8 @@ export default function AdminManagement() {
                 )}
                 </tbody>
             </table>
-            {admins.length > 0 && totalPages > 1 && (
+
+            {adminsData?.length > 0 && totalPages > 1 && (
                 <div className="mt-4 flex justify-center items-center space-x-2">
                     <Button
                         onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -284,8 +230,8 @@ export default function AdminManagement() {
                         <ChevronLeft className="h-5 w-5" />
                     </Button>
                     <span>
-                        Page {currentPage} of {totalPages}
-                    </span>
+                    Page {currentPage} of {totalPages}
+                </span>
                     <Button
                         onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                         disabled={currentPage === totalPages}

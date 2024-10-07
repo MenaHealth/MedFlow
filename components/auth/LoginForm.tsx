@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { TextFormField } from "@/components/ui/TextFormField";
 import { Button } from "@/components/ui/button";
-import ForgotPasswordForm from "@/components/auth/ForgotPasswordForm";
+import ForgotPasswordForm from "@/components/auth/forgotPassword/ForgotPasswordForm";
 import { useRouter } from "next/navigation";
 import { signIn, getProviders } from "next-auth/react";
 import { BarLoader } from "react-spinners";
@@ -43,6 +43,10 @@ export function LoginForm() {
         fetchProviders();
     }, []);
 
+    useEffect(() => {
+        console.log("LoginForm component has mounted!");
+    }, []);
+
     const onError = (errors: any) => {
         const errorMessages = [];
 
@@ -73,6 +77,7 @@ export function LoginForm() {
 
     const onSubmit = async (data: LoginFormValues) => {
         setSubmitting(true);
+        console.log("Login button clicked! Form data:", data); // Log form data
 
         try {
             const response = await signIn('credentials', {
@@ -80,9 +85,9 @@ export function LoginForm() {
                 password: data.password,
                 redirect: false,
             });
+            console.log("Full response from signIn:", response); // Log the entire response
 
             if (response && !response.error) {
-                // Successful login
                 setToast?.({ title: '✓', description: 'You have successfully logged in.', variant: 'default' });
                 router.replace('/patient-info/dashboard');
             } else if (response?.error) {
@@ -99,6 +104,7 @@ export function LoginForm() {
                 }
             }
         } catch (error) {
+            console.error("Error during login:", error);
             setToast?.({ title: 'Login Error', description: 'An unexpected error occurred. Please try again.', variant: 'error' });
         } finally {
             setSubmitting(false);
@@ -126,6 +132,7 @@ export function LoginForm() {
                         <Button
                             type="submit"
                             disabled={submitting}
+                            onClick={() => console.log("Login button clicked!")}
                         > Login
                             {submitting && (
                                 <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
@@ -152,7 +159,7 @@ export function LoginForm() {
                             <span className="text-gray-600">or</span>
                         </div>
                         <div className="flex justify-center mt-2 mb-4">
-                            <button 
+                            <button
                                 className="gsi-material-button"
                                 onClick={() => {
                                     signIn(provider.id, { callbackUrl: '/patient-info/dashboard' });

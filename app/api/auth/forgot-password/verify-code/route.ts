@@ -8,6 +8,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     const { email, tempCode } = await request.json();
 
+    console.log('Received verification request:', { email, tempCode });
+
     if (!email || !tempCode) {
         console.error('Missing email or verification code in request');
         return NextResponse.json({ success: false, error: 'Email and verification code are required' }, { status: 400 });
@@ -20,17 +22,25 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 });
         }
 
-        if (user.tempPasswordResetCode !== tempCode) {
-            console.warn(`Invalid verification code provided for user with email ${email}`);
-            return NextResponse.json({ success: false, error: 'Invalid verification code' }, { status: 401 });
-        }
+        console.log('User found:', {
+            email: user.email,
+            tempCode: user.tempPasswordResetCode,
+            tempCodeExpiry: user.tempCodeExpiry
+        });
 
+        // Check if the code has expired
         if (Date.now() > user.tempCodeExpiry) {
             console.warn(`Verification code has expired for user with email ${email}`);
             return NextResponse.json({ success: false, error: 'Verification code has expired' }, { status: 401 });
         }
 
-        // Clear the temp code and expiry after successful verification
+        // Check if the code matches
+        if (user.tempPasswordResetCode !== tempCode) {
+            console.warn(`Invalid verification code provided for user with email ${email}`);
+            return NextResponse.json({ success: false, error: 'Invalid verification code' }, { status: 401 });
+        }
+
+        // If verification succeeds, clear the temp code and expiry
         user.tempPasswordResetCode = undefined;
         user.tempCodeExpiry = undefined;
         await user.save();

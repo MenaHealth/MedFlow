@@ -1,5 +1,4 @@
 // app/api/admin/existing-users/route.ts
-
 import { NextResponse } from 'next/server';
 import dbConnect from '@/utils/database';
 import User from '@/models/user';
@@ -14,20 +13,23 @@ export async function GET(request: Request) {
     const search = searchParams.get('search') || '';
 
     try {
-        const query = {
-            authorized: true,
-            $or: [
+        // Base query for authorized users
+        const query: any = { authorized: true };
+
+        // Only apply search filter if search term is provided
+        if (search) {
+            query.$or = [
                 { lastName: { $regex: search, $options: 'i' } },
                 { email: { $regex: search, $options: 'i' } }
-            ]
-        };
+            ];
+        }
 
         // Count the total number of matching users
         const totalUsers = await User.countDocuments(query);
 
-        // Fetch matching users with pagination
+        // Fetch matching users with pagination, explicitly selecting 'authorized' field
         const existingUsers = await User.find(query)
-            .select('firstName lastName email accountType countries approvalDate')
+            .select('+authorized firstName lastName email accountType countries approvalDate')
             .skip(skip)
             .limit(limit);
 

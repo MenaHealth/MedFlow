@@ -1,6 +1,7 @@
 "use client";
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
+import { BarLoader } from "react-spinners";
 import RXForm from "@/components/form/RXForm";  // Importing the RXForm component
 
 interface RXPageProps {
@@ -19,10 +20,11 @@ const RXPage: React.FC<RXPageProps> = ({ params }) => {
     }
 
     if (status === 'loading') {
-        return <p>Loading...</p>;  // Show loading if session is being fetched
+        return  <BarLoader />;
     }
 
-    const username = `${session?.user?.firstName} ${session?.user?.lastName}`;  // Extract user info
+    const username = `${session?.user?.firstName || ''} ${session?.user?.lastName || ''}`;
+    const patientId = params.id;
 
     return (
         <div className="w-full max-w-4xl mx-auto pb-16">
@@ -30,7 +32,7 @@ const RXPage: React.FC<RXPageProps> = ({ params }) => {
             <div className="border border-gray-300 p-8 bg-white shadow rounded-lg">
                 <p>Welcome, {username}</p>
                 {/* Render the RXForm here */}
-                <RXForm />
+                <RXForm patientId={patientId} username={username} />
             </div>
         </div>
     );

@@ -25,8 +25,8 @@ const handler = NextAuth({
                 await dbConnect();
                 const { email, password } = credentials;
 
-                // Find the user by email, and explicitly select the "authorized" field
-                const user = await User.findOne({ email }).select('+authorized');
+                // Find the user by email, case-insensitve, and explicitly select the "authorized" field
+                const user = await User.findOne({ email: { $regex: new RegExp(`^${email}$`, 'i') } }).select('+authorized');
 
                 // If no user found, throw an error
                 if (!user) {

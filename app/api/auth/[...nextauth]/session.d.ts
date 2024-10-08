@@ -11,13 +11,13 @@ declare module 'next-auth' {
             firstName: string;
             lastName: string;
             accountType: 'Doctor' | 'Triage';
-            isAdmin: boolean;  // Admin access is checked via JWT
+            isAdmin: boolean;
             image?: string;
             doctorSpecialty?: string;
             languages?: string[];
             token?: string;
             gender?: 'male' | 'female';
-            dob: Date;
+            dob?: Date;
             countries?: string[];
         };
     }

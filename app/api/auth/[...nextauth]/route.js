@@ -72,6 +72,7 @@ const handler = NextAuth({
                     accountType: user.accountType,
                     image: user.image,
                     isAdmin: !!isAdmin,
+                    dob: user.dob,
                 };
 
                 if (user.accountType === 'Doctor') {
@@ -123,6 +124,7 @@ const handler = NextAuth({
                     token.lastName = user.lastName;
                     token.image = user.image;
                     token.isAdmin = user.isAdmin;
+                    token.dob = user.dob;
 
                     token.accessToken = jwt.sign(
                         { id: user._id, email: user.email, isAdmin: user.isAdmin },
@@ -149,6 +151,7 @@ const handler = NextAuth({
                 session.user.image = token.image;
                 session.user.isAdmin = token.isAdmin;
                 session.user.token = token.accessToken;
+                session.user.dob = token.dob;
 
                 if (token.accountType === 'Doctor') {
                     session.user.languages = token.languages;

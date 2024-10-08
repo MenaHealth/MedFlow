@@ -74,87 +74,71 @@ export default function PatientTriage() {
     ].filter(Boolean).length >= 2);
   }, [priorityFilter, statusFilter, specialtyFilter]);
 
-  const sortAndFilterRows = (
-      rows,
-      priorityFilter,
-      statusFilter,
-      specialtyFilter
-  ) => {
-    if (!session) return [];
-    let filteredRows = rows;
+  const sortAndFilterRows = useCallback(
+      (rows, priorityFilter, statusFilter, specialtyFilter) => {
+        if (!session) return [];
+        let filteredRows = rows;
 
-  if (priorityFilter !== "all") {
-    filteredRows = filteredRows.filter(
-        (row) => row.priority === priorityFilter
-    );
-  }
+        if (priorityFilter !== "all") {
+          filteredRows = filteredRows.filter(
+              (row) => row.priority === priorityFilter
+          );
+        }
 
-  if (statusFilter !== "all") {
-    filteredRows = filteredRows.filter(
-        (row) => row.status === statusFilter
-    );
-  }
+        if (statusFilter !== "all") {
+          filteredRows = filteredRows.filter(
+              (row) => row.status === statusFilter
+          );
+        }
 
-    if (specialtyFilter !== "all") {
-      filteredRows = filteredRows.filter(
-          (row) => row.specialty === specialtyFilter
-      );
-    }
+        if (specialtyFilter !== "all") {
+          filteredRows = filteredRows.filter(
+              (row) => row.specialty === specialtyFilter
+          );
+        }
 
-    // Filter for specific doctor - expand logic?
-    if (session?.user?.accountType === "Doctor") {
-      filteredRows = filteredRows.filter(
-          (row) => 
-            // Only patients who are at least triaged
-            row.triagedBy && Object.keys(row.triagedBy).length !== 0 &&
-            // Only patients who speak the same language
-            session.user.languages.indexOf(row?.language) !== -1 && 
-            // Only patients who have needs matching the doctor's specialty
-            session.user.doctorSpecialty === row.specialty
-          
-      );
-    }
+        if (session?.user?.accountType === "Doctor") {
+          filteredRows = filteredRows.filter(
+              (row) =>
+                  row.triagedBy &&
+                  Object.keys(row.triagedBy).length !== 0 &&
+                  session.user.languages.includes(row?.language) &&
+                  session.user.doctorSpecialty === row.specialty
+          );
+        }
 
-  if (statusFilter !== "Archived") {
-    filteredRows = filteredRows.filter(
-        (row) => row.status !== "Archived"
-    )
-  }
+        if (statusFilter !== "Archived") {
+          filteredRows = filteredRows.filter(
+              (row) => row.status !== "Archived"
+          );
+        }
 
-  // Sorting by createdAt (or the field that tracks when patients were added)
-  let sortedRows = [...filteredRows].sort((a, b) => {
-    return b._id.localeCompare(a._id);  // Sorting by ID in descending order
-    const dateA = new Date(a.createdAt);
-    const dateB = new Date(b.createdAt);
-    return dateB - dateA;  // Show new patients at the top
-  });
+        // Sorting by createdAt (or ID in descending order)
+        return filteredRows.sort((a, b) => b._id.localeCompare(a._id));
+      },
+      [session]
+  );
 
-    return sortedRows;
-  };
+  useEffect(() => {
+    const fetchAndSortRows = async () => {
+      try {
+        const response = await fetch("/api/patient/");
+        const data = await response.json();
 
-useEffect(() => {
-  const fetchAndSortRows = async () => {
-    try {
-      const response = await fetch("/api/patient/");
-      const data = await response.json();
-      
-      // Check if data is fetched correctly
-      console.log(data);  // Ensure you are fetching the correct data
-      
-      const sortedAndFilteredData = sortAndFilterRows(
-        data,
-        priorityFilter,
-        statusFilter,
-        specialtyFilter
-      );
-      setRows(sortedAndFilteredData);  // Set sorted rows after sorting
-    } catch (error) {
-      console.log(error);
-    }
-  };
+        const sortedAndFilteredData = sortAndFilterRows(
+            data,
+            priorityFilter,
+            statusFilter,
+            specialtyFilter
+        );
+        setRows(sortedAndFilteredData);
+      } catch (error) {
+        console.log(error);
+      }
+    };
 
     fetchAndSortRows();
-  }, [priorityFilter, statusFilter, specialtyFilter, session]);
+  }, [priorityFilter, statusFilter, specialtyFilter, session, sortAndFilterRows]);
 
   const handleStatusChange = async (value, row, index) => {
     let triagedBy = row.triagedBy ?? {};

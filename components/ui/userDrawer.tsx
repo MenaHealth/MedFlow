@@ -76,7 +76,7 @@ export function UserDrawer({ isOpen, setIsOpen, user }: UserDrawerProps) {
                     </Link>
                     <Link href="/my-profile" className="flex items-center space-x-3 p-2 hover:bg-orange-100 rounded-md" onClick={handleItemClick}>
                         <Settings size={22} />
-                        <span className="text-lg">Settings</span>
+                        <span className="text-lg">My Profile</span>
                     </Link>
                     {user.isAdmin && (
                         <Link href="/admin" className="flex items-center space-x-3 p-2 hover:bg-orange-100 rounded-md" onClick={handleItemClick}>

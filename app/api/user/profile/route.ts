@@ -26,3 +26,6 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
 }
+
+export const dynamic = 'force-dynamic';
+// have this line ^^ to stop the Dynamic server usage errors when running `npm run build`

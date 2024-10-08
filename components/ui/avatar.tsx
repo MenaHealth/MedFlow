@@ -1,4 +1,5 @@
 import * as React from "react"
+import Image from "next/image"
 import { cn } from "@/lib/utils"
 
 const Avatar = React.forwardRef<
@@ -15,10 +16,11 @@ const Avatar = React.forwardRef<
             {...props}
         >
       {src ? (
-          <img
+          <Image
               src={src}
               alt={alt || "Avatar"}
-              className="h-full w-full object-cover"
+              className="object-cover"
+              layout="fill" // This makes the image take up the full span dimensions
           />
       ) : (
           <span className="flex h-full w-full items-center justify-center bg-gray-300 text-gray-600 font-medium text-sm">

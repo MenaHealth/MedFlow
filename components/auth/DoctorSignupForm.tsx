@@ -30,12 +30,13 @@
     export type DoctorSignupFormValues = z.infer<typeof doctorSignupSchema>;
 
     const DoctorSignupForm: React.FC = () => {
+        const { data: session } = useSession();
         const { formData, setFormData, updateAnsweredQuestions, setDoctorSignupFormCompleted } = useSignupContext();
         const methods = useForm<DoctorSignupFormValues>({
             resolver: zodResolver(doctorSignupSchema),
             defaultValues: {
-                firstName: formData.firstName || '',
-                lastName: formData.lastName || '',
+                firstName: session?.user?.firstName || formData.firstName || '',
+                lastName: session?.user?.lastName || formData.lastName || '',
                 dob: formData.dob || '',
                 doctorSpecialty: formData.doctorSpecialty || '',
                 languages: formData.languages || [],
@@ -45,7 +46,6 @@
             mode: "onChange",
         });
 
-        const { data: session } = useSession();
 
         useEffect(() => {
             const subscription = methods.watch((data) => {
@@ -90,13 +90,11 @@
                             fieldName="firstName"
                             fieldLabel="First Name"
                             autoComplete="given-name"
-                            value={session?.user?.firstName}
                         />
                         <TextFormField
                             fieldName="lastName"
                             fieldLabel="Last Name"
                             autoComplete="family-name"
-                            value={session?.user?.lastName}
                         />
                         <DatePickerFormField
                             name="dob"

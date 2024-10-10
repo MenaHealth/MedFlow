@@ -8,7 +8,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { TextFormField } from "@/components/ui/TextFormField";
 import { useSignupContext } from './SignupContext';
-import { DatePickerFormField } from "@/components/form/DatePickerFormField"
+import { DatePickerFormField } from "@/components/form/DatePickerFormField";
+import { useSession } from "next-auth/react";
 
 const triageSignupSchema = z.object({
     firstName: z.string().min(1, "First name is required"),
@@ -26,11 +27,12 @@ export type TriageSignupFormValues = z.infer<typeof triageSignupSchema>;
 
 const TriageSignupForm: React.FC = () => {
     const { formData, setFormData, updateAnsweredQuestions, setTriageSignupFormCompleted } = useSignupContext();
+    const { data: session } = useSession();
     const methods = useForm<TriageSignupFormValues>({
         resolver: zodResolver(triageSignupSchema),
         defaultValues: {
-            firstName: formData.firstName || '',
-            lastName: formData.lastName || '',
+            firstName: session?.user?.firstName || formData.firstName || '',
+            lastName: session?.user?.lastName || formData.lastName || '',
             dob: formData.dob || '',
         },
         mode: "onChange",

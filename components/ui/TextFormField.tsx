@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Controller } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
 import { EyeOff, Eye } from "lucide-react";
 
@@ -16,7 +16,6 @@ interface Props {
     disabled?: boolean;
     autoComplete?: string;
     id?: string;
-    value?: string;
 }
 
 const TextFormField = ({
@@ -29,10 +28,11 @@ const TextFormField = ({
                            onFocus,
                            onBlur,
                            autoComplete,
-                           value,
                        }: Props) => {
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const [isFocused, setIsFocused] = useState(false);
+
+    const { control } = useFormContext();
 
     const id = `${fieldName}-input`;
 
@@ -49,11 +49,8 @@ const TextFormField = ({
     return (
         <Controller
             name={fieldName}
+            control={control}
             render={({ field }) => {
-                if (value) {
-                    field.value = value
-                    value = undefined;
-                }
                 return(
                     <div className={`mt-6 mb-6 p-2 ${className}`}>
                         <div className="relative">

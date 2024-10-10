@@ -13,6 +13,7 @@ import { ChevronUpIcon, ChevronDownIcon } from 'lucide-react';
 export default function AuthPage() {
     const [accountType, setAccountType] = useState<'Doctor' | 'Triage' | 'Admin' | 'Pending' | null>(null);
     const [authType, setAuthType] = useState<'Login' | 'Signup'>('Login');
+    const [signUpMethod, setSignUpMethod] = useState<'Credentials' | 'Google'>('Credentials');
     const [isHeaderVisible, setIsHeaderVisible] = useState(true);
 
     const handleAuthTypeChange = (value: 'Login' | 'Signup') => {
@@ -30,6 +31,7 @@ export default function AuthPage() {
         const storedAccountType = localStorage.getItem('accountType') as 'Doctor' | 'Triage' | 'Admin' | 'Pending' | null;
         if (storedAccountType) {
             setAccountType(storedAccountType);
+            setSignUpMethod('Google');
         }
     }, []);
 

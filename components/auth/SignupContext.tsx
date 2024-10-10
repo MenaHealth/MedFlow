@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useCallback, useMemo, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 
 interface FormData {
     accountType?: string;
@@ -54,6 +55,7 @@ interface SignupContextValue {
     // TriageSignupForm
     triageSignupFormCompleted: boolean;
     setTriageSignupFormCompleted: React.Dispatch<React.SetStateAction<boolean>>;
+    signUpMethod: 'Credentials' | 'Google';
 }
 
 const SignupContext = createContext<SignupContextValue | null>(null);
@@ -67,6 +69,7 @@ export const useSignupContext = () => {
 };
 
 export const SignupProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const { data: session } = useSession();
     const [formData, setFormData] = useState<FormData>({});
     const [currentStep, setCurrentStep] = useState(0);
     const [progress, setProgress] = useState(2);
@@ -80,6 +83,7 @@ export const SignupProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const [securityQuestionFormCompleted, setSecurityQuestionFormCompleted] = useState(false);
     const [doctorSignupFormCompleted, setDoctorSignupFormCompleted] = useState(false);
     const [triageSignupFormCompleted, setTriageSignupFormCompleted] = useState(false);
+    const [signUpMethod, setSignUpMethod] = useState<'Credentials' | 'Google'>('Credentials');
     const totalQuestions = useMemo(() => {
         console.log('Calculating total questions for account type:', accountType);
         return accountType === 'Doctor' ? 17 : 13;
@@ -119,6 +123,12 @@ export const SignupProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         if (currentStep === 0 && answeredQuestions === 0) {
         }
     }, [currentStep, answeredQuestions]);
+
+    useEffect(() => {
+        if (session?.user?.firstName && session?.user?.lastName) {
+            setSignUpMethod('Google');
+        }
+    }, [session?.user])
 
     useEffect(() => {
         console.log('Updating progress based on answered questions or total questions');
@@ -169,6 +179,7 @@ export const SignupProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                 setDoctorSignupFormCompleted,
                 triageSignupFormCompleted,
                 setTriageSignupFormCompleted,
+                signUpMethod,
             }}
         >
             {children}

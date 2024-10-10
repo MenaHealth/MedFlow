@@ -12,7 +12,7 @@ import BackButton from "@/components/auth/BackButton";
 import { useSession } from "next-auth/react";
 
 const SignupSection = () => {
-    const { currentStep, setCurrentStep, accountType, setAccountType, handleBack, progress } = useSignupContext();
+    const { currentStep, setCurrentStep, accountType, setAccountType, handleBack, progress, signUpMethod } = useSignupContext();
 
     const { data: session } = useSession();
     console.log(session);
@@ -21,21 +21,37 @@ const SignupSection = () => {
         const storedAccountType = localStorage.getItem('accountType') as 'Doctor' | 'Triage' | 'Admin' | 'Pending' | null;
         if (storedAccountType) {
             setAccountType(storedAccountType);
-            setCurrentStep(2);
+            setCurrentStep(1);
             localStorage.removeItem('accountType');
         }
     }, []);
 
     const renderForm = () => {
-        switch (currentStep) {
-            case 0:
-                return <UserTypeForm />;
-            case 1:
-                return <PasswordEmailForm />;
-            case 2:
-                return <SecurityQuestionsForm />;
-            case 3:
-                return accountType === "Doctor" ? <DoctorSignupForm /> : <TriageSignupForm />;
+        switch (signUpMethod) {
+            case 'Google':
+                switch (currentStep) {
+                    case 0:
+                        return <UserTypeForm />;
+                    case 1:
+                        return <SecurityQuestionsForm />;
+                    case 2:
+                        return accountType === "Doctor" ? <DoctorSignupForm /> : <TriageSignupForm />;
+                    default:
+                        return null;
+                }
+            case 'Credentials':
+                switch (currentStep) {
+                    case 0:
+                        return <UserTypeForm />;
+                    case 1:
+                        return <PasswordEmailForm />;
+                    case 2:
+                        return <SecurityQuestionsForm />;
+                    case 3:
+                        return accountType === "Doctor" ? <DoctorSignupForm /> : <TriageSignupForm />;
+                    default:
+                        return null;
+                }
             default:
                 return null;
         }

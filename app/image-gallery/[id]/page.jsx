@@ -208,6 +208,7 @@ const ImageGallery = () => {
             <h1 className="text-3xl font-bold mb-8 m-8 text-center">Image Gallery</h1>
             <div className="w-full max-w-4xl mx-auto pb-16">
                 <PatientSubmenu />
+                <div className="border border-gray-300 p-8 bg-white shadow rounded-lg">
                     <div style={{ minWidth: '75%' }}>
                         {isLoading ? (
                             <div className="flex justify-center items-center h-full">
@@ -313,7 +314,7 @@ const ImageGallery = () => {
                         </Button>
                     </form>
                 </div>
-
+                </div>
         </>
     );
 };

@@ -205,7 +205,7 @@ const ImageGallery = () => {
 
     return (
         <>
-            <h1 className="text-3xl font-bold mb-8 text-center">Image Gallery</h1>
+            <h1 className="text-3xl font-bold mb-8 m-8 text-center">Image Gallery</h1>
             <div className="w-full max-w-4xl mx-auto pb-16">
                 <PatientSubmenu />
                     <div style={{ minWidth: '75%' }}>

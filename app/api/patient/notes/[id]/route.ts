@@ -1,76 +1,104 @@
 // app/api/patient/notes/[id]/route.ts
-export const dynamic = 'force-dynamic';
-// have this line ^^ to stop the Dynamic server usage errors when running `npm run build`
 
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '../../../../../utils/database';
-import Note from '../../../../../models/note';
+import Patient from '../../../../../models/patient';
+import { Note, PhysicianNote, ProcedureNote, SubjectiveNote, TriageNote } from '../../../../../models/note';
+
+export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+    await dbConnect();
+    try {
+        const patientId = params.id;
+        const noteData = await request.json();
+
+        const patient = await Patient.findById(patientId);
+        if (!patient) {
+            return NextResponse.json({ message: 'Patient not found' }, { status: 404 });
+        }
+
+        let newNote;
+
+        switch (noteData.type) {
+            case 'physician':
+                newNote = new PhysicianNote(noteData);
+                break;
+            case 'procedure':
+                newNote = new ProcedureNote(noteData);
+                break;
+            case 'subjective':
+                newNote = new SubjectiveNote(noteData);
+                break;
+            case 'triage':
+                newNote = new TriageNote(noteData);
+                break;
+            default:
+                return NextResponse.json({ message: 'Invalid note type' }, { status: 400 });
+        }
+
+        await newNote.save();
+        patient.notes.push(newNote);
+        await patient.save();
+
+        return NextResponse.json({ message: 'Note added successfully', note: newNote }, { status: 201 });
+    } catch (error) {
+        console.error('Error adding note:', error);
+        return NextResponse.json({ message: 'Failed to add note' }, { status: 500 });
+    }
+}
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
     await dbConnect();
     try {
         const { searchParams } = new URL(request.url);
         const noteId = searchParams.get('noteId');
+        const patientId = params.id;
+
+        const patient = await Patient.findById(patientId);
+
+        if (!patient) {
+            return NextResponse.json({ message: 'Patient not found' }, { status: 404 });
+        }
 
         if (noteId) {
-            const note = await Note.findById(noteId);
+            const note = patient.notes.id(noteId);
             if (!note) {
                 return NextResponse.json({ message: 'Note not found' }, { status: 404 });
             }
             return NextResponse.json(note);
         } else {
-            const patientId = params.id;
-            const notes = await Note.find({ patientId }).sort({ date: -1 });
-            return NextResponse.json(notes);
+            return NextResponse.json(patient.notes.sort((a, b) => b.date - a.date)); // Sort notes by date descending
         }
-    } catch (error: unknown) {
+    } catch (error) {
         console.error('Error fetching notes:', error);
         return NextResponse.json({ message: 'Failed to fetch notes' }, { status: 500 });
-    }
-}
-
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
-    await dbConnect();
-    try {
-        const patientId = params.id;
-        const { content, username, title } = await request.json();
-
-        console.log('Received data:', { content, username, title });
-
-        const newNote = new Note({
-            content,
-            username,
-            patientId,
-            title,
-            date: new Date(),
-        });
-
-        await newNote.save();
-        console.log('Note saved:', newNote);
-
-        return NextResponse.json(newNote, { status: 201 });
-    } catch (error: unknown) {
-        console.error('Error adding note:', error);
-        return NextResponse.json({ message: 'Failed to add note' }, { status: 500 });
     }
 }
 
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
     await dbConnect();
     try {
-        const noteId = params.id;
-        console.log(`Attempting to delete note with ID: ${noteId}`); // Debugging
-        const deletedNote = await Note.findByIdAndDelete(noteId);
+        const { searchParams } = new URL(request.url);
+        const noteId = searchParams.get('noteId');
+        const patientId = params.id;
 
-        if (!deletedNote) {
-            console.log(`Note with ID: ${noteId} not found`);
+        const patient = await Patient.findById(patientId);
+        if (!patient) {
+            return NextResponse.json({ message: 'Patient not found' }, { status: 404 });
+        }
+
+        const note = patient.notes.id(noteId);
+        if (!note) {
             return NextResponse.json({ message: 'Note not found' }, { status: 404 });
         }
 
-        console.log(`Note with ID: ${noteId} deleted successfully`);
+        note.remove();
+        await patient.save();
+
         return NextResponse.json({ message: 'Note deleted successfully' });
-    } catch (error: unknown) {
+    } catch (error) {
         console.error('Error deleting note:', error);
         return NextResponse.json({ message: 'Failed to delete note' }, { status: 500 });
     }
 }
+
+export const dynamic = 'force-dynamic';

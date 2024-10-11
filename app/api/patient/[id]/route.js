@@ -1,4 +1,4 @@
-// app/api/patient/[id]/route.ts
+// app/api/patient/[id]/route.js
 import Patient from "@/models/patient";
 import dbConnect from "@/utils/database";
 import { Types } from "mongoose";
@@ -18,6 +18,7 @@ export const GET = async (request, { params }) => {
 
         return new Response(JSON.stringify(patient), { status: 200 });
     } catch (error) {
+        console.error("Error fetching patient:", error);
         return new Response("Internal Server Error", { status: 500 });
     }
 };

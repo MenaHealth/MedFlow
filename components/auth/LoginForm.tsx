@@ -125,7 +125,6 @@ export function LoginForm() {
                     <TextFormField
                         fieldName="password"
                         fieldLabel="Password"
-                        type="password"
                         error={form.formState.errors.password?.message}
                     />
                     <div className="flex justify-center mt-6">

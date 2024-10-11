@@ -1,4 +1,4 @@
-// app/image-gallery/[id]/page.jsx
+// app/image-gallery/[id]/page.tsx
 "use client";
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'next/navigation';

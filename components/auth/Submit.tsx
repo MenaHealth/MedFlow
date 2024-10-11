@@ -5,7 +5,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { Button } from "@/components/ui/button"
 import { useSignupContext } from "@/components/auth/SignupContext"
 import { SendHorizonal } from "lucide-react";
-    import { ClipLoader } from 'react-spinners'
+import { ClipLoader } from 'react-spinners'
 import { useRouter } from "next/navigation";
 
 export default function Submit() {

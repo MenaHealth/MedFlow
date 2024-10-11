@@ -3,7 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '../../../../../utils/database';
 import Patient from '../../../../../models/patient';
-import { Note, PhysicianNote, ProcedureNote, SubjectiveNote, TriageNote } from '../../../../../models/note';
+import { Note, PhysicianNote, ProcedureNote, SubjectiveNote } from '../../../../../models/note';
 
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
     await dbConnect();
@@ -20,16 +20,26 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
         switch (noteData.type) {
             case 'physician':
-                newNote = new PhysicianNote(noteData);
+                newNote = new PhysicianNote({
+                    ...noteData,
+                    date: new Date(noteData.date), // Ensure date is properly parsed
+                    email: noteData.email,
+                    createdAt: new Date(noteData.createdAt)
+                });
                 break;
             case 'procedure':
-                newNote = new ProcedureNote(noteData);
+                newNote = new ProcedureNote({
+                    ...noteData,
+                    email: noteData.email,
+                    createdAt: new Date(noteData.createdAt)
+                });
                 break;
             case 'subjective':
-                newNote = new SubjectiveNote(noteData);
-                break;
-            case 'triage':
-                newNote = new TriageNote(noteData);
+                newNote = new SubjectiveNote({
+                    ...noteData,
+                    email: noteData.email,
+                    createdAt: new Date(noteData.createdAt)
+                });
                 break;
             default:
                 return NextResponse.json({ message: 'Invalid note type' }, { status: 400 });
@@ -42,7 +52,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
         return NextResponse.json({ message: 'Note added successfully', note: newNote }, { status: 201 });
     } catch (error) {
         console.error('Error adding note:', error);
-        return NextResponse.json({ message: 'Failed to add note' }, { status: 500 });
+        return NextResponse.json({ message: 'Failed to add note', error: error.message }, { status: 500 });
     }
 }
 

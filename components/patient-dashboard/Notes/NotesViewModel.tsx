@@ -1,9 +1,9 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 
 export interface Note {
     _id: string;
     content: string;
-    username: string;
+    email: string;
     date: string;
     title: string;
 }
@@ -29,143 +29,118 @@ export interface PhysicianNote {
     signature: string;
 }
 
-export interface ProcedureNote {
-    procedureName: string;
-    date: string;
-    physician: string;
-    Diagnosis: string;
-    Notes: string;
-    Plan: string;
-}
+export function useNotes(patientId: string, userEmail: string) {
+    const [notesList, setNotesList] = useState<Note[]>([]);
+    const [templateType, setTemplateType] = useState<'physician' | 'procedure' | 'subjective'>('physician');
+    const [physicianNote, setPhysicianNote] = useState<PhysicianNote>({
+        patientName: '',
+        patientID: patientId,
+        date: new Date().toISOString().split('T')[0],
+        time: new Date().toTimeString().split(' ')[0],
+        attendingPhysician: '',
+        hpi: '',
+        rosConstitutional: '',
+        rosCardiovascular: '',
+        rosRespiratory: '',
+        rosGastrointestinal: '',
+        rosGenitourinary: '',
+        rosMusculoskeletal: '',
+        rosNeurological: '',
+        rosPsychiatric: '',
+        mdm: '',
+        planAndFollowUp: '',
+        diagnosis: '',
+        signature: ''
+    });
 
-export interface SubjectiveNote {
-    subjective: string;
-    objective: string;
-    assessment: string;
-    plan: string;
-}
-
-export class NotesViewModel {
-    private patientId: string;
-    private username: string;
-
-    constructor(patientId: string, username: string) {
-        this.patientId = patientId;
-        this.username = username;
-    }
-
-    useNotes = () => {
-        const [notesList, setNotesList] = useState<Note[]>([]);
-        const [templateType, setTemplateType] = useState<'physician' | 'procedure' | 'subjective'>('physician');
-        const [physicianNote, setPhysicianNote] = useState<PhysicianNote>({} as PhysicianNote);
-        const [procedureNote, setProcedureNote] = useState<ProcedureNote>({} as ProcedureNote);
-        const [subjectiveNote, setSubjectiveNote] = useState<SubjectiveNote>({} as SubjectiveNote);
-
-        const fetchNotes = useCallback(async () => {
-            try {
-                const response = await fetch(`/api/patient/notes/${this.patientId}`);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const notes = await response.json();
-                setNotesList(notes);
-            } catch (error) {
-                console.error('Failed to fetch notes:', error);
+    const fetchNotes = useCallback(async () => {
+        try {
+            const response = await fetch(`/api/patient/notes/${patientId}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-        }, [this.patientId]);
+            const notes = await response.json();
+            setNotesList(notes);
+        } catch (error) {
+            console.error('Failed to fetch notes:', error);
+        }
+    }, [patientId]);
 
-        const publishNote = useCallback(async () => {
-            let noteData;
-            let noteTitle;
-            let noteType = templateType;
+    const publishNote = useCallback(async () => {
+        let noteData;
+        let noteTitle;
+        let noteType = templateType;
 
-            switch (templateType) {
-                case 'physician':
-                    noteData = {
-                        date: physicianNote.date,
-                        time: physicianNote.time,
-                        attendingPhysician: physicianNote.attendingPhysician,
-                        hpi: physicianNote.hpi,
-                        rosConstitutional: physicianNote.rosConstitutional,
-                        rosCardiovascular: physicianNote.rosCardiovascular,
-                        rosRespiratory: physicianNote.rosRespiratory,
-                        rosGastrointestinal: physicianNote.rosGastrointestinal,
-                        rosGenitourinary: physicianNote.rosGenitourinary,
-                        rosMusculoskeletal: physicianNote.rosMusculoskeletal,
-                        rosNeurological: physicianNote.rosNeurological,
-                        rosPsychiatric: physicianNote.rosPsychiatric,
-                        mdm: physicianNote.mdm,
-                        planAndFollowUp: physicianNote.planAndFollowUp,
-                        diagnosis: physicianNote.diagnosis,
-                        signature: physicianNote.signature
-                    };
-                    noteTitle = 'Physician Note';
-                    break;
-                // cases for other note types
+        switch (templateType) {
+            case 'physician':
+                noteData = {
+                    ...physicianNote,
+                    email: userEmail,
+                    createdAt: new Date().toISOString()
+                };
+                noteTitle = 'Physician Note';
+                break;
+            // cases for other note types
+        }
+
+        try {
+            const response = await fetch(`/api/patient/notes/${patientId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    ...noteData,
+                    title: noteTitle,
+                    type: noteType
+                }),
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
+            const newNote = await response.json();
+            setNotesList(prevNotes => [...prevNotes, newNote]);
+        } catch (error) {
+            console.error('Failed to publish note:', error);
+        }
+    }, [templateType, physicianNote, patientId, userEmail]);
 
-            try {
-                const response = await fetch(`/api/patient/notes/${this.patientId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        ...noteData,
-                        username: this.username,
-                        title: noteTitle,
-                        type: noteType
-                    }),
-                });
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const newNote = await response.json();
-                setNotesList(prevNotes => [...prevNotes, newNote]);
-            } catch (error) {
-                console.error('Failed to publish note:', error);
+    const deleteNote = useCallback(async (noteId: string) => {
+        try {
+            const response = await fetch(`/api/patient/notes/${noteId}`, {
+                method: 'DELETE',
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-        }, [templateType, physicianNote, procedureNote, subjectiveNote, this.patientId, this.username]);
+            setNotesList((prevNotes) => prevNotes.filter((note) => note._id !== noteId));
+        } catch (error) {
+            console.error('Failed to delete note:', error);
+        }
+    }, []);
 
-        const deleteNote = useCallback(async (noteId: string) => {
-            try {
-                const response = await fetch(`/api/patient/notes/${noteId}`, {
-                    method: 'DELETE',
-                });
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                setNotesList((prevNotes) => prevNotes.filter((note) => note._id !== noteId));
-            } catch (error) {
-                console.error('Failed to delete note:', error);
-            }
-        }, []);
+    const updateNote = useCallback((type: 'physician' | 'procedure' | 'subjective', name: string, value: string) => {
+        switch (type) {
+            case 'physician':
+                setPhysicianNote(prev => ({ ...prev, [name]: value }));
+                break;
+            case 'procedure':
+                setProcedureNote(prev => ({ ...prev, [name]: value }));
+                break;
+            case 'subjective':
+                setSubjectiveNote(prev => ({ ...prev, [name]: value }));
+                break;
+        }
+    }, []);
 
-        const updateNote = useCallback((type: 'physician' | 'procedure' | 'subjective', name: string, value: string) => {
-            switch (type) {
-                case 'physician':
-                    setPhysicianNote(prev => ({ ...prev, [name]: value }));
-                    break;
-                case 'procedure':
-                    setProcedureNote(prev => ({ ...prev, [name]: value }));
-                    break;
-                case 'subjective':
-                    setSubjectiveNote(prev => ({ ...prev, [name]: value }));
-                    break;
-            }
-        }, []);
-
-        return {
-            notesList,
-            templateType,
-            setTemplateType,
-            physicianNote,
-            procedureNote,
-            subjectiveNote,
-            fetchNotes,
-            publishNote,
-            deleteNote,
-            updateNote,
-        };
+    return {
+        notesList,
+        templateType,
+        setTemplateType,
+        physicianNote,
+        fetchNotes,
+        publishNote,
+        deleteNote,
+        updateNote,
     };
 }

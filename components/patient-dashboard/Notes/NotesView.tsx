@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { NotesViewModel } from './NotesViewModel';
+import React, { useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { useNotes } from './NotesViewModel';
 import { PhysicianNoteView } from './PhysicianNoteView';
 import { ProcedureNoteView } from './ProcedureNoteView';
 import { SubjectiveNoteView } from './SubjectiveNoteView';
@@ -12,11 +13,12 @@ import { Trash2, Download } from 'lucide-react';
 
 interface NotesViewProps {
     patientId: string;
-    username: string;
 }
 
-export const NotesView: React.FC<NotesViewProps> = ({ patientId, username }) => {
-    const viewModel = new NotesViewModel(patientId, username);
+export const NotesView: React.FC<NotesViewProps> = ({ patientId }) => {
+    const { data: session, status } = useSession();
+    const userEmail = session?.user?.email || '';
+
     const {
         notesList,
         templateType,
@@ -28,11 +30,21 @@ export const NotesView: React.FC<NotesViewProps> = ({ patientId, username }) => 
         publishNote,
         deleteNote,
         updateNote,
-    } = viewModel.useNotes();
+    } = useNotes(patientId, userEmail);
 
     useEffect(() => {
-        fetchNotes();
-    }, [fetchNotes]);
+        if (status === 'authenticated') {
+            fetchNotes();
+        }
+    }, [status, fetchNotes]);
+
+    if (status === 'loading') {
+        return <div>Loading...</div>;
+    }
+
+    if (status === 'unauthenticated' || !session?.user) {
+        return <div>Access Denied</div>;
+    }
 
     const handleDownload = (note: { _id: string; content: string }) => {
         const blob = new Blob([note.content], { type: 'application/json' });
@@ -58,7 +70,7 @@ export const NotesView: React.FC<NotesViewProps> = ({ patientId, username }) => 
                             <ListItem key={note._id} className="flex justify-between items-center">
                                 <div>
                                     <h4 className="font-bold">{note.title}</h4>
-                                    <p className="text-sm text-gray-500">{note.username} - {new Date(note.date).toLocaleString()}</p>
+                                    <p className="text-sm text-gray-500">{note.email} - {new Date(note.date).toLocaleString()}</p>
                                 </div>
                                 <div>
                                     <Button onClick={() => handleDownload(note)} size="icon" variant="ghost">
@@ -74,7 +86,6 @@ export const NotesView: React.FC<NotesViewProps> = ({ patientId, username }) => 
                 </CardContent>
             </Card>
 
-            {/* Note Form Card on the right two-thirds (desktop) */}
             <Card className="md:col-span-2">
                 <CardHeader className="px-4 py-2">
                     <RadioCard.Root

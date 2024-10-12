@@ -83,7 +83,8 @@ const ImageGallery = () => {
                 if (patientFiles.length > 0) {
                     const tempPhotos = [];
                     for (let i = 0; i < patientFiles.length; i++) {
-                        const response = await fetch(`/api/patient/photos/${patientFiles[i].hash}`);
+                        const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+                        const response = await fetch(`${apiUrl}/api/patient/photos/${patientFiles[i].hash}`);
                         if (!response.ok) {
                             throw new Error(`HTTP error! status: ${response.status}`);
                         }

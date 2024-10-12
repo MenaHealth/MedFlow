@@ -29,6 +29,18 @@ export interface PhysicianNote {
     signature: string;
 }
 
+export interface ProcedureNote {
+    patientName: string;
+    patientID: string;
+    date: string;
+    time: string;
+    procedureName: string;
+    attendingPhysician: string;
+    Diagnosis: string;
+    Notes: string;
+    Plan: string;
+}
+
 export function useNotes(patientId: string, userEmail: string) {
     const [notesList, setNotesList] = useState<Note[]>([]);
     const [templateType, setTemplateType] = useState<'physician' | 'procedure' | 'subjective'>('physician');
@@ -51,6 +63,17 @@ export function useNotes(patientId: string, userEmail: string) {
         planAndFollowUp: '',
         diagnosis: '',
         signature: ''
+    });
+    const [procedureNote, setProcedureNote] = useState<ProcedureNote>({
+        patientName: '',
+        patientID: patientId,
+        date: new Date().toISOString().split('T')[0],
+        time: new Date().toTimeString().split(' ')[0],
+        procedureName: '',
+        attendingPhysician: '',
+        Diagnosis: '',
+        Notes: '',
+        Plan: ''
     });
 
     const fetchNotes = useCallback(async () => {
@@ -79,6 +102,13 @@ export function useNotes(patientId: string, userEmail: string) {
                     createdAt: new Date().toISOString()
                 };
                 noteTitle = 'Physician Note';
+            case 'procedure':
+                noteData = {
+                    ...procedureNote,
+                    email: userEmail,
+                    createdAt: new Date().toISOString()
+                };
+                noteTitle = 'Procedure Note';
                 break;
             // cases for other note types
         }
@@ -138,9 +168,12 @@ export function useNotes(patientId: string, userEmail: string) {
         templateType,
         setTemplateType,
         physicianNote,
+        procedureNote,
+        // subjectiveNote,
         fetchNotes,
         publishNote,
         deleteNote,
         updateNote,
     };
 }
+

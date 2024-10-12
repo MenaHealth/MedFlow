@@ -1,4 +1,4 @@
-// components/patient-dashboard/patient-info/PatientInfoViewModel.tsx
+// components/PatientViewModels/patient-info/PatientInfoViewModel.tsx
 import { IPatient } from './../../../models/patient';
 
 export class PatientInfoViewModel {
@@ -11,16 +11,16 @@ export class PatientInfoViewModel {
     getPrimaryDetails() {
         return {
             patientName: `${this.patient?.firstName} ${this.patient?.lastName}`,
-            age: this.patient?.age,
-            genderPreference: this.patient?.genderPreference,
-            dob: this.patient?.dob || null, // Direct access as a Date object
-            patientID: this.patient?._id,
-            phone: this.patient?.phone,
         };
     }
 
     getExpandedDetails() {
         return {
+            age: this.patient?.age,
+            genderPreference: this.patient?.genderPreference,
+            dob: this.patient?.dob || null, // Direct access as a Date object
+            patientID: this.patient?._id,
+            phone: this.patient?.phone,
             country: this.patient?.country,
             city: this.patient?.city,
             language: this.patient?.language,

@@ -3,7 +3,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import { BarLoader } from "react-spinners";
 // import RXFormView from "@/components/form/Medications/RXFormView";
-import MedicationsView from "@/components/patient-dashboard/Medications/MedicationsView";
+import MedicationsView from "@/components/PatientViewModels/Medications/MedicationsView";
 import PatientSubmenu from "@/components/PatientSubmenu";
 
 interface MedicationsPageProps {

@@ -1,9 +1,9 @@
 'use client'
 
-import PatientDashboard from '@/components/patient-dashboard/PatientDashboard'
+import PatientViewModel from '@/components/PatientViewModels/PatientViewModel'
 
 const PatientDashboardPage = () => {
-    return <PatientDashboard />
+    return <PatientViewModel />
 }
 
 export default PatientDashboardPage

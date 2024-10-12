@@ -84,9 +84,7 @@ const TextFormField: React.FC<Props> = ({
                         id={id}
                         name={fieldName}
                         autoComplete={autoComplete}
-                        className={`w-full pt-4 pb-2 pl-2 pr-10 border-2 hover:border-orange-500 border-gray-300 rounded-md text-gray-700 ${
-                            isFocused || hasValue ? 'border-darkBlue' : ''
-                        }`}
+                        className={`w-full pt-4 pb-2 pl-2 pr-10 border-2 ${isFocused || hasValue ? 'border-darkBlue' : 'border-gray-300'} rounded-md text-gray-700 hover:border-orange-500`}
                         rows={rows || 2}
                     />
                 ) : (

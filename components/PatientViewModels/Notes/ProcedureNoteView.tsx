@@ -2,6 +2,7 @@ import React from 'react';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ProcedureNote } from './NotesViewModel';
+import {TextFormField} from "@/components/ui/TextFormField";
 
 interface ProcedureNoteViewProps {
     note: ProcedureNote;
@@ -11,23 +12,31 @@ interface ProcedureNoteViewProps {
 export const ProcedureNoteView: React.FC<ProcedureNoteViewProps> = ({ note, onChange }) => {
     return (
         <div className="space-y-4">
+            <TextFormField
+                fieldName="date"
+                fieldLabel="Date"
+                value={note.date}
+                onChange={(e) => onChange('date', e.target.value)}
+                type="date"
+            />
+            <TextFormField
+                fieldName="time"
+                fieldLabel="Time"
+                value={note.time}
+                onChange={(e) => onChange('time', e.target.value)}
+                type="time"
+            />
+            <TextFormField
+                fieldName="attendingPhysician"
+                fieldLabel="Attending Physician"
+                value={note.attendingPhysician}
+                onChange={(e) => onChange('attendingPhysician', e.target.value)}
+            />
             <Input
                 name="procedureName"
                 placeholder="Procedure Name"
                 value={note.procedureName}
                 onChange={(e) => onChange('procedureName', e.target.value)}
-            />
-            <Input
-                name="date"
-                placeholder="Date"
-                value={note.date}
-                onChange={(e) => onChange('date', e.target.value)}
-            />
-            <Input
-                name="physician"
-                placeholder="Physician"
-                value={note.physician}
-                onChange={(e) => onChange('physician', e.target.value)}
             />
             <Input
                 name="Diagnosis"

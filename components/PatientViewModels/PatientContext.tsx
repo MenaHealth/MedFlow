@@ -1,10 +1,10 @@
-// components/patient-dashboard/PatientDashboardContext.tsx
+// components/PatientViewModels/PatientContext.tsx
 "use client"
 
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react'
 import { useParams } from 'next/navigation'
-import { PatientInfoViewModel } from "@/components/patient-dashboard/patient-info/PatientInfoViewModel";
-import { NotesViewModel } from "@/components/patient-dashboard/notes/NotesViewModel";
+import { PatientInfoViewModel } from "@/components/PatientViewModels/patient-info/PatientInfoViewModel";
+import { NotesViewModel } from "@/components/PatientViewModels/Notes/NotesViewModel";
 import Patient from "@/models/patient";
 
 // Define the types for our data
@@ -63,10 +63,10 @@ interface PatientDashboardContextType {
     toggleExpand: () => void;
 }
 
-const PatientDashboardContext = createContext<PatientDashboardContextType | undefined>(undefined)
+const PatientContext = createContext<PatientDashboardContextType | undefined>(undefined)
 
 export const usePatientDashboard = () => {
-    const context = useContext(PatientDashboardContext)
+    const context = useContext(PatientContext)
     if (!context) {
         throw new Error("usePatientDashboard must be used within PatientDashboardProvider")
     }
@@ -176,7 +176,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
     }, [id])
 
     return (
-        <PatientDashboardContext.Provider
+        <PatientContext.Provider
             value={{
                 activeTab,
                 setActiveTab,
@@ -203,6 +203,6 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             }}
         >
             {children}
-        </PatientDashboardContext.Provider>
+        </PatientContext.Provider>
     )
 }

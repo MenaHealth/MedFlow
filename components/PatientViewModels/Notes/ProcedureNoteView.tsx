@@ -37,19 +37,19 @@ export const ProcedureNoteView: React.FC<ProcedureNoteViewProps> = ({ note, onCh
                 onChange={(e) => onChange('procedureName', e.target.value)}
             />
             <TextFormField
-                fieldName="Diagnosis"
+                fieldName="diagnosis"
                 fieldLabel="Diagnosis"
                 value={note.Diagnosis}
                 onChange={(e) => onChange('Diagnosis', e.target.value)}
             />
             <TextFormField
-                fieldName="Notes"
+                fieldName="notes"
                 fieldLabel="Notes"
                 value={note.Notes}
                 onChange={(e) => onChange('Notes', e.target.value)}
             />
             <TextFormField
-                fieldName="Plan"
+                fieldName="plan"
                 fieldLabel="Plan"
                 value={note.Plan}
                 onChange={(e) => onChange('Plan', e.target.value)}

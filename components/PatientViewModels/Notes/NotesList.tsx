@@ -1,13 +1,16 @@
+// components/PatientViewModels/Notes/NotesList.tsx
 import React from 'react';
-import { List, ListItem } from "@/components/ui/List";
+import { List } from "@/components/ui/List";
+import { ListItem } from "@/components/ui/ListItem";
 import { Button } from "@/components/ui/button";
 import { Trash2, Download } from 'lucide-react';
 
 interface Note {
     _id: string;
     title: string;
-    username: string;
+    email: string;
     date: string;
+    type: string;
 }
 
 interface NotesListProps {
@@ -34,7 +37,8 @@ export const NotesList: React.FC<NotesListProps> = ({ notes, onDelete }) => {
                 <ListItem key={note._id} className="flex justify-between items-center">
                     <div>
                         <h3 className="font-bold">{note.title}</h3>
-                        <p className="text-sm text-gray-500">{note.username} - {new Date(note.date).toLocaleString()}</p>
+                        <p className="text-sm text-gray-500">{note.type}</p>
+                        <p className="text-sm text-gray-500">{note.email} - {new Date(note.date).toLocaleString()}</p>
                     </div>
                     <div>
                         <Button onClick={() => handleDownload(note)} size="icon" variant="ghost">

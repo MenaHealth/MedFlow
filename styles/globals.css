@@ -366,6 +366,10 @@ a {
   color: #FFFFFF;
 }
 
+button:disabled {
+  cursor: not-allowed;
+}
+
 .gsi-material-button {
   -moz-user-select: none;
   -webkit-user-select: none;

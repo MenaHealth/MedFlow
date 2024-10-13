@@ -63,7 +63,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
         const noteId = searchParams.get('noteId');
         const patientId = params.id;
 
-        const patient = await Patient.findById(patientId);
+        const patient = await Patient.findById(patientId).populate('notes');
 
         if (!patient) {
             return NextResponse.json({ message: 'Patient not found' }, { status: 404 });

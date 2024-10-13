@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
-import { useNotes } from './NotesViewModel';
-import { PhysicianNoteView } from './PhysicianNoteView';
-import { ProcedureNoteView } from './ProcedureNoteView';
-import { SubjectiveNoteView } from './SubjectiveNoteView';
+import { NotesViewModel, PhysicianNote, ProcedureNote, SubjectiveNote } from "@/components/PatientViewModels/Notes/NotesViewModel";
+import { PhysicianNoteView } from "@/components/PatientViewModels/Notes/PhysicianNoteView";
+import { ProcedureNoteView } from "@/components/PatientViewModels/Notes/ProcedureNoteView";
+import { SubjectiveNoteView } from "@/components/PatientViewModels/Notes/SubjectiveNoteView";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { RadioCard } from "@/components/ui/radio-card";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ interface NotesViewProps {
 export const NotesView: React.FC<NotesViewProps> = ({ patientId }) => {
     const { data: session, status } = useSession();
     const userEmail = session?.user?.email || '';
+    const userName = session?.user ? `Dr. ${session.user.firstName} ${session.user.lastName}` : '';
 
     const {
         notesList,
@@ -30,13 +31,45 @@ export const NotesView: React.FC<NotesViewProps> = ({ patientId }) => {
         publishNote,
         deleteNote,
         updateNote,
-    } = useNotes(patientId, userEmail);
+    } = NotesViewModel(patientId, userEmail);
 
     useEffect(() => {
-        if (status === 'authenticated') {
+        if (status === 'authenticated' && patientId) {
             fetchNotes();
         }
-    }, [status, fetchNotes]);
+    }, [status, fetchNotes, patientId]);
+
+    useEffect(() => {
+        if (userName) {
+            updateNote('physician', 'attendingPhysician', userName);
+            updateNote('procedure', 'attendingPhysician', userName);
+        }
+    }, [userName, updateNote]);
+
+    const isFormValid = useMemo(() => {
+        const checkAllFieldsFilled = (obj: Record<string, any>) => {
+            return Object.values(obj).every(value =>
+                value !== '' && value !== null && value !== undefined
+            );
+        };
+
+        let currentNote: PhysicianNote | ProcedureNote | SubjectiveNote;
+        switch (templateType) {
+            case 'physician':
+                currentNote = physicianNote;
+                break;
+            case 'procedure':
+                currentNote = procedureNote;
+                break;
+            case 'subjective':
+                currentNote = subjectiveNote;
+                break;
+            default:
+                return false;
+        }
+
+        return checkAllFieldsFilled(currentNote);
+    }, [templateType, physicianNote, procedureNote, subjectiveNote]);
 
     if (status === 'loading') {
         return <div>Loading...</div>;
@@ -133,7 +166,12 @@ export const NotesView: React.FC<NotesViewProps> = ({ patientId }) => {
                                 onChange={(name, value) => updateNote('subjective', name, value)}
                             />
                         )}
-                        <Button onClick={publishNote} className="mt-4">
+                        <Button
+                            onClick={publishNote}
+                            variant="submit"
+                            className="mt-4"
+                            disabled={!isFormValid}
+                        >
                             Publish Note
                         </Button>
                     </div>

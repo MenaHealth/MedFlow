@@ -1,6 +1,4 @@
 import React from 'react';
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { ProcedureNote } from './NotesViewModel';
 import {TextFormField} from "@/components/ui/TextFormField";
 
@@ -32,27 +30,27 @@ export const ProcedureNoteView: React.FC<ProcedureNoteViewProps> = ({ note, onCh
                 value={note.attendingPhysician}
                 onChange={(e) => onChange('attendingPhysician', e.target.value)}
             />
-            <Input
-                name="procedureName"
-                placeholder="Procedure Name"
+            <TextFormField
+                fieldName="procedureName"
+                fieldLabel="Procedure Name"
                 value={note.procedureName}
                 onChange={(e) => onChange('procedureName', e.target.value)}
             />
-            <Input
-                name="Diagnosis"
-                placeholder="Diagnosis"
+            <TextFormField
+                fieldName="Diagnosis"
+                fieldLabel="Diagnosis"
                 value={note.Diagnosis}
                 onChange={(e) => onChange('Diagnosis', e.target.value)}
             />
-            <Textarea
-                name="Notes"
-                placeholder="Notes"
+            <TextFormField
+                fieldName="Notes"
+                fieldLabel="Notes"
                 value={note.Notes}
                 onChange={(e) => onChange('Notes', e.target.value)}
             />
-            <Textarea
-                name="Plan"
-                placeholder="Plan"
+            <TextFormField
+                fieldName="Plan"
+                fieldLabel="Plan"
                 value={note.Plan}
                 onChange={(e) => onChange('Plan', e.target.value)}
             />

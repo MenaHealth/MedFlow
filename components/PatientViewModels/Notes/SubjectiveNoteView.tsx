@@ -1,6 +1,7 @@
 import React from 'react';
 import { Textarea } from "@/components/ui/textarea";
 import { SubjectiveNote } from './NotesViewModel';
+import {TextFormField} from "@/components/ui/TextFormField";
 
 interface SubjectiveNoteViewProps {
     note: SubjectiveNote;
@@ -10,27 +11,41 @@ interface SubjectiveNoteViewProps {
 export const SubjectiveNoteView: React.FC<SubjectiveNoteViewProps> = ({ note, onChange }) => {
     return (
         <div className="space-y-4">
-            <Textarea
-                name="subjective"
-                placeholder="Subjective"
+            <TextFormField
+                fieldName="date"
+                fieldLabel="Date"
+                value={note.date}
+                onChange={(e) => onChange('date', e.target.value)}
+                type="date"
+            />
+            <TextFormField
+                fieldName="time"
+                fieldLabel="Time"
+                value={note.time}
+                onChange={(e) => onChange('time', e.target.value)}
+                type="time"
+            />
+            <TextFormField
+                fieldName="subjective"
+                fieldLabel="Subjective"
                 value={note.subjective}
                 onChange={(e) => onChange('subjective', e.target.value)}
             />
-            <Textarea
-                name="objective"
-                placeholder="Objective"
+            <TextFormField
+                fieldName="objective"
+                fieldLabel="Objective"
                 value={note.objective}
                 onChange={(e) => onChange('objective', e.target.value)}
             />
-            <Textarea
-                name="assessment"
-                placeholder="Assessment"
+            <TextFormField
+                fieldName="assessment"
+                fieldLabel="Assessment"
                 value={note.assessment}
                 onChange={(e) => onChange('assessment', e.target.value)}
             />
-            <Textarea
-                name="plan"
-                placeholder="Plan"
+            <TextFormField
+                fieldName="plan"
+                fieldLabel="Plan"
                 value={note.plan}
                 onChange={(e) => onChange('plan', e.target.value)}
             />

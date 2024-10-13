@@ -4,7 +4,7 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react'
 import { useParams } from 'next/navigation'
 import { PatientInfoViewModel } from "@/components/PatientViewModels/patient-info/PatientInfoViewModel";
-import { NotesViewModel } from "@/components/PatientViewModels/Notes/NotesViewModel";
+import { NotesViewModel } from '@/components/PatientViewModels/Notes/NotesViewModel';
 import Patient from "@/models/patient";
 
 // Define the types for our data
@@ -58,7 +58,6 @@ interface PatientDashboardContextType {
     fetchMedications: () => Promise<void>
 
     patientViewModel: PatientInfoViewModel | null;
-    notesViewModel: NotesViewModel | null;
     isExpanded: boolean;
     toggleExpand: () => void;
 }
@@ -74,38 +73,52 @@ export const usePatientDashboard = () => {
 }
 
 export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const { id } = useParams() as { id: string }
-    const [activeTab, setActiveTab] = useState('patient-info')
-    const [patientInfo, setPatientInfo] = useState<PatientInfo | null>(null)
+    const { id: patientId } = useParams() as { id: string };
+    const userEmail = 'currentUser';
+
+    const [activeTab, setActiveTab] = useState('patient-info');
+    const [patientInfo, setPatientInfo] = useState<PatientInfo | null>(null);
     const [patientViewModel, setPatientViewModel] = useState<PatientInfoViewModel | null>(null);
-    const [notesViewModel, setNotesViewModel] = useState<NotesViewModel | null>(null);
     const [isExpanded, setIsExpanded] = useState(false);
 
     const toggleExpand = () => {
         setIsExpanded(prev => !prev);
     };
 
-    const loadPatientInfo = (patientData: Patient) => {
+    const loadPatientInfo = (patientData: typeof Patient) => {
         const viewModel = new PatientInfoViewModel(patientData);
         setPatientViewModel(viewModel);
     };
 
-    const [labVisits, setLabVisits] = useState<LabVisit[]>([])
-    const [notes, setNotes] = useState<Note[]>([])
-    const [images, setImages] = useState<Image[]>([])
-    const [medications, setMedications] = useState<Medication[]>([])
+    const {
+        notesList,
+        templateType,
+        setTemplateType,
+        physicianNote,
+        procedureNote,
+        subjectiveNote,
+        fetchNotes,
+        publishNote,
+        deleteNote,
+        updateNote
+    } = NotesViewModel(patientId, userEmail); // Call the hook here
 
-    const [loadingPatientInfo, setLoadingPatientInfo] = useState(false)
-    const [loadingLabVisits, setLoadingLabVisits] = useState(false)
-    const [loadingNotes, setLoadingNotes] = useState(false)
-    const [loadingImages, setLoadingImages] = useState(false)
-    const [loadingMedications, setLoadingMedications] = useState(false)
+    const [labVisits, setLabVisits] = useState<LabVisit[]>([]);
+    const [notes, setNotes] = useState<Note[]>([]);
+    const [images, setImages] = useState<Image[]>([]);
+    const [medications, setMedications] = useState<Medication[]>([]);
+
+    const [loadingPatientInfo, setLoadingPatientInfo] = useState(false);
+    const [loadingLabVisits, setLoadingLabVisits] = useState(false);
+    const [loadingNotes, setLoadingNotes] = useState(false);
+    const [loadingImages, setLoadingImages] = useState(false);
+    const [loadingMedications, setLoadingMedications] = useState(false);
 
     const fetchPatientInfo = useCallback(async () => {
-        setLoadingPatientInfo(true)
+        setLoadingPatientInfo(true);
         try {
-            const response = await fetch(`/api/patient/${id}`)
-            const data = await response.json()
+            const response = await fetch(`/api/patient/${patientId}`);
+            const data = await response.json();
             setPatientInfo({
                 patientName: `${data.firstName} ${data.lastName}`,
                 age: data.age,
@@ -113,67 +126,15 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 dob: new Date(data.dob),
                 phoneNumber: data.phone,
                 patientID: data._id,
-            })
+            });
             loadPatientInfo(data);
-            setNotesViewModel(new NotesViewModel(data._id, 'currentUser')); // Replace 'currentUser' with actual username
+            fetchNotes(); // Add this line to fetch notes when patient info is loaded
         } catch (error) {
-            console.error('Error fetching patient info:', error)
+            console.error('Error fetching patient info:', error);
         } finally {
-            setLoadingPatientInfo(false)
+            setLoadingPatientInfo(false);
         }
-    }, [id])
-
-    const fetchLabVisits = useCallback(async () => {
-        setLoadingLabVisits(true)
-        try {
-            const response = await fetch(`/api/patients/${id}/lab-visits`)
-            const data = await response.json()
-            setLabVisits(data)
-        } catch (error) {
-            console.error('Error fetching lab visits:', error)
-        } finally {
-            setLoadingLabVisits(false)
-        }
-    }, [id])
-
-    const fetchNotes = useCallback(async () => {
-        setLoadingNotes(true)
-        try {
-            const response = await fetch(`/api/patients/${id}/notes`)
-            const data = await response.json()
-            setNotes(data)
-        } catch (error) {
-            console.error('Error fetching notes:', error)
-        } finally {
-            setLoadingNotes(false)
-        }
-    }, [id])
-
-    const fetchImages = useCallback(async () => {
-        setLoadingImages(true)
-        try {
-            const response = await fetch(`/api/patients/${id}/images`)
-            const data = await response.json()
-            setImages(data)
-        } catch (error) {
-            console.error('Error fetching images:', error)
-        } finally {
-            setLoadingImages(false)
-        }
-    }, [id])
-
-    const fetchMedications = useCallback(async () => {
-        setLoadingMedications(true)
-        try {
-            const response = await fetch(`/api/patients/${id}/medications`)
-            const data = await response.json()
-            setMedications(data)
-        } catch (error) {
-            console.error('Error fetching medications:', error)
-        } finally {
-            setLoadingMedications(false)
-        }
-    }, [id])
+    }, [patientId, fetchNotes]);
 
     return (
         <PatientContext.Provider
@@ -182,10 +143,8 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 setActiveTab,
                 patientInfo,
                 patientViewModel,
-                notesViewModel,
                 isExpanded,
                 toggleExpand,
-
                 labVisits,
                 notes,
                 images,
@@ -196,13 +155,13 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 loadingImages,
                 loadingMedications,
                 fetchPatientInfo,
-                fetchLabVisits,
+                // fetchLabVisits,
                 fetchNotes,
-                fetchImages,
-                fetchMedications,
+                // fetchImages,
+                // fetchMedications,
             }}
         >
             {children}
         </PatientContext.Provider>
-    )
+    );
 }

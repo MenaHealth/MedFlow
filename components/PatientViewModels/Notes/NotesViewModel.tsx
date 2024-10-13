@@ -1,3 +1,4 @@
+// components/PatientViewModels/Notes/NotesViewModel.tsx
 import { useState, useCallback, useMemo } from 'react';
 
 export interface Note {
@@ -41,7 +42,18 @@ export interface ProcedureNote {
     Plan: string;
 }
 
-export function useNotes(patientId: string, userEmail: string) {
+export interface SubjectiveNote {
+    patientName: string;
+    patientID: string;
+    date: string;
+    time: string;
+    subjective: string;
+    objective: string;
+    assessment: string;
+    plan: string;
+}
+
+export function NotesViewModel(patientId: string, userEmail: string) {
     const [notesList, setNotesList] = useState<Note[]>([]);
     const [templateType, setTemplateType] = useState<'physician' | 'procedure' | 'subjective'>('physician');
     const [physicianNote, setPhysicianNote] = useState<PhysicianNote>({
@@ -75,8 +87,22 @@ export function useNotes(patientId: string, userEmail: string) {
         Notes: '',
         Plan: ''
     });
+    const [subjectiveNote, setSubjectiveNote] = useState<SubjectiveNote>({
+        patientName: '',
+        patientID: patientId,
+        date: new Date().toISOString().split('T')[0],
+        time: new Date().toTimeString().split(' ')[0],
+        subjective: '',
+        objective: '',
+        assessment: '',
+        plan: ''
+    });
 
     const fetchNotes = useCallback(async () => {
+        if (!patientId) {
+            console.error('patientId is undefined');
+            return;
+        }
         try {
             const response = await fetch(`/api/patient/notes/${patientId}`);
             if (!response.ok) {
@@ -110,7 +136,14 @@ export function useNotes(patientId: string, userEmail: string) {
                 };
                 noteTitle = 'Procedure Note';
                 break;
-            // cases for other note types
+            case 'subjective':
+                noteData = {
+                    ...subjectiveNote,
+                    email: userEmail,
+                    createdAt: new Date().toISOString()
+                };
+                noteTitle = 'Subjective Note';
+                break;
         }
 
         try {
@@ -130,7 +163,9 @@ export function useNotes(patientId: string, userEmail: string) {
             }
             const newNote = await response.json();
             setNotesList(prevNotes => [...prevNotes, newNote]);
-        } catch (error) {
+        }
+
+        catch (error) {
             console.error('Failed to publish note:', error);
         }
     }, [templateType, physicianNote, patientId, userEmail]);
@@ -169,11 +204,12 @@ export function useNotes(patientId: string, userEmail: string) {
         setTemplateType,
         physicianNote,
         procedureNote,
-        // subjectiveNote,
+        subjectiveNote,
         fetchNotes,
         publishNote,
         deleteNote,
         updateNote,
     };
 }
+
 

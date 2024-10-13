@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { PatientDashboardProvider, usePatientDashboard } from './PatientContext'
-import { User, FileText, LoaderPinwheel } from 'lucide-react'
+import { User, FileText, LoaderPinwheel, PanelTopOpen } from 'lucide-react'
 import { Card, CardHeader, CardContent } from "@/components/ui/card"
 import PatientInfoView from './patient-info/PatientInfoView'
 import { NotesView } from './notes/NotesView'
@@ -40,9 +40,8 @@ const PatientDashboardContent: React.FC = () => {
             }
             return isExpanded ? <PatientInfoView viewModel={patientViewModel} isExpanded={isExpanded} /> : null;
         } else if (section === 'notes') {
-            return <NotesView patientId={patientViewModel?.getPrimaryDetails().patientID || ''} email="currentUser" />
+            return <NotesView patientId={patientViewModel?.getPrimaryDetails().patientID || ''} />;
         }
-        return null
     }
 
     const sections = [
@@ -97,7 +96,7 @@ const PatientDashboardContent: React.FC = () => {
                                         : ''
                                 } ${section.textColor}`}
                             >
-                                ▼
+                                <PanelTopOpen />
                             </span>
                         </div>
                         {(openSections.includes(section.id) && (!loadingPatientInfo || section.id !== 'patient-info')) && (
@@ -114,9 +113,9 @@ const PatientDashboardContent: React.FC = () => {
     )
 }
 
-const PatientViewModel: React.FC = () => (
-    <PatientDashboardProvider>
-        <PatientDashboardContent />
+const PatientViewModel: React.FC<{ patientId: string }> = ({ patientId }) => (
+    <PatientDashboardProvider patientId={patientId}>
+        <PatientDashboardContent patientId={patientId} />
     </PatientDashboardProvider>
 )
 

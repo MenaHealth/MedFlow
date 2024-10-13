@@ -1,5 +1,12 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
+const noteSchema = new Schema<INote>({
+    email: { type: String, required: true },
+    type: { type: String, enum: ['physician', 'procedure', 'subjective', 'triage'], required: true },
+    date: { type: Date, default: Date.now }
+});
+
+
 interface INote extends Document {
     email: string;
     type: 'physician' | 'procedure' | 'subjective' | 'triage';
@@ -41,12 +48,6 @@ interface ITriageNote extends INote {
         respiratoryRate: number;
     };
 }
-
-const noteSchema = new Schema<INote>({
-    email: { type: String, required: true },
-    type: { type: String, enum: ['physician', 'procedure', 'subjective', 'triage'], required: true },
-    date: { type: Date, default: Date.now }
-});
 
 const physicianNoteSchema = new Schema<IPhysicianNote>({
     attendingPhysician: { type: String, required: true },

@@ -3,7 +3,7 @@ import { PatientDashboardProvider, usePatientDashboard } from './PatientContext'
 import { User, FileText, LoaderPinwheel, PanelTopOpen } from 'lucide-react'
 import { Card, CardHeader, CardContent } from "@/components/ui/card"
 import PatientInfoView from './patient-info/PatientInfoView'
-import { NotesView } from './notes/NotesView'
+import { CombinedNotesView } from '@/components/PatientViewModels/PatientNotes/CombinedNotesView'
 import { Skeleton } from '@/components/ui/skeleton'
 
 const PatientDashboardContent: React.FC = () => {
@@ -40,7 +40,7 @@ const PatientDashboardContent: React.FC = () => {
             }
             return isExpanded ? <PatientInfoView viewModel={patientViewModel} isExpanded={isExpanded} /> : null;
         } else if (section === 'notes') {
-            return <NotesView patientId={patientViewModel?.getPrimaryDetails().patientID || ''} />;
+            return <CombinedNotesView patientId={patientViewModel?.getPrimaryDetails().patientID || ''} />;
         }
     }
 

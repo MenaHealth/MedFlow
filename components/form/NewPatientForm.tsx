@@ -15,7 +15,7 @@ import { CountriesList, Countries, CountriesListArabic, CountriesListFarsi, Coun
 import { RadioGroupField } from "@/components/form/RadioGroupField";
 import { useSession } from "next-auth/react";
 import { mapLanguageToEnglish } from "@/utils/mapLanguageToEnglish";
-import { mapCountryToEnglish } from "@/utils/mapCountryToEnglish";components/form/NewPatientForm.tsx
+import { mapCountryToEnglish } from "@/utils/mapCountryToEnglish";
 
 const newPatientFormSchema = z.object({
     firstName: z.string().min(1, "First name is required"),

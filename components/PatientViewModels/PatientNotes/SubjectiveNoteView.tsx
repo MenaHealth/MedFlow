@@ -1,6 +1,6 @@
 import React from 'react';
 import { Textarea } from "@/components/ui/textarea";
-import { SubjectiveNote } from './NotesViewModel';
+import { SubjectiveNote } from './CombinedNotesViewModel';
 import {TextFormField} from "@/components/ui/TextFormField";
 
 interface SubjectiveNoteViewProps {

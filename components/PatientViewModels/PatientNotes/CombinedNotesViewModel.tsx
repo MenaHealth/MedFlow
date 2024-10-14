@@ -1,5 +1,5 @@
-    // components/PatientViewModels/Notes/NotesViewModel.tsx
-    import { useState, useCallback, useMemo } from 'react';
+    // components/PatientViewModels/PatientNotes/CombinedNotesViewModel.tsx
+    import { useState, useCallback, useEffect } from 'react';
 
     export interface Note {
         _id: string;
@@ -47,9 +47,12 @@
         plan: string;
     }
 
-    export function NotesViewModel(patientId: string, userEmail: string) {
+    export function CombinedNotesViewModel(patientId: string, userEmail: string) {
         const [notesList, setNotesList] = useState<Note[]>([]);
         const [templateType, setTemplateType] = useState<'physician' | 'procedure' | 'subjective'>('physician');
+        const [isExpanded, setIsExpanded] = useState(false);
+        const [isLoading, setIsLoading] = useState(false);
+
         const [physicianNote, setPhysicianNote] = useState<PhysicianNote>({
             date: new Date().toISOString().split('T')[0],
             time: new Date().toTimeString().split(' ')[0],
@@ -68,6 +71,7 @@
             diagnosis: '',
             signature: ''
         });
+
         const [procedureNote, setProcedureNote] = useState<ProcedureNote>({
             date: new Date().toISOString().split('T')[0],
             time: new Date().toTimeString().split(' ')[0],
@@ -77,6 +81,7 @@
             Notes: '',
             Plan: ''
         });
+
         const [subjectiveNote, setSubjectiveNote] = useState<SubjectiveNote>({
             date: new Date().toISOString().split('T')[0],
             time: new Date().toTimeString().split(' ')[0],
@@ -87,80 +92,148 @@
         });
 
         const fetchNotes = useCallback(async () => {
+            if (!patientId || !isExpanded) {
+                return;
+            }
+            setIsLoading(true);
+            try {
+                console.log(`Fetching notes for patient: ${patientId}`);
+                const response = await fetch(`/api/patient/notes/${patientId}`);
+                console.log('Fetch response status:', response.status);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error(`Error response: ${errorText}`);
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const notes = await response.json();
+                console.log('Fetched notes:', notes);
+                setNotesList(notes);
+                console.log('Updated notesList:', notes);
+            } catch (error) {
+                console.error('Failed to fetch notes:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        }, [patientId, isExpanded]);
+
+        useEffect(() => {
+            if (isExpanded) {
+                fetchNotes();
+            }
+        }, [isExpanded, fetchNotes]);
+
+        const toggleExpand = useCallback(() => {
+            setIsExpanded(prev => !prev);
+        }, []);
+
+        const publishNote = useCallback(async () => {
+            console.log('publishNote called with patientId:', patientId);
             if (!patientId) {
                 console.error('patientId is undefined');
                 return;
             }
-            try {
-                const response = await fetch(`/api/patient/notes/${patientId}`);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const notes = await response.json();
-                setNotesList(notes);
-            } catch (error) {
-                console.error('Failed to fetch notes:', error);
-            }
-        }, [patientId]);
 
-        const publishNote = useCallback(async () => {
             let noteData;
-            let noteTitle;
             let noteType = templateType;
 
             switch (templateType) {
                 case 'physician':
                     noteData = {
                         ...physicianNote,
+                        noteType: 'physician',
                         email: userEmail,
                         createdAt: new Date().toISOString()
                     };
-                    noteTitle = 'Physician Note';
+                    break;
                 case 'procedure':
                     noteData = {
                         ...procedureNote,
+                        noteType: 'procedure',
                         email: userEmail,
                         createdAt: new Date().toISOString()
                     };
-                    noteTitle = 'Procedure Note';
                     break;
                 case 'subjective':
                     noteData = {
                         ...subjectiveNote,
+                        noteType: 'subjective',
                         email: userEmail,
                         createdAt: new Date().toISOString()
                     };
-                    noteTitle = 'Subjective Note';
                     break;
             }
 
             try {
-                const response = await fetch(`/api/patient/notes/${patientId}`, {
+                const url = `/api/patient/notes/${patientId}`;
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({
-                        ...noteData,
-                        title: noteTitle,
-                        type: noteType
-                    }),
+                    body: JSON.stringify(noteData),
                 });
                 if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error(`Error response: ${errorText}`);
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const newNote = await response.json();
-                setNotesList(prevNotes => [...prevNotes, newNote]);
-            }
-
-            catch (error) {
+                setNotesList(prevNotes => [...prevNotes, newNote.note]);
+                resetForm();
+            } catch (error) {
                 console.error('Failed to publish note:', error);
             }
-        }, [templateType, physicianNote, patientId, userEmail]);
+        }, [templateType, physicianNote, procedureNote, subjectiveNote, patientId, userEmail]);
+
+        const resetForm = useCallback(() => {
+            switch (templateType) {
+                case 'physician':
+                    setPhysicianNote({
+                        date: new Date().toISOString().split('T')[0],
+                        time: new Date().toTimeString().split(' ')[0],
+                        attendingPhysician: '',
+                        hpi: '',
+                        rosConstitutional: '',
+                        rosCardiovascular: '',
+                        rosRespiratory: '',
+                        rosGastrointestinal: '',
+                        rosGenitourinary: '',
+                        rosMusculoskeletal: '',
+                        rosNeurological: '',
+                        rosPsychiatric: '',
+                        mdm: '',
+                        planAndFollowUp: '',
+                        diagnosis: '',
+                        signature: ''
+                    });
+                    break;
+                case 'procedure':
+                    setProcedureNote({
+                        date: new Date().toISOString().split('T')[0],
+                        time: new Date().toTimeString().split(' ')[0],
+                        procedureName: '',
+                        attendingPhysician: '',
+                        Diagnosis: '',
+                        Notes: '',
+                        Plan: ''
+                    });
+                    break;
+                case 'subjective':
+                    setSubjectiveNote({
+                        date: new Date().toISOString().split('T')[0],
+                        time: new Date().toTimeString().split(' ')[0],
+                        subjective: '',
+                        objective: '',
+                        assessment: '',
+                        plan: ''
+                    });
+                    break;
+            }
+        }, [templateType]);
 
         const deleteNote = useCallback(async (noteId: string) => {
             try {
-                const response = await fetch(`/api/patient/notes/${noteId}`, {
+                const response = await fetch(`/api/patient/notes/${patientId}?noteId=${noteId}`, {
                     method: 'DELETE',
                 });
                 if (!response.ok) {
@@ -170,42 +243,25 @@
             } catch (error) {
                 console.error('Failed to delete note:', error);
             }
-        }, []);
+        }, [patientId]);
 
         const updateNote = useCallback((type: 'physician' | 'procedure' | 'subjective', name: string, value: string) => {
             switch (type) {
                 case 'physician':
-                    console.log("Updating Physician Note:", name, value);
-                    setPhysicianNote(prev => {
-                        const updatedNote = { ...prev, [name]: value };
-                        console.log("Updated Physician Note:", updatedNote);
-                        return updatedNote;
-                    });
+                    setPhysicianNote(prev => ({ ...prev, [name]: value }));
                     break;
                 case 'procedure':
-                    console.log("Updating Procedure Note:", name, value);
-                    setProcedureNote(prev => {
-                        const updatedNote = { ...prev, [name]: value };
-                        console.log("Updated Procedure Note:", updatedNote);
-                        return updatedNote;
-                    });
+                    setProcedureNote(prev => ({ ...prev, [name]: value }));
                     break;
                 case 'subjective':
-                    console.log("Updating Subjective Note:", name, value);
-                    setSubjectiveNote(prev => {
-                        const updatedNote = { ...prev, [name]: value };
-                        console.log("Updated Subjective Note:", updatedNote);
-                        return updatedNote;
-                    });
-                    break;
-                default:
-                    console.error("Invalid note type:", type);
+                    setSubjectiveNote(prev => ({ ...prev, [name]: value }));
                     break;
             }
         }, []);
 
         return {
             notesList,
+            setNotesList,
             templateType,
             setTemplateType,
             physicianNote,
@@ -213,9 +269,13 @@
             subjectiveNote,
             fetchNotes,
             publishNote,
-            deleteNote,
-            updateNote,
+            isExpanded,
+            toggleExpand,
+            isLoading,
         };
     }
 
-
+    export default function Component() {
+        // This is a placeholder component to satisfy the React Component code block requirements
+        return null;
+    }

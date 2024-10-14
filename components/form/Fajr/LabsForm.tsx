@@ -140,7 +140,7 @@ export function LabForm() {
                     <NumericalFormField form={form} fieldName="drinkCount" fieldLabel="Avg Drinks per week" />
                     <TextFormField form={form} fieldName="otherDrugs" fieldLabel="Other illicit uses" />
                     <TextFormField form={form} fieldName="allergies" fieldLabel="Allergies" />
-                    <TextAreaFormField form={form} fieldName="notes" fieldLabel="Notes" /> */}
+                    <TextAreaFormField form={form} fieldName="notes" fieldLabel="PatientNotes" /> */}
 
                     <Button type="submit">Submit Request</Button>
                 </form>

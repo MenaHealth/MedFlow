@@ -1,10 +1,12 @@
-import React, { useEffect, useMemo } from 'react';
+// components/PatientViewModels/PatientNotes/CombinedNotesView.tsx
+
+import React, { useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { NotesViewModel, PhysicianNote, ProcedureNote, SubjectiveNote } from "@/components/PatientViewModels/Notes/NotesViewModel";
-import { PhysicianNoteView } from "@/components/PatientViewModels/Notes/PhysicianNoteView";
-import { ProcedureNoteView } from "@/components/PatientViewModels/Notes/ProcedureNoteView";
-import { SubjectiveNoteView } from "@/components/PatientViewModels/Notes/SubjectiveNoteView";
-import PreviousNotesView from "@/components/PatientViewModels/Notes/PreviousNotesView";
+import { CombinedNotesViewModel } from "./CombinedNotesViewModel";
+import { PhysicianNoteView } from "./PhysicianNoteView";
+import { ProcedureNoteView } from "./ProcedureNoteView";
+import { SubjectiveNoteView } from "./SubjectiveNoteView";
+import { PreviousNotesView } from "./PreviousNotesView";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { RadioCard } from "@/components/ui/radio-card";
 import { Button } from "@/components/ui/button";
@@ -13,10 +15,9 @@ interface NotesViewProps {
     patientId: string;
 }
 
-export const NotesView: React.FC<NotesViewProps> = ({ patientId }) => {
+export function CombinedNotesView({ patientId }: NotesViewProps) {
     const { data: session, status } = useSession();
     const userEmail = session?.user?.email || '';
-    const userName = session?.user ? `Dr. ${session.user.firstName} ${session.user.lastName}` : '';
 
     const {
         templateType,
@@ -24,61 +25,20 @@ export const NotesView: React.FC<NotesViewProps> = ({ patientId }) => {
         physicianNote,
         procedureNote,
         subjectiveNote,
-        fetchNotes,
         publishNote,
         updateNote,
-    } = NotesViewModel(patientId, userEmail);
+    } = CombinedNotesViewModel(patientId, userEmail);
 
-    useEffect(() => {
-        if (status === 'authenticated' && patientId) {
-            fetchNotes();
+    const handlePublishNote = async () => {
+        try {
+            await publishNote();
+            console.log('Note published successfully');
+            // You might want to add some UI feedback here
+        } catch (error) {
+            console.error('Error publishing note:', error);
+            // You might want to add some error handling UI here
         }
-    }, [status, fetchNotes, patientId]);
-
-    useEffect(() => {
-        if (userName) {
-            updateNote('physician', 'attendingPhysician', userName);
-            updateNote('procedure', 'attendingPhysician', userName);
-        }
-    }, [userName, updateNote]);
-
-    const isFormValid = useMemo(() => {
-        const checkAllFieldsFilled = (obj: Record<string, any>) => {
-            const allFieldsFilled = Object.values(obj).every(value =>
-                value !== '' && value !== null && value !== undefined
-            );
-
-            console.log("Checking fields for:", obj);
-            console.log("All fields filled:", allFieldsFilled);
-
-            return allFieldsFilled;
-        };
-
-        let currentNote: PhysicianNote | ProcedureNote | SubjectiveNote;
-        switch (templateType) {
-            case 'physician':
-                currentNote = physicianNote;
-                break;
-            case 'procedure':
-                currentNote = procedureNote;
-                break;
-            case 'subjective':
-                currentNote = subjectiveNote;
-                break;
-            default:
-                console.log("Invalid templateType:", templateType);
-                return false;
-        }
-
-        const isValid = checkAllFieldsFilled(currentNote);
-        console.log("isFormValid for template type", templateType, ":", isValid);
-
-        return isValid;
-    }, [templateType, physicianNote, procedureNote, subjectiveNote]);
-
-    if (status === 'loading') {
-        return <div>Loading...</div>;
-    }
+    };
 
     if (status === 'unauthenticated' || !session?.user) {
         return <div>Access Denied</div>;
@@ -143,12 +103,10 @@ export const NotesView: React.FC<NotesViewProps> = ({ patientId }) => {
                             />
                         )}
                         <Button
-                            onClick={publishNote}
+                            onClick={handlePublishNote}
                             variant="submit"
                             className="mt-4"
-                            disabled={!isFormValid}
                         >
-                            {console.log("Button disabled:", !isFormValid)}
                             Publish Note
                         </Button>
                     </div>
@@ -156,4 +114,6 @@ export const NotesView: React.FC<NotesViewProps> = ({ patientId }) => {
             </Card>
         </div>
     );
-};
+}
+
+export default CombinedNotesView;

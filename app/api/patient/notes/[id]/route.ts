@@ -61,59 +61,71 @@
     }
 
 
-// Modify in GET handler in app/api/patient/notes/[id]/route.ts
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
-    await dbConnect();
-    try {
-        const patientId = params.id;
-        const patient = await Patient.findById(patientId);
+    export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+        await dbConnect();
+        try {
+            const patientId = params.id;
+            const patient = await Patient.findById(patientId);
 
-        if (!patient) {
-            return NextResponse.json({ message: 'Patient not found' }, { status: 404 });
+            if (!patient) {
+                return NextResponse.json({ message: 'Patient not found' }, { status: 404 });
+            }
+
+            const sortedNotes = patient.notes
+                .map((note) => ({
+                    _id: note._id.toString(),
+                    title: note.noteType || 'Note',
+                    email: note.email,
+                    date: new Date(note.date).toISOString(),  // Ensure date is in ISO format
+                    content: getContentForNoteType(note),
+                }))
+                .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+            return NextResponse.json(sortedNotes);
+        } catch (error) {
+            console.error('Error fetching notes:', error);
+            return NextResponse.json({ message: 'Failed to fetch notes', error: error.message }, { status: 500 });
         }
-
-        const sortedNotes = patient.notes
-            .map((note) => ({
-                _id: note._id,
-                title: note.type || 'Note',  // Default title if not present
-                email: note.email,
-                date: note.date,
-                content: note.hpi || note.planAndFollowUp || '',  // Adjust based on actual note structure
-            }))
-            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-        return NextResponse.json(sortedNotes);
-    } catch (error) {
-        console.error('Error fetching notes:', error);
-        return NextResponse.json({ message: 'Failed to fetch notes', error: error.message }, { status: 500 });
     }
-}
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
-    await dbConnect();
-    try {
-        const { searchParams } = new URL(request.url);
-        const noteId = searchParams.get('noteId');
-        const patientId = params.id;
-
-        const patient = await Patient.findById(patientId);
-        if (!patient) {
-            return NextResponse.json({ message: 'Patient not found' }, { status: 404 });
+    function getContentForNoteType(note) {
+        switch (note.noteType) {
+            case 'physician':
+                return note.hpi || '';
+            case 'procedure':
+                return note.notes || '';
+            case 'subjective':
+                return `${note.subjective}\n${note.objective}\n${note.assessment}\n${note.plan}`;
+            default:
+                return '';
         }
-
-        const note = patient.notes.id(noteId);
-        if (!note) {
-            return NextResponse.json({ message: 'Note not found' }, { status: 404 });
-        }
-
-        note.remove();
-        await patient.save();
-
-        return NextResponse.json({ message: 'Note deleted successfully' });
-    } catch (error) {
-        console.error('Error deleting note:', error);
-        return NextResponse.json({ message: 'Failed to delete note' }, { status: 500 });
     }
-}
+
+    export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+        await dbConnect();
+        try {
+            const { searchParams } = new URL(request.url);
+            const noteId = searchParams.get('noteId');
+            const patientId = params.id;
+
+            const patient = await Patient.findById(patientId);
+            if (!patient) {
+                return NextResponse.json({ message: 'Patient not found' }, { status: 404 });
+            }
+
+            const noteIndex = patient.notes.findIndex((note) => note._id.toString() === noteId);
+            if (noteIndex === -1) {
+                return NextResponse.json({ message: 'Note not found' }, { status: 404 });
+            }
+
+            patient.notes.splice(noteIndex, 1);
+            await patient.save();
+
+            return NextResponse.json({ message: 'Note deleted successfully' });
+        } catch (error) {
+            console.error('Error deleting note:', error);
+            return NextResponse.json({ message: 'Failed to delete note', error: error.message }, { status: 500 });
+        }
+    }
 
 export const dynamic = 'force-dynamic';

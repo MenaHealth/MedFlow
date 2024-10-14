@@ -1,5 +1,5 @@
 import React from 'react';
-import { ProcedureNote } from './NotesViewModel';
+import { ProcedureNote } from './CombinedNotesViewModel';
 import {TextFormField} from "@/components/ui/TextFormField";
 
 interface ProcedureNoteViewProps {

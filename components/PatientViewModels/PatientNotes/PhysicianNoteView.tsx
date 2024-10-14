@@ -1,6 +1,6 @@
 import React from 'react';
 import { TextFormField } from "@/components/ui/TextFormField";
-import { PhysicianNote } from './NotesViewModel';
+import { PhysicianNote } from './CombinedNotesViewModel';
 
 interface PhysicianNoteViewProps {
     note: PhysicianNote;

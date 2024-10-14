@@ -4,7 +4,7 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react'
 import { useParams } from 'next/navigation'
 import { PatientInfoViewModel } from "@/components/PatientViewModels/patient-info/PatientInfoViewModel";
-import { NotesViewModel } from '@/components/PatientViewModels/Notes/NotesViewModel';
+import { CombinedNotesViewModel } from '@/components/PatientViewModels/PatientNotes/CombinedNotesViewModel';
 import Patient from "@/models/patient";
 
 // Define the types for our data
@@ -101,7 +101,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
         publishNote,
         deleteNote,
         updateNote
-    } = NotesViewModel(patientId, userEmail); // Call the hook here
+    } = CombinedNotesViewModel(patientId, userEmail); // Call the hook here
 
     const [labVisits, setLabVisits] = useState<LabVisit[]>([]);
     const [notes, setNotes] = useState<Note[]>([]);
@@ -116,6 +116,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
 
     const fetchPatientInfo = useCallback(async () => {
         setLoadingPatientInfo(true);
+        setLoadingNotes(true);
         try {
             const response = await fetch(`/api/patient/${patientId}`);
             const data = await response.json();
@@ -128,13 +129,18 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 patientID: data._id,
             });
             loadPatientInfo(data);
-            fetchNotes(); // Add this line to fetch notes when patient info is loaded
+
+            // Fetch notes once patient data is loaded
+            const notesResponse = await fetch(`/api/patient/notes/${data._id}`);
+            const notesData = await notesResponse.json();
+            setNotes(notesData);
         } catch (error) {
             console.error('Error fetching patient info:', error);
         } finally {
             setLoadingPatientInfo(false);
+            setLoadingNotes(false); // Stop loading notes after fetch
         }
-    }, [patientId, fetchNotes]);
+    }, [patientId]);
 
     return (
         <PatientContext.Provider

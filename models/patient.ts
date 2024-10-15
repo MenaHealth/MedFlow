@@ -1,6 +1,9 @@
 import { Schema, model, models, Document, Types } from 'mongoose';
 import { DoctorSpecialties as SPECIALTIES } from '@/data/doctorSpecialty.enum';
 import { INote } from './note';
+import mongoose from 'mongoose';
+import { noteSchema } from '@/models/note';
+
 
 interface Prescription {
   medName: string;
@@ -10,7 +13,6 @@ interface Prescription {
 
 export interface IPatient extends Document {
   files?: any[];
-  _id?: string;
   firstName: string;
   lastName: string;
   phone?: string;
@@ -45,7 +47,7 @@ export interface IPatient extends Document {
   allergies?: string;
   notes: Types.DocumentArray<INote>;
   RXForms?: any[];
-  visits?: Types.ObjectId[];
+  visits?: any[];
   triagedBy?: {
     firstName?: string;
     lastName?: string;
@@ -94,7 +96,7 @@ const PatientSchema = new Schema<IPatient>({
   drinkCount: { type: String },
   otherDrugs: { type: String },
   allergies: { type: String },
-  notes: [{ type: Schema.Types.Mixed, ref: 'Note' }],
+  notes: { type: [noteSchema], default: [] },
   RXForms: [{
     title: { type: String, required: true },
     content: { type: String, required: true },

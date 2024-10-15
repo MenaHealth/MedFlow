@@ -1,54 +1,33 @@
 // components/PatientViewModels/PatientNotes/PreviousNotesViewModel.tsx
-import { useState, useEffect } from 'react';
+import { usePatientDashboard } from '@/components/PatientViewModels/PatientContext';
 
-export interface Note {
-    _id: string;
-    title: string;
-    email: string;
-    date: string;
-    content: string;
-}
+export function usePreviousNotesViewModel() {
+    const { notes, loadingNotes: loading, error } = usePatientDashboard();
 
-export class PreviousNotesViewModel {
-    private patientId: string;
-    private notes: Note[] = [];
-    private loading: boolean = true;
-    private error: string | null = null;
-
-    constructor(patientId: string) {
-        this.patientId = patientId;
-    }
-
-    async fetchNotes() {
-        this.loading = true;
-        this.error = null;
-        try {
-            const response = await fetch(`/api/patient/notes/${this.patientId}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            this.notes = await response.json();
-        } catch (error) {
-            console.error('Failed to fetch notes:', error);
-            this.error = (error as Error).message;
-        } finally {
-            this.loading = false;
+    // Generate display content based on note type
+    const processedNotes = notes.map(note => {
+        let content;
+        switch (note.noteType) {
+            case 'subjective':
+                content = note.subjective; // Use subjective content for subjective notes
+                break;
+            case 'procedure':
+                content = note.procedureName; // Use procedure name for procedure notes
+                break;
+            case 'physician':
+                content = note.diagnosis; // Use diagnosis for physician notes
+                break;
+            default:
+                content = "No content available"; // Default message if no specific field is set
         }
-    }
 
-    getNotes() {
-        return this.notes;
-    }
+        return {
+            ...note,
+            content, // Add content field specifically for the view
+        };
+    });
 
-    isLoading() {
-        return this.loading;
-    }
-
-    getError() {
-        return this.error;
-    }
-
-    handleDownload(note: Note) {
+    const handleDownload = (note) => {
         const blob = new Blob([JSON.stringify(note)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -58,33 +37,12 @@ export class PreviousNotesViewModel {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-    }
-}
-
-export function usePreviousNotesViewModel(patientId: string) {
-    const [viewModel] = useState(() => new PreviousNotesViewModel(patientId));
-    const [notes, setNotes] = useState<Note[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-
-    useEffect(() => {
-        async function loadNotes() {
-            await viewModel.fetchNotes();
-            setNotes(viewModel.getNotes());
-            setLoading(viewModel.isLoading());
-            setError(viewModel.getError());
-        }
-        loadNotes();
-    }, [viewModel]);
+    };
 
     return {
-        notes,
+        notes: processedNotes,
         loading,
         error,
-        handleDownload: viewModel.handleDownload
+        handleDownload
     };
-}
-
-export default function Component() {
-    return null;
 }

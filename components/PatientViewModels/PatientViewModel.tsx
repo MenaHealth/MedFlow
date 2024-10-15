@@ -1,25 +1,25 @@
-import React, { useState, useEffect } from 'react'
-import { PatientDashboardProvider, usePatientDashboard } from './PatientContext'
-import { User, FileText, LoaderPinwheel, PanelTopOpen } from 'lucide-react'
-import { Card, CardHeader, CardContent } from "@/components/ui/card"
-import PatientInfoView from './patient-info/PatientInfoView'
-import { CombinedNotesView } from '@/components/PatientViewModels/PatientNotes/CombinedNotesView'
-import { Skeleton } from '@/components/ui/skeleton'
+import React, { useState, useEffect } from 'react';
+import { PatientDashboardProvider, usePatientDashboard } from './PatientContext';
+import { User, FileText, LoaderPinwheel, PanelTopOpen } from 'lucide-react';
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import PatientInfoView from './patient-info/PatientInfoView';
+import { CombinedNotesView } from '@/components/PatientViewModels/PatientNotes/CombinedNotesView';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const PatientDashboardContent: React.FC = () => {
     const {
         patientViewModel,
         loadingPatientInfo,
-        fetchPatientInfo,
+        fetchPatientData, // Renamed
         isExpanded,
         toggleExpand,
-    } = usePatientDashboard()
+    } = usePatientDashboard();
 
-    const [openSections, setOpenSections] = useState<string[]>(['patient-info'])
+    const [openSections, setOpenSections] = useState<string[]>(['patient-info']);
 
     useEffect(() => {
-        fetchPatientInfo()
-    }, [fetchPatientInfo])
+        fetchPatientData(); // Call fetchPatientData here
+    }, [fetchPatientData]);
 
     const toggleSection = (section: string) => {
         if (openSections.includes(section)) {
@@ -31,18 +31,18 @@ const PatientDashboardContent: React.FC = () => {
         } else {
             setOpenSections(prev => [...prev, section]);
         }
-    }
+    };
 
     const renderSectionContent = (section: string) => {
         if (section === 'patient-info') {
             if (!patientViewModel || loadingPatientInfo) {
                 return null; // Return null during loading to maintain consistent size
             }
-            return isExpanded ? <PatientInfoView viewModel={patientViewModel} isExpanded={isExpanded} /> : null;
+            return isExpanded ? <PatientInfoView isExpanded={isExpanded} /> : null;
         } else if (section === 'notes') {
             return <CombinedNotesView patientId={patientViewModel?.getPrimaryDetails().patientID || ''} />;
         }
-    }
+    };
 
     const sections = [
         {
@@ -59,7 +59,7 @@ const PatientDashboardContent: React.FC = () => {
             color: 'bg-darkBlue',
             textColor: 'text-orange-50'
         },
-    ]
+    ];
 
     return (
         <div className="container mx-auto px-4 py-8 overflow-hidden">
@@ -110,13 +110,13 @@ const PatientDashboardContent: React.FC = () => {
                 ))}
             </div>
         </div>
-    )
-}
+    );
+};
 
-const PatientViewModel: React.FC<{ patientId: string }> = ({ patientId }) => (
-    <PatientDashboardProvider patientId={patientId}>
-        <PatientDashboardContent patientId={patientId} />
+const PatientViewModel: React.FC = () => (
+    <PatientDashboardProvider>
+        <PatientDashboardContent />
     </PatientDashboardProvider>
-)
+);
 
-export default PatientViewModel
+export default PatientViewModel;

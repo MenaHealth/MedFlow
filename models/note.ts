@@ -1,14 +1,14 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
 // Define the base Note interface
-interface INote extends Document {
+export interface INote extends Document {
     email: string;
     noteType: 'physician' | 'procedure' | 'subjective' | 'triage';
     date: Date;
 }
 
 // Define schemas for each note type
-const noteSchema = new Schema<INote>({
+export const noteSchema = new Schema<INote>({
     email: { type: String, required: true },
     noteType: { type: String, enum: ['physician', 'procedure', 'subjective', 'triage'], required: true },
     date: { type: Date, default: Date.now },
@@ -18,7 +18,7 @@ const noteSchema = new Schema<INote>({
 const Note: Model<INote> = mongoose.models.Note || mongoose.model<INote>('Note', noteSchema);
 
 // Define additional interfaces for the specific note types
-interface IPhysicianNote extends INote {
+export interface IPhysicianNote extends INote {
     attendingPhysician: string;
     hpi: string;
     rosConstitutional: string;
@@ -35,7 +35,7 @@ interface IPhysicianNote extends INote {
     signature: string;
 }
 
-interface IProcedureNote extends INote {
+export interface IProcedureNote extends INote {
     attendingPhysician: string;
     procedureName: string;
     diagnosis: string;
@@ -43,14 +43,14 @@ interface IProcedureNote extends INote {
     plan: string;
 }
 
-interface ISubjectiveNote extends INote {
+export interface ISubjectiveNote extends INote {
     subjective: string;
     objective: string;
     assessment: string;
     plan: string;
 }
 
-interface ITriageNote extends INote {
+export interface ITriageNote extends INote {
     note: string;
 }
 
@@ -92,4 +92,3 @@ const TriageNote = Note.discriminators?.TriageNote || Note.discriminator<ITriage
 }));
 
 export { Note, PhysicianNote, ProcedureNote, SubjectiveNote, TriageNote };
-export type { INote, IPhysicianNote, IProcedureNote, ISubjectiveNote };

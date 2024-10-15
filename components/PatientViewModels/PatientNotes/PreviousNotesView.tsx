@@ -4,30 +4,13 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Trash2, Download } from 'lucide-react';
 import { ClipLoader } from 'react-spinners';
-import { usePatientDashboard } from '@/components/PatientViewModels/PatientContext';
+import { usePreviousNotesViewModel } from './PreviousNotesViewModel';
 
 export function PreviousNotesView() {
-    const { notes, loadingNotes: loading, error } = usePatientDashboard();
+    const { notes, loading, error, handleDownload } = usePreviousNotesViewModel();
 
-    const handleDownload = (note: Note) => {
-        const blob = new Blob([JSON.stringify(note)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `note-${note._id}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    };
-
-    if (loading) {
-        return <ClipLoader />;
-    }
-
-    if (error) {
-        return <p>Error: {error}</p>;
-    }
+    if (loading) return <ClipLoader />;
+    if (error) return <p>Error: {error}</p>;
 
     return (
         <div>
@@ -37,9 +20,11 @@ export function PreviousNotesView() {
                     {notes.map((note) => (
                         <li key={note._id} className="p-4 border-b border-gray-200 last:border-b-0 flex justify-between items-center">
                             <div>
-                                <h3 className="font-bold">{note.title}</h3>
-                                <p className="text-sm text-gray-500">{note.email} - {new Date(note.date).toLocaleString()}</p>
-                                <p>{note.content}</p>
+                                <h3 className="font-bold">{note.title}</h3> {/* Displays note type */}
+                                <p className="text-sm text-gray-500">
+                                    {note.patientName} - {new Date(note.date).toLocaleString()}
+                                </p>
+                                <p>{note.content}</p> {/* Displays dynamically generated content */}
                             </div>
                             <div>
                                 <Button onClick={() => handleDownload(note)} size="icon" variant="ghost">

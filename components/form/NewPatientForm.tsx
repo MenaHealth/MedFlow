@@ -15,7 +15,8 @@ import { CountriesList, Countries, CountriesListArabic, CountriesListFarsi, Coun
 import { RadioGroupField } from "@/components/form/RadioGroupField";
 import { useSession } from "next-auth/react";
 import { mapLanguageToEnglish } from "@/utils/mapLanguageToEnglish";
-import { mapCountryToEnglish } from "@/utils/mapCountryToEnglish";
+import { mapCountryToEnglish } from "@/utils/mapCountryToEnglish"
+import {SendHorizonal} from "lucide-react";
 
 const newPatientFormSchema = z.object({
     firstName: z.string().min(1, "First name is required"),
@@ -270,6 +271,7 @@ export function NewPatientForm({ handleSubmit, submitting, language }: NewPatien
                 
                 <div className="flex justify-center">
                     <Button type="submit" disabled={submitting} style={{ backgroundColor: !session ? 'rgb(71, 140, 143)' : '' }}>
+                        <SendHorizonal className="mr-2 h-4 w-4" />
                         {submitting ? fieldLabels.submitting[language][1] : fieldLabels.submitting[language][0]}
                     </Button>
                 </div>

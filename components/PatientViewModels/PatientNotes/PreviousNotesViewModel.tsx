@@ -4,26 +4,25 @@ import { usePatientDashboard } from '@/components/PatientViewModels/PatientConte
 export function usePreviousNotesViewModel() {
     const { notes, loadingNotes: loading, error } = usePatientDashboard();
 
-    // Generate display content based on note type
     const processedNotes = notes.map(note => {
         let content;
         switch (note.noteType) {
             case 'subjective':
-                content = note.subjective; // Use subjective content for subjective notes
+                content = note.subjective;
                 break;
             case 'procedure':
-                content = note.procedureName; // Use procedure name for procedure notes
+                content = note.procedureName;
                 break;
             case 'physician':
-                content = note.diagnosis; // Use diagnosis for physician notes
+                content = note.diagnosis;
                 break;
             default:
-                content = "No content available"; // Default message if no specific field is set
+                content = "No content available";
         }
 
         return {
             ...note,
-            content, // Add content field specifically for the view
+            content,
         };
     });
 
@@ -41,8 +40,8 @@ export function usePreviousNotesViewModel() {
 
     return {
         notes: processedNotes,
-        loading,
+        loading,  // Updated to use loadingNotes state from context
         error,
-        handleDownload
+        handleDownload,
     };
 }

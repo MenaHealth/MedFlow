@@ -1,6 +1,7 @@
 import React from 'react';
 import { ProcedureNote } from './CombinedNotesViewModel';
 import {TextFormField} from "@/components/ui/TextFormField";
+import {ScrollArea} from "@/components/form/ScrollArea";
 
 interface ProcedureNoteViewProps {
     note: ProcedureNote;
@@ -10,6 +11,7 @@ interface ProcedureNoteViewProps {
 export const ProcedureNoteView: React.FC<ProcedureNoteViewProps> = ({ note, onChange }) => {
     return (
         <div className="space-y-4">
+            <ScrollArea className="h-full w-full">
             <TextFormField
                 fieldName="date"
                 fieldLabel="Date"
@@ -39,21 +41,22 @@ export const ProcedureNoteView: React.FC<ProcedureNoteViewProps> = ({ note, onCh
             <TextFormField
                 fieldName="diagnosis"
                 fieldLabel="Diagnosis"
-                value={note.Diagnosis}
-                onChange={(e) => onChange('Diagnosis', e.target.value)}
+                value={note.diagnosis} // Changed from Diagnosis
+                onChange={(e) => onChange('diagnosis', e.target.value)}
             />
             <TextFormField
                 fieldName="notes"
                 fieldLabel="Notes"
-                value={note.Notes}
-                onChange={(e) => onChange('Notes', e.target.value)}
+                value={note.notes} // Changed from Notes
+                onChange={(e) => onChange('notes', e.target.value)}
             />
             <TextFormField
                 fieldName="plan"
                 fieldLabel="Plan"
-                value={note.Plan}
-                onChange={(e) => onChange('Plan', e.target.value)}
+                value={note.plan} // Changed from Plan
+                onChange={(e) => onChange('plan', e.target.value)}
             />
+            </ScrollArea>
         </div>
     );
 };

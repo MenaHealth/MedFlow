@@ -2,6 +2,7 @@ import React from 'react';
 import { Textarea } from "@/components/ui/textarea";
 import { SubjectiveNote } from './CombinedNotesViewModel';
 import {TextFormField} from "@/components/ui/TextFormField";
+import {ScrollArea} from "@/components/form/ScrollArea";
 
 interface SubjectiveNoteViewProps {
     note: SubjectiveNote;
@@ -11,6 +12,7 @@ interface SubjectiveNoteViewProps {
 export const SubjectiveNoteView: React.FC<SubjectiveNoteViewProps> = ({ note, onChange }) => {
     return (
         <div className="space-y-4">
+            <ScrollArea className="h-full w-full">
             <TextFormField
                 fieldName="date"
                 fieldLabel="Date"
@@ -49,6 +51,7 @@ export const SubjectiveNoteView: React.FC<SubjectiveNoteViewProps> = ({ note, on
                 value={note.plan}
                 onChange={(e) => onChange('plan', e.target.value)}
             />
+            </ScrollArea>
         </div>
     );
 };

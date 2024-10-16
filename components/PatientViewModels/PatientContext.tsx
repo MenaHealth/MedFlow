@@ -31,6 +31,7 @@ interface PatientDashboardContextType {
     patientViewModel: PatientInfoViewModel | null;
     isExpanded: boolean;
     toggleExpand: () => void;
+    refreshPatientNotes: () => Promise<void>;
 }
 
 const PatientContext = createContext<PatientDashboardContextType | undefined>(undefined);
@@ -53,6 +54,17 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
     const [patientViewModel, setPatientViewModel] = useState<PatientInfoViewModel | null>(null);
     const [isExpanded, setIsExpanded] = useState(false);
 
+    const refreshPatientNotes = async () => {
+        setLoadingNotes(true);
+        try {
+            await fetchPatientData(); // Re-fetches patient data, including notes
+        } catch (error) {
+            console.error('Error refreshing patient notes:', error);
+        } finally {
+            setLoadingNotes(false);
+        }
+    };
+
     const toggleExpand = () => {
         setIsExpanded(prev => !prev);
     };
@@ -66,17 +78,15 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             console.log('Received patient data:', data);
 
             formatPatientInfo(data);
-
-            // Set notes directly from the fetched patient data
             if (data.notes) {
                 formatPreviousNotes(data.notes);
             } else {
-                setNotes([]); // Initialize with empty array if no notes are found
+                setNotes([]); // Set to empty array if no notes
             }
         } catch (error) {
             console.error('Error fetching patient data:', error);
         } finally {
-            setLoadingPatientInfo(false);
+            setLoadingPatientInfo(false); // Set loading to false after completion
         }
     }, [patientId]);
 
@@ -132,10 +142,12 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 patientInfo,
                 notes,
                 loadingPatientInfo,
+                loadingNotes, // Include loading state for notes
                 fetchPatientData,
                 patientViewModel,
                 isExpanded,
                 toggleExpand,
+                refreshPatientNotes, // Include refresh function for notes
             }}
         >
             {children}

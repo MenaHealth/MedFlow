@@ -1,5 +1,6 @@
     // components/PatientViewModels/PatientNotes/CombinedNotesViewModel.tsx
     import { useState, useCallback, useEffect } from 'react';
+    import {usePatientDashboard} from "@/components/PatientViewModels/PatientContext";
 
     export interface Note {
         _id: string;
@@ -33,9 +34,9 @@
         time: string;
         procedureName: string;
         attendingPhysician: string;
-        Diagnosis: string;
-        Notes: string;
-        Plan: string;
+        diagnosis: string;
+        notes: string;
+        plan: string;
     }
 
     export interface SubjectiveNote {
@@ -52,6 +53,7 @@
         const [templateType, setTemplateType] = useState<'physician' | 'procedure' | 'subjective'>('physician');
         const [isExpanded, setIsExpanded] = useState(false);
         const [isLoading, setIsLoading] = useState(false);
+        const { refreshPatientNotes } = usePatientDashboard();
 
         const [physicianNote, setPhysicianNote] = useState<PhysicianNote>({
             date: new Date().toISOString().split('T')[0],
@@ -77,9 +79,9 @@
             time: new Date().toTimeString().split(' ')[0],
             procedureName: '',
             attendingPhysician: '',
-            Diagnosis: '',
-            Notes: '',
-            Plan: ''
+            diagnosis: '',
+            notes: '',
+            plan: '',
         });
 
         const [subjectiveNote, setSubjectiveNote] = useState<SubjectiveNote>({
@@ -126,16 +128,14 @@
             setIsExpanded(prev => !prev);
         }, []);
 
-        const publishNote = useCallback(async () => {
-            console.log('publishNote called with patientId:', patientId);
+        const createNote = useCallback(async () => {
+            console.log('createNote called with patientId:', patientId);
             if (!patientId) {
                 console.error('patientId is undefined');
                 return;
             }
 
             let noteData;
-            let noteType = templateType;
-
             switch (templateType) {
                 case 'physician':
                     noteData = {
@@ -180,10 +180,11 @@
                 const newNote = await response.json();
                 setNotesList(prevNotes => [...prevNotes, newNote.note]);
                 resetForm();
+                await refreshPatientNotes(); // Refresh notes view after note creation
             } catch (error) {
-                console.error('Failed to publish note:', error);
+                console.error('Failed to create note:', error);
             }
-        }, [templateType, physicianNote, procedureNote, subjectiveNote, patientId, userEmail]);
+        }, [templateType, physicianNote, procedureNote, subjectiveNote, patientId, userEmail, refreshPatientNotes]);
 
         const resetForm = useCallback(() => {
             switch (templateType) {
@@ -214,7 +215,7 @@
                         procedureName: '',
                         attendingPhysician: '',
                         Diagnosis: '',
-                        Notes: '',
+                        notes: '',
                         Plan: ''
                     });
                     break;
@@ -245,7 +246,7 @@
             }
         }, [patientId]);
 
-        const updateNote = useCallback((type: 'physician' | 'procedure' | 'subjective', name: string, value: string) => {
+        const setNoteField = useCallback((type: 'physician' | 'procedure' | 'subjective', name: string, value: string) => {
             switch (type) {
                 case 'physician':
                     setPhysicianNote(prev => ({ ...prev, [name]: value }));
@@ -268,7 +269,8 @@
             procedureNote,
             subjectiveNote,
             fetchNotes,
-            publishNote,
+            createNote,
+            setNoteField,
             isExpanded,
             toggleExpand,
             isLoading,

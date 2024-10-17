@@ -26,14 +26,6 @@
   z-index: 3;
 }
 
-a {
-  color: var(--orange);
-}
-a:hover {
-  color: var(--white);
-  background-color: var(--orange);
-}
-
 .heart-rate, .ball, .ball-first {
   position: absolute;
   width: 100%;

@@ -1,6 +1,7 @@
 // utils/countries.enum.ts
 export enum Countries {
     EGYPT = 'Egypt',
+    PALESTINE_GAZA = 'Palestine - Gaza',
     PALESTINE_WEST_BANK = 'Palestine - West Bank',
     SYRIA = 'Syria',
     YEMEN = 'Yemen',
@@ -12,6 +13,7 @@ export const CountriesList = Object.values(Countries);
 
 export enum CountriesArabic {
     EGYPT = 'مصر',
+    PALESTINE_GAZA = 'فلسطين - غزة',
     PALESTINE_WEST_BANK = 'فلسطين - الضفة الغربية',
     SYRIA = 'سوريا',
     YEMEN = 'اليمن',
@@ -23,6 +25,7 @@ export const CountriesListArabic = Object.values(CountriesArabic);
 
 export enum CountriesFarsi {
     EGYPT = 'مصر',
+    PALESTINE_GAZA = 'فلسطین - غزه',
     PALESTINE_WEST_BANK = 'فلسطین - کرانه باختری',
     SYRIA = 'سوریه',
     YEMEN = 'یمن',
@@ -34,6 +37,7 @@ export const CountriesListFarsi = Object.values(CountriesFarsi)
 
 export enum CountriesPashto {
     EGYPT = 'مصر',
+    PALESTINE_GAZA = 'فلسطین – غزه',
     PALESTINE_WEST_BANK = 'فلسطین - لویدیځه غاړه',
     SYRIA = 'سوریه',
     YEMEN = 'یمن',
@@ -42,3 +46,14 @@ export enum CountriesPashto {
 }
 
 export const CountriesListPashto = Object.values(CountriesPashto)
+
+export enum CountryCodes {
+    EGYPT = '+20',
+    AFGHANISTAN = '+93',
+    LEBANON = '+961',
+    SYRIA = '+963',
+    YEMEN = '+967',
+    PALESTINE = '+970',
+}
+
+export const CountryCodesList = Object.values(CountryCodes)

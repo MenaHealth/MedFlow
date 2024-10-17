@@ -26,9 +26,9 @@ const newPatientFormSchema = z.object({
     city: z.string().min(1, "City is required"),
     language: z.string().min(1, "Language is required"),
     chiefComplaint: z.string().min(1, "Please enter the main reason you seek medical care"),
-    email: z.string().email(),
     genderPreference: z.string(),
     previouslyRegistered: z.string(),
+    createdAt: z.date(),
 });
 
 type NewPatientFormValues = z.infer<typeof newPatientFormSchema>;
@@ -46,7 +46,6 @@ export function NewPatientForm({ handleSubmit, submitting, language }: NewPatien
         resolver: zodResolver(newPatientFormSchema),
         defaultValues: {
             firstName: '',
-            email: '',
             lastName: '',
             phone: '',
             age: 0,
@@ -56,6 +55,7 @@ export function NewPatientForm({ handleSubmit, submitting, language }: NewPatien
             chiefComplaint: '',
             genderPreference: '',
             previouslyRegistered: '',
+            createdAt: new Date(),
         },
     });
 
@@ -215,10 +215,8 @@ export function NewPatientForm({ handleSubmit, submitting, language }: NewPatien
                         <TextFormField fieldName="lastName" fieldLabel={fieldLabels.lastName[language]} />
                     </div>
                 </div>
-                {/* Second row - email */}
-                <TextFormField fieldName="email" fieldLabel={fieldLabels.email[language]} />
 
-                {/* Third row - age, phone, language */}
+                {/* Second row - age, phone, language */}
                 <div className="flex flex-col md:flex-row md:space-x-4">
                     <div className="w-full md:w-1/4">
                         <NumericalFormField form={form} fieldName="age" fieldLabel={fieldLabels.age[language]} />
@@ -231,7 +229,7 @@ export function NewPatientForm({ handleSubmit, submitting, language }: NewPatien
                     </div>
                 </div>
 
-                {/* Fourth row - city, country */}
+                {/* Third row - city, country */}
                 <div className="flex flex-col md:flex-row md:space-x-4">
                     <div className="w-full md:w-1/2">
                         <SelectFormField form={form} fieldName="country" fieldLabel={fieldLabels.country[language].label} selectOptions={fieldLabels.country[language].options} />
@@ -241,12 +239,12 @@ export function NewPatientForm({ handleSubmit, submitting, language }: NewPatien
                     </div>
                 </div>
 
-                {/* Fifth row - Chief Complaint */}
+                {/* Fourth row - Chief Complaint */}
                 <TextAreaFormField form={form} fieldName="chiefComplaint" fieldLabel={fieldLabels.chiefComplaint[language]} />
                 
                 {!session && (
                     <>
-                        {/* Sixth row - Gender Preference */}
+                        {/* Fifth row - Gender Preference */}
                         <div className="flex flex-col mx-2">
                             <span>{fieldLabels.genderPreference[language].label}</span>
                             <RadioGroupField
@@ -256,7 +254,7 @@ export function NewPatientForm({ handleSubmit, submitting, language }: NewPatien
                             />
                         </div>
 
-                        {/* Seventh row - Previously Registered */}
+                        {/* Sixth row - Previously Registered */}
                         <div className="flex flex-col mx-2">
                             <span>{fieldLabels.previouslyRegistered[language].label}</span>
                             <RadioGroupField

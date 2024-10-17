@@ -54,6 +54,8 @@
     };
     notes?: string;
     visits?: Types.ObjectId[];
+    createdAt?: Date; // Add timestamp field for creation
+    updatedAt?: Date; // Add timestamp field for last update
   }
 
   // models/patient.ts

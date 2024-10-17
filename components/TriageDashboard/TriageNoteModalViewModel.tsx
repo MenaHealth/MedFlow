@@ -16,7 +16,7 @@ const useTriageNoteModalViewModel = (patientId, onSuccess) => {
                 setLoading(false);
             })
             .catch(error => {
-                console.error("Error fetching notes:", error);
+                console.error("Error fetching notes2:", error);
                 setLoading(false);
             });
     };

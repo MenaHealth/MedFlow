@@ -37,7 +37,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdownMenu";
-import DescriptionIcon from '@mui/icons-material/Description';
 
 import { PRIORITIES, STATUS } from '@/data/data';
 import { DoctorSpecialties as DOCTOR_SPECIALTIES } from '@/data/doctorSpecialty.enum';

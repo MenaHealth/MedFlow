@@ -76,7 +76,7 @@ const NotesCell = ({ notes, onUpdate }) => {
         <>
             <TableCell align="center">
                 <CellWrapper>
-                    {/* Show the DescriptionIcon only if there are notes */}
+                    {/* Show the DescriptionIcon only if there are notes2 */}
                     {notes && (
                         <DescriptionButton
                             onClick={toggleNotesVisibility}

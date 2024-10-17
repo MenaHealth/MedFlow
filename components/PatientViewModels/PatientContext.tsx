@@ -95,9 +95,9 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
     const refreshPatientNotes = async () => {
         setLoadingNotes(true);
         try {
-            await fetchPatientData(); // Re-fetches patient data, including notes
+            await fetchPatientData(); // Re-fetches patient data, including notes2
         } catch (error) {
-            console.error('Error refreshing patient notes:', error);
+            console.error('Error refreshing patient notes2:', error);
         } finally {
             setLoadingNotes(false);
         }
@@ -105,40 +105,6 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
 
     const toggleExpand = () => {
         setIsExpanded(prev => !prev);
-    };
-
-    const fetchPatientData = useCallback(async () => {
-        console.log('Fetching patient data for ID:', patientId);
-        setLoadingPatientInfo(true);
-        try {
-            const response = await fetch(`/api/patient/${patientId}`);
-            const data = await response.json() as IPatient;
-            console.log('Received patient data:', data);
-
-            formatPatientInfo(data);
-            if (data.notes) {
-                formatPreviousNotes(data.notes);
-            } else {
-                setNotes([]); // Set to empty array if no notes
-            }
-        } catch (error) {
-            console.error('Error fetching patient data:', error);
-        } finally {
-            setLoadingPatientInfo(false); // Set loading to false after completion
-        }
-    }, [patientId]);
-
-    const fetchNotes = async (patientId: string) => {
-        console.log('Fetching notes for patient ID:', patientId);
-        try {
-            const response = await fetch(`/api/patient/${patientId}/notes`);
-            const notesData = await response.json() as INote[];
-            console.log('Received notes data:', notesData);
-            formatPreviousNotes(notesData);
-        } catch (error) {
-            console.error('Error fetching notes:', error);
-            setNotes([]);
-        }
     };
 
     const formatPatientInfo = (patientData: IPatient) => {
@@ -157,20 +123,105 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
     };
 
     const formatPreviousNotes = (notesData: INote[]) => {
-        console.log('Formatting previous notes:', notesData);
+        console.log('Formatting previous notes2:', notesData);
         if (Array.isArray(notesData)) {
             const updatedNotes = notesData.map((note: INote) => ({
                 ...note,
                 title: note.noteType,
                 patientName: `${patientInfo?.patientName || ''}`,
             }));
-            console.log('Formatted notes:', updatedNotes);
+            console.log('Formatted notes2:', updatedNotes);
             setNotes(updatedNotes);
         } else {
-            console.log('No notes found or notes is not an array');
+            console.log('No notes2 found or notes2 is not an array');
             setNotes([]);
         }
     };
+
+    const fetchPatientData = useCallback(async () => {
+        console.log('Fetching patient data for ID:', patientId);
+        setLoadingPatientInfo(true);
+        try {
+            console.log('Fetching patient data for ID:', patientId);
+            const response = await fetch(`/api/patient/${patientId}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json() as IPatient;
+            console.log('Received patient data:', data);
+
+            formatPatientInfo(data);
+            if (data.notes) {
+                formatPreviousNotes(data.notes);
+            } else {
+                setNotes([]); // Set to empty array if no notes2
+            }
+        } catch (error) {
+            console.error('Error fetching patient data:', error);
+            // Handle the error appropriately, e.g., show an error message to the user
+        } finally {
+            setLoadingPatientInfo(false); // Set loading to false after completion
+        }
+    }, [patientId, formatPatientInfo, formatPreviousNotes]);
+
+    // const fetchNotes = useCallback(async (noteType?: string) => {
+    //     try {
+    //         const url = new URL(`/api/patient/${patientId}/notes`, window.location.origin);
+    //         if (noteType) {
+    //             url.searchParams.append('type', noteType);
+    //         }
+    //         const response = await fetch(url.toString());
+    //         if (!response.ok) {
+    //             throw new Error(`HTTP error! status: ${response.status}`);
+    //         }
+    //         const notes = await response.json();
+    //         return notes;
+    //     } catch (error) {
+    //         console.error('Error fetching notes2:', error);
+    //         throw error;
+    //     }
+    // }, [patientId]);
+
+    // const addNote = useCallback(async (noteData) => {
+    //     try {
+    //         const response = await fetch(`/api/patient/${patientId}/notes2/${noteData.noteType}-notes2`, {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body: JSON.stringify(noteData),
+    //         });
+    //         if (!response.ok) {
+    //             throw new Error(`HTTP error! status: ${response.status}`);
+    //         }
+    //         const newNote = await response.json();
+    //         return newNote;
+    //     } catch (error) {
+    //         console.error('Error adding note:', error);
+    //         throw error;
+    //     }
+    // }, [patientId]);
+    //
+    // const updateNote = useCallback(async (noteId, noteData) => {
+    //     try {
+    //         const response = await fetch(`/api/patient/${patientId}/notes2/doctor-notes2`, {
+    //             method: 'PUT',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body: JSON.stringify({ noteId, ...noteData }),
+    //         });
+    //         if (!response.ok) {
+    //             throw new Error(`HTTP error! status: ${response.status}`);
+    //         }
+    //         const updatedNote = await response.json();
+    //         return updatedNote;
+    //     } catch (error) {
+    //         console.error('Error updating note:', error);
+    //         throw error;
+    //     }
+    // }, [patientId]);
+
 
     return (
         <PatientContext.Provider

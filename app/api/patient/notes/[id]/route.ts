@@ -1,4 +1,4 @@
-    // app/api/patient/notes/[id]/route.ts
+    // app/api/patient/notes2/[id]/route.ts
 
     import { NextRequest, NextResponse } from 'next/server';
     import dbConnect from '../../../../../utils/database';
@@ -48,7 +48,7 @@
                     return NextResponse.json({ message: 'Invalid note type' }, { status: 400 });
             }
 
-            // Save the new note and add it to the patient's notes array
+            // Save the new note and add it to the patient's notes2 array
             await newNote.save();
             patient.notes.push(newNote);
             await patient.save();
@@ -83,8 +83,8 @@
 
             return NextResponse.json(sortedNotes);
         } catch (error) {
-            console.error('Error fetching notes:', error);
-            return NextResponse.json({ message: 'Failed to fetch notes', error: error.message }, { status: 500 });
+            console.error('Error fetching notes2:', error);
+            return NextResponse.json({ message: 'Failed to fetch notes2', error: error.message }, { status: 500 });
         }
     }
 

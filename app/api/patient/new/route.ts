@@ -13,10 +13,10 @@ export const POST = async (request: Request) => {
 
     await dbConnect();
 
-    // Ensure that notes is initialized as an empty array if not already present
+    // Ensure that notes2 is initialized as an empty array if not already present
     const newPatient = new Patient({
       ...patientData,
-      notes: patientData.notes || [],  // Default to an empty array if notes are undefined
+      notes: patientData.notes || [],  // Default to an empty array if notes2 are undefined
     });
 
     await newPatient.save();

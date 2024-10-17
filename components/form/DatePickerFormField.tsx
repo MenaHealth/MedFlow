@@ -11,9 +11,9 @@ import { useFormContext } from "react-hook-form"
 
 import { cn } from "../../utils/classNames";
 import { Button } from "./../ui/button";
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "../../components/ui/form"
+import { Popover, PopoverContent, PopoverTrigger } from "../../components/ui/popover"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
 import {useMemo, useState} from "react";
 
 
@@ -90,7 +90,7 @@ function Calendar({
             showOutsideDays={showOutsideDays}
             onSelect={handleDateSelect}
             month={new Date(year, month)}
-            className={cn("p-3", className)}
+            className={cn("p-3", className || "" )}
             classNames={{
                 months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
                 month: "space-y-4",
@@ -195,7 +195,7 @@ export function DatePickerFormField({ name, label, type = "future" }: DatePicker
                                     variant={"outline"}
                                     className={cn(
                                         "w-[240px] pl-3 text-left font-normal",
-                                        !field.value && "text-muted-foreground"
+                                        !field.value ? "text-muted-foreground" : ""
                                     )}
                                 >
                                     {field.value ? (

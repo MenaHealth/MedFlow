@@ -52,7 +52,7 @@ export function useMedicalOrderRequestViewModel(user: Session['user'], patientId
             }
 
             const updatedPatient = await response.json();
-            // You might want to update some state here or trigger a refresh of the notes list
+            // You might want to update some state here or trigger a refresh of the notes2 list
         } catch (error) {
             console.error('Failed to publish Medical Order Request:', error);
         }

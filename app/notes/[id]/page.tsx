@@ -1,4 +1,4 @@
-// app/fajr/patient/[id]/notes/page.tsx
+// app/fajr/patient/[id]/notes2/page.tsx
 "use client";
 
 import React from 'react';

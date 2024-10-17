@@ -123,10 +123,10 @@
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const notes = await response.json();
-                console.log('Fetched notes:', notes);
+                console.log('Fetched notes2:', notes);
                 setNotesList(notes);
             } catch (error) {
-                console.error('Failed to fetch notes:', error);
+                console.error('Failed to fetch notes2:', error);
             } finally {
                 setIsLoading(false);
             }

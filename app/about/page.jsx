@@ -10,7 +10,7 @@ import { ClipboardList, Calendar, Image, Stethoscope, FileText } from 'lucide-re
 const features = [
     { icon: ClipboardList, title: "View Patient Info", description: "Access comprehensive patient information" },
     { icon: Calendar, title: "Schedule Lab Visits", description: "Easily manage and schedule laboratory appointments" },
-    { icon: Stethoscope, title: "Take PatientNotes", description: "Record detailed medical notes for each patient" },
+    { icon: Stethoscope, title: "Take PatientNotes", description: "Record detailed medical notes2 for each patient" },
     { icon: Image, title: "Image Gallery", description: "Maintain a dedicated image gallery for each patient" },
     { icon: FileText, title: "Prescription Management", description: "Generate and manage drug prescription paperwork" },
 ]

@@ -13,7 +13,7 @@
     _id?: string;
     firstName: string;
     lastName: string;
-    phone?: string;
+    phone: string;
     age?: string;
     country?: string;
     city?: string;
@@ -22,7 +22,7 @@
     previouslyRegistered?: string;
     chiefComplaint?: string;
     coordinatorId?: string;
-    email: string;
+    email?: string;
     laterality?: 'Not Selected' | 'Left' | 'Right' | 'Bilateral';
     diagnosis?: string;
     diagnosisCat?: string;
@@ -99,6 +99,8 @@
     visits: [{ type: Schema.Types.ObjectId, ref: 'Visit' }],
     triagedBy: { type: Object },
     doctor: { type: Object },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date }
   });
 
   const Patient = models.Patient || model<IPatient>('Patient', PatientSchema);

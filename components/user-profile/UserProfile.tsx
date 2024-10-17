@@ -5,19 +5,52 @@ import { Avatar } from '@/components/ui/avatar';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Pencil, X } from 'lucide-react';
-import { Countries } from '../../data/countries.enum';
-import { Languages } from '../../data/languages.enum';
+import { Pencil, X, Copy, Check } from 'lucide-react';
+import { Countries, CountriesList } from '@/data/countries.enum';
+import { Languages, LanguagesList } from '@/data/languages.enum';
+import { MultiChoiceFormField } from "@/components/form/MultiChoiceFormField";
+import { SingleChoiceFormField } from "@/components/form/SingleChoiceFormField";
+import { DatePickerFormField } from "@/components/form/DatePickerFormField";
+import { useForm, FormProvider } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
 interface UserProfileProps {
     user: Session["user"];
 }
 
+const userProfileSchema = z.object({
+    firstName: z.string().min(1, "First name is required"),
+    lastName: z.string().min(1, "Last name is required"),
+    dob: z.string().refine((value) => {
+        const date = new Date(value);
+        return !isNaN(date.getTime()) && date < new Date();
+    }, {
+        message: "Please enter a valid date of birth in the past",
+    }),
+    languages: z.array(z.string()).min(1, "At least one language is required"),
+    countries: z.array(z.string()).min(1, "At least one country is required"),
+    gender: z.enum(['male', 'female'], { errorMap: () => ({ message: "Gender is required" }) }),
+});
+
+type UserProfileFormValues = z.infer<typeof userProfileSchema>;
+
 export function UserProfile({ user }: UserProfileProps) {
     const [isEditing, setIsEditing] = useState(false);
-    const [editedUser, setEditedUser] = useState(user);
     const [isLoading, setIsLoading] = useState(false);
+    const [isCopied, setIsCopied] = useState(false);
+
+    const methods = useForm<UserProfileFormValues>({
+        resolver: zodResolver(userProfileSchema),
+        defaultValues: {
+            firstName: user.firstName || '',
+            lastName: user.lastName || '',
+            dob: user.dob || '',
+            languages: user.languages || [],
+            countries: user.countries || [],
+            gender: user.gender || undefined,
+        },
+    });
 
     if (!user) {
         return <div>Profile not found. Try refreshing the page.</div>;
@@ -31,18 +64,10 @@ export function UserProfile({ user }: UserProfileProps) {
 
     const handleCancelEdit = () => {
         setIsEditing(false);
-        setEditedUser(user);
+        methods.reset();
     };
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setEditedUser({ ...editedUser, [e.target.name]: e.target.value });
-    };
-
-    const handleSelectChange = (name: string, value: string) => {
-        setEditedUser({ ...editedUser, [name]: value });
-    };
-
-    const handleSubmit = async () => {
+    const handleSubmit = async (data: UserProfileFormValues) => {
         setIsLoading(true);
         try {
             const response = await fetch(`/api/user/${user._id}`, {
@@ -50,7 +75,7 @@ export function UserProfile({ user }: UserProfileProps) {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(editedUser),
+                body: JSON.stringify(data),
             });
 
             if (response.ok) {
@@ -65,105 +90,138 @@ export function UserProfile({ user }: UserProfileProps) {
         setIsLoading(false);
     };
 
+    const copyToClipboard = () => {
+        navigator.clipboard.writeText(user._id).then(() => {
+            setIsCopied(true);
+            setTimeout(() => setIsCopied(false), 2000);
+        });
+    };
+
     return (
-        <Card className="w-full max-w-3xl mx-auto mt-8">
-            <CardHeader className="relative">
-                <CardTitle className="text-center">My Profile</CardTitle>
-                {!isEditing ? (
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="absolute top-2 right-2"
-                        onClick={handleEdit}
-                    >
-                        <Pencil className="h-4 w-4" />
-                    </Button>
-                ) : (
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="absolute top-2 right-2"
-                        onClick={handleCancelEdit}
-                    >
-                        <X className="h-4 w-4" />
-                    </Button>
-                )}
-            </CardHeader>
-            <CardContent>
-                <div className="flex flex-col items-center space-y-4">
-                    <Avatar
-                        src={user.image || undefined}
-                        alt={`${user.firstName} ${user.lastName}`}
-                        initials={initials}
-                        className="w-24 h-24 text-2xl"
-                    />
-                    <div className="text-center">
-                        <p className="text-sm text-orange-500">{user.email}</p>
-                        <p className="text-sm text-orange-500">ID: {user._id}</p>
-                    </div>
-                </div>
-                <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <ProfileField
-                        label="First Name"
-                        value={editedUser.firstName}
-                        isEditing={isEditing}
-                        onChange={handleInputChange}
-                        name="firstName"
-                    />
-                    <ProfileField
-                        label="Last Name"
-                        value={editedUser.lastName}
-                        isEditing={isEditing}
-                        onChange={handleInputChange}
-                        name="lastName"
-                    />
-                    <ProfileField label="Account Type" value={user.accountType} isEditing={false} />
-                    {user.accountType === 'Doctor' && (
-                        <>
-                            <ProfileField label="Specialty" value={user.doctorSpecialty} isEditing={false} />
-                            <ProfileField
-                                label="Languages"
-                                value={editedUser.languages?.join(', ')}
-                                isEditing={isEditing}
-                                isMultiSelect={true}
-                                options={Object.values(Languages)}
-                                onChange={(value) => handleSelectChange('languages', value)}
+        <FormProvider {...methods}>
+            <form onSubmit={methods.handleSubmit(handleSubmit)}>
+                <Card className="w-full max-w-3xl mx-auto mt-8">
+                    <CardHeader className="relative">
+                        <CardTitle className="text-center">My Profile</CardTitle>
+                        {!isEditing ? (
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="absolute top-2 right-2"
+                                onClick={handleEdit}
+                            >
+                                <Pencil className="h-4 w-4" />
+                            </Button>
+                        ) : (
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="absolute top-2 right-2"
+                                onClick={handleCancelEdit}
+                            >
+                                <X className="h-4 w-4" />
+                            </Button>
+                        )}
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex flex-col items-center space-y-4">
+                            <Avatar
+                                src={user.image || undefined}
+                                alt={`${user.firstName} ${user.lastName}`}
+                                initials={initials}
+                                className="w-24 h-24 text-2xl"
                             />
-                        </>
-                    )}
-                    <ProfileField
-                        label="Countries"
-                        value={editedUser.countries?.join(', ')}
-                        isEditing={isEditing}
-                        isMultiSelect={true}
-                        options={Object.values(Countries)}
-                        onChange={(value) => handleSelectChange('countries', value)}
-                    />
-                    <ProfileField
-                        label="Gender"
-                        value={editedUser.gender}
-                        isEditing={isEditing}
-                        options={['male', 'female']}
-                        onChange={(value) => handleSelectChange('gender', value)}
-                    />
-                    <ProfileField
-                        label="Date of Birth"
-                        value={editedUser.dob ? new Date(editedUser.dob).toLocaleDateString() : 'N/A'}
-                        isEditing={isEditing}
-                        onChange={handleInputChange}
-                        name="dob"
-                        type="date"
-                    />
-                </div>
-                {isEditing && (
-                    <div className="mt-6 flex justify-end">
-                        <Button onClick={handleSubmit} variant="submit" disabled={isLoading}>
-                            {isLoading ? 'Updating...' : 'Submit Changes'}
-                        </Button>
-                    </div>
-                )}
-            </CardContent>
-        </Card>
+                            <div className="text-center">
+                                <h2 className="text-xl font-semibold">{user.firstName} {user.lastName}</h2>
+                                <p className="text-sm text-gray-500">{user.email}</p>
+                                <div className="flex items-center justify-center mt-2">
+                                    <p className="text-sm bg-darkBlue text-white px-2 py-1 rounded">ID: {user._id}</p>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={copyToClipboard}
+                                        className="ml-2"
+                                    >
+                                        {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <ProfileField
+                                label="First Name"
+                                value={user.firstName}
+                                isEditing={isEditing}
+                                fieldName="firstName"
+                            />
+                            <ProfileField
+                                label="Last Name"
+                                value={user.lastName}
+                                isEditing={isEditing}
+                                fieldName="lastName"
+                            />
+                            <ProfileField label="Account Type" value={user.accountType} isEditing={false} />
+                            {user.accountType === 'Doctor' && (
+                                <>
+                                    <ProfileField label="Specialty" value={user.doctorSpecialty} isEditing={false} />
+                                    <div className="col-span-2">
+                                        {isEditing ? (
+                                            <MultiChoiceFormField
+                                                fieldName="languages"
+                                                fieldLabel="Languages"
+                                                choices={LanguagesList}
+                                            />
+                                        ) : (
+                                            <ProfileField label="Languages" value={user.languages?.join(', ')} isEditing={false} />
+                                        )}
+                                    </div>
+                                </>
+                            )}
+                            <div className="col-span-2">
+                                {isEditing ? (
+                                    <MultiChoiceFormField
+                                        fieldName="countries"
+                                        fieldLabel="Countries"
+                                        choices={CountriesList}
+                                    />
+                                ) : (
+                                    <ProfileField label="Countries" value={user.countries?.join(', ')} isEditing={false} />
+                                )}
+                            </div>
+                            {isEditing ? (
+                                <SingleChoiceFormField
+                                    fieldName="gender"
+                                    fieldLabel="Gender"
+                                    choices={["male", "female"]}
+                                />
+                            ) : (
+                                <ProfileField label="Gender" value={user.gender} isEditing={false} />
+                            )}
+                            {isEditing ? (
+                                <DatePickerFormField
+                                    name="dob"
+                                    label="Date of Birth"
+                                    type="past"
+                                />
+                            ) : (
+                                <ProfileField
+                                    label="Date of Birth"
+                                    value={user.dob ? new Date(user.dob).toLocaleDateString() : 'N/A'}
+                                    isEditing={false}
+                                />
+                            )}
+                        </div>
+                        {isEditing && (
+                            <div className="mt-6 flex justify-end">
+                                <Button type="submit" variant="submit" disabled={isLoading}>
+                                    {isLoading ? 'Updating...' : 'Submit Changes'}
+                                </Button>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+            </form>
+        </FormProvider>
     );
 }
 
@@ -171,14 +229,12 @@ interface ProfileFieldProps {
     label: string;
     value?: string;
     isEditing: boolean;
-    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    name?: string;
-    type?: string;
-    options?: string[];
-    isMultiSelect?: boolean;
+    fieldName?: string;
 }
 
-function ProfileField({ label, value, isEditing, onChange, name, type = "text", options, isMultiSelect }: ProfileFieldProps) {
+function ProfileField({ label, value, isEditing, fieldName }: ProfileFieldProps) {
+    const { register } = useForm();
+
     if (!isEditing) {
         return (
             <div>
@@ -188,39 +244,21 @@ function ProfileField({ label, value, isEditing, onChange, name, type = "text", 
         );
     }
 
-    if (options) {
+    if (fieldName) {
         return (
             <div>
-                <Label className="font-medium">{label}</Label>
-                <Select onValueChange={(value) => onChange(value)} value={value}>
-                    <SelectTrigger className="w-full mt-1">
-                        <SelectValue placeholder={`Select ${label}`} />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {options.map((option) => (
-                            <SelectItem key={option} value={option}>
-                                {option}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+                <Label className="font-medium" htmlFor={fieldName}>
+                    {label}
+                </Label>
+                <Input
+                    id={fieldName}
+                    {...register(fieldName)}
+                    defaultValue={value}
+                    className="mt-1"
+                />
             </div>
         );
     }
 
-    return (
-        <div>
-            <Label className="font-medium" htmlFor={name}>
-                {label}
-            </Label>
-            <Input
-                type={type}
-                id={name}
-                name={name}
-                value={value}
-                onChange={onChange}
-                className="mt-1"
-            />
-        </div>
-    );
+    return null;
 }

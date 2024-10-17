@@ -73,7 +73,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
     useEffect(() => {
         if (status === 'authenticated' && session?.user) {
             const userSessionData: UserSession = {
-                id: session.user._id,
+                id: session.user.id,
                 email: session.user.email,
                 firstName: session.user.firstName,
                 lastName: session.user.lastName,

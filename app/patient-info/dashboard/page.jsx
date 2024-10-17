@@ -28,7 +28,6 @@ import InfoIcon from '@mui/icons-material/Info';
 import TableCellWithTooltip from '@/components/TableCellWithTooltip';
 import * as Toast from '@radix-ui/react-toast';
 import { useSession } from 'next-auth/react';
-import NotesCell from '@/components/NotesCell';
 
 import {
   DropdownMenu,
@@ -43,31 +42,41 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import { PRIORITIES, STATUS } from '@/data/data';
 import { DoctorSpecialties as DOCTOR_SPECIALTIES } from '@/data/doctorSpecialty.enum';
 import Link from 'next/link';
-import TriageNoteComponent from "../../../components/TriageDashboard/TriageNoteComponent";
+import TriageNoteModal from "../../../components/TriageDashboard/TriageNoteModal";
 
 export default function PatientTriage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [rows, setRows] = React.useState([]);
+  const [userSession, setUserSession] = useState(null);
   const [priorityFilter, setPriorityFilter] = React.useState("all");
   const [statusFilter, setStatusFilter] = React.useState("all");
   const [specialtyFilter, setSpecialtyFilter] = React.useState("all");
   const [triageNotes, setTriageNotes] = useState({});
 
-  const handleSaveTriageNote = (patientId, updatedNote) => {
-    setTriageNotes((prevNotes) => ({
-      ...prevNotes,
-      [patientId]: updatedNote,
-    }));
+  const [loading, setLoading] = useState(false);
 
-    // Optionally, update the server with the new note
-    fetch(`/api/patient/${patientId}/triage-note`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ note: updatedNote }),
-    }).catch(console.error);
-  };
+  useEffect(() => {
+    if (status === 'authenticated' && session?.user) {
+      const userSessionData = {
+        id: session.user._id,
+        email: session.user.email,
+        firstName: session.user.firstName,
+        lastName: session.user.lastName,
+        accountType: session.user.accountType,
+        isAdmin: session.user.isAdmin,
+        image: session.user.image,
+        doctorSpecialty: session.user.doctorSpecialty,
+        languages: session.user.languages,
+        token: session.user.token,
+        gender: session.user.gender,
+        dob: session.user.dob,
+        countries: session.user.countries,
+      };
+      setUserSession(userSessionData);
+      console.log('Full user session object:', userSessionData);
+    }
+  }, [session, status]);
+
 
   useEffect(() => {
     // Fetch rows from API
@@ -451,18 +460,7 @@ export default function PatientTriage() {
                     </DropdownMenu>
                   </TableCell>
                   <TableCell
-                    align="left">
-                    <span>TRIAGE</span>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      whiteSpace: 'nowrap',
-                    }}>
-                      <span>Notes</span>
-                      <Tooltip tooltipText={`Hover description icon to see full text.\nClick pencil icon to edit.`} showTooltip={true}>
-                        <InfoIcon className="ml-2" style={{ height: '1rem', width: '1rem' }}/>
-                      </Tooltip>
-                    </div>
+                    align="center"><span>TRIAGE NOTE</span>
                   </TableCell>
                   <TableCell align="center">Triaged By</TableCell>
                   <TableCell align="center">Doctor</TableCell>
@@ -581,9 +579,10 @@ export default function PatientTriage() {
                         </DropdownMenu>
                       </TableCell>
                       <TableCell align="center">
-                        <TriageNoteComponent
+                        <TriageNoteModal
                             note={triageNotes[row._id] || ""}
-                            onSave={(updatedNote) => handleSaveTriageNote(row._id, updatedNote)}
+                            patientId={row._id}
+                            patientName={`${row.firstName} ${row.lastName}`}
                         />
                       </TableCell>
                       <TableCell align="center">
@@ -594,9 +593,9 @@ export default function PatientTriage() {
                       <TableCell align="center">
                         {
                           row.status === 'Not Started'
-                            ? '' 
+                            ? ''
                             : row.status === 'In-Progress' || row.status === 'Archived'
-                              ? getInitials(row.doctor?.firstName, row.doctor?.lastName) 
+                              ? getInitials(row.doctor?.firstName, row.doctor?.lastName)
                               : row.status === 'Triaged'
                                 ? session.user.accountType === 'Doctor'
                                   ?  (
@@ -638,9 +637,9 @@ export default function PatientTriage() {
           }
         </div>
         <Toast.Provider>
-        <Toast.Root 
-          className="bg-black text-white p-3 rounded-lg shadow-lg" 
-          open={open} 
+        <Toast.Root
+          className="bg-black text-white p-3 rounded-lg shadow-lg"
+          open={open}
           onOpenChange={setOpen}
           duration={3000}
         >

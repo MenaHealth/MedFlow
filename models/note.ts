@@ -5,8 +5,8 @@ export interface INote extends Document {
     email: string;
     noteType: 'physician' | 'procedure' | 'subjective' | 'triage';
     date: Date;
-    authorName: string;
-    authorID: string;
+    authorName?: string;
+    authorID?: string;
 }
 
 // Define schemas for each note type
@@ -14,8 +14,8 @@ export const noteSchema = new Schema<INote>({
     email: { type: String, required: true },
     noteType: { type: String, enum: ['physician', 'procedure', 'subjective', 'triage'], required: true },
     date: { type: Date, default: Date.now },
-    authorName: { type: String, required: true },
-    authorID: { type: String, required: true },
+    authorName: { type: String },
+    authorID: { type: String },
 });
 
 // Define the base Note model

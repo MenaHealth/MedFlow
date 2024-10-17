@@ -73,6 +73,10 @@ const handler = NextAuth({
                     image: user.image,
                     isAdmin: !!isAdmin,
                     dob: user.dob,
+                    gender: user.gender,
+                    countries: user.countries || [],
+                    languages: user.languages || [],
+                    doctorSpecialty: user.doctorSpecialty,
                 };
 
                 if (user.accountType === 'Doctor') {
@@ -106,6 +110,7 @@ const handler = NextAuth({
         // Updated jwt callback to include the accessToken
         async jwt({ token, user, account }) {
             if (account && user) {
+                console.log('User data in jwt callback:', user);
                 token.id = user._id.toString();
                     if (account.provider === 'google') {
                         // Handle Google user
@@ -134,14 +139,16 @@ const handler = NextAuth({
                         token.accessToken = jwt.sign(
                             { id: user._id, email: user.email, isAdmin: user.isAdmin },
                             process.env.JWT_SECRET,
-                            { expiresIn: '1d' }
+                            { expiresIn: '2d' }
                         );
                     }
             }
+            console.log('Token about to be passed to session callback:', token);
             return token;
         },
 
         async session({ session, token }) {
+            console.log('Token in session callback:', token);
             if (token) {
                 session.user._id = token.id;
                 session.user.accountType = token.accountType;

@@ -43,14 +43,43 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import { PRIORITIES, STATUS } from '@/data/data';
 import { DoctorSpecialties as DOCTOR_SPECIALTIES } from '@/data/doctorSpecialty.enum';
 import Link from 'next/link';
+import TriageNoteComponent from "../../../components/TriageDashboard/TriageNoteComponent";
 
 export default function PatientTriage() {
+  const { data: session } = useSession();
   const [rows, setRows] = React.useState([]);
   const [priorityFilter, setPriorityFilter] = React.useState("all");
   const [statusFilter, setStatusFilter] = React.useState("all");
   const [specialtyFilter, setSpecialtyFilter] = React.useState("all");
+  const [triageNotes, setTriageNotes] = useState({});
 
-  const { data: session } = useSession();
+  const handleSaveTriageNote = (patientId, updatedNote) => {
+    setTriageNotes((prevNotes) => ({
+      ...prevNotes,
+      [patientId]: updatedNote,
+    }));
+
+    // Optionally, update the server with the new note
+    fetch(`/api/patient/${patientId}/triage-note`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ note: updatedNote }),
+    }).catch(console.error);
+  };
+
+  useEffect(() => {
+    // Fetch rows from API
+    const fetchPatients = async () => {
+      const response = await fetch('/api/patient');
+      const data = await response.json();
+      setRows(data);
+    };
+
+    fetchPatients();
+  }, []);
+
 
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState('');
@@ -423,7 +452,7 @@ export default function PatientTriage() {
                   </TableCell>
                   <TableCell
                     align="left">
-                    <span>Additional</span>
+                    <span>TRIAGE</span>
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -551,28 +580,12 @@ export default function PatientTriage() {
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
-                      <NotesCell
-                        notes={row.notes}
-                        onUpdate={async (newNotes) => {
-                          try {
-                            await fetch("/api/patient/assign", {
-                              method: 'PATCH',
-                              headers: {
-                                'Content-Type': 'application/json',
-                              },
-                              body: JSON.stringify({
-                                _id: rows[index]["_id"],
-                                notes: newNotes,
-                              }),
-                            });
-                            const updatedRows = [...rows];
-                            updatedRows[index].notes = newNotes;
-                            setRows(updatedRows);
-                          } catch (error) {
-                            console.log(error);
-                          }
-                        }}
-                      />
+                      <TableCell align="center">
+                        <TriageNoteComponent
+                            note={triageNotes[row._id] || ""}
+                            onSave={(updatedNote) => handleSaveTriageNote(row._id, updatedNote)}
+                        />
+                      </TableCell>
                       <TableCell align="center">
                         {
                           getInitials(row.triagedBy?.firstName, row.triagedBy?.lastName)

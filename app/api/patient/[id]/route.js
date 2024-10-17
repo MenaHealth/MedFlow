@@ -124,21 +124,14 @@ export const POST = async (request, { params }) => {
             noteType: updateData.noteType,
             date: new Date(updateData.date),
             email: updateData.email,
-            subjective: updateData.subjective,
-            objective: updateData.objective,
-            assessment: updateData.assessment,
-            plan: updateData.plan
+            authorName: updateData.authorName,
+            authorID: updateData.authorID,
         };
 
-        // Ensure notes is an array before updating
+        // Add new note to patient
         const patient = await Patient.findById(params.id);
         if (!patient) {
             return new Response(`Patient with ID ${params.id} not found`, { status: 404 });
-        }
-
-        // Convert notes to an array if it's not already one
-        if (!Array.isArray(patient.notes)) {
-            patient.notes = [];
         }
 
         patient.notes.push(newNote);

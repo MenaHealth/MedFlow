@@ -1,13 +1,10 @@
 // components/PatientViewModels/PatientContext.tsx
-
-
-
-
 "use client"
 
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { PatientInfoViewModel } from "@/components/PatientViewModels/patient-info/PatientInfoViewModel";
+import { useSession } from 'next-auth/react';
+import { PatientInfoViewModel } from "./patient-info/PatientInfoViewModel";
 import { IPatient } from '../../models/patient';
 import { INote } from '../../models/note';
 
@@ -18,6 +15,22 @@ interface PatientInfo {
     dob: Date;
     phoneNumber: string;
     patientID: string;
+}
+
+interface UserSession {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    accountType: 'Doctor' | 'Triage';
+    isAdmin: boolean;
+    image?: string;
+    doctorSpecialty?: string;
+    languages?: string[];
+    token?: string;
+    gender?: 'male' | 'female';
+    dob?: Date;
+    countries?: string[];
 }
 
 interface PatientDashboardContextType {
@@ -32,6 +45,7 @@ interface PatientDashboardContextType {
     isExpanded: boolean;
     toggleExpand: () => void;
     refreshPatientNotes: () => Promise<void>;
+    userSession: UserSession | null;
 }
 
 const PatientContext = createContext<PatientDashboardContextType | undefined>(undefined);
@@ -46,6 +60,7 @@ export const usePatientDashboard = () => {
 
 export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const { id: patientId } = useParams() as { id: string };
+    const { data: session, status } = useSession();
     const [activeTab, setActiveTab] = useState('patient-info');
     const [patientInfo, setPatientInfo] = useState<PatientInfo | null>(null);
     const [notes, setNotes] = useState<INote[]>([]);
@@ -53,6 +68,29 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
     const [loadingNotes, setLoadingNotes] = useState(false);
     const [patientViewModel, setPatientViewModel] = useState<PatientInfoViewModel | null>(null);
     const [isExpanded, setIsExpanded] = useState(false);
+    const [userSession, setUserSession] = useState<UserSession | null>(null);
+
+    useEffect(() => {
+        if (status === 'authenticated' && session?.user) {
+            const userSessionData: UserSession = {
+                id: session.user._id,
+                email: session.user.email,
+                firstName: session.user.firstName,
+                lastName: session.user.lastName,
+                accountType: session.user.accountType,
+                isAdmin: session.user.isAdmin,
+                image: session.user.image,
+                doctorSpecialty: session.user.doctorSpecialty,
+                languages: session.user.languages,
+                token: session.user.token,
+                gender: session.user.gender,
+                dob: session.user.dob,
+                countries: session.user.countries,
+            };
+            setUserSession(userSessionData);
+            console.log('Full user session object:', userSessionData);
+        }
+    }, [session, status]);
 
     const refreshPatientNotes = async () => {
         setLoadingNotes(true);
@@ -142,15 +180,21 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 patientInfo,
                 notes,
                 loadingPatientInfo,
-                loadingNotes, // Include loading state for notes
+                loadingNotes,
                 fetchPatientData,
                 patientViewModel,
                 isExpanded,
                 toggleExpand,
-                refreshPatientNotes, // Include refresh function for notes
+                refreshPatientNotes,
+                userSession,
             }}
         >
             {children}
         </PatientContext.Provider>
     );
 };
+
+export default function Component() {
+    // This is a placeholder component to satisfy the React Component code block requirements
+    return null;
+}

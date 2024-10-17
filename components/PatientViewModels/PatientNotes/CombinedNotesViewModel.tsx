@@ -1,6 +1,8 @@
     // components/PatientViewModels/PatientNotes/CombinedNotesViewModel.tsx
     import { useState, useCallback, useEffect } from 'react';
-    import {usePatientDashboard} from "@/components/PatientViewModels/PatientContext";
+    import { usePatientDashboard } from "@/components/PatientViewModels/PatientContext";
+    import { useSession } from "next-auth/react";
+    import type { Session } from 'next-auth';
 
     export interface Note {
         _id: string;
@@ -48,7 +50,11 @@
         plan: string;
     }
 
-    export function CombinedNotesViewModel(patientId: string, userEmail: string) {
+    export function CombinedNotesViewModel(patientId: string) {
+        const { data: session, status } = useSession();
+        const [userEmail, setUserEmail] = useState('');
+        const [authorID, setAuthorID] = useState('');
+        const [authorName, setAuthorName] = useState('');
         const [notesList, setNotesList] = useState<Note[]>([]);
         const [templateType, setTemplateType] = useState<'physician' | 'procedure' | 'subjective'>('physician');
         const [isExpanded, setIsExpanded] = useState(false);
@@ -93,6 +99,15 @@
             plan: ''
         });
 
+        useEffect(() => {
+            if (status === "authenticated" && session?.user) {
+                console.log("Session user data:", session.user);
+                setUserEmail(session.user.email || '');
+                setAuthorID(session.user.id || '');
+                setAuthorName(`${session.user.firstName || ''} ${session.user.lastName || ''}`.trim());
+            }
+        }, [session, status]);
+
         const fetchNotes = useCallback(async () => {
             if (!patientId || !isExpanded) {
                 return;
@@ -110,7 +125,6 @@
                 const notes = await response.json();
                 console.log('Fetched notes:', notes);
                 setNotesList(notes);
-                console.log('Updated notesList:', notes);
             } catch (error) {
                 console.error('Failed to fetch notes:', error);
             } finally {
@@ -124,14 +138,17 @@
             }
         }, [isExpanded, fetchNotes]);
 
-        const toggleExpand = useCallback(() => {
-            setIsExpanded(prev => !prev);
-        }, []);
-
         const createNote = useCallback(async () => {
             console.log('createNote called with patientId:', patientId);
+            console.log('Current session data:', { userEmail, authorID, authorName });
+
             if (!patientId) {
                 console.error('patientId is undefined');
+                return;
+            }
+
+            if (!authorID) {
+                console.error('authorID is undefined');
                 return;
             }
 
@@ -142,6 +159,8 @@
                         ...physicianNote,
                         noteType: 'physician',
                         email: userEmail,
+                        authorName,
+                        authorID,
                         createdAt: new Date().toISOString()
                     };
                     break;
@@ -150,6 +169,8 @@
                         ...procedureNote,
                         noteType: 'procedure',
                         email: userEmail,
+                        authorName,
+                        authorID,
                         createdAt: new Date().toISOString()
                     };
                     break;
@@ -158,10 +179,14 @@
                         ...subjectiveNote,
                         noteType: 'subjective',
                         email: userEmail,
+                        authorName,
+                        authorID,
                         createdAt: new Date().toISOString()
                     };
                     break;
             }
+
+            console.log('Note data being sent:', noteData);
 
             try {
                 const url = `/api/patient/notes/${patientId}`;
@@ -172,19 +197,23 @@
                     },
                     body: JSON.stringify(noteData),
                 });
+                console.log('POST request sent to:', url);
                 if (!response.ok) {
                     const errorText = await response.text();
                     console.error(`Error response: ${errorText}`);
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const newNote = await response.json();
+                console.log('New note created:', newNote);
                 setNotesList(prevNotes => [...prevNotes, newNote.note]);
                 resetForm();
-                await refreshPatientNotes(); // Refresh notes view after note creation
+                await refreshPatientNotes();
             } catch (error) {
                 console.error('Failed to create note:', error);
             }
-        }, [templateType, physicianNote, procedureNote, subjectiveNote, patientId, userEmail, refreshPatientNotes]);
+        }, [templateType, physicianNote, procedureNote, subjectiveNote, patientId, userEmail, authorName, authorID, refreshPatientNotes]);
+
+
 
         const resetForm = useCallback(() => {
             switch (templateType) {
@@ -272,8 +301,8 @@
             createNote,
             setNoteField,
             isExpanded,
-            toggleExpand,
             isLoading,
+            status,
         };
     }
 

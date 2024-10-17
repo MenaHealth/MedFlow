@@ -1,16 +1,16 @@
 // components/PatientViewModels/PatientNotes/CombinedNotesView.tsx
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { CombinedNotesViewModel } from "./CombinedNotesViewModel";
 import { PhysicianNoteView } from "./PhysicianNoteView";
 import { ProcedureNoteView } from "./ProcedureNoteView";
 import { SubjectiveNoteView } from "./SubjectiveNoteView";
 import { PreviousNotesView } from "./PreviousNotesView";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { RadioCard } from "@/components/ui/radio-card";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from '@/components/form/ScrollArea';
+import { Card, CardContent, CardHeader } from "../../ui/card";
+import { RadioCard } from "../../ui/radio-card";
+import { Button } from "../../ui/button";
+import { ScrollArea } from '../../form/ScrollArea';
 import { ArrowDownWideNarrow } from 'lucide-react';
 
 interface NotesViewProps {
@@ -19,7 +19,6 @@ interface NotesViewProps {
 
 export function CombinedNotesView({ patientId }: NotesViewProps) {
     const { data: session, status } = useSession();
-    const userEmail = session?.user?.email || '';
     const [isExpanded, setIsExpanded] = useState(false);
 
     const {
@@ -30,14 +29,30 @@ export function CombinedNotesView({ patientId }: NotesViewProps) {
         subjectiveNote,
         createNote,
         setNoteField,
-    } = CombinedNotesViewModel(patientId, userEmail);
+        status: noteViewModelStatus,
+    } = CombinedNotesViewModel(patientId);
+
+    useEffect(() => {
+        console.log('CombinedNotesView mounted');
+        return () => {
+            console.log('CombinedNotesView unmounted');
+        };
+    }, []);
 
     const handleCreateNote = async () => {
-        try {
-            await createNote();
-            console.log('Note created successfully');
-        } catch (error) {
-            console.error('Error creating note:', error);
+        console.log('Create Note button clicked');
+        console.log('Session status:', status);
+        console.log('Note view model status:', noteViewModelStatus);
+
+        if (status === "authenticated" && noteViewModelStatus === "authenticated") {
+            try {
+                await createNote();
+                console.log('Note created successfully');
+            } catch (error) {
+                console.error('Error creating note:', error);
+            }
+        } else {
+            console.error('Session not authenticated or note view model not ready');
         }
     };
 
@@ -117,6 +132,7 @@ export function CombinedNotesView({ patientId }: NotesViewProps) {
                                 onClick={handleCreateNote}
                                 variant="submit"
                                 className="mt-4"
+                                disabled={status !== "authenticated" || noteViewModelStatus !== "authenticated"}
                             >
                                 Create Note
                             </Button>

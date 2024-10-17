@@ -11,7 +11,6 @@ import Collections from '@mui/icons-material/Collections';
 import LocalPharmacy from '@mui/icons-material/LocalPharmacy';
 import { useParams } from 'next/navigation';
 import PatientSubmenu from '@/components/PatientSubmenu';
-import PatientSubmenuHeader from '@/components/PatientSubmenuHeader';
 import LabVisits from './../../lab-visits/[id]/page';
 
 const PatientOverview: React.FC = () => {
@@ -42,7 +41,6 @@ const PatientOverview: React.FC = () => {
 
     return (
         <Container maxWidth="md" sx={{ mt: 4 }}>
-            {id && <PatientSubmenuHeader patientId={id} />}
             <PatientSubmenu />
             {activeContent ? (
                 renderContent()

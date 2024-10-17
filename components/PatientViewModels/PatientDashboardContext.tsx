@@ -1,4 +1,4 @@
-// components/PatientViewModels/PatientContext.tsx
+// components/PatientViewModels/PatientDashboardContext.tsx
 "use client"
 
 import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
@@ -48,10 +48,10 @@ interface PatientDashboardContextType {
     userSession: UserSession | null;
 }
 
-const PatientContext = createContext<PatientDashboardContextType | undefined>(undefined);
+const PatientDashboardContext = createContext<PatientDashboardContextType | undefined>(undefined);
 
 export const usePatientDashboard = () => {
-    const context = useContext(PatientContext);
+    const context = useContext(PatientDashboardContext);
     if (!context) {
         throw new Error("usePatientDashboard must be used within PatientDashboardProvider");
     }
@@ -69,10 +69,11 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
     const [patientViewModel, setPatientViewModel] = useState<PatientInfoViewModel | null>(null);
     const [isExpanded, setIsExpanded] = useState(false);
     const [userSession, setUserSession] = useState<UserSession | null>(null);
+    const [lastFetchTime, setLastFetchTime] = useState(0);
 
     useEffect(() => {
         if (status === 'authenticated' && session?.user) {
-            const userSessionData: UserSession = {
+            setUserSession({
                 id: session.user.id,
                 email: session.user.email,
                 firstName: session.user.firstName,
@@ -86,29 +87,13 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 gender: session.user.gender,
                 dob: session.user.dob,
                 countries: session.user.countries,
-            };
-            setUserSession(userSessionData);
-            console.log('Full user session object:', userSessionData);
+            });
         }
     }, [session, status]);
 
-    const refreshPatientNotes = async () => {
-        setLoadingNotes(true);
-        try {
-            await fetchPatientData(); // Re-fetches patient data, including notes2
-        } catch (error) {
-            console.error('Error refreshing patient notes2:', error);
-        } finally {
-            setLoadingNotes(false);
-        }
-    };
+    const toggleExpand = () => setIsExpanded(prev => !prev);
 
-    const toggleExpand = () => {
-        setIsExpanded(prev => !prev);
-    };
-
-    const formatPatientInfo = (patientData: IPatient) => {
-        console.log('Formatting patient info:', patientData);
+    const formatPatientInfo = useCallback((patientData: IPatient) => {
         setPatientInfo({
             patientName: `${patientData.firstName} ${patientData.lastName}`,
             age: patientData.age || '',
@@ -117,114 +102,58 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             phoneNumber: patientData.phone || '',
             patientID: patientData._id || '',
         });
-
         setPatientViewModel(new PatientInfoViewModel(patientData));
-        console.log('Patient info formatted and set');
-    };
+    }, []);
 
-    const formatPreviousNotes = (notesData: INote[]) => {
-        console.log('Formatting previous notes2:', notesData);
+    const formatPreviousNotes = useCallback((notesData: INote[]) => {
         if (Array.isArray(notesData)) {
-            const updatedNotes = notesData.map((note: INote) => ({
+            setNotes(notesData.map((note: INote) => ({
                 ...note,
                 title: note.noteType,
-                patientName: `${patientInfo?.patientName || ''}`,
-            }));
-            console.log('Formatted notes2:', updatedNotes);
-            setNotes(updatedNotes);
+                patientName: patientInfo?.patientName || '',
+            })));
         } else {
-            console.log('No notes2 found or notes2 is not an array');
             setNotes([]);
         }
-    };
+    }, [patientInfo?.patientName]);
 
-    const fetchPatientData = useCallback(async () => {
-        console.log('Fetching patient data for ID:', patientId);
+    const fetchPatientData = useCallback(async (force = false) => {
+        const now = Date.now();
+        if (!force && now - lastFetchTime < 60000) { // 1 minute cooldown
+            return; // Skip if less than a minute has passed since last fetch
+        }
+
         setLoadingPatientInfo(true);
         try {
-            console.log('Fetching patient data for ID:', patientId);
             const response = await fetch(`/api/patient/${patientId}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const data = await response.json() as IPatient;
-            console.log('Received patient data:', data);
-
             formatPatientInfo(data);
             if (data.notes) {
                 formatPreviousNotes(data.notes);
             } else {
-                setNotes([]); // Set to empty array if no notes2
+                setNotes([]);
             }
+            setLastFetchTime(now);
         } catch (error) {
             console.error('Error fetching patient data:', error);
-            // Handle the error appropriately, e.g., show an error message to the user
         } finally {
-            setLoadingPatientInfo(false); // Set loading to false after completion
+            setLoadingPatientInfo(false);
         }
-    }, [patientId, formatPatientInfo, formatPreviousNotes]);
+    }, [patientId, formatPatientInfo, formatPreviousNotes, lastFetchTime]);
 
-    // const fetchNotes = useCallback(async (noteType?: string) => {
-    //     try {
-    //         const url = new URL(`/api/patient/${patientId}/notes`, window.location.origin);
-    //         if (noteType) {
-    //             url.searchParams.append('type', noteType);
-    //         }
-    //         const response = await fetch(url.toString());
-    //         if (!response.ok) {
-    //             throw new Error(`HTTP error! status: ${response.status}`);
-    //         }
-    //         const notes = await response.json();
-    //         return notes;
-    //     } catch (error) {
-    //         console.error('Error fetching notes2:', error);
-    //         throw error;
-    //     }
-    // }, [patientId]);
+    useEffect(() => {
+        if (patientId) {
+            fetchPatientData();
+        }
+    }, [patientId, fetchPatientData]);
 
-    // const addNote = useCallback(async (noteData) => {
-    //     try {
-    //         const response = await fetch(`/api/patient/${patientId}/notes2/${noteData.noteType}-notes2`, {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //             },
-    //             body: JSON.stringify(noteData),
-    //         });
-    //         if (!response.ok) {
-    //             throw new Error(`HTTP error! status: ${response.status}`);
-    //         }
-    //         const newNote = await response.json();
-    //         return newNote;
-    //     } catch (error) {
-    //         console.error('Error adding note:', error);
-    //         throw error;
-    //     }
-    // }, [patientId]);
-    //
-    // const updateNote = useCallback(async (noteId, noteData) => {
-    //     try {
-    //         const response = await fetch(`/api/patient/${patientId}/notes2/doctor-notes2`, {
-    //             method: 'PUT',
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //             },
-    //             body: JSON.stringify({ noteId, ...noteData }),
-    //         });
-    //         if (!response.ok) {
-    //             throw new Error(`HTTP error! status: ${response.status}`);
-    //         }
-    //         const updatedNote = await response.json();
-    //         return updatedNote;
-    //     } catch (error) {
-    //         console.error('Error updating note:', error);
-    //         throw error;
-    //     }
-    // }, [patientId]);
-
+    const refreshPatientNotes = () => fetchPatientData(true);
 
     return (
-        <PatientContext.Provider
+        <PatientDashboardContext.Provider
             value={{
                 activeTab,
                 setActiveTab,
@@ -241,7 +170,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             }}
         >
             {children}
-        </PatientContext.Provider>
+        </PatientDashboardContext.Provider>
     );
 };
 

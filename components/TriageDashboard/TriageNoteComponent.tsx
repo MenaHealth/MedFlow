@@ -1,6 +1,7 @@
 // components/TriageDashboard/TriageNoteComponent.tsx
 import React, { useState } from 'react';
-import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button } from '@mui/material';
+import { Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
+import { Button } from "./../ui/button";
 import EditIcon from '@mui/icons-material/Edit';
 
 interface TriageNoteComponentProps {
@@ -22,7 +23,8 @@ const TriageNoteComponent: React.FC<TriageNoteComponentProps> = ({ note, onSave 
 
     return (
         <>
-            <Button startIcon={<EditIcon />} onClick={handleOpen} variant="contained" color="primary">
+            <Button onClick={handleOpen} variant="outline">
+                <EditIcon />
             </Button>
             <Dialog open={open} onClose={handleClose}>
                 <DialogTitle>Edit Triage Note</DialogTitle>

@@ -9,8 +9,8 @@ import { Send } from "lucide-react";
 import { DayPicker } from "react-day-picker"
 import { useFormContext } from "react-hook-form"
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { cn } from "../../utils/classNames";
+import { Button } from "./../ui/button";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"

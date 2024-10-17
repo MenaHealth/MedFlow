@@ -1,6 +1,6 @@
 import * as React from "react"
 import Image from "next/image"
-import { cn } from "@/lib/utils"
+import { cn } from "../../utils/classNames";
 
 const Avatar = React.forwardRef<
     HTMLSpanElement,
@@ -11,7 +11,7 @@ const Avatar = React.forwardRef<
             ref={ref}
             className={cn(
                 "inline-block h-10 w-10 overflow-hidden rounded-full bg-gray-100",
-                className
+                className || ''
             )}
             {...props}
         >

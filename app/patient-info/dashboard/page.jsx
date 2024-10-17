@@ -352,7 +352,7 @@ export default function PatientTriage() {
                         variant="ghost"
                         className="h-8 w-full justify-start"
                         style={{ fontSize: "0.7rem", fontWeight: 500, letterSpacing: "0.05rem" }}>
-                        STATUS OF PATIENT
+                        STATUS
                         <KeyboardArrowDownIcon className="ml-2 h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -422,6 +422,7 @@ export default function PatientTriage() {
                   </div>
                 </TableCell>
                 <TableCell align="center">Triaged By</TableCell>
+                <TableCell align="center">Dr. Pref</TableCell>
                 <TableCell align="center">Doctor</TableCell>
                 <TableCell align="center">Created At</TableCell> {/* Header for Created At */}
               </TableRow>
@@ -554,6 +555,9 @@ export default function PatientTriage() {
                   />
                   <TableCell align="center">
                     {getInitials(row.triagedBy?.firstName, row.triagedBy?.lastName)}
+                  </TableCell>
+                  <TableCell align="center">
+                    {row.genderPreference === 'Male' ? '♂' : row.genderPreference === 'Female' ? '♀' : 'N/A'}
                   </TableCell>
                   <TableCell align="center">
                     {row.status === 'Not Started'

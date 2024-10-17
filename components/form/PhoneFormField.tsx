@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { CountryCodesList } from '@/data/countries.enum'; // Assuming this is a string enum or array
 
-// Define the type based on the structure of CountryCodesList
 type CountryCodes = typeof CountryCodesList[number]; // Infers the type from the array or enum
 
 export function PhoneFormField({
@@ -14,18 +13,38 @@ export function PhoneFormField({
     fieldName: string;
     fieldLabel: string;
 }) {
-    const [countryCode, setCountryCode] = useState<CountryCodes>(CountryCodesList[0]); // Type it properly
+    const [countryCode, setCountryCode] = useState<CountryCodes | undefined>(undefined); // Default to undefined
     const [phoneNumber, setPhoneNumber] = useState('');
+    const [countryCodeError, setCountryCodeError] = useState<string | null>(null); // To track the error state
 
     const handleCountryCodeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setCountryCode(e.target.value as CountryCodes); // Ensure the value is cast to the correct type
+        const selectedCode = e.target.value as CountryCodes;
+        setCountryCode(selectedCode);
+
+        // Clear the error if a country code is selected
+        if (selectedCode) {
+            setCountryCodeError(null);
+        }
     };
 
     const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const rawValue = e.target.value.replace(/\D/g, ''); // Strip all non-numeric characters
         setPhoneNumber(rawValue);
-        const fullPhoneNumber = `${countryCode}${rawValue}`;
-        form.setValue(fieldName, fullPhoneNumber, { shouldValidate: true }); // Save the full phone number (country code + number)
+
+        if (countryCode) {
+            const fullPhoneNumber = `${countryCode}${rawValue}`;
+            form.setValue(fieldName, fullPhoneNumber, { shouldValidate: true }); // Save the full phone number (country code + number)
+        }
+    };
+
+    const handleValidation = () => {
+        // Ensure that a country code is selected
+        if (!countryCode) {
+            setCountryCodeError('Country code is required');
+            return false;
+        }
+
+        return true;
     };
 
     useEffect(() => {
@@ -33,7 +52,7 @@ export function PhoneFormField({
         if (initialValue) {
             const code = initialValue.slice(0, initialValue.indexOf(' ') + 1);
             const number = initialValue.slice(initialValue.indexOf(' ') + 1);
-            setCountryCode(code as CountryCodes || CountryCodesList[0]);
+            setCountryCode(code as CountryCodes || undefined);
             setPhoneNumber(number || '');
         }
     }, [form, fieldName]);
@@ -48,10 +67,14 @@ export function PhoneFormField({
                     <div className="flex items-center">
                         {/* Country Code Dropdown */}
                         <select
-                            value={countryCode}
+                            value={countryCode || ''}
                             onChange={handleCountryCodeChange}
-                            className="p-2 border rounded-l-md"
+                            onBlur={handleValidation} // Validate onBlur
+                            className={`p-2 border rounded-l-md ${countryCodeError ? 'border-red-500' : ''}`}
                         >
+                            <option value="" disabled>
+                                
+                            </option>
                             {CountryCodesList.map((code) => (
                                 <option key={code} value={code}>
                                     {code}
@@ -69,6 +92,8 @@ export function PhoneFormField({
                             placeholder="1234567890"
                         />
                     </div>
+                    {/* Show error message if country code is not selected */}
+                    {countryCodeError && <p className="text-red-500 text-sm">{countryCodeError}</p>}
                     <FormMessage />
                 </FormItem>
             )}

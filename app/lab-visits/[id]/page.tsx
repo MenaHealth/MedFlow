@@ -1,11 +1,14 @@
+// app/lab-visits/[id]/page.tsx
+'use client'
+
 import React from 'react';
 import { Typography, Box } from '@mui/material';
+import { useParams } from 'next/navigation'; // For Next.js App Router
 
-interface LabVisitsProps {
-    patientId: string | undefined;
-}
+const LabVisits: React.FC = () => {
+    const params = useParams();
+    const patientId = params?.id; // Extract patientId from the URL params
 
-const LabVisits: React.FC<LabVisitsProps> = ({ patientId }) => {
     return (
         <Box sx={{ mt: 4 }}>
             <Typography variant="h4" gutterBottom>

@@ -3,7 +3,15 @@ import Patient from "@/models/patient";
 import dbConnect from "@/utils/database";
 import { Types } from "mongoose";
 
-export const GET = async (request, { params }) => {
+// Define the type for params
+interface Params {
+    params: {
+        id: string;
+    };
+}
+
+// Update the type annotations for the GET and PATCH handlers
+export const GET = async (request: Request, { params }: Params) => {
     try {
         await dbConnect();
 
@@ -24,7 +32,7 @@ export const GET = async (request, { params }) => {
     }
 };
 
-export const PATCH = async (request, { params }) => {
+export const PATCH = async (request: Request, { params }: Params) => {
     const newPatientData = await request.json();
 
     try {

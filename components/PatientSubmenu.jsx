@@ -13,7 +13,6 @@ import Collections from '@mui/icons-material/Collections';
 import LocalPharmacy from '@mui/icons-material/LocalPharmacy';
 import ArrowBack from '@mui/icons-material/ArrowBack';
 import { styled } from '@mui/material/styles';
-import PatientSubmenuHeader from './PatientSubmenuHeader';
 
 const CustomBottomNavigationAction = styled(BottomNavigationAction)(({ theme }) => ({
     '&.Mui-selected': {

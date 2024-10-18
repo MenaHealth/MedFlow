@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import ReadOnlyField from '@/components/form/ReadOnlyField';
-import { usePatientDashboard } from '@/components/PatientViewModels/PatientContext';
+import { usePatientDashboard } from '@/components/PatientViewModels/PatientDashboardContext';
 
 const PatientInfoView: React.FC<{ isExpanded: boolean }> = ({ isExpanded }) => {
     const { patientViewModel, loadingPatientInfo } = usePatientDashboard();

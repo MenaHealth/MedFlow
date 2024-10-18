@@ -1,6 +1,6 @@
     // components/PatientViewModels/PatientNotes/CombinedNotesViewModel.tsx
     import { useState, useCallback, useEffect } from 'react';
-    import { usePatientDashboard } from "@/components/PatientViewModels/PatientContext";
+    import { usePatientDashboard } from "@/components/PatientViewModels/PatientDashboardContext";
     import { useSession } from "next-auth/react";
     import type { Session } from 'next-auth';
 

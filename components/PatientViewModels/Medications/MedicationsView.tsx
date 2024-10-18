@@ -1,25 +1,34 @@
 // components/form/Medications/MedicationsView.tsx
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from './../../../components/ui/button';
 import RXFormView from './RXFormView';
 import MedicalOrderRequestView from './MedicalOrderRequestView';
 import PatientInfoView from '../patient-info/PatientInfoView';
 import PreviousMedications from './PreviousMedications';
-import { useRXFormViewModel } from './RXFormViewModel';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { Session } from 'next-auth';
+import { RXForm } from './../../../models/RXForm';
+import { MedX } from './../../../models/MedX';
 
 interface MedicationsViewProps {
     user: Session['user'];
     patientId: string;
+    rxForms: RXForm[];
+    medicalOrders: MedX[];
+    loadingMedications: boolean;
+    refreshMedications: () => Promise<void>;
 }
 
-export default function MedicationsView({ user, patientId }: MedicationsViewProps) {
+export default function MedicationsView({
+                                            user,
+                                            patientId,
+                                            rxForms,
+                                            medicalOrders,
+                                            loadingMedications,
+                                            refreshMedications
+                                        }: MedicationsViewProps) {
     const [templateType, setTemplateType] = useState<'rxform' | 'medicalrequest'>('rxform');
     const [isPreviousMedicationsExpanded, setIsPreviousMedicationsExpanded] = useState(false);
-
-    // Use the RXFormViewModel to get patient data and previous forms
-    const { rxForm, previousRXForms } = useRXFormViewModel(user, patientId);
 
     return (
         <div className="container mx-auto p-4 flex flex-col space-y-6" style={{ paddingBottom: '80px', minHeight: '100vh' }}>
@@ -38,25 +47,33 @@ export default function MedicationsView({ user, patientId }: MedicationsViewProp
                         </Button>
                         {isPreviousMedicationsExpanded && (
                             <div className="mt-2">
-                                <PreviousMedications previousRXForms={previousRXForms} />
+                                <PreviousMedications
+                                    rxForms={rxForms}
+                                    medicalOrders={medicalOrders}
+                                    loadingMedications={loadingMedications}
+                                />
                             </div>
                         )}
                     </div>
 
                     {/* Desktop-only Previous Medications View */}
                     <div className="hidden md:block">
-                        <PreviousMedications previousRXForms={previousRXForms} />
+                        <PreviousMedications
+                            rxForms={rxForms}
+                            medicalOrders={medicalOrders}
+                            loadingMedications={loadingMedications}
+                        />
                     </div>
                 </div>
 
                 {/* Patient Information Section */}
                 <div className="w-full md:w-1/2">
                     <PatientInfoView
-                        patientName={rxForm.patientName}
-                        phoneNumber={rxForm.phoneNumber}
-                        age={rxForm.age}
-                        patientID={rxForm.patientID}
-                        date={rxForm.date}
+                        patientName={rxForms[0]?.patientName || ''}
+                        phoneNumber={rxForms[0]?.phoneNumber || ''}
+                        age={rxForms[0]?.age || ''}
+                        patientID={patientId}
+                        date={new Date().toISOString().split('T')[0]}
                     />
                 </div>
             </div>
@@ -74,9 +91,9 @@ export default function MedicationsView({ user, patientId }: MedicationsViewProp
             {/* Render the Selected Form - Full Width */}
             <div className="w-full bg-white p-4">
                 {templateType === 'rxform' ? (
-                    <RXFormView user={user} patientId={patientId} />
+                    <RXFormView user={user} patientId={patientId} refreshMedications={refreshMedications} />
                 ) : (
-                    <MedicalOrderRequestView user={user} patientId={patientId} />
+                    <MedicalOrderRequestView user={user} patientId={patientId} refreshMedications={refreshMedications} />
                 )}
             </div>
         </div>

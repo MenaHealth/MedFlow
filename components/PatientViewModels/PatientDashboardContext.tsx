@@ -7,6 +7,8 @@ import { useSession } from 'next-auth/react';
 import { PatientInfoViewModel } from "./patient-info/PatientInfoViewModel";
 import { IPatient } from '../../models/patient';
 import { INote } from '../../models/note';
+import { IRXForm } from '../../models/RXForm';
+import { IMedX } from '../../models/MedX';
 
 interface PatientInfo {
     patientName: string;
@@ -48,6 +50,10 @@ interface PatientDashboardContextType {
     userSession: UserSession | null;
     authorName: string;
     authorID: string;
+    rxForms: IRXForm[];
+    medicalOrders: IMedX[];
+    loadingMedications: boolean;
+    refreshMedications: () => Promise<void>;
 }
 
 const PatientDashboardContext = createContext<PatientDashboardContextType | undefined>(undefined);
@@ -73,6 +79,9 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
     const [userSession, setUserSession] = useState<UserSession | null>(null);
     const [authorName, setAuthorName] = useState('');
     const [authorID, setAuthorID] = useState('');
+    const [rxForms, setRxForms] = useState<IRXForm[]>([]);
+    const [medicalOrders, setMedicalOrders] = useState<IMedX[]>([]);
+    const [loadingMedications, setLoadingMedications] = useState(false);
 
     useEffect(() => {
         if (status === 'authenticated' && session?.user) {
@@ -132,6 +141,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
 
     const fetchPatientData = useCallback(async () => {
         setLoadingPatientInfo(true);
+        setLoadingMedications(true);
         try {
             const response = await fetch(`/api/patient/${patientId}`);
             if (!response.ok) {
@@ -144,10 +154,13 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             } else {
                 setNotes([]);
             }
+            setRxForms(data.RXForms || []);
+            setMedicalOrders(data.medx || []);
         } catch (error) {
             console.error('Error fetching patient data:', error);
         } finally {
             setLoadingPatientInfo(false);
+            setLoadingMedications(false);
         }
         console.log("format patient info", patientId);
     }, [patientId, formatPatientInfo, formatPreviousNotes]);
@@ -159,7 +172,8 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
         console.log('Patient ID:', patientId);
     }, [patientId, fetchPatientData]);
 
-    const refreshPatientNotes = () => fetchPatientData(true);
+    const refreshPatientNotes = () => fetchPatientData();
+    const refreshMedications = () => fetchPatientData();
 
     return (
         <PatientDashboardContext.Provider
@@ -178,6 +192,10 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 userSession,
                 authorName,
                 authorID,
+                rxForms,
+                medicalOrders,
+                loadingMedications,
+                refreshMedications,
             }}
         >
             {children}

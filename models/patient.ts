@@ -1,9 +1,10 @@
 // models/patient.ts
 import { Schema, model, models, Document, Types } from 'mongoose';
-import { DoctorSpecialties as SPECIALTIES } from '@/data/doctorSpecialty.enum';
-import { INote } from './note';
+import { DoctorSpecialties as SPECIALTIES } from './../data/doctorSpecialty.enum';
+import { INote, noteSchema } from './note';
 import mongoose from 'mongoose';
-import { noteSchema } from '@/models/note';
+import {IRXForm, rxFormSchema} from "./RXForm";
+import {IMedX, medXSchema} from "./MedX";
 
 
   interface Prescription {
@@ -41,13 +42,13 @@ export interface IPatient extends Document {
   baselineAmbu?: 'Not Selected' | 'Independent' | 'Boot' | 'Crutches' | 'Walker' | 'Non-Ambulatory';
   pmhx?: string[];
   pshx?: string[];
-  medx?: Prescription[];
   smokeCount?: string;
   drinkCount?: string;
   otherDrugs?: string;
   allergies?: string;
   notes: Types.DocumentArray<INote>;
-  RXForms?: any[];
+  RXForms: Types.DocumentArray<IRXForm>;
+  medx?: Types.DocumentArray<IMedX>;
   visits?: any[];
   triagedBy?: {
     firstName?: string;
@@ -139,26 +140,13 @@ const PatientSchema = new Schema<IPatient>({
   baselineAmbu: { type: String, enum: ['Not Selected', 'Independent', 'Boot', 'Crutches', 'Walker', 'Non-Ambulatory'] },
   pmhx: { type: [String], default: [] },
   pshx: { type: [String], default: [] },
-  medx: [{
-    medName: { type: String },
-    medDosage: { type: String },
-    medFrequency: { type: String }
-  }],
   smokeCount: { type: String },
   drinkCount: { type: String },
   otherDrugs: { type: String },
   allergies: { type: String },
   notes: { type: [noteSchema], default: [] },
-  RXForms: [{
-    title: { type: String, required: true },
-    content: { type: String, required: true },
-    createdBy: {
-      userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-      firstName: { type: String, required: true },
-      lastName: { type: String, required: true },
-    },
-    createdAt: { type: Date, default: Date.now },
-  }],
+  RXForms: { type: [rxFormSchema], default: [] },
+  medx: { type: [medXSchema], default: [] },
   visits: [{ type: Schema.Types.ObjectId, ref: 'Visit' }],
   triagedBy: { type: Object },
   doctor: { type: Object },

@@ -1,23 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { PatientDashboardProvider, usePatientDashboard } from './PatientDashboardContext';
-import { User, FileText, LoaderPinwheel, PanelTopOpen } from 'lucide-react';
+import { User, FileText, LoaderPinwheel, PanelTopOpen, PillBottle } from 'lucide-react';
 import PatientInfoView from './patient-info/PatientInfoView';
 import { CombinedNotesView } from './../../components/PatientViewModels/PatientNotes/CombinedNotesView';
 import { Skeleton } from './../../components/ui/skeleton';
+import MedicationsView from './Medications/MedicationsView';
 
 const PatientDashboardContent: React.FC = () => {
     const {
         patientViewModel,
         loadingPatientInfo,
-        fetchPatientData, // Renamed
+        fetchPatientData,
         isExpanded,
         toggleExpand,
+        rxForms,
+        medicalOrders,
+        loadingMedications,
+        refreshMedications,
+        userSession,
     } = usePatientDashboard();
 
     const [openSections, setOpenSections] = useState<string[]>(['patient-info']);
 
     useEffect(() => {
-        fetchPatientData(); // Call fetchPatientData here
+        fetchPatientData();
     }, [fetchPatientData]);
 
     const toggleSection = (section: string) => {
@@ -35,11 +41,20 @@ const PatientDashboardContent: React.FC = () => {
     const renderSectionContent = (section: string) => {
         if (section === 'patient-info') {
             if (!patientViewModel || loadingPatientInfo) {
-                return null; // Return null during loading to maintain consistent size
+                return null;
             }
             return isExpanded ? <PatientInfoView isExpanded={isExpanded} /> : null;
         } else if (section === 'notes') {
             return <CombinedNotesView patientId={patientViewModel?.getPrimaryDetails().patientID || ''} />;
+        } else if (section === 'medications') {
+            return <MedicationsView
+                user={userSession}
+                patientId={patientViewModel?.getPrimaryDetails().patientID || ''}
+                rxForms={rxForms}
+                medicalOrders={medicalOrders}
+                loadingMedications={loadingMedications}
+                refreshMedications={refreshMedications}
+            />;
         }
     };
 
@@ -58,6 +73,13 @@ const PatientDashboardContent: React.FC = () => {
             color: 'bg-darkBlue',
             textColor: 'text-orange-50'
         },
+        {
+            id: 'medications',
+            icon: PillBottle,
+            label: 'Medications',
+            color: 'bg-orange-900',
+            textColor: 'text-orange-50'
+        }
     ];
 
     return (
@@ -89,16 +111,13 @@ const PatientDashboardContent: React.FC = () => {
                             </div>
                             <span
                                 className={`transform transition-transform ${
-                                    (section.id === 'patient-info' && openSections.includes(section.id) && isExpanded) ||
-                                    (section.id === 'notes' && openSections.includes(section.id))
-                                        ? 'rotate-180'
-                                        : ''
+                                    openSections.includes(section.id) ? 'rotate-180' : ''
                                 } ${section.textColor}`}
                             >
                                 <PanelTopOpen />
                             </span>
                         </div>
-                        {(openSections.includes(section.id) && (!loadingPatientInfo || section.id !== 'patient-info')) && (
+                        {openSections.includes(section.id) && (
                             <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'border-t border-gray-200' : ''}`}>
                                 <div className={`p-0 bg-transparent`}>
                                     {renderSectionContent(section.id)}

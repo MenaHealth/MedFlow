@@ -1,7 +1,7 @@
 // components/form/Medications/RXFormView.tsx
 import React from 'react';
 import { useRXFormViewModel } from './RXFormViewModel';
-import TextFormField from '@/components/ui/TextFormField';
+import { TextFormField } from '@/components/ui/TextFormField';
 import { Button } from '@/components/ui/button';
 import { SendHorizonal } from "lucide-react";
 

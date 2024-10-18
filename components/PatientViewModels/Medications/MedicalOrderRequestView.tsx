@@ -1,7 +1,7 @@
 // components/form/Medications/MedicalOrderRequestView.tsx
 import React from 'react';
 import { useMedicalOrderRequestViewModel } from './MedicalOrderRequestViewModel';
-import TextFormField from '@/components/ui/TextFormField';
+import { TextFormField } from '@/components/ui/TextFormField';
 import ReadOnlyField from '@/components/form/ReadOnlyField';
 import { Button } from '@/components/ui/button';
 import { SendHorizonal } from "lucide-react";

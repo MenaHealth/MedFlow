@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { PatientDashboardProvider, usePatientDashboard } from './PatientDashboardContext';
 import { User, FileText, LoaderPinwheel, PanelTopOpen } from 'lucide-react';
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import PatientInfoView from './patient-info/PatientInfoView';
-import { CombinedNotesView } from '@/components/PatientViewModels/PatientNotes/CombinedNotesView';
-import { Skeleton } from '@/components/ui/skeleton';
+import { CombinedNotesView } from './../../components/PatientViewModels/PatientNotes/CombinedNotesView';
+import { Skeleton } from './../../components/ui/skeleton';
 
 const PatientDashboardContent: React.FC = () => {
     const {

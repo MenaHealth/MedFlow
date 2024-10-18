@@ -10,7 +10,7 @@ import Notes from '@mui/icons-material/Notes';
 import Collections from '@mui/icons-material/Collections';
 import LocalPharmacy from '@mui/icons-material/LocalPharmacy';
 import { useParams } from 'next/navigation';
-import PatientSubmenu from '@/components/PatientSubmenu';
+import PatientSubmenu from './../../../components/PatientSubmenu';
 import LabVisits from './../../lab-visits/[id]/page';
 
 const PatientOverview: React.FC = () => {
@@ -32,7 +32,7 @@ const PatientOverview: React.FC = () => {
     const renderContent = () => {
         switch (activeContent) {
             case 'lab-visits':
-                return <LabVisits patientId={id} />;
+                return <LabVisits />;
             // Add other cases for different content types
             default:
                 return null;

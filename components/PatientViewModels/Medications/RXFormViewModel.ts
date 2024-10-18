@@ -23,9 +23,6 @@ export function useRXFormViewModel(user: Session['user'], patientId: string) {
 
     const [previousRXForms, setPreviousRXForms] = useState<RXForm[]>([]);
 
-    useEffect(() => {
-        fetchPatientData();
-    }, [patientId]);
 
     const fetchPatientData = async () => {
         try {
@@ -48,6 +45,9 @@ export function useRXFormViewModel(user: Session['user'], patientId: string) {
         }
     };
 
+    useEffect(() => {
+        fetchPatientData();
+    }, [patientId]);
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setRxForm({
             ...rxForm,

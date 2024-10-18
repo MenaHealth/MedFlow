@@ -62,7 +62,6 @@ export interface ISubjectiveNote extends INote {
     };
 }
 
-// Define discriminators conditionally to prevent redeclaration
 const PhysicianNote = Note.discriminators?.PhysicianNote || Note.discriminator<IPhysicianNote>('PhysicianNote', new Schema<IPhysicianNote>({
     content: {
         attendingPhysician: { type: String, required: true },

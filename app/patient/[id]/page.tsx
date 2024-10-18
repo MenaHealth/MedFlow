@@ -7,7 +7,7 @@ import { useParams } from 'next/navigation';
 const PatientView = () => {
     const { id } = useParams();
 
-    return <PatientViewModel patientId={id} />
+    return <PatientViewModel />
 }
 
 export default PatientView

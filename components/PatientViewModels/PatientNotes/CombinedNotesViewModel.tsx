@@ -62,7 +62,6 @@
             }
         }, []);
 
-        // Create new note by calling the correct API
         const createNote = useCallback(async () => {
             console.log('authorID:', authorID); // Log authorID to check if it's available
             console.log('patientId:', patientId);
@@ -77,7 +76,7 @@
                 case 'physician':
                     noteData = {
                         noteType: 'physician',
-                        content: JSON.stringify(physicianNote),
+                        content: physicianNote,  // Directly assign the physicianNote object
                         email: userSession?.email,
                         authorName,
                         authorID,
@@ -86,7 +85,7 @@
                 case 'procedure':
                     noteData = {
                         noteType: 'procedure',
-                        content: JSON.stringify(procedureNote),
+                        content: procedureNote,  // Directly assign the procedureNote object
                         email: userSession?.email,
                         authorName,
                         authorID,
@@ -95,7 +94,7 @@
                 case 'subjective':
                     noteData = {
                         noteType: 'subjective',
-                        content: JSON.stringify(subjectiveNote),
+                        content: subjectiveNote,  // Directly assign the subjectiveNote object
                         email: userSession?.email,
                         authorName,
                         authorID,
@@ -120,43 +119,7 @@
                 await refreshPatientNotes(); // Refresh the notes
 
                 // Reset the form fields after successful note creation
-                setPhysicianNote({
-                    date: new Date().toISOString().split('T')[0],
-                    time: new Date().toTimeString().split(' ')[0],
-                    attendingPhysician: '',
-                    hpi: '',
-                    rosConstitutional: '',
-                    rosCardiovascular: '',
-                    rosRespiratory: '',
-                    rosGastrointestinal: '',
-                    rosGenitourinary: '',
-                    rosMusculoskeletal: '',
-                    rosNeurological: '',
-                    rosPsychiatric: '',
-                    mdm: '',
-                    planAndFollowUp: '',
-                    diagnosis: '',
-                    signature: ''
-                });
-
-                setProcedureNote({
-                    date: new Date().toISOString().split('T')[0],
-                    time: new Date().toTimeString().split(' ')[0],
-                    procedureName: '',
-                    attendingPhysician: '',
-                    diagnosis: '',
-                    notes: '',
-                    plan: '',
-                });
-
-                setSubjectiveNote({
-                    date: new Date().toISOString().split('T')[0],
-                    time: new Date().toTimeString().split(' ')[0],
-                    subjective: '',
-                    objective: '',
-                    assessment: '',
-                    plan: ''
-                });
+                resetNoteFields();
 
                 console.log('Note created:', newNote);
             } catch (error) {
@@ -165,6 +128,47 @@
                 setIsLoading(false);
             }
         }, [templateType, physicianNote, procedureNote, subjectiveNote, patientId, authorID, authorName, userSession, refreshPatientNotes]);
+
+// Helper function to reset form fields
+        const resetNoteFields = () => {
+            setPhysicianNote({
+                date: new Date().toISOString().split('T')[0],
+                time: new Date().toTimeString().split(' ')[0],
+                attendingPhysician: '',
+                hpi: '',
+                rosConstitutional: '',
+                rosCardiovascular: '',
+                rosRespiratory: '',
+                rosGastrointestinal: '',
+                rosGenitourinary: '',
+                rosMusculoskeletal: '',
+                rosNeurological: '',
+                rosPsychiatric: '',
+                mdm: '',
+                planAndFollowUp: '',
+                diagnosis: '',
+                signature: ''
+            });
+
+            setProcedureNote({
+                date: new Date().toISOString().split('T')[0],
+                time: new Date().toTimeString().split(' ')[0],
+                procedureName: '',
+                attendingPhysician: '',
+                diagnosis: '',
+                notes: '',
+                plan: '',
+            });
+
+            setSubjectiveNote({
+                date: new Date().toISOString().split('T')[0],
+                time: new Date().toTimeString().split(' ')[0],
+                subjective: '',
+                objective: '',
+                assessment: '',
+                plan: ''
+            });
+        };
 
         // Ensure setNoteField is returned
         return {

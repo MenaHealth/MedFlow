@@ -49,6 +49,10 @@ export const POST = async (request: Request, { params }: Params) => {
         return new Response(JSON.stringify(newNote), { status: 201 });
     } catch (error) {
         console.error('Failed to add doctor note:', error);
-        return new Response(`Failed to add doctor note: ${error.message}`, { status: 500 });
+        if (error instanceof Error) {
+            return new Response(`Failed to add doctor note: ${error.message}`, { status: 500 });
+            } else {
+            return new Response('Failed to add doctor note due to an unknown error', { status: 500 });
+          }
     }
 };

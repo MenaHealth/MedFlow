@@ -1,3 +1,4 @@
+// models/patient.ts
 import { Schema, model, models, Document, Types } from 'mongoose';
 import { DoctorSpecialties as SPECIALTIES } from '@/data/doctorSpecialty.enum';
 import { INote } from './note';
@@ -5,11 +6,11 @@ import mongoose from 'mongoose';
 import { noteSchema } from '@/models/note';
 
 
-interface Prescription {
-  medName: string;
-  medDosage: string;
-  medFrequency: string;
-}
+  interface Prescription {
+    medName: string;
+    medDosage: string;
+    medFrequency: string;
+  }
 
 export interface IPatient extends Document {
   files?: any[];
@@ -59,6 +60,57 @@ export interface IPatient extends Document {
     email?: string;
   };
 }
+  export interface IPatient extends Document {
+    files?: any[];
+    _id?: string;
+    firstName: string;
+    lastName: string;
+    phone: string;
+    age?: string;
+    country?: string;
+    city?: string;
+    language?: string;
+    genderPreference?: string;
+    previouslyRegistered?: string;
+    chiefComplaint?: string;
+    coordinatorId?: string;
+    email?: string;
+    laterality?: 'Not Selected' | 'Left' | 'Right' | 'Bilateral';
+    diagnosis?: string;
+    diagnosisCat?: string;
+    hospital?: 'Not Selected' | 'PMC' | 'PRCS' | 'Hugo Chavez';
+    priority?: 'Not Selected' | 'Routine' | 'Moderate' | 'Urgent' | 'Emergency';
+    specialty?: typeof SPECIALTIES[number];
+    status?: 'Not Selected' | 'Not Started' | 'Triaged' | 'In-Progress' | 'Completed' | 'Archived';
+    complaint?: string;
+    icd10?: string;
+    surgeryDate?: Date;
+    occupation?: string;
+    baselineAmbu?: 'Not Selected' | 'Independent' | 'Boot' | 'Crutches' | 'Walker' | 'Non-Ambulatory';
+    pmhx?: string[];
+    pshx?: string[];
+    medx?: Prescription[];
+    smokeCount?: string;
+    drinkCount?: string;
+    otherDrugs?: string;
+    allergies?: string;
+    triagedBy?: {
+      firstName?: string;
+      lastName?: string;
+      email?: string;
+    };
+    doctor?: {
+      firstName?: string;
+      lastName?: string;
+      email?: string;
+    };
+    notes?: string;
+    visits?: Types.ObjectId[];
+    createdAt?: Date; // Add timestamp field for creation
+    updatedAt?: Date; // Add timestamp field for last update
+  }
+
+  // models/patient.ts
 
 const PatientSchema = new Schema<IPatient>({
   files: [{ type: Object }],
@@ -110,7 +162,9 @@ const PatientSchema = new Schema<IPatient>({
   visits: [{ type: Schema.Types.ObjectId, ref: 'Visit' }],
   triagedBy: { type: Object },
   doctor: { type: Object },
-});
+createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date }
+  });
 
 const Patient = models.Patient || model<IPatient>('Patient', PatientSchema);
 

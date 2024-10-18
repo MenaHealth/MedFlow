@@ -46,6 +46,8 @@ interface PatientDashboardContextType {
     toggleExpand: () => void;
     refreshPatientNotes: () => Promise<void>;
     userSession: UserSession | null;
+    authorName: string;
+    authorID: string;
 }
 
 const PatientDashboardContext = createContext<PatientDashboardContextType | undefined>(undefined);
@@ -69,15 +71,20 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
     const [patientViewModel, setPatientViewModel] = useState<PatientInfoViewModel | null>(null);
     const [isExpanded, setIsExpanded] = useState(false);
     const [userSession, setUserSession] = useState<UserSession | null>(null);
-    const [lastFetchTime, setLastFetchTime] = useState(0);
+    const [authorName, setAuthorName] = useState('');
+    const [authorID, setAuthorID] = useState('');
 
     useEffect(() => {
         if (status === 'authenticated' && session?.user) {
+            const firstName = session.user.firstName || '';
+            const lastName = session.user.lastName || '';
+            const userId = session.user._id || ''; // Check if this field is being populated properly
+
             setUserSession({
-                id: session.user.id,
+                id: userId,
                 email: session.user.email,
-                firstName: session.user.firstName,
-                lastName: session.user.lastName,
+                firstName,
+                lastName,
                 accountType: session.user.accountType,
                 isAdmin: session.user.isAdmin,
                 image: session.user.image,
@@ -88,8 +95,14 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 dob: session.user.dob,
                 countries: session.user.countries,
             });
+
+            setAuthorName(`${firstName} ${lastName}`.trim());
+            setAuthorID(userId);
+
+            console.log('User session:', userSession);
         }
     }, [session, status]);
+
 
     const toggleExpand = () => setIsExpanded(prev => !prev);
 
@@ -117,12 +130,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
         }
     }, [patientInfo?.patientName]);
 
-    const fetchPatientData = useCallback(async (force = false) => {
-        const now = Date.now();
-        if (!force && now - lastFetchTime < 60000) { // 1 minute cooldown
-            return; // Skip if less than a minute has passed since last fetch
-        }
-
+    const fetchPatientData = useCallback(async () => {
         setLoadingPatientInfo(true);
         try {
             const response = await fetch(`/api/patient/${patientId}`);
@@ -136,18 +144,19 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             } else {
                 setNotes([]);
             }
-            setLastFetchTime(now);
         } catch (error) {
             console.error('Error fetching patient data:', error);
         } finally {
             setLoadingPatientInfo(false);
         }
-    }, [patientId, formatPatientInfo, formatPreviousNotes, lastFetchTime]);
+        console.log("format patient info", patientId);
+    }, [patientId, formatPatientInfo, formatPreviousNotes]);
 
     useEffect(() => {
         if (patientId) {
             fetchPatientData();
         }
+        console.log('Patient ID:', patientId);
     }, [patientId, fetchPatientData]);
 
     const refreshPatientNotes = () => fetchPatientData(true);
@@ -167,6 +176,8 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 toggleExpand,
                 refreshPatientNotes,
                 userSession,
+                authorName,
+                authorID,
             }}
         >
             {children}

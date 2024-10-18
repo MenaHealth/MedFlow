@@ -1,17 +1,35 @@
 // components/PatientViewModels/PatientNotes/PreviousNotesView.tsx
 import React, { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { Trash2, Download } from 'lucide-react';
-import { ClipLoader } from 'react-spinners';
+import { ChevronDown, ChevronsDown, ChevronsUp, ChevronUp } from 'lucide-react'; // Importing the Chevron icons
 import { usePreviousNotesViewModel } from './PreviousNotesViewModel';
 import { ScrollArea } from '@/components/form/ScrollArea';
 
 export function PreviousNotesView() {
-    const { notes, loading, error, handleDownload } = usePreviousNotesViewModel();
-    const [newNoteIds, setNewNoteIds] = useState<string[]>([]);
+    const { notes, loading, error } = usePreviousNotesViewModel();
+    const [expandedNotes, setExpandedNotes] = useState<string[]>([]);
+    const [expandAll, setExpandAll] = useState(false);
 
-    if (loading) return <ClipLoader />; // Render ClipLoader while loading
+    if (loading) return <p>Loading...</p>; // Render loading state
     if (error) return <p>Error: {error}</p>;
+
+    // Toggles individual note expansion
+    const toggleNoteExpansion = (noteId: string) => {
+        if (expandedNotes.includes(noteId)) {
+            setExpandedNotes(expandedNotes.filter(id => id !== noteId));
+        } else {
+            setExpandedNotes([...expandedNotes, noteId]);
+        }
+    };
+
+    // Toggles expansion for all notes
+    const toggleExpandAll = () => {
+        if (expandAll) {
+            setExpandedNotes([]); // Collapse all notes
+        } else {
+            setExpandedNotes(notes.map(note => note._id)); // Expand all notes
+        }
+        setExpandAll(!expandAll);
+    };
 
     const getBackgroundColor = (noteType: string) => {
         switch (noteType) {
@@ -28,32 +46,65 @@ export function PreviousNotesView() {
 
     return (
         <div className="h-full">
+            <div className="flex justify-between items-center px-4 py-2 bg-gray-100">
+                {/*<h3 className="font-bold">Previous Notes</h3>*/}
+                <button onClick={toggleExpandAll} className="text-gray-600">
+                    {expandAll ? <ChevronsUp className="h-5 w-5" /> : <ChevronsDown className="h-5 w-5" />}
+                </button>
+            </div>
             <ScrollArea className="h-full w-full">
                 {notes.length > 0 ? (
                     <ul className="list-none p-0">
                         {notes.map((note) => (
                             <li
                                 key={note._id}
-                                className={`p-4 border-b border-gray-200 last:border-b-0 flex justify-between items-center transition-all duration-500 ease-out ${getBackgroundColor(note.noteType)}`}
+                                className={`p-4 border-b border-gray-200 last:border-b-0 transition-all duration-500 ease-out ${getBackgroundColor(note.noteType)}`}
                             >
-                                <div>
-                                    <h3 className="font-bold">{note.date ? new Date(note.date).toLocaleDateString() : 'Date Unavailable'}</h3>
-                                    <h3 className="font-bold">{note.email} </h3>
-
-                                    {/* Conditional content rendering based on note type */}
-                                    {note.noteType === 'subjective' && <p>{note.subjective}</p>}
-                                    {note.noteType === 'physician' && <p>{note.diagnosis}</p>}
-                                    {note.noteType === 'procedure' && <p>{note.procedureName}</p>}
-
+                                <div className="flex justify-between items-center">
+                                    <div>
+                                        <h3 className="font-bold">
+                                            {note.noteType || 'note type Unavailable'} {/* Display author name */}
+                                        </h3>
+                                        <p>
+                                            {note.date ? new Date(note.date).toLocaleDateString() : 'Date Unavailable'}
+                                        </p>
+                                        <h3 className="font-bold">
+                                            {note.authorName || 'Author Unavailable'} {/* Display author name */}
+                                        </h3>
+                                    </div>
+                                    <button onClick={() => toggleNoteExpansion(note._id)} className="text-gray-600">
+                                        {expandedNotes.includes(note._id) ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                                    </button>
                                 </div>
-                                <div className="flex space-x-2">
-                                    <Button onClick={() => handleDownload(note)} size="icon" variant="ghost">
-                                        <Download className="h-4 w-4" />
-                                    </Button>
-                                    <Button size="icon" variant="ghost">
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                </div>
+
+                                {/* Conditionally render full content if note is expanded */}
+                                {expandedNotes.includes(note._id) && (
+                                    <div className="mt-2">
+                                        {note.noteType === 'subjective' && note.content && (
+                                            <>
+                                                <p><strong>Subjective:</strong> {note.content.subjective}</p>
+                                                <p><strong>Objective:</strong> {note.content.objective}</p>
+                                                <p><strong>Assessment:</strong> {note.content.assessment}</p>
+                                                <p><strong>Plan:</strong> {note.content.plan}</p>
+                                            </>
+                                        )}
+                                        {note.noteType === 'physician' && note.content && (
+                                            <>
+                                                <p><strong>Diagnosis:</strong> {note.content.diagnosis}</p>
+                                                <p><strong>MDM:</strong> {note.content.mdm}</p>
+                                                <p><strong>Plan & Follow-Up:</strong> {note.content.planAndFollowUp}</p>
+                                            </>
+                                        )}
+                                        {note.noteType === 'procedure' && note.content && (
+                                            <>
+                                                <p><strong>Procedure Name:</strong> {note.content.procedureName}</p>
+                                                <p><strong>Diagnosis:</strong> {note.content.diagnosis}</p>
+                                                <p><strong>Notes:</strong> {note.content.notes}</p>
+                                                <p><strong>Plan:</strong> {note.content.plan}</p>
+                                            </>
+                                        )}
+                                    </div>
+                                )}
                             </li>
                         ))}
                     </ul>

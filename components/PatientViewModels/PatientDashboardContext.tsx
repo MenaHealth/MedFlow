@@ -155,7 +155,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 setNotes([]);
             }
             setRxForms(data.RXForms || []);
-            setMedicalOrders(data.medx || []);
+            setMedicalOrders(data.medOrders || []);
         } catch (error) {
             console.error('Error fetching patient data:', error);
         } finally {

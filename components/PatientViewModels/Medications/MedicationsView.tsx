@@ -1,32 +1,15 @@
-// components/form/Medications/MedicationsView.tsx
+// components/PatientViewModels/Medications/MedicationsView.tsx
 import React, { useState } from 'react';
 import { Button } from './../../../components/ui/button';
 import RXFormView from './RXFormView';
 import MedicalOrderRequestView from './MedicalOrderRequestView';
+import PreviousMedicationsView from './PreviousMedicationsView';
 import PatientInfoView from '../patient-info/PatientInfoView';
-import PreviousMedications from './PreviousMedications';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import { Session } from 'next-auth';
-import { RXForm } from './../../../models/RXForm';
-import { MedX } from '../../../models/medX';
+import { useMedicationsViewModel } from './MedicationsViewModel';
 
-interface MedicationsViewProps {
-    user: Session['user'];
-    patientId: string;
-    rxForms: RXForm[];
-    medicalOrders: MedX[];
-    loadingMedications: boolean;
-    refreshMedications: () => Promise<void>;
-}
-
-export default function MedicationsView({
-                                            user,
-                                            patientId,
-                                            rxForms,
-                                            medicalOrders,
-                                            loadingMedications,
-                                            refreshMedications
-                                        }: MedicationsViewProps) {
+export default function MedicationsView() {
+    const { rxForms, medicalOrders, loadingMedications, refreshMedications } = useMedicationsViewModel();
     const [templateType, setTemplateType] = useState<'rxform' | 'medicalrequest'>('rxform');
     const [isPreviousMedicationsExpanded, setIsPreviousMedicationsExpanded] = useState(false);
 
@@ -47,7 +30,7 @@ export default function MedicationsView({
                         </Button>
                         {isPreviousMedicationsExpanded && (
                             <div className="mt-2">
-                                <PreviousMedications
+                                <PreviousMedicationsView
                                     rxForms={rxForms}
                                     medicalOrders={medicalOrders}
                                     loadingMedications={loadingMedications}
@@ -58,7 +41,7 @@ export default function MedicationsView({
 
                     {/* Desktop-only Previous Medications View */}
                     <div className="hidden md:block">
-                        <PreviousMedications
+                        <PreviousMedicationsView
                             rxForms={rxForms}
                             medicalOrders={medicalOrders}
                             loadingMedications={loadingMedications}
@@ -69,10 +52,10 @@ export default function MedicationsView({
                 {/* Patient Information Section */}
                 <div className="w-full md:w-1/2">
                     <PatientInfoView
-                        patientName={rxForms[0]?.patientName || ''}
-                        phoneNumber={rxForms[0]?.phoneNumber || ''}
-                        age={rxForms[0]?.age || ''}
-                        patientID={patientId}
+                        patientName={rxForms[0]?.content.patientName || ''}
+                        phoneNumber={rxForms[0]?.content.phoneNumber || ''}
+                        age={rxForms[0]?.content.age || ''}
+                        patientID={rxForms[0]?._id || ''}
                         date={new Date().toISOString().split('T')[0]}
                     />
                 </div>
@@ -91,9 +74,9 @@ export default function MedicationsView({
             {/* Render the Selected Form - Full Width */}
             <div className="w-full bg-white p-4">
                 {templateType === 'rxform' ? (
-                    <RXFormView user={user} patientId={patientId} refreshMedications={refreshMedications} />
+                    <RXFormView refreshMedications={refreshMedications} />
                 ) : (
-                    <MedicalOrderRequestView user={user} patientId={patientId} refreshMedications={refreshMedications} />
+                    <MedicalOrderRequestView refreshMedications={refreshMedications} />
                 )}
             </div>
         </div>

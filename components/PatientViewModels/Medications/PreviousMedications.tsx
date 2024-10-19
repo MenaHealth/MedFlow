@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { IRXForm } from './../../../models/RXForm';
-import { IMedX } from './../../../models/MedX';
+import { IMedX } from '../../../models/medX';
 
 interface PreviousMedicationsProps {
     rxForms: IRXForm[];

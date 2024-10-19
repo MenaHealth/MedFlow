@@ -4,7 +4,7 @@ import { DoctorSpecialties as SPECIALTIES } from './../data/doctorSpecialty.enum
 import { INote, noteSchema } from './note';
 import mongoose from 'mongoose';
 import {IRXForm, rxFormSchema} from "./RXForm";
-import {IMedX, medXSchema} from "./MedX";
+import {IMedX, medXSchema} from "./medX";
 
 
   interface Prescription {
@@ -90,7 +90,7 @@ export interface IPatient extends Document {
     baselineAmbu?: 'Not Selected' | 'Independent' | 'Boot' | 'Crutches' | 'Walker' | 'Non-Ambulatory';
     pmhx?: string[];
     pshx?: string[];
-    medx?: Prescription[];
+    medOrders: Types.DocumentArray<IMedX>;
     smokeCount?: string;
     drinkCount?: string;
     otherDrugs?: string;
@@ -105,7 +105,7 @@ export interface IPatient extends Document {
       lastName?: string;
       email?: string;
     };
-    notes?: string;
+    notes?: [];
     visits?: Types.ObjectId[];
     createdAt?: Date; // Add timestamp field for creation
     updatedAt?: Date; // Add timestamp field for last update
@@ -146,7 +146,7 @@ const PatientSchema = new Schema<IPatient>({
   allergies: { type: String },
   notes: { type: [noteSchema], default: [] },
   RXForms: { type: [rxFormSchema], default: [] },
-  medx: { type: [medXSchema], default: [] },
+  medOrders: { type: [medXSchema], default: [] },
   visits: [{ type: Schema.Types.ObjectId, ref: 'Visit' }],
   triagedBy: { type: Object },
   doctor: { type: Object },

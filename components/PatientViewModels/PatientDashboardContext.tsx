@@ -8,7 +8,7 @@ import { PatientInfoViewModel } from "./patient-info/PatientInfoViewModel";
 import { IPatient } from '../../models/patient';
 import { INote } from '../../models/note';
 import { IRXForm } from '../../models/RXForm';
-import { IMedX } from '../../models/MedX';
+import { IMedX } from '../../models/medX';
 
 interface PatientInfo {
     patientName: string;

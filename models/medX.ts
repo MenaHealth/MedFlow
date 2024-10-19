@@ -1,10 +1,9 @@
-// models/MedX.ts
+// models/medX.ts
 import { Schema, Document, Model, model, models } from 'mongoose';
 import { DoctorSpecialties } from './../data/doctorSpecialty.enum';
 
 export interface IMedX extends Document {
     email: string;
-    noteType: 'medx';
     date: Date;
     authorName: string;
     authorID: string;
@@ -22,7 +21,6 @@ export interface IMedX extends Document {
 
 export const medXSchema = new Schema<IMedX>({
     email: { type: String, required: true },
-    noteType: { type: String, enum: ['medx'], required: true },
     date: { type: Date, default: Date.now },
     authorName: { type: String, required: true },
     authorID: { type: String, required: true },

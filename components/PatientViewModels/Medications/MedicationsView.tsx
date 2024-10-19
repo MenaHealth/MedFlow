@@ -8,7 +8,7 @@ import PreviousMedications from './PreviousMedications';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { Session } from 'next-auth';
 import { RXForm } from './../../../models/RXForm';
-import { MedX } from './../../../models/MedX';
+import { MedX } from '../../../models/medX';
 
 interface MedicationsViewProps {
     user: Session['user'];

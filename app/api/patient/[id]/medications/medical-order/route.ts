@@ -1,26 +1,81 @@
 // app/api/patient/[id]/medications/medical-order/route.ts
+
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
-import { ObjectId } from 'mongodb';
+import Patient from "./../../../../../../models/patient";
+import { MedX } from "./../../../../../../models/MedX";
+import dbConnect from "./../../../../../../utils/database";
+import { Types } from 'mongoose';
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+// Define the type for params
+interface Params {
+    params: {
+        id: string;
+    };
+}
+
+// POST method to add a new medical order
+export const POST = async (request: Request, { params }: Params) => {
+    const {
+        email,
+        date,
+        authorName,
+        authorID,
+        content: {
+            doctorSpecialty,
+            patientName,
+            patientPhoneNumber,
+            patientAddress,
+            diagnosis,
+            medications,
+            dosage,
+            frequency
+        }
+    } = await request.json();
+
     try {
-        const { db } = await connectToDatabase();
-        const patientId = params.id;
-        const rxFormData = await req.json();
+        await dbConnect();
 
-        const result = await db.collection('patients').updateOne(
-            { _id: new ObjectId(patientId) },
-            { $push: { RXForms: rxFormData } }
-        );
-
-        if (result.modifiedCount === 0) {
-            return NextResponse.json({ error: 'Failed to add RX Form' }, { status: 400 });
+        // Validate patient ID
+        if (!Types.ObjectId.isValid(params.id)) {
+            return new Response("Invalid ID", { status: 400 });
         }
 
-        return NextResponse.json({ message: 'RX Form added successfully' });
+        // Find the patient by ID
+        const patient = await Patient.findById(params.id);
+        if (!patient) {
+            return new Response(`Patient with ID ${params.id} not found`, { status: 404 });
+        }
+
+        // Create new medical order (MedX)
+        const newMedOrder = new MedX({
+            email,
+            date: date || new Date(),
+            authorName,
+            authorID,
+            content: {
+                doctorSpecialty,
+                patientName,
+                patientPhoneNumber,
+                patientAddress,
+                diagnosis,
+                medications,
+                dosage,
+                frequency
+            }
+        });
+
+        // Add the medical order to the patient's medOrders array
+        patient.medOrders.push(newMedOrder);
+        await patient.save();
+
+        // Return the new medical order as the response
+        return new Response(JSON.stringify(newMedOrder), { status: 201 });
     } catch (error) {
-        console.error('Error adding RX Form:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        console.error('Failed to add medical order:', error);
+        if (error instanceof Error) {
+            return new Response(`Failed to add medical order: ${error.message}`, { status: 500 });
+        } else {
+            return new Response('Failed to add medical order due to an unknown error', { status: 500 });
+        }
     }
-}
+};

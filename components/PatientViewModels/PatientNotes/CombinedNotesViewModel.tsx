@@ -1,6 +1,6 @@
     // components/PatientViewModels/PatientNotes/CombinedNotesViewModel.tsx
     import { useState, useCallback } from 'react';
-    import { usePatientDashboard } from "../../../components/PatientViewModels/PatientDashboardContext";
+    import { usePatientDashboard } from "../PatientViewModelContext";
 
     export function CombinedNotesViewModel(patientId: string) {
         const { notes, authorName, authorID, refreshPatientNotes, userSession } = usePatientDashboard();

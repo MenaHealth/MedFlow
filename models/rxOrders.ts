@@ -15,20 +15,20 @@ export interface IRXForm extends Document {
         referringDr: string;
         prescribingDr: string;
         diagnosis: string;
-        medicationsNeeded: string;
-        pharmacyOrClinic: string;
+        pharmacyOrClinic: typeof Pharmacies[number];
         medication: string;
         dosage: string;
         frequency: string;
     };
 }
 
-export const rxFormSchema = new Schema<IRXForm>({
+export const RXOrderSchema = new Schema<IRXForm>({
     email: { type: String, required: true },
     date: { type: Date, default: Date.now },
     authorName: { type: String, required: true },
     authorID: { type: String, required: true },
     content: {
+        pharmacyOrClinic: { type: String, enum: Pharmacies, required: true },
         patientName: { type: String, required: true },
         phoneNumber: { type: String, required: true },
         age: { type: String, required: true },
@@ -36,14 +36,12 @@ export const rxFormSchema = new Schema<IRXForm>({
         referringDr: { type: String, required: true },
         prescribingDr: { type: String, required: true },
         diagnosis: { type: String, required: true },
-        medicationsNeeded: { type: String, required: true },
-        pharmacyOrClinic: { type: String, enum: Pharmacies, required: true },
         medication: { type: String, required: true },
         dosage: { type: String, required: true },
         frequency: { type: String, required: true },
     },
 });
 
-const RxOrders: Model<IRXForm> = models.RxOrders || model<IRXForm>('RxOrders', rxFormSchema);
+const RxOrders: Model<IRXForm> = models.RxOrders || model<IRXForm>('RxOrders', RXOrderSchema);
 
 export default RxOrders;

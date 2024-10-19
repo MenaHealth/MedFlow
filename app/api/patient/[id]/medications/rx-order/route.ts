@@ -41,6 +41,21 @@ export const POST = async (request: Request, { params }: Params) => {
             }
         } = requestData;
 
+        console.log('Data received in content:', {
+            patientName,
+            phoneNumber,
+            age,
+            address,
+            referringDr,
+            prescribingDr,
+            diagnosis,
+            medicationsNeeded,
+            pharmacyOrClinic,
+            medication,
+            dosage,
+            frequency,
+        });
+
         await dbConnect();
         console.log('Database connected');
 

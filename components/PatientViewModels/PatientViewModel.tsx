@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { PatientDashboardProvider, usePatientDashboard } from './PatientDashboardContext';
+import { PatientDashboardProvider, usePatientDashboard } from './PatientViewModelContext';
 import { User, FileText, LoaderPinwheel, PanelTopOpen, PillBottle } from 'lucide-react';
 import PatientInfoView from './patient-info/PatientInfoView';
 import { CombinedNotesView } from './../../components/PatientViewModels/PatientNotes/CombinedNotesView';

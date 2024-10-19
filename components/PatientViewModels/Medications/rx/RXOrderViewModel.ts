@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { RxOrders } from '@/models/rxOrders';
-import { usePatientDashboard } from '@/components/PatientViewModels/PatientDashboardContext';
+import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewModelContext';
 
 export function useRXFormViewModel(patientId: string) {
     const { userSession } = usePatientDashboard();

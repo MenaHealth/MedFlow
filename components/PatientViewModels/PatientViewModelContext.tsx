@@ -1,4 +1,4 @@
-// components/PatientViewModels/PatientDashboardContext.tsx
+// components/PatientViewModels/PatientViewModelContext.tsx
 "use client"
 
 import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
@@ -56,10 +56,10 @@ interface PatientDashboardContextType {
     refreshMedications: () => Promise<void>;
 }
 
-const PatientDashboardContext = createContext<PatientDashboardContextType | undefined>(undefined);
+const PatientViewModelContext = createContext<PatientDashboardContextType | undefined>(undefined);
 
 export const usePatientDashboard = () => {
-    const context = useContext(PatientDashboardContext);
+    const context = useContext(PatientViewModelContext);
     if (!context) {
         throw new Error("usePatientDashboard must be used within PatientDashboardProvider");
     }
@@ -176,7 +176,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
     const refreshMedications = () => fetchPatientData();
 
     return (
-        <PatientDashboardContext.Provider
+        <PatientViewModelContext.Provider
             value={{
                 activeTab,
                 setActiveTab,
@@ -199,7 +199,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             }}
         >
             {children}
-        </PatientDashboardContext.Provider>
+        </PatientViewModelContext.Provider>
     );
 };
 

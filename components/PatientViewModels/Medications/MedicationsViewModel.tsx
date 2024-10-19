@@ -1,6 +1,6 @@
 // components/PatientViewModels/Medications/MedicationsViewModel.tsx
 import { useState, useCallback } from 'react';
-import { usePatientDashboard } from "../PatientDashboardContext";
+import { usePatientDashboard } from "../PatientViewModelContext";
 import { IRXForm } from '@/models/rxOrders';
 import { IMedOrders } from '@/models/medOrders';
 

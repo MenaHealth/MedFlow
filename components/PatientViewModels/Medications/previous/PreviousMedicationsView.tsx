@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { usePreviousMedicationsViewModel } from './PreviousMedicationsViewModel';
-import { ScrollArea } from './../../../components/form/ScrollArea';
+import { ScrollArea } from '../../../form/ScrollArea';
 
 export default function PreviousMedicationsView() {
     const { rxForms, medicalOrders, loadingMedications } = usePreviousMedicationsViewModel();

@@ -2,7 +2,7 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import { BarLoader } from "react-spinners";
-import RXForm from "./../../../components/PatientViewModels/Medications/RXFormView";
+import RXForm from "../../../components/PatientViewModels/Medications/rx/RXFormView";
 
 interface RXPageProps {
     params: {

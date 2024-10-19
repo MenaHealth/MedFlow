@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronsDown, ChevronsUp, ChevronUp } from 'lucide-react'; // Importing the Chevron icons
 import { usePreviousNotesViewModel } from './PreviousNotesViewModel';
-import { ScrollArea } from '@/components/form/ScrollArea';
+import { ScrollArea } from './../../../../components/form/ScrollArea';
 
 export function PreviousNotesView() {
     const { notes, loading, error } = usePreviousNotesViewModel();

@@ -1,5 +1,5 @@
 // components/PatientViewModels/Medications/PreviousMedicationsViewModel.tsx
-import { usePatientDashboard } from './../../PatientViewModels/PatientDashboardContext';
+import { usePatientDashboard } from '../../PatientDashboardContext';
 
 export function usePreviousMedicationsViewModel() {
     const { rxForms, medicalOrders, loadingMedications } = usePatientDashboard();

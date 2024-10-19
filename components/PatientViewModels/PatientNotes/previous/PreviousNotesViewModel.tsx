@@ -1,6 +1,6 @@
 // components/PatientViewModels/PatientNotes/PreviousNotesViewModel.tsx
-import { usePatientDashboard } from '@/components/PatientViewModels/PatientDashboardContext';
-import { INote } from '@/models/note';
+import { usePatientDashboard } from'./../../../../components/PatientViewModels/PatientDashboardContext';
+import { INote } from './../../../../models/note';
 
 export function usePreviousNotesViewModel() {
     const { notes, loadingNotes: loading, error } = usePatientDashboard();

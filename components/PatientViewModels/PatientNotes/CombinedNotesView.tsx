@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { CombinedNotesViewModel } from "./CombinedNotesViewModel";
-import { PhysicianNoteView } from "./PhysicianNoteView";
-import { ProcedureNoteView } from "./ProcedureNoteView";
-import { SubjectiveNoteView } from "./SubjectiveNoteView";
-import { PreviousNotesView } from "./PreviousNotesView";
+import { PhysicianNoteView } from "./forms/PhysicianNoteView";
+import { ProcedureNoteView } from "./forms/ProcedureNoteView";
+import { SubjectiveNoteView } from "./forms/SubjectiveNoteView";
+import { PreviousNotesView } from "./previous/PreviousNotesView";
 import { Card, CardContent, CardHeader } from "../../ui/card";
 import { RadioCard } from "../../ui/radio-card";
 import { Button } from "../../ui/button";

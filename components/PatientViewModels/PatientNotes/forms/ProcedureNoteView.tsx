@@ -1,5 +1,5 @@
 import React from 'react';
-import { ProcedureNote } from './CombinedNotesViewModel';
+import { ProcedureNote } from '../CombinedNotesViewModel';
 import {TextFormField} from "@/components/ui/TextFormField";
 import {ScrollArea} from "@/components/form/ScrollArea";
 

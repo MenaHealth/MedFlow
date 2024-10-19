@@ -1,5 +1,6 @@
 // models/RXForm.ts
 import { Schema, Document, Model, model, models } from 'mongoose';
+import { Pharmacies } from '@/data/pharmacies.enum';
 
 export interface IRXForm extends Document {
     email: string;
@@ -7,12 +8,6 @@ export interface IRXForm extends Document {
     authorName: string;
     authorID: string;
     content: {
-        patientName: string;
-        phoneNumber: string;
-        age: string;
-        address: string;
-        referringDr: string;
-        prescribingDr: string;
         diagnosis: string;
         medicationsNeeded: string;
         pharmacyOrClinic: string;
@@ -28,15 +23,9 @@ export const rxFormSchema = new Schema<IRXForm>({
     authorName: { type: String, required: true },
     authorID: { type: String, required: true },
     content: {
-        patientName: { type: String, required: true },
-        phoneNumber: { type: String, required: true },
-        age: { type: String, required: true },
-        address: { type: String, required: true },
-        referringDr: { type: String },
-        prescribingDr: { type: String },
         diagnosis: { type: String, required: true },
         medicationsNeeded: { type: String, required: true },
-        pharmacyOrClinic: { type: String, required: true },
+        pharmacyOrClinic: { type: String, enum: Pharmacies, required: true }, // Restrict to enum
         medication: { type: String, required: true },
         dosage: { type: String, required: true },
         frequency: { type: String, required: true },

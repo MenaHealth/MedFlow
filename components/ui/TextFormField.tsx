@@ -57,7 +57,7 @@ const TextFormField: React.FC<Props> = ({
         if (e?.target) {
             setHasValue(!!e.target.value);
         }
-        if (onBlur) onBlur();
+        if (onBlur) onBlur(e);
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

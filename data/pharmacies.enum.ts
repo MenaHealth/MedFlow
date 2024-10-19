@@ -1,3 +1,4 @@
+// data/pharmacies.enum.ts
 export const Pharmacies = [
     'EGH, Khan Younis',
     'Shuhada Al Aqsa, Dier El Balah',

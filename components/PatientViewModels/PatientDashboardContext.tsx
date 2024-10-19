@@ -7,8 +7,8 @@ import { useSession } from 'next-auth/react';
 import { PatientInfoViewModel } from "./patient-info/PatientInfoViewModel";
 import { IPatient } from '../../models/patient';
 import { INote } from '../../models/note';
-import { IRXForm } from '../../models/RXForm';
-import { IMedX } from '../../models/medX';
+import { IRXForm } from '../../models/rxOrders';
+import { IMedOrders } from '../../models/medOrders';
 
 interface PatientInfo {
     patientName: string;
@@ -51,7 +51,7 @@ interface PatientDashboardContextType {
     authorName: string;
     authorID: string;
     rxForms: IRXForm[];
-    medicalOrders: IMedX[];
+    medicalOrders: IMedOrders[];
     loadingMedications: boolean;
     refreshMedications: () => Promise<void>;
 }
@@ -80,7 +80,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
     const [authorName, setAuthorName] = useState('');
     const [authorID, setAuthorID] = useState('');
     const [rxForms, setRxForms] = useState<IRXForm[]>([]);
-    const [medicalOrders, setMedicalOrders] = useState<IMedX[]>([]);
+    const [medicalOrders, setMedicalOrders] = useState<IMedOrders[]>([]);
     const [loadingMedications, setLoadingMedications] = useState(false);
 
     useEffect(() => {

@@ -1,11 +1,13 @@
 // components/PatientViewModels/Medications/MedicationsViewModel.tsx
 import { useState, useCallback } from 'react';
 import { usePatientDashboard } from "../PatientDashboardContext";
-import { IRXForm } from '@/models/RXForm';
-import { IMedX } from '@/models/MedX';
+import { IRXForm } from '@/models/rxOrders';
+import { IMedOrders } from '@/models/medOrders';
 
 export function useMedicationsViewModel(patientId: string) {
-    const { rxForms, medicalOrders, loadingMedications, refreshMedications, userSession } = usePatientDashboard();
+    // Destructure all necessary properties from usePatientDashboard at once
+    const { userSession, rxForms, medicalOrders, loadingMedications, refreshMedications } = usePatientDashboard();
+
     const [templateType, setTemplateType] = useState<'rxform' | 'medicalrequest'>('rxform');
     const [isLoading, setIsLoading] = useState(false);
 
@@ -25,8 +27,8 @@ export function useMedicationsViewModel(patientId: string) {
         frequency: '',
     });
 
-    const [medicalOrder, setMedicalOrder] = useState<IMedX['content']>({
-        doctorSpecialty: '',
+    const [medicalOrder, setMedicalOrder] = useState<IMedOrders['content']>({
+        doctorSpecialty: userSession?.doctorSpecialty || '',
         patientName: '',
         patientPhoneNumber: '',
         patientAddress: '',
@@ -36,13 +38,19 @@ export function useMedicationsViewModel(patientId: string) {
         frequency: '',
     });
 
-    const setMedicationField = useCallback((formType: 'rxform' | 'medicalrequest', name: string, value: string) => {
+    const setMedicationField = (formType: 'rxform' | 'medicalrequest', name: string, value: string) => {
         if (formType === 'rxform') {
-            setRxForm(prev => ({ ...prev, [name]: value }));
+            setRxForm({
+                ...rxForm,
+                [name]: value
+            });
         } else {
-            setMedicalOrder(prev => ({ ...prev, [name]: value }));
+            setMedicalOrder({
+                ...medicalOrder,
+                [name]: value
+            });
         }
-    }, []);
+    };
 
     const createMedication = useCallback(async () => {
         if (!userSession?.email || !patientId) {
@@ -51,6 +59,8 @@ export function useMedicationsViewModel(patientId: string) {
         }
 
         let medicationData;
+        let endpoint;
+
         if (templateType === 'rxform') {
             medicationData = {
                 email: userSession.email,
@@ -60,6 +70,7 @@ export function useMedicationsViewModel(patientId: string) {
                 authorID: userSession.id,
                 content: rxForm,
             };
+            endpoint = `/api/patient/${patientId}/medications/rx-order`;  // RX Order endpoint
         } else {
             medicationData = {
                 email: userSession.email,
@@ -69,11 +80,12 @@ export function useMedicationsViewModel(patientId: string) {
                 authorID: userSession.id,
                 content: medicalOrder,
             };
+            endpoint = `/api/patient/${patientId}/medications/med-order`;  // Medical Order endpoint
         }
 
         try {
             setIsLoading(true);
-            const response = await fetch(`/api/patient/${patientId}/medications/${templateType === 'rxform' ? 'rx-order' : 'medical-order'}`, {
+            const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -88,7 +100,7 @@ export function useMedicationsViewModel(patientId: string) {
             const newMedication = await response.json();
             await refreshMedications();
 
-            // Reset the form fields after successful creation
+            // Reset form fields after successful creation
             if (templateType === 'rxform') {
                 setRxForm({
                     patientName: '',

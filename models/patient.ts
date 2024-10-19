@@ -2,9 +2,8 @@
 import { Schema, model, models, Document, Types } from 'mongoose';
 import { DoctorSpecialties as SPECIALTIES } from './../data/doctorSpecialty.enum';
 import { INote, noteSchema } from './note';
-import mongoose from 'mongoose';
-import {IRXForm, rxFormSchema} from "./RXForm";
-import {IMedX, medXSchema} from "./medX";
+import {IRXForm, rxFormSchema} from "./rxOrders";
+import {IMedOrders, medOrdersSchema} from "./medOrders";
 
 
   interface Prescription {
@@ -27,7 +26,7 @@ export interface IPatient extends Document {
   previouslyRegistered?: string;
   chiefComplaint?: string;
   coordinatorId?: string;
-  email: string;
+  email?: string; // This makes email optional
   laterality?: 'Not Selected' | 'Left' | 'Right' | 'Bilateral';
   diagnosis?: string;
   diagnosisCat?: string;
@@ -46,9 +45,9 @@ export interface IPatient extends Document {
   drinkCount?: string;
   otherDrugs?: string;
   allergies?: string;
-  notes: Types.DocumentArray<INote>;
-  RXForms: Types.DocumentArray<IRXForm>;
-  medx?: Types.DocumentArray<IMedX>;
+  notes?: Types.DocumentArray<INote>;
+  RXForms?: Types.DocumentArray<IRXForm>;
+  medOrders?: Types.DocumentArray<IMedOrders>;
   visits?: any[];
   triagedBy?: {
     firstName?: string;
@@ -60,56 +59,9 @@ export interface IPatient extends Document {
     lastName?: string;
     email?: string;
   };
+  createdAt?: Date;
+  updatedAt?: Date;
 }
-  export interface IPatient extends Document {
-    files?: any[];
-    _id?: string;
-    firstName: string;
-    lastName: string;
-    phone: string;
-    age?: string;
-    country?: string;
-    city?: string;
-    language?: string;
-    genderPreference?: string;
-    previouslyRegistered?: string;
-    chiefComplaint?: string;
-    coordinatorId?: string;
-    email?: string;
-    laterality?: 'Not Selected' | 'Left' | 'Right' | 'Bilateral';
-    diagnosis?: string;
-    diagnosisCat?: string;
-    hospital?: 'Not Selected' | 'PMC' | 'PRCS' | 'Hugo Chavez';
-    priority?: 'Not Selected' | 'Routine' | 'Moderate' | 'Urgent' | 'Emergency';
-    specialty?: typeof SPECIALTIES[number];
-    status?: 'Not Selected' | 'Not Started' | 'Triaged' | 'In-Progress' | 'Completed' | 'Archived';
-    complaint?: string;
-    icd10?: string;
-    surgeryDate?: Date;
-    occupation?: string;
-    baselineAmbu?: 'Not Selected' | 'Independent' | 'Boot' | 'Crutches' | 'Walker' | 'Non-Ambulatory';
-    pmhx?: string[];
-    pshx?: string[];
-    medOrders: Types.DocumentArray<IMedX>;
-    smokeCount?: string;
-    drinkCount?: string;
-    otherDrugs?: string;
-    allergies?: string;
-    triagedBy?: {
-      firstName?: string;
-      lastName?: string;
-      email?: string;
-    };
-    doctor?: {
-      firstName?: string;
-      lastName?: string;
-      email?: string;
-    };
-    notes?: [];
-    visits?: Types.ObjectId[];
-    createdAt?: Date; // Add timestamp field for creation
-    updatedAt?: Date; // Add timestamp field for last update
-  }
 
   // models/patient.ts
 
@@ -146,7 +98,7 @@ const PatientSchema = new Schema<IPatient>({
   allergies: { type: String },
   notes: { type: [noteSchema], default: [] },
   RXForms: { type: [rxFormSchema], default: [] },
-  medOrders: { type: [medXSchema], default: [] },
+  medOrders: { type: [medOrdersSchema], default: [] },
   visits: [{ type: Schema.Types.ObjectId, ref: 'Visit' }],
   triagedBy: { type: Object },
   doctor: { type: Object },

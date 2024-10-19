@@ -1,4 +1,4 @@
-// app/api/patient/[id]/medications/rx-order/route.ts
+// app/api/patient/[id]/medications/med-order/route.ts
 
 import { NextResponse } from 'next/server';
 import Patient from '../../../../../../models/patient';
@@ -19,7 +19,6 @@ export const POST = async (request: Request, { params }: Params) => {
         const requestData = await request.json();
         console.log("Received data:", requestData);
 
-        // Destructure fields from the request body
         const {
             email,
             date,
@@ -37,7 +36,7 @@ export const POST = async (request: Request, { params }: Params) => {
                 pharmacyOrClinic,
                 medication,
                 dosage,
-                frequency,
+                frequency
             }
         } = requestData;
 
@@ -60,7 +59,7 @@ export const POST = async (request: Request, { params }: Params) => {
         // Create new RX order
         const newRXOrder = new RxOrders({
             email,
-            date: date || new Date(), // Default to the current date if not provided
+            date: date || new Date(),
             authorName,
             authorID,
             content: {

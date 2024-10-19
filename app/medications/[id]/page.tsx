@@ -2,7 +2,7 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import { BarLoader } from "react-spinners";
-// import RXFormView from "@/components/form/Medications/RXFormView";
+// import RXOrderView from "@/components/form/Medications/RXOrderView";
 import MedicationsView from "@/components/PatientViewModels/Medications/MedicationsView";
 import PatientSubmenu from "@/components/PatientSubmenu";
 

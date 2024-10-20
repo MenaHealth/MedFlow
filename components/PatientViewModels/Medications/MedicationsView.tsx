@@ -1,17 +1,18 @@
 // components/PatientViewModels/Medications/MedicationsView.tsx
 import React, { useState } from 'react';
 import { useForm, FormProvider } from "react-hook-form";
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { RadioCard } from "@/components/ui/radio-card";
-import { ScrollArea } from '@/components/form/ScrollArea';
+import { Button } from './../../../components/ui/button';
+import { Card, CardContent, CardHeader } from './../../../components/ui/card';
+import { RadioCard } from './../../../components/ui/radio-card';
+import { ScrollArea } from './../../../components/form/ScrollArea';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useMedicationsViewModel } from './MedicationsViewModel';
 import RXOrderView from './rx/RXOrderView';
 import MedOrderView from './medX/MedOrderView';
 import PreviousMedicationsView from './previous/PreviousMedicationsView';
-import { Resizable } from '@/components/ui/Resizable';
-import {useRXFormViewModel} from "@/components/PatientViewModels/Medications/rx/RXOrderViewModel";
+import { Resizable } from './../../../components/ui/Resizable';
+import { useRXOrderViewModel } from './../../../components/PatientViewModels/Medications/rx/RXOrderViewModel';
+import { useMedOrderRequestViewModel } from './../../../components/PatientViewModels/Medications/medX/MedOrderViewModel';
 
 interface MedicationsViewProps {
     patientId: string;
@@ -20,17 +21,23 @@ interface MedicationsViewProps {
 export default function MedicationsView({ patientId }: MedicationsViewProps) {
     const {
         rxForm,
-        publishRXForm,
-        previousRXForms,
-        isLoading,
-    } = useRXFormViewModel(patientId);
+        SumbitRxOrder,
+        previousrxOrders,
+        isLoading: rxLoading,
+    } = useRXOrderViewModel(patientId);
+
+    const {
+        medicalOrder,
+        submitMedicalOrder,
+        isLoading: medLoading,
+    } = useMedOrderRequestViewModel(patientId);
 
     const [isExpanded, setIsExpanded] = useState(false);
     const [previousMedicationsWidth, setPreviousMedicationsWidth] = useState(400);
     const [templateType, setTemplateType] = useState<'rxform' | 'medicalrequest'>('rxform');
 
     const methods = useForm({
-        defaultValues: rxForm,
+        defaultValues: templateType === 'rxform' ? rxForm : medicalOrder,
     });
 
     const handleResize = (width: number) => {
@@ -39,10 +46,9 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
 
     const handleCreateMedication = async (data: any) => {
         if (templateType === 'rxform') {
-            await publishRXForm(data);
+            await SumbitRxOrder(data);
         } else {
-            // Handle medical request submission
-            console.log('Medical request submission not implemented yet');
+            await submitMedicalOrder();
         }
     };
 
@@ -65,9 +71,9 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                 </CardHeader>
                                 <CardContent className="h-full p-0">
                                     <PreviousMedicationsView
-                                        rxForms={previousRXForms}
-                                        medicalOrders={[]} // Add medical orders here when implemented
-                                        loadingMedications={false}
+                                        rxOrders={previousrxOrders}
+                                        medOrders={[]} // Add medical orders here when implemented
+                                        loadingMedications={rxLoading || medLoading}
                                     />
                                 </CardContent>
                             </ScrollArea>
@@ -86,9 +92,9 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                         <div className={`overflow-hidden transition-all duration-300 ${isExpanded ? 'max-h-[50vh]' : 'max-h-0'}`}>
                             <ScrollArea className="h-[50vh] w-full">
                                 <PreviousMedicationsView
-                                    rxForms={previousRXForms}
-                                    medicalOrders={[]} // Add medical orders here when implemented
-                                    loadingMedications={false}
+                                    rxOrders={previousrxOrders}
+                                    medOrders={[]} // Add medical orders here when implemented
+                                    loadingMedications={rxLoading || medLoading}
                                 />
                             </ScrollArea>
                         </div>
@@ -101,7 +107,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                 defaultValue={templateType}
                                 onValueChange={(value) => {
                                     setTemplateType(value as "rxform" | "medicalrequest");
-                                    methods.reset(value === 'rxform' ? rxForm : {});
+                                    methods.reset(value === 'rxform' ? rxForm : medicalOrder);
                                 }}
                                 className="flex w-full"
                             >
@@ -131,9 +137,9 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                         type="submit"
                                         variant="submit"
                                         className="mt-4"
-                                        disabled={isLoading}
+                                        disabled={rxLoading || medLoading}
                                     >
-                                        {isLoading ? 'Saving...' : 'Create Medication'}
+                                        {rxLoading || medLoading ? 'Saving...' : 'Create Medication'}
                                     </Button>
                                 </div>
                             </ScrollArea>

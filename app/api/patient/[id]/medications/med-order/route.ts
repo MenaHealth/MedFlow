@@ -81,8 +81,8 @@ export const POST = async (request: Request, { params }: Params) => {
         // Log the new RX order before saving
         console.log('New RX order to be saved:', newRXOrder);
 
-        // Add the RX order to the patient's RXForms array
-        patient.RXForms.push(newRXOrder);
+        // Add the RX order to the patient's rxOrders array
+        patient.rxOrders.push(newRXOrder);
         await patient.save();
         console.log('RX order saved successfully');
 

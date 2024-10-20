@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { RxOrders } from '@/models/rxOrders';
+import RxOrders from '../../../../models/rxOrders';
 import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewModelContext';
 
-export function useRXFormViewModel(patientId: string) {
+export function useRXOrderViewModel(patientId: string) {
     const { userSession } = usePatientDashboard();
     const [rxForm, setRxForm] = useState<RxOrders>({
         patientName: '',
@@ -19,10 +19,10 @@ export function useRXFormViewModel(patientId: string) {
         frequency: '',
     });
 
-    const [previousRXForms, setPreviousRXForms] = useState<RxOrders[]>([]);
+    const [previousrxOrders, setPreviousrxOrders] = useState<RxOrders[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
-    const publishRXForm = async (formData: RxOrders) => {
+    const SumbitRxOrder = async (formData: RxOrders) => {
         setIsLoading(true);
         try {
             const response = await fetch(`/api/patient/${patientId}/medications/rx-order`, {
@@ -44,7 +44,7 @@ export function useRXFormViewModel(patientId: string) {
             }
 
             const newRXForm = await response.json();
-            setPreviousRXForms(prevForms => [...prevForms, newRXForm]);
+            setPreviousrxOrders(prevForms => [...prevForms, newRXForm]);
             setRxForm({
                 patientName: '',
                 phoneNumber: '',
@@ -66,5 +66,5 @@ export function useRXFormViewModel(patientId: string) {
         }
     };
 
-    return { rxForm, publishRXForm, previousRXForms, isLoading };
+    return { rxForm, SumbitRxOrder, previousrxOrders, isLoading };
 }

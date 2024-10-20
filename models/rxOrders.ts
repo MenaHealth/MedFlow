@@ -2,7 +2,7 @@
 import { Schema, Document, Model, model, models } from 'mongoose';
 import { Pharmacies } from './../data/pharmacies.enum';
 
-export interface IRXForm extends Document {
+export interface IRxOrder extends Document {
     email: string;
     date: Date;
     authorName: string;
@@ -22,7 +22,7 @@ export interface IRXForm extends Document {
     };
 }
 
-export const RXOrderSchema = new Schema<IRXForm>({
+export const RXOrderSchema = new Schema<IRxOrder>({
     email: { type: String, required: true },
     date: { type: Date, default: Date.now },
     authorName: { type: String, required: true },
@@ -42,6 +42,6 @@ export const RXOrderSchema = new Schema<IRXForm>({
     },
 });
 
-const RxOrders: Model<IRXForm> = models.RxOrders || model<IRXForm>('RxOrders', RXOrderSchema);
+const RxOrders: Model<IRxOrder> = models.RxOrders || model<IRxOrder>('RxOrders', RXOrderSchema);
 
 export default RxOrders;

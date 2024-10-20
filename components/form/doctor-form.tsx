@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/form"
 import { MultiChoiceFormField } from "./MultiChoiceFormField"
 import { TextAreaFormField } from "../ui/TextAreaFormField"
-import { MedicationSelection } from "./MedicationSelection"
 const doctorFormSchema = z.object({
     doctorName: z.string(),
     patientName: z.string(),
@@ -67,7 +66,6 @@ export function DoctorForm() {
                 <TextFormField fieldName="patientPhoneNumber" fieldLabel="Patient's Phone Number" />
                 <MultiChoiceFormField fieldName="patientAddress" fieldLabel="Patient's Address" choices={["North Gaza", "Gaza City", "Deir Al Balah", "Khan Yunis", "Rafah"]} />
                 <TextAreaFormField form={form} fieldName="diagnosis" fieldLabel="Patient Diagnosis" />
-                <MedicationSelection form={form} fieldLabel="Medicine" fieldName="medx"  />
                 <MultiChoiceFormField fieldName="urgency" fieldLabel="Rate the Urgency" choices={["Extremely urgent: vital prognosis at risk", "Urgent: functional prognosis at risk", "Moderately urgent: can wait for few days-weeks",
                 "Less urgent: can wait", "Not urgent"]} />
                 <Button type="submit">Submit Request</Button>

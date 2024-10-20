@@ -3,9 +3,10 @@
 
 import * as React from 'react';
 import { useEffect, useState, useCallback } from "react";
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import { UserRoundPlus } from "lucide-react"
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -14,18 +15,17 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-
 import EditIcon from "@mui/icons-material/Edit";
 import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
+import InfoIcon from '@mui/icons-material/Info';
 
 import { Button } from '@/components/ui/button';
 import Tooltip from '../../../components/form/Tooltip';
 import './dashboard.css';
-import InfoIcon from '@mui/icons-material/Info';
 import TableCellWithTooltip from '@/components/TableCellWithTooltip';
 import * as Toast from '@radix-ui/react-toast';
-import { useSession } from 'next-auth/react';
+
 
 import {
   DropdownMenu,
@@ -51,6 +51,7 @@ export default function PatientTriage() {
   const [triageNotes, setTriageNotes] = useState({});
 
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     if (status === 'authenticated' && session?.user) {
@@ -280,6 +281,19 @@ export default function PatientTriage() {
     }
   }
 
+
+
+
+  useEffect(() => {
+    // This ensures the component has mounted before using the router
+  }, [router]);
+
+  const handlePatientClick = (patientId) => {
+    if (router) {
+      router.push(`/patient/${patientId}`);
+    }
+  };
+
   return (
     <>
       <div className="w-full relative dashboard-page">
@@ -459,13 +473,14 @@ export default function PatientTriage() {
                 <TableRow
                   key={index}
                   sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                  <TableCellWithTooltip tooltipText={row._id} maxWidth='100px'>
-                    <a href={`/patient-overview/${row._id}`} className="block overflow-hidden text-ellipsis text-sm" style={{
-                      maxWidth: '100px',
-                      whiteSpace: 'nowrap',
-                    }}>
+                  <TableCellWithTooltip tooltipText={row._id} maxWidth="100px">
+                    <div
+                        onClick={() => handlePatientClick(row._id)}
+                        className="block overflow-hidden text-ellipsis text-sm cursor-pointer"
+                        style={{ maxWidth: '100px', whiteSpace: 'nowrap' }}
+                    >
                       {row._id}
-                    </a>
+                    </div>
                   </TableCellWithTooltip>
                   <TableCell align="center" style={{ minWidth: '150px' }}>{row.lastName}</TableCell>
                   <TableCell align="center">{row.age || ''}</TableCell>

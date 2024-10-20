@@ -1,3 +1,4 @@
+// data/doctorSpecialty.enum.ts
 export enum DoctorSpecialtyList {
     ALLERGY_IMMUNOLOGY = 'Allergy & Immunology',
     ANESTHESIA_PAIN_MANAGEMENT = 'Anesthesia & Pain Management',

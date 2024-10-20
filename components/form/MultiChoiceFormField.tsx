@@ -53,7 +53,7 @@ export function MultiChoiceFormField({ fieldName, fieldLabel, choices }: MultiCh
                                     aria-expanded={open}
                                     className={cn(
                                         "w-full justify-between",
-                                        !displayValue && "text-muted-foreground"
+                                        typeof displayValue === "string" && !displayValue.length ? "text-muted-foreground" : ""
                                     )}
                                 >
                                     {displayValue && displayValue.length > 0

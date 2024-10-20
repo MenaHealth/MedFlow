@@ -1,8 +1,9 @@
+// app/medications/[id]/page.tsx
+
 "use client";
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import { BarLoader } from "react-spinners";
-// import RXOrderView from "@/components/form/Medications/RXOrderView";
 import MedicationsView from "@/components/PatientViewModels/Medications/MedicationsView";
 import PatientSubmenu from "@/components/PatientSubmenu";
 
@@ -32,7 +33,7 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ params }) => {
             <PatientSubmenu />
             <h1 className="text-3xl font-bold mb-8 text-center m-4 text-orange-500">Medications</h1>
             <div className="border border-gray-300 p-8 bg-grey-100 shadow rounded-lg">
-                <MedicationsView user={session.user} patientId={patientId} />
+                <MedicationsView patientId={patientId} />
             </div>
         </div>
     );

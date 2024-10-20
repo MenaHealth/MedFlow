@@ -2,11 +2,11 @@
 import { usePatientDashboard } from '../../PatientViewModelContext';
 
 export function usePreviousMedicationsViewModel() {
-    const { rxForms, medicalOrders, loadingMedications } = usePatientDashboard();
+    const { rxOrders, medOrders, loadingMedications } = usePatientDashboard();
 
     return {
-        rxForms,
-        medicalOrders,
+        rxOrders,
+        medOrders,
         loadingMedications,
     };
 }

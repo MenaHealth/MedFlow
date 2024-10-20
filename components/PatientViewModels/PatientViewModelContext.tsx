@@ -7,7 +7,7 @@ import { useSession } from 'next-auth/react';
 import { PatientInfoViewModel } from "./patient-info/PatientInfoViewModel";
 import { IPatient } from '../../models/patient';
 import { INote } from '../../models/note';
-import { IRXForm } from '../../models/rxOrders';
+import { IRxOrder } from '../../models/rxOrders';
 import { IMedOrders } from '../../models/medOrders';
 
 interface PatientInfo {
@@ -35,7 +35,7 @@ interface UserSession {
     countries?: string[];
 }
 
-interface PatientDashboardContextType {
+interface PatientContext {
     activeTab: string;
     setActiveTab: (tab: string) => void;
     patientInfo: PatientInfo | null;
@@ -50,13 +50,13 @@ interface PatientDashboardContextType {
     userSession: UserSession | null;
     authorName: string;
     authorID: string;
-    rxForms: IRXForm[];
-    medicalOrders: IMedOrders[];
+    rxOrders: IRxOrder[];
+    medOrders: IMedOrders[];
     loadingMedications: boolean;
     refreshMedications: () => Promise<void>;
 }
 
-const PatientViewModelContext = createContext<PatientDashboardContextType | undefined>(undefined);
+const PatientViewModelContext = createContext<PatientContext | undefined>(undefined);
 
 export const usePatientDashboard = () => {
     const context = useContext(PatientViewModelContext);
@@ -79,8 +79,8 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
     const [userSession, setUserSession] = useState<UserSession | null>(null);
     const [authorName, setAuthorName] = useState('');
     const [authorID, setAuthorID] = useState('');
-    const [rxForms, setRxForms] = useState<IRXForm[]>([]);
-    const [medicalOrders, setMedicalOrders] = useState<IMedOrders[]>([]);
+    const [rxOrders, setrxOrders] = useState<IRxOrder[]>([]);
+    const [medOrders, setmedOrders] = useState<IMedOrders[]>([]);
     const [loadingMedications, setLoadingMedications] = useState(false);
 
     useEffect(() => {
@@ -154,8 +154,8 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             } else {
                 setNotes([]);
             }
-            setRxForms(data.RXForms || []);
-            setMedicalOrders(data.medOrders || []);
+            setrxOrders(data.rxOrders || []);
+            setmedOrders(data.medOrders || []);
         } catch (error) {
             console.error('Error fetching patient data:', error);
         } finally {
@@ -192,8 +192,8 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 userSession,
                 authorName,
                 authorID,
-                rxForms,
-                medicalOrders,
+                rxOrders,
+                medOrders,
                 loadingMedications,
                 refreshMedications,
             }}

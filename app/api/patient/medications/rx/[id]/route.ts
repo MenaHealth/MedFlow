@@ -17,7 +17,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
         }
 
         const rxForm = JSON.parse(content);
-        patient.RXForms.push({
+        patient.rxOrders.push({
             title,
             content: rxForm,
             createdBy,

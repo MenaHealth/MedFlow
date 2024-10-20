@@ -1,19 +1,29 @@
-// components/PatientViewModels/PatientMedications/PreviousMedicationsView.tsx
-// components/PatientViewModels/Medications/PreviousMedicationsView.tsx
+// components/PatientViewModels/Medications/previous/PreviousMedicationsView.tsx
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import { usePreviousMedicationsViewModel } from './PreviousMedicationsViewModel';
 import { ScrollArea } from '../../../form/ScrollArea';
+import { IMedOrders } from './../../../../models/medOrders'; // Import medOrders interface
+import { IRxOrder } from './../../../../models/rxOrders'; // Import RxOrders interface
 
-export default function PreviousMedicationsView() {
-    const { rxForms, medicalOrders, loadingMedications } = usePreviousMedicationsViewModel();
+// Define props interface for PreviousMedicationsView
+interface PreviousMedicationsViewProps {
+    rxOrders: IRxOrder[];
+    medOrders: IMedOrders[];
+    loadingMedications: boolean;
+}
+
+export default function PreviousMedicationsView({
+                                                    rxOrders,
+                                                    medOrders,
+                                                    loadingMedications,
+                                                }: PreviousMedicationsViewProps) {
     const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
     if (loadingMedications) return <p>Loading medications...</p>;
 
     const toggleItemExpansion = (itemId: string) => {
         if (expandedItems.includes(itemId)) {
-            setExpandedItems(expandedItems.filter(id => id !== itemId));
+            setExpandedItems(expandedItems.filter((id) => id !== itemId));
         } else {
             setExpandedItems([...expandedItems, itemId]);
         }
@@ -22,9 +32,9 @@ export default function PreviousMedicationsView() {
     return (
         <div className="h-full">
             <ScrollArea className="h-full w-full">
-                {rxForms.length > 0 || medicalOrders.length > 0 ? (
+                {rxOrders.length > 0 || medOrders.length > 0 ? (
                     <ul className="list-none p-0">
-                        {rxForms.map((rxForm) => (
+                        {rxOrders.map((rxForm) => (
                             <li key={rxForm._id} className="p-4 border-b border-gray-200 bg-white">
                                 <div className="flex justify-between items-center">
                                     <div>
@@ -44,7 +54,7 @@ export default function PreviousMedicationsView() {
                                 )}
                             </li>
                         ))}
-                        {medicalOrders.map((medOrder) => (
+                        {medOrders.map((medOrder) => (
                             <li key={medOrder._id} className="p-4 border-b border-gray-200 bg-white">
                                 <div className="flex justify-between items-center">
                                     <div>

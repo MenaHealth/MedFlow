@@ -14,8 +14,8 @@ const PatientDashboardContent: React.FC = () => {
         fetchPatientData,
         isExpanded,
         toggleExpand,
-        rxForms,
-        medicalOrders,
+        rxOrders,
+        medOrders,
         loadingMedications,
         refreshMedications,
         userSession,
@@ -51,8 +51,8 @@ const PatientDashboardContent: React.FC = () => {
             return <MedicationsView
                 user={userSession}
                 patientId={patientViewModel?.getPrimaryDetails().patientID || ''}
-                rxForms={rxForms}
-                medicalOrders={medicalOrders}
+                rxOrders={rxOrders}
+                medOrders={medOrders}
                 loadingMedications={loadingMedications}
                 refreshMedications={refreshMedications}
             />;

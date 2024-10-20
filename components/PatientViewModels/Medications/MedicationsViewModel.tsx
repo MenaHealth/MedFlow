@@ -1,17 +1,17 @@
 // components/PatientViewModels/Medications/MedicationsViewModel.tsx
 import { useState, useCallback } from 'react';
 import { usePatientDashboard } from "../PatientViewModelContext";
-import { IRXForm } from '@/models/rxOrders';
+import { IRxOrder } from '@/models/rxOrders';
 import { IMedOrders } from '@/models/medOrders';
 
 export function useMedicationsViewModel(patientId: string) {
     // Destructure all necessary properties from usePatientDashboard at once
-    const { userSession, rxForms, medicalOrders, loadingMedications, refreshMedications } = usePatientDashboard();
+    const { userSession, rxOrders, medOrders, loadingMedications, refreshMedications } = usePatientDashboard();
 
     const [templateType, setTemplateType] = useState<'rxform' | 'medicalrequest'>('rxform');
     const [isLoading, setIsLoading] = useState(false);
 
-    const [rxForm, setRxForm] = useState<IRXForm['content']>({
+    const [rxForm, setRxForm] = useState<IRxOrder['content']>({
         patientName: '',
         phoneNumber: '',
         age: '',
@@ -139,8 +139,8 @@ export function useMedicationsViewModel(patientId: string) {
     }, [templateType, rxForm, medicalOrder, patientId, userSession, refreshMedications]);
 
     return {
-        rxForms,
-        medicalOrders,
+        rxOrders,
+        medOrders,
         loadingMedications,
         templateType,
         setTemplateType,

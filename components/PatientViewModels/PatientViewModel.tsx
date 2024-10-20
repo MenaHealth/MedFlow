@@ -5,6 +5,7 @@ import PatientInfoView from './patient-info/PatientInfoView';
 import { CombinedNotesView } from './../../components/PatientViewModels/PatientNotes/CombinedNotesView';
 import { Skeleton } from './../../components/ui/skeleton';
 import MedicationsView from './Medications/MedicationsView';
+import ImageGallery from './image-gallery/ImageGallery';
 
 const PatientDashboardContent: React.FC = () => {
     const {
@@ -55,6 +56,8 @@ const PatientDashboardContent: React.FC = () => {
                 loadingMedications={loadingMedications}
                 refreshMedications={refreshMedications}
             />;
+        } else if (section === 'images') {
+            return <ImageGallery />;
         }
     };
 
@@ -78,6 +81,13 @@ const PatientDashboardContent: React.FC = () => {
             icon: PillBottle,
             label: 'Medications',
             color: 'bg-orange-900',
+            textColor: 'text-orange-50'
+        },
+        {
+            id: 'images',
+            icon: PanelTopOpen,
+            label: 'Images',
+            color: 'bg-darkBlue',
             textColor: 'text-orange-50'
         }
     ];

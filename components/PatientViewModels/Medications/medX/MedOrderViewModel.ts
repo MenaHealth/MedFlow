@@ -9,7 +9,8 @@
         const [medOrder, setMedOrder] = useState({
             content: {
                 patientName: '',
-                patientPhoneNumber: '',
+                phoneNumber: '',
+                address: '',
                 diagnosis: '',
                 medications: '',
                 dosage: '',
@@ -59,6 +60,7 @@
                     content: {
                         patientName: '',
                         phoneNumber: '',
+                        address: '',
                         diagnosis: '',
                         medications: '',
                         dosage: '',

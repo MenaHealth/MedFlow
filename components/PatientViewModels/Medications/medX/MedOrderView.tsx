@@ -28,8 +28,8 @@ export default function MedOrderView({ patientId }: MedOrderViewProps) {
             if (primaryDetails.patientName !== medOrder.content.patientName) {
                 memoizedHandleInputChange('patientName', primaryDetails.patientName || '');
             }
-            if (expandedDetails.phone !== medOrder.content.patientPhoneNumber) {
-                memoizedHandleInputChange('patientPhoneNumber', expandedDetails.phone || '');
+            if (expandedDetails.phone !== medOrder.content.phoneNumber) {
+                memoizedHandleInputChange('phoneNumber', expandedDetails.phone || '');
             }
         }
     }, [userSession, primaryDetails, expandedDetails, medOrder.content, memoizedHandleInputChange]);
@@ -58,17 +58,16 @@ export default function MedOrderView({ patientId }: MedOrderViewProps) {
                 readOnly={true}
             />
             <TextFormField
-                fieldName="patientPhoneNumber"
-                fieldLabel="Patient's Phone Number"
-                value={medOrder.content.patientPhoneNumber}
-                readOnly={true}
+                fieldName="phoneNumber"
+                fieldLabel="Phone Number"
+                value={medOrder.content.phoneNumber}
+                onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
             />
             <TextFormField
-                fieldName="patientAddress"
-                fieldLabel="Patient's Address"
-                value={medOrder.content.patientAddress}
-                onChange={(e) => handleInputChange('patientAddress', e.target.value)}
-                readOnly={isReadOnly}
+                fieldName="address"
+                fieldLabel="address"
+                value={medOrder.content.address}
+                onChange={(e) => handleInputChange('address', e.target.value)}
             />
             <TextFormField
                 fieldName="diagnosis"

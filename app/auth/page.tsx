@@ -2,12 +2,12 @@
 "use client"
 
 import React, { useState } from 'react';
-import LoginForm from '@/components/auth/LoginForm';
-import { RadioCard } from '@/components/ui/radio-card';
-import Flex from "@/components/ui/flex";
-import Text from "@/components/ui/text";
-import { SignupProvider } from "@/components/auth/SignupContext";
-import SignupSection from '@/components/auth/SignupSection';
+import LoginForm from './../../components/auth/LoginForm';
+import { RadioCard } from './../../components/ui/radio-card';
+import Flex from "./../../components/ui/flex";
+import Text from "./../../components/ui/text";
+import { SignupProvider } from "./../../components/auth/SignupContext";
+import SignupSection from './../../components/auth/SignupSection';
 import { ChevronUpIcon, ChevronDownIcon } from 'lucide-react';
 
 export default function AuthPage() {

@@ -11,11 +11,9 @@ import {
 } from "@/components/ui/form"
 import { NumericalFormField } from "../NumericalFormField"
 import { TextAreaFormField } from "../../ui/TextAreaFormField"
-import { MedicationSelection } from "../MedicationSelection"
 import { DatePickerFormField } from "../DatePickerFormField"
 import { SelectFormField } from "../SelectFormField"
 import { TableSelect } from "../TableSelectTemplate"
-import { MedicationPopover } from "../MedicationPopover"
 import { PMHxSelect } from "../PMHxSelection"
 import { PSHxSelect } from "../PSHxSelection"
 
@@ -134,13 +132,12 @@ export function LabForm() {
                     <DatePickerFormField form={form} fieldName="surgeryDate" fieldLabel="Date of Surgery" />
                     <TextFormField form={form} fieldName="occupation" fieldLabel="Job/Occupation" />
                     <SelectFormField form={form} fieldName="baselineAmbu" fieldLabel="Baseline Ambu" />
-                    <MedicationSelection form={form} fieldName="medx" fieldLabel="Medications Needed" />
                     <PMHxSelect form={form} fieldName="pmhx" fieldLabel="PMHx" fieldCompact="PMHx" PopOverComponent={null} />
                     <NumericalFormField form={form} fieldName="smokeCount" fieldLabel="Smoking Status (packs per day)" />
                     <NumericalFormField form={form} fieldName="drinkCount" fieldLabel="Avg Drinks per week" />
                     <TextFormField form={form} fieldName="otherDrugs" fieldLabel="Other illicit uses" />
                     <TextFormField form={form} fieldName="allergies" fieldLabel="Allergies" />
-                    <TextAreaFormField form={form} fieldName="notes" fieldLabel="Notes" /> */}
+                    <TextAreaFormField form={form} fieldName="notes2" fieldLabel="PatientNotes" /> */}
 
                     <Button type="submit">Submit Request</Button>
                 </form>

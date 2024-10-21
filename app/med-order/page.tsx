@@ -1,4 +1,4 @@
-import { DoctorForm } from "@/components/form/doctor-form";
+import { DoctorForm } from "./../../components/form/doctor-form";
 
 export default function Home() {
   return (

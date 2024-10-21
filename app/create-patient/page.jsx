@@ -1,4 +1,8 @@
-// app/create-patient/page.jsx
+// app/create-patient/page.tsx
+// this page is for doctors and triage to create patients.
+// this file app/new-patient/page.jsx is for patients to create patients.
+// both views use the same API endpoint: app/api/patient/new/route.ts
+
 "use client";
 
 import { useState } from "react";

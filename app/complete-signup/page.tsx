@@ -3,11 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import Flex from "@/components/ui/flex";
-import Text from "@/components/ui/text";
-import { Card } from '@/components/ui/card';
-import { RadioCard } from '@/components/ui/radio-card';
-import { Button } from "@/components/ui/button";
+import Flex from "./../../components/ui/flex";
+import Text from "./../../components/ui/text";
+import { Card } from './../../components/ui/card';
+import { RadioCard } from './../../components/ui/radio-card';
+import { Button } from "./../../components/ui/button";
 
 
 const SignupSuccess = () => {

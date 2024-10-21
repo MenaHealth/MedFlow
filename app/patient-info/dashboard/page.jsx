@@ -1,10 +1,12 @@
+// app/patient-info/dashboard/page.jsx
 "use client";
 
 import * as React from 'react';
 import { useEffect, useState, useCallback } from "react";
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import { UserRoundPlus } from "lucide-react"
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -13,19 +15,17 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-
 import EditIcon from "@mui/icons-material/Edit";
 import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
+import InfoIcon from '@mui/icons-material/Info';
 
 import { Button } from '@/components/ui/button';
 import Tooltip from '../../../components/form/Tooltip';
 import './dashboard.css';
-import InfoIcon from '@mui/icons-material/Info';
 import TableCellWithTooltip from '@/components/TableCellWithTooltip';
 import * as Toast from '@radix-ui/react-toast';
-import { useSession } from 'next-auth/react';
-import NotesCell from '@/components/NotesCell';
+
 
 import {
   DropdownMenu,
@@ -35,19 +35,58 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdownMenu";
-import DescriptionIcon from '@mui/icons-material/Description';
 
 import { PRIORITIES, STATUS } from '@/data/data';
 import { DoctorSpecialties as DOCTOR_SPECIALTIES } from '@/data/doctorSpecialty.enum';
 import Link from 'next/link';
+import TriageModalView from "../../../components/TriageDashboard/TriageModalView";
 
 export default function PatientTriage() {
+  const { data: session, status } = useSession();
   const [rows, setRows] = React.useState([]);
+  const [userSession, setUserSession] = useState(null);
   const [priorityFilter, setPriorityFilter] = React.useState("all");
   const [statusFilter, setStatusFilter] = React.useState("all");
   const [specialtyFilter, setSpecialtyFilter] = React.useState("all");
+  const [triageNotes, setTriageNotes] = useState({});
 
-  const { data: session } = useSession();
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === 'authenticated' && session?.user) {
+      const userSessionData = {
+        id: session.user._id,
+        email: session.user.email,
+        firstName: session.user.firstName,
+        lastName: session.user.lastName,
+        accountType: session.user.accountType,
+        isAdmin: session.user.isAdmin,
+        image: session.user.image,
+        doctorSpecialty: session.user.doctorSpecialty,
+        languages: session.user.languages,
+        token: session.user.token,
+        gender: session.user.gender,
+        dob: session.user.dob,
+        countries: session.user.countries,
+      };
+      setUserSession(userSessionData);
+      console.log('Full user session object:', userSessionData);
+    }
+  }, [session, status]);
+
+
+  useEffect(() => {
+    // Fetch rows from API
+    const fetchPatients = async () => {
+      const response = await fetch('/api/patient');
+      const data = await response.json();
+      setRows(data);
+    };
+
+    fetchPatients();
+  }, []);
+
 
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState('');
@@ -242,6 +281,19 @@ export default function PatientTriage() {
     }
   }
 
+
+
+
+  useEffect(() => {
+    // This ensures the component has mounted before using the router
+  }, [router]);
+
+  const handlePatientClick = (patientId) => {
+    if (router) {
+      router.push(`/patient/${patientId}`);
+    }
+  };
+
   return (
     <>
       <div className="w-full relative dashboard-page">
@@ -408,18 +460,7 @@ export default function PatientTriage() {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
-                <TableCell align="left">
-                  <span>Additional</span>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    whiteSpace: 'nowrap',
-                  }}>
-                    <span>Notes</span>
-                    <Tooltip tooltipText={`Hover description icon to see full text.\nClick pencil icon to edit.`} showTooltip={true}>
-                      <InfoIcon className="ml-2" style={{ height: '1rem', width: '1rem' }} />
-                    </Tooltip>
-                  </div>
+                <TableCell align="center"><span>TRIAGE NOTE</span>
                 </TableCell>
                 <TableCell align="center">Triaged By</TableCell>
                 <TableCell align="center">Dr. Pref</TableCell>
@@ -432,13 +473,14 @@ export default function PatientTriage() {
                 <TableRow
                   key={index}
                   sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                  <TableCellWithTooltip tooltipText={row._id} maxWidth='100px'>
-                    <a href={`/patient-overview/${row._id}`} className="block overflow-hidden text-ellipsis text-sm" style={{
-                      maxWidth: '100px',
-                      whiteSpace: 'nowrap',
-                    }}>
+                  <TableCellWithTooltip tooltipText={row._id} maxWidth="100px">
+                    <div
+                        onClick={() => handlePatientClick(row._id)}
+                        className="block overflow-hidden text-ellipsis text-sm cursor-pointer"
+                        style={{ maxWidth: '100px', whiteSpace: 'nowrap' }}
+                    >
                       {row._id}
-                    </a>
+                    </div>
                   </TableCellWithTooltip>
                   <TableCell align="center" style={{ minWidth: '150px' }}>{row.lastName}</TableCell>
                   <TableCell align="center">{row.age || ''}</TableCell>
@@ -473,14 +515,16 @@ export default function PatientTriage() {
                         <DropdownMenuSeparator />
                         <DropdownMenuRadioGroup value={row.priority} onValueChange={async (value) => {
                           try {
-                            await fetch("/api/patient/assign", {
+                            await fetch('/api/patient/assign', {
                               method: 'PATCH',
                               headers: {
                                 'Content-Type': 'application/json',
                               },
                               body: JSON.stringify({
                                 _id: rows[index]["_id"],
-                                priority: value,
+                                status: "In-Progress",
+                                priority: value, // New priority value
+                                doctor: doctor
                               }),
                             });
                             const updatedRows = [...rows];
@@ -504,79 +548,76 @@ export default function PatientTriage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent style={{ maxWidth: "20rem", maxHeight: "25rem", overflowY: "auto" }}>
                         <DropdownMenuSeparator />
-                        <DropdownMenuRadioGroup value={row.specialty} onValueChange={async (value) => {
-                          try {
-                            await fetch("/api/patient/", {
-                              method: 'PATCH',
-                              headers: {
-                                'Content-Type': 'application/json',
-                              },
-                              body: JSON.stringify({
-                                _id: rows[index]["_id"],
-                                specialty: value,
-                              }),
-                            }).then(() => {
-                              const updatedRows = [...rows];
-                              updatedRows[index].specialty = value;
-                              setRows(updatedRows);
-                            })
-                          } catch (error) {
-                            console.log(error);
-                          }
-                        }}>
+                        <DropdownMenuRadioGroup
+                            value={row.specialty}
+                            onValueChange={async (value) => {
+                              try {
+                                await fetch(`/api/patient/${rows[index]._id}/specialty`, {
+                                  method: "PATCH",
+                                  headers: {
+                                    "Content-Type": "application/json",
+                                  },
+                                  body: JSON.stringify({
+                                    specialty: value,
+                                  }),
+                                });
+                                const updatedRows = [...rows];
+                                updatedRows[index].specialty = value;
+                                setRows(updatedRows);
+                              } catch (error) {
+                                console.log(error);
+                              }
+                            }}
+                        >
                           {DOCTOR_SPECIALTIES.map((specialty) => (
-                            <DropdownMenuRadioItem key={specialty} value={specialty}>{specialty}</DropdownMenuRadioItem>
+                              <DropdownMenuRadioItem key={specialty} value={specialty}>
+                                {specialty}
+                              </DropdownMenuRadioItem>
                           ))}
                         </DropdownMenuRadioGroup>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
-                  <NotesCell
-                    notes={row.notes}
-                    onUpdate={async (newNotes) => {
-                      try {
-                        await fetch("/api/patient/assign", {
-                          method: 'PATCH',
-                          headers: {
-                            'Content-Type': 'application/json',
-                          },
-                          body: JSON.stringify({
-                            _id: rows[index]["_id"],
-                            notes: newNotes,
-                          }),
-                        });
-                        const updatedRows = [...rows];
-                        updatedRows[index].notes = newNotes;
-                        setRows(updatedRows);
-                      } catch (error) {
-                        console.log(error);
-                      }
-                    }}
-                  />
+                  <TableCell align="center">
+                    <TableCell align="center">
+                      <TriageModalView
+                          userEmail={session.user.email}
+                          userId={session.user._id}
+                          userFirstName={session.user.firstName}
+                          note={triageNotes[row._id] || ""}
+                          patientId={row._id}
+                          patientName={`${row.firstName} ${row.lastName}`}
+                          currentStatus={row.status}
+                          currentPriority={row.priority}
+                          currentSpecialty={row.specialty}
+                      />
+                    </TableCell>
+                  </TableCell>
                   <TableCell align="center">
                     {getInitials(row.triagedBy?.firstName, row.triagedBy?.lastName)}
                   </TableCell>
                   <TableCell align="center">
                     {row.genderPreference === 'Male' ? '♂' : row.genderPreference === 'Female' ? '♀' : 'N/A'}
-                  </TableCell>
-                  <TableCell align="center">
-                    {row.status === 'Not Started'
-                      ? ''
-                      : row.status === 'In-Progress' || row.status === 'Archived'
-                        ? getInitials(row.doctor?.firstName, row.doctor?.lastName)
-                        : row.status === 'Triaged'
-                          ? session.user.accountType === 'Doctor'
-                            ? (
-                              <Button onClick={() => handleTakeCase(index)}
-                                variant="contained"
-                                color="primary"
-                                style={{
-                                  backgroundColor: 'black',
-                                  color: 'white',
-                                  borderRadius: '4px',
-                                  padding: '8px 16px',
-                                  fontSize: '14px',
-                                  textTransform: 'none',
+                      </TableCell>
+                      <TableCell align="center">
+                        {
+                          row.status === 'Not Started'
+                            ? ''
+                            : row.status === 'In-Progress' || row.status === 'Archived'
+                              ? getInitials(row.doctor?.firstName, row.doctor?.lastName)
+                              : row.status === 'Triaged'
+                                ? session.user.accountType === 'Doctor'
+                                  ?  (
+                                        <Button onClick={() => handleTakeCase(index)}
+                                          variant="contained"
+                                          color="primary"
+                                          style={{
+                                            backgroundColor: 'black',
+                                            color: 'white',
+                                            borderRadius: '4px',
+                                            padding: '8px 16px',
+                                            fontSize: '14px',
+                                            textTransform: 'none',
                                   boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)'
                                 }}>
                                 Take Case
@@ -602,8 +643,8 @@ export default function PatientTriage() {
             <p>No patient data found matching your expertise.</p>
           </div>
         )}
-      </div>
-      <Toast.Provider>
+        </div>
+        <Toast.Provider>
         <Toast.Root
           className="bg-black text-white p-3 rounded-lg shadow-lg"
           open={open}
@@ -617,4 +658,3 @@ export default function PatientTriage() {
     </>
   );
 }
-

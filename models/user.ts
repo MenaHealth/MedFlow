@@ -1,132 +1,136 @@
-// models/user.ts
-import { Schema, model, models, Document, CallbackError } from 'mongoose';
-import bcrypt from 'bcryptjs';
-import { SecurityQuestion } from '@/data/securityQuestions.enum';
-import { DoctorSpecialties, DoctorSpecialtyList } from '@/data/doctorSpecialty.enum';
+  // models/user.ts
+  import { Schema, model, models, Document, CallbackError } from 'mongoose';
+  import bcrypt from 'bcryptjs';
+  import { SecurityQuestion } from '../data/securityQuestions.enum';
+  import { Countries } from '../data/countries.enum';
+  import { Languages } from '../data/languages.enum';
+  import { DoctorSpecialties, DoctorSpecialtyList } from '../data/doctorSpecialty.enum';
 
-interface IUser extends Document {
-  lastLogin: Date;
-  firstName: string;
-  lastName: string;
-  email: string;
-  accountType: 'Doctor' | 'Triage';
-  password: string;
-  doctorSpecialty?: DoctorSpecialtyList;
-  languages?: string[];
-  countries?: string[];
-  gender?: 'male' | 'female';
-  dob: Date;
-  image?: string;
-  securityQuestions: {
-    question: SecurityQuestion;
-    answer: string;
-  }[];
-  authorized: boolean;
-  approvalDate?: Date;
-  denialDate?: Date;
-  tempPasswordResetCode?: string;
-  tempCodeExpiry?: Date;
-}
-
-const UserSchema = new Schema<IUser>({
-  lastLogin: {
-    type: Date,
-    default: null,
-  },
-  firstName: {
-    type: String,
-    required: [true, 'First name is required!'],
-  },
-  lastName: {
-    type: String,
-    required: [true, 'Last name is required!'],
-  },
-  email: {
-    type: String,
-    unique: true,
-    required: [true, 'Email is required!'],
-  },
-  accountType: {
-    type: String,
-    required: [true, 'Account type is required!'],
-    enum: ['Doctor', 'Triage'],
-  },
-  doctorSpecialty: {
-    type: String,
-    enum: DoctorSpecialties,
-  },
-  languages: {
-    type: [String],
-  },
-  countries: {
-    type: [String],
-  },
-  gender: {
-    type: String,
-    enum: ['male', 'female'],
-  },
-  dob: {
-    type: Date,
-    required: [true, 'Date of birth is required!'],
-  },
-  password: {
-    type: String,
-    required: [true, 'Password is required!'],
-  },
-  image: {
-    type: String,
-  },
-  securityQuestions: [{
-    question: {
-      type: String,
-      enum: Object.values(SecurityQuestion),
-      required: [true, 'Question is required!'],
-    },
-    answer: {
-      type: String,
-      required: [true, 'Answer is required!'],
-    },
-  }],
-  authorized: {
-    type: Boolean,
-    select: false,
-    default: undefined,
-  },
-  approvalDate: {
-    type: Date,
-  },
-  denialDate: {
-    type: Date,
-  },
-  tempPasswordResetCode: {
-    type: String,
-  },
-  tempCodeExpiry: {
-    type: Date,
-  },
-});
-
-UserSchema.virtual('denied').get(function () {
-  return !!this.denialDate;
-});
-
-UserSchema.pre('save', async function (next) {
-  const user = this;
-
-  // Only hash if the password is modified and not already hashed
-  if (user.isModified('password') && !user.password.startsWith('$2a$')) {
-    try {
-      const salt = await bcrypt.genSalt(10);
-      user.password = await bcrypt.hash(user.password, salt);
-    } catch (error) {
-      return next(error as CallbackError);
-    }
+  interface IUser extends Document {
+    lastLogin: Date;
+    firstName: string;
+    lastName: string;
+    email: string;
+    accountType: 'Doctor' | 'Triage';
+    password: string;
+    doctorSpecialty?: DoctorSpecialtyList;
+    languages?: string[];
+    countries?: string[];
+    gender?: 'male' | 'female';
+    dob: Date;
+    image?: string;
+    securityQuestions: {
+      question: SecurityQuestion;
+      answer: string;
+    }[];
+    authorized: boolean;
+    approvalDate?: Date;
+    denialDate?: Date;
+    tempPasswordResetCode?: string;
+    tempCodeExpiry?: Date;
   }
-  next();
-});
 
-const User = models.User || model<IUser>('User', UserSchema);
+  const UserSchema = new Schema<IUser>({
+    lastLogin: {
+      type: Date,
+      default: null,
+    },
+    firstName: {
+      type: String,
+      required: [true, 'First name is required!'],
+    },
+    lastName: {
+      type: String,
+      required: [true, 'Last name is required!'],
+    },
+    email: {
+      type: String,
+      unique: true,
+      required: [true, 'Email is required!'],
+    },
+    accountType: {
+      type: String,
+      required: [true, 'Account type is required!'],
+      enum: ['Doctor', 'Triage'],
+    },
+    doctorSpecialty: {
+      type: String,
+      enum: DoctorSpecialties,
+    },
+    languages: [{
+      type: String,
+      enum: Object.values(Languages),
+    }],
+    countries: [{
+      type: String,
+      enum: Object.values(Countries),
+    }],
+    gender: {
+      type: String,
+      enum: ['male', 'female'],
+    },
+    dob: {
+      type: Date,
+      required: [true, 'Date of birth is required!'],
+    },
+    password: {
+      type: String,
+      required: [true, 'Password is required!'],
+    },
+    image: {
+      type: String,
+    },
+    securityQuestions: [{
+      question: {
+        type: String,
+        enum: Object.values(SecurityQuestion),
+        required: [true, 'Question is required!'],
+      },
+      answer: {
+        type: String,
+        required: [true, 'Answer is required!'],
+      },
+    }],
+    authorized: {
+      type: Boolean,
+      select: false,
+      default: undefined,
+    },
+    approvalDate: {
+      type: Date,
+    },
+    denialDate: {
+      type: Date,
+    },
+    tempPasswordResetCode: {
+      type: String,
+    },
+    tempCodeExpiry: {
+      type: Date,
+    },
+  });
 
-export default User;
+  UserSchema.virtual('denied').get(function () {
+    return !!this.denialDate;
+  });
 
-export type { IUser };
+  UserSchema.pre('save', async function (next) {
+    const user = this;
+
+    // Only hash if the password is modified and not already hashed
+    if (user.isModified('password') && !user.password.startsWith('$2a$')) {
+      try {
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(user.password, salt);
+      } catch (error) {
+        return next(error as CallbackError);
+      }
+    }
+    next();
+  });
+
+  const User = models.User || model<IUser>('User', UserSchema);
+
+  export default User;
+
+  export type { IUser };

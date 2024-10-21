@@ -11,7 +11,7 @@ import {
     DrawerDescription,
     DrawerHeader,
     DrawerTitle,
-} from "@/components/ui/drawer"
+} from "../../components/ui/drawer"
 
 interface UserDrawerProps {
     isOpen: boolean

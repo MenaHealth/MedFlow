@@ -43,9 +43,9 @@ export function LoginForm() {
         fetchProviders();
     }, []);
 
-    useEffect(() => {
-        console.log("LoginForm component has mounted!");
-    }, []);
+    // useEffect(() => {
+    //     console.log("LoginForm component has mounted!");
+    // }, []);
 
     const onError = (errors: any) => {
         const errorMessages = [];
@@ -77,7 +77,7 @@ export function LoginForm() {
 
     const onSubmit = async (data: LoginFormValues) => {
         setSubmitting(true);
-        console.log("Login button clicked! Form data:", data); // Log form data
+        // console.log("Login button clicked! Form data:", data);
 
         try {
             const response = await signIn('credentials', {
@@ -85,7 +85,7 @@ export function LoginForm() {
                 password: data.password,
                 redirect: false,
             });
-            console.log("Full response from signIn:", response); // Log the entire response
+            // console.log("Full response from signIn:", response);
 
             if (response && !response.error) {
                 setToast?.({ title: '✓', description: 'You have successfully logged in.', variant: 'default' });
@@ -104,7 +104,7 @@ export function LoginForm() {
                 }
             }
         } catch (error) {
-            console.error("Error during login:", error);
+            // console.error("Error during login:", error);
             setToast?.({ title: 'Login Error', description: 'An unexpected error occurred. Please try again.', variant: 'error' });
         } finally {
             setSubmitting(false);
@@ -125,14 +125,13 @@ export function LoginForm() {
                     <TextFormField
                         fieldName="password"
                         fieldLabel="Password"
-                        type="password"
                         error={form.formState.errors.password?.message}
                     />
                     <div className="flex justify-center mt-6">
                         <Button
                             type="submit"
                             disabled={submitting}
-                            onClick={() => console.log("Login button clicked!")}
+                            variant={'submit'}
                         > Login
                             {submitting && (
                                 <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">

@@ -65,7 +65,7 @@ const handler = NextAuth({
                 const isAdmin = await Admin.findOne({ userId: user._id });
 
                 const session = {
-                    id: user._id.toString(),
+                    _id: user._id.toString(),
                     email: user.email,
                     firstName: user.firstName,
                     lastName: user.lastName,
@@ -73,6 +73,10 @@ const handler = NextAuth({
                     image: user.image,
                     isAdmin: !!isAdmin,
                     dob: user.dob,
+                    gender: user.gender,
+                    countries: user.countries || [],
+                    languages: user.languages || [],
+                    doctorSpecialty: user.doctorSpecialty,
                 };
 
                 if (user.accountType === 'Doctor') {
@@ -105,46 +109,48 @@ const handler = NextAuth({
         },
         // Updated jwt callback to include the accessToken
         async jwt({ token, user, account }) {
-            if (account) {
-                if (account.provider === 'google') {
-                    // Handle Google user
-                    const googleUser = await GoogleUser.findOne({ email: token.email });
+            if (account && user) {
+                console.log('User data in jwt callback:', user);
+                token.id = user._id.toString();
+                    if (account.provider === 'google') {
+                        // Handle Google user
+                        const googleUser = await GoogleUser.findOne({ email: token.email });
 
-                    if (googleUser) {
-                        token.id = googleUser.userID;
-                        token.accountType = googleUser.accountType;
-                        token.firstName = googleUser.firstName;
-                    } else {
-                        token.accountType = 'Pending';
-                    }
-                } else if (user) {
-                    token.id = user._id;
-                    token.accountType = user.accountType;
-                    token.firstName = user.firstName;
-                    token.lastName = user.lastName;
-                    token.image = user.image;
-                    token.isAdmin = user.isAdmin;
-                    token.dob = user.dob;
-
-                    token.accessToken = jwt.sign(
-                        { id: user._id, email: user.email, isAdmin: user.isAdmin },
-                        process.env.JWT_SECRET,
-                        { expiresIn: '1d' } // Set expiration time for the JWT
-                    );
-
-                    if (user.accountType === 'Doctor') {
+                        if (googleUser) {
+                            token.id = googleUser.userID;
+                            token.accountType = googleUser.accountType;
+                            token.firstName = googleUser.firstName;
+                        } else {
+                            token.accountType = 'Pending';
+                        }
+                    } else if (user) {
+                        token.id = user._id.toString();
+                        token.accountType = user.accountType;
+                        token.firstName = user.firstName;
+                        token.lastName = user.lastName;
+                        token.image = user.image;
+                        token.isAdmin = user.isAdmin;
+                        token.dob = user.dob;
+                        token.gender = user.gender;
+                        token.countries = user.countries;
                         token.languages = user.languages;
                         token.doctorSpecialty = user.doctorSpecialty;
-                    }
-                }
-            }
 
+                        token.accessToken = jwt.sign(
+                            { id: user._id, email: user.email, isAdmin: user.isAdmin },
+                            process.env.JWT_SECRET,
+                            { expiresIn: '2d' }
+                        );
+                    }
+            }
+            // console.log('Token about to be passed to session callback:', token);
             return token;
         },
 
         async session({ session, token }) {
+            // console.log('Token in session callback:', token);
             if (token) {
-                session.user.id = token.id;
+                session.user._id = token.id;
                 session.user.accountType = token.accountType;
                 session.user.firstName = token.firstName;
                 session.user.lastName = token.lastName;
@@ -152,11 +158,10 @@ const handler = NextAuth({
                 session.user.isAdmin = token.isAdmin;
                 session.user.token = token.accessToken;
                 session.user.dob = token.dob;
-
-                if (token.accountType === 'Doctor') {
-                    session.user.languages = token.languages;
-                    session.user.doctorSpecialty = token.doctorSpecialty;
-                }
+                session.user.gender = token.gender;
+                session.user.countries = token.countries;
+                session.user.languages = token.languages;
+                session.user.doctorSpecialty = token.doctorSpecialty;
             }
             return session;
         },

@@ -1,12 +1,12 @@
 // app/api/auth/[...nextauth]/session.d.ts
 
-
 import NextAuth from 'next-auth';
+import { Countries, Languages } from '@/utils/enums'; // Make sure to import these
 
 declare module 'next-auth' {
     interface Session {
         user: {
-            id: string;
+            _id: string;
             email: string;
             firstName: string;
             lastName: string;
@@ -14,25 +14,27 @@ declare module 'next-auth' {
             isAdmin: boolean;
             image?: string;
             doctorSpecialty?: string;
-            languages?: string[];
+            languages?: Languages[];
             token?: string;
             gender?: 'male' | 'female';
             dob?: Date;
-            countries?: string[];
+            countries?: Countries[];
         };
     }
 
     interface JWT {
-        id: string;
+        _id: string;
         accountType: 'Doctor' | 'Triage';
         firstName: string;
         lastName: string;
-        isAdmin: boolean;  // Admin access is encoded in the token
+        isAdmin: boolean;
         token?: string;
         doctorSpecialty?: string;
-        languages?: string[];
+        languages?: Languages[]; // Update to use the enum
         gender?: 'male' | 'female';
         dob: Date;
-        countries?: string[];
+        countries?: Countries[]; // Update to use the enum
+        email: string;
+        image?: string;
     }
 }

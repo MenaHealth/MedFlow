@@ -2,13 +2,13 @@
     import { useForm, FormProvider } from "react-hook-form";
     import { zodResolver } from "@hookform/resolvers/zod";
     import { z } from "zod";
-    import { TextFormField } from "@/components/ui/TextFormField";
-    import { MultiChoiceFormField } from "@/components/form/MultiChoiceFormField";
-    import { SingleChoiceFormField } from "@/components/form/SingleChoiceFormField";
-    import { DatePickerFormField } from "@/components/form/DatePickerFormField";
-    import { DoctorSpecialties } from '@/data/doctorSpecialty.enum';
-    import { LanguagesList } from '@/data/languages.enum';
-    import { CountriesList } from '@/data/countries.enum';
+    import { TextFormField } from "../../components/ui/TextFormField";
+    import { MultiChoiceFormField } from "../../components/form/MultiChoiceFormField";
+    import { SingleChoiceFormField } from "../../components/form/SingleChoiceFormField";
+    import { DatePickerFormField } from "../../components/form/DatePickerFormField";
+    import { DoctorSpecialties } from '../../data/doctorSpecialty.enum';
+    import { LanguagesList } from '../../data/languages.enum';
+    import { CountriesList } from '../../data/countries.enum';
     import { useSignupContext } from './SignupContext';
 
     const doctorSignupSchema = z.object({

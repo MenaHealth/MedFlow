@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
+    "types": ["next-auth"],
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
+    "typeRoots": ["./node_modules/@types", "./types"],
     "skipLibCheck": true,
     "strict": true,
     "noImplicitAny": true,
@@ -24,6 +26,12 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "components/PatientCard.jsx", "app/rx/rx.tsx / [id]"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "app/api/auth/[...nextauth]/session.d.ts"
+  ],
   "exclude": ["node_modules"]
 }

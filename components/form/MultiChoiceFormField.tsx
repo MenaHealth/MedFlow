@@ -6,7 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/form/ScrollArea";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "../../utils/classNames";
 import { Send } from "lucide-react";
 
 interface MultiChoiceFormFieldProps {
@@ -53,7 +53,7 @@ export function MultiChoiceFormField({ fieldName, fieldLabel, choices }: MultiCh
                                     aria-expanded={open}
                                     className={cn(
                                         "w-full justify-between",
-                                        !displayValue && "text-muted-foreground"
+                                        typeof displayValue === "string" && !displayValue.length ? "text-muted-foreground" : ""
                                     )}
                                 >
                                     {displayValue && displayValue.length > 0

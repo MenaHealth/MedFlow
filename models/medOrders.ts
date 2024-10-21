@@ -11,8 +11,8 @@ export interface IMedOrders extends Document {
     content: {
         doctorSpecialty: typeof DoctorSpecialties[number];
         patientName: string;
-        patientPhoneNumber: string;
-        patientAddress: string;
+        phoneNumber: string;
+        address: string;
         diagnosis: string;
         medications: string;
         dosage: string;
@@ -28,8 +28,8 @@ export const medOrdersSchema = new Schema<IMedOrders>({
     content: {
         doctorSpecialty: { type: String, enum: DoctorSpecialties, required: true },
         patientName: { type: String, required: true },
-        patientPhoneNumber: { type: String, required: true },
-        patientAddress: { type: String, required: true },
+        phoneNumber: { type: String, required: true }, // Changed from patientPhoneNumber
+        address: { type: String, required: true },
         diagnosis: { type: String, required: true },
         medications: { type: String, required: true },
         dosage: { type: String, required: true },
@@ -37,7 +37,6 @@ export const medOrdersSchema = new Schema<IMedOrders>({
     },
 });
 
-// Check if the model already exists before defining it
 const MedOrders: Model<IMedOrders> = models.MedOrders || model<IMedOrders>('MedOrders', medOrdersSchema);
 
 export default MedOrders;

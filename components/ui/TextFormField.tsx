@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
-import { Input } from '@/components/ui/input';
+import { Input } from './../../components/ui/input';
 
 interface Props {
     fieldName: string;
@@ -19,6 +19,7 @@ interface Props {
     onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
     multiline?: boolean;
     rows?: number;
+    readOnly?: boolean;
 }
 
 const TextFormField: React.FC<Props> = ({
@@ -36,6 +37,7 @@ const TextFormField: React.FC<Props> = ({
                                             onChange,
                                             multiline,
                                             rows,
+                                            readOnly,
                                         }) => {
     const [isFocused, setIsFocused] = useState(false);
     const [hasValue, setHasValue] = useState(!!value);
@@ -48,22 +50,34 @@ const TextFormField: React.FC<Props> = ({
     }, [value]);
 
     const handleFocus = () => {
-        setIsFocused(true);
-        if (onFocus) onFocus();
+        if (!readOnly) {
+            setIsFocused(true);
+            if (onFocus) onFocus();
+        }
     };
 
     const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        setIsFocused(false);
-        if (e?.target) {
-            setHasValue(!!e.target.value);
+        if (!readOnly) {
+            setIsFocused(false);
+            if (e?.target) {
+                setHasValue(!!e.target.value);
+            }
+            if (onBlur) onBlur(e);
         }
-        if (onBlur) onBlur(e);
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        setHasValue(!!e.target.value);
-        if (onChange) onChange(e);
+        if (!readOnly) {
+            setHasValue(!!e.target.value);
+            if (onChange) onChange(e);
+        }
     };
+
+    const inputClassName = `w-full pt-4 pb-2 pl-2 pr-10 border-2 rounded-md text-gray-700 ${
+        readOnly ? 'bg-gray-50 cursor-not-allowed hover:bg-orange-50' : 'hover:border-orange-500'
+    } ${
+        isFocused || hasValue ? 'border-darkBlue' : 'border-gray-300'
+    }`;
 
     const renderInput = ({ field }: any) => (
         <div className={`mt-6 mb-6 p-2 ${className}`}>
@@ -84,8 +98,9 @@ const TextFormField: React.FC<Props> = ({
                         id={id}
                         name={fieldName}
                         autoComplete={autoComplete}
-                        className={`w-full pt-4 pb-2 pl-2 pr-10 border-2 ${isFocused || hasValue ? 'border-darkBlue' : 'border-gray-300'} rounded-md text-gray-700 hover:border-orange-500`}
+                        className={inputClassName}
                         rows={rows || 2}
+                        readOnly={readOnly}
                     />
                 ) : (
                     <Input
@@ -103,16 +118,17 @@ const TextFormField: React.FC<Props> = ({
                         id={id}
                         name={fieldName}
                         autoComplete={autoComplete}
-                        className={`w-full pt-4 pb-2 pl-2 pr-10 border-2 hover:border-orange-500 border-gray-300 rounded-md text-gray-700 ${
-                            isFocused || hasValue ? 'border-darkBlue' : ''
-                        }`}
+                        className={inputClassName}
+                        readOnly={readOnly}
                     />
                 )}
 
                 <label
                     htmlFor={id}
                     className={`absolute transition-all duration-200 ${
-                        (isFocused || hasValue) ? 'text-xs -top-2 left-2 bg-white px-1' : 'text-sm top-1/2 left-2 -translate-y-1/2'
+                        isFocused || hasValue
+                            ? 'text-xs -top-2 left-2 bg-white px-1'
+                            : 'text-sm top-1/2 left-2 -translate-y-1/2'
                     } pointer-events-none`}
                     style={{
                         transformOrigin: 'left center',
@@ -120,7 +136,6 @@ const TextFormField: React.FC<Props> = ({
                 >
                     {fieldLabel}
                 </label>
-
 
                 {showTooltip && tooltip && (
                     <div className="absolute left-0 bottom-full mt-2 w-full bg-gray-700 text-white text-sm p-2 rounded shadow-lg z-10">
@@ -133,15 +148,12 @@ const TextFormField: React.FC<Props> = ({
     );
 
     if (formContext) {
-        return (
-            <Controller
-                name={fieldName}
-                render={renderInput}
-            />
-        );
+        return <Controller name={fieldName} render={renderInput} />;
     }
 
-    return renderInput({ field: { value: value || '', onChange: handleChange, onBlur: handleBlur } });
+    return renderInput({
+        field: { value: value || '', onChange: handleChange, onBlur: handleBlur },
+    });
 };
 
 export { TextFormField };

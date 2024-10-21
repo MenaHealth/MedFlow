@@ -1,3 +1,4 @@
+// models/note.ts
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
 // Define the base Note interface with a flexible content field

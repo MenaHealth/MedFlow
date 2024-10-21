@@ -34,22 +34,22 @@ export default function PreviousMedicationsView({
             <ScrollArea className="h-full w-full">
                 {rxOrders.length > 0 || medOrders.length > 0 ? (
                     <ul className="list-none p-0">
-                        {rxOrders.map((rxForm) => (
-                            <li key={rxForm._id} className="p-4 border-b border-gray-200 bg-white">
+                        {rxOrders.map((rxOrder) => (
+                            <li key={rxOrder._id} className="p-4 border-b border-gray-200 bg-white">
                                 <div className="flex justify-between items-center">
                                     <div>
-                                        <h3 className="font-bold">RX Form: {rxForm.content.medication}</h3>
-                                        <p>{new Date(rxForm.date).toLocaleDateString()}</p>
-                                        <h4 className="font-bold">Prescribed by: {rxForm.authorName}</h4>
+                                        <h3 className="font-bold">RX Form: {rxOrder.content.medication}</h3>
+                                        <p>{new Date(rxOrder.date).toLocaleDateString()}</p>
+                                        <h4 className="font-bold">Prescribed by: {rxOrder.authorName}</h4>
                                     </div>
-                                    <button onClick={() => toggleItemExpansion(rxForm._id)} className="text-gray-600">
-                                        {expandedItems.includes(rxForm._id) ? <ChevronUp /> : <ChevronDown />}
+                                    <button onClick={() => toggleItemExpansion(rxOrder._id)} className="text-gray-600">
+                                        {expandedItems.includes(rxOrder._id) ? <ChevronUp /> : <ChevronDown />}
                                     </button>
                                 </div>
-                                {expandedItems.includes(rxForm._id) && (
+                                {expandedItems.includes(rxOrder._id) && (
                                     <div className="mt-2">
-                                        <p><strong>Dosage:</strong> {rxForm.content.dosage}</p>
-                                        <p><strong>Frequency:</strong> {rxForm.content.frequency}</p>
+                                        <p><strong>Dosage:</strong> {rxOrder.content.dosage}</p>
+                                        <p><strong>Frequency:</strong> {rxOrder.content.frequency}</p>
                                     </div>
                                 )}
                             </li>

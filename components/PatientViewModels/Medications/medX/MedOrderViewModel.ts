@@ -1,65 +1,78 @@
-// components/form/Medications/MedOrderViewModel.ts
-import { useState } from 'react';
+    // components/form/Medications/MedOrderViewModel.ts
 
-export function useMedOrderRequestViewModel(patientId: string) {
-    const [medicalOrder, setMedicalOrder] = useState({
-        doctorSpecialty: '',
-        patientName: '',
-        patientPhoneNumber: '',
-        patientAddress: '',
-        diagnosis: '',
-        medications: '',
-        dosage: '',
-        frequency: '',
-    });
-    const [isLoading, setIsLoading] = useState(false);
-    const [isReadOnly, setIsReadOnly] = useState(false);
 
-    const handleInputChange = (name: string, value: string) => {
-        setMedicalOrder({
-            ...medicalOrder,
-            [name]: value,
-        });
-    };
+    import { useState } from 'react';
+    import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewModelContext';
 
-    const submitMedicalOrder = async () => {
-        setIsLoading(true);
-        try {
-            const response = await fetch(`/api/patient/${patientId}/medications/med-order`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    doctorSpecialty: medicalOrder.doctorSpecialty,
-                    patientName: medicalOrder.patientName,
-                    patientPhoneNumber: medicalOrder.patientPhoneNumber,
-                    patientAddress: medicalOrder.patientAddress,
-                    diagnosis: medicalOrder.diagnosis,
-                    medications: medicalOrder.medications,
-                    dosage: medicalOrder.dosage,
-                    frequency: medicalOrder.frequency,
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to submit medical order');
+    export function useMedOrderRequestViewModel(patientId: string) {
+        const { userSession } = usePatientDashboard();
+        const [medOrder, setMedOrder] = useState({
+            content: {
+                patientName: '',
+                patientPhoneNumber: '',
+                diagnosis: '',
+                medications: '',
+                dosage: '',
+                frequency: '',
+                patientAddress: '',
+                doctorSpecialty: ''
             }
+        });
 
-            // Mark the form as read-only on success
-            setIsReadOnly(true);
-        } catch (error) {
-            console.error('Error submitting medical order:', error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+        const handleInputChange = (field: string, value: string) => {
+            setMedOrder(prevState => ({
+                ...prevState,
+                content: {
+                    ...prevState.content,
+                    [field]: value,
+                },
+            }));
+        };
 
-    return {
-        medicalOrder,
-        isLoading,
-        isReadOnly,
-        handleInputChange,
-        submitMedicalOrder,
-    };
-}
+        const [previousMedOrders, setPreviousMedOrders] = useState([]);
+        const [isLoading, setIsLoading] = useState(false);
+
+        const submitMedOrder = async () => {
+            setIsLoading(true);
+            try {
+                const response = await fetch(`/api/patient/${patientId}/medications/med-order`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: userSession?.email,
+                        authorName: `${userSession?.firstName} ${userSession?.lastName}`,
+                        authorID: userSession?.id,
+                        content: medOrder.content,
+                    }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to submit med order');
+                }
+
+                const newMedOrder = await response.json();
+                setPreviousMedOrders(prevForms => [...prevForms, newMedOrder]);
+                setMedOrder({
+                    content: {
+                        patientName: '',
+                        phoneNumber: '',
+                        diagnosis: '',
+                        medications: '',
+                        dosage: '',
+                        frequency: '',
+                        patientAddress: '',
+                        doctorSpecialty: '',
+                    }
+                });
+            } catch (error) {
+                console.error('Failed to submit med order:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        return { medOrder, submitMedOrder, previousMedOrders, isLoading, handleInputChange };
+    }

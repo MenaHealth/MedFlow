@@ -20,24 +20,24 @@ interface MedicationsViewProps {
 
 export default function MedicationsView({ patientId }: MedicationsViewProps) {
     const {
-        rxForm,
+        rxOrder,
         SumbitRxOrder,
         previousrxOrders,
         isLoading: rxLoading,
     } = useRXOrderViewModel(patientId);
 
     const {
-        medicalOrder,
-        submitMedicalOrder,
+        medOrder,
+        submitMedOrder,
         isLoading: medLoading,
     } = useMedOrderRequestViewModel(patientId);
 
     const [isExpanded, setIsExpanded] = useState(false);
     const [previousMedicationsWidth, setPreviousMedicationsWidth] = useState(400);
-    const [templateType, setTemplateType] = useState<'rxform' | 'medicalrequest'>('rxform');
+    const [templateType, setTemplateType] = useState<'rxOrder' | 'medicalrequest'>('rxOrder');
 
     const methods = useForm({
-        defaultValues: templateType === 'rxform' ? rxForm : medicalOrder,
+        defaultValues: templateType === 'rxOrder' ? rxOrder : medOrder,
     });
 
     const handleResize = (width: number) => {
@@ -45,10 +45,10 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
     };
 
     const handleCreateMedication = async (data: any) => {
-        if (templateType === 'rxform') {
+        if (templateType === 'rxOrder') {
             await SumbitRxOrder(data);
         } else {
-            await submitMedicalOrder();
+            await submitMedOrder();
         }
     };
 
@@ -106,32 +106,32 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                             <RadioCard.Root
                                 defaultValue={templateType}
                                 onValueChange={(value) => {
-                                    setTemplateType(value as "rxform" | "medicalrequest");
-                                    methods.reset(value === 'rxform' ? rxForm : medicalOrder);
+                                    setTemplateType(value as "rxOrder" | "medicalrequest");
+                                    methods.reset(value === 'rxOrder' ? rxOrder : medOrder);
                                 }}
                                 className="flex w-full"
                             >
                                 <RadioCard.Item
-                                    value="rxform"
-                                    className={`flex-1 ${templateType === 'rxform' ? 'border-2 border-orange-500' : 'border border-gray-200'}`}
+                                    value="rxOrder"
+                                    className={`flex-1 ${templateType === 'rxOrder' ? 'border-2 border-orange-500' : 'border border-gray-200'}`}
                                 >
-                                    RX Form
+                                    Rx Order
                                 </RadioCard.Item>
                                 <RadioCard.Item
                                     value="medicalrequest"
                                     className={`flex-1 ${templateType === 'medicalrequest' ? 'border-2 border-orange-500' : 'border border-gray-200'}`}
                                 >
-                                    Medical Request
+                                    Medication Order
                                 </RadioCard.Item>
                             </RadioCard.Root>
                         </CardHeader>
                         <CardContent className="h-full md:h-[calc(100vh-120px)] p-0">
                             <ScrollArea className="h-full w-full pb-16">
                                 <div className="mt-4 p-4">
-                                    {templateType === 'rxform' ? (
+                                    {templateType === 'rxOrder' ? (
                                         <RXOrderView />
                                     ) : (
-                                        <MedOrderView />
+                                        <MedOrderView patientId={patientId} />
                                     )}
                                     <Button
                                         type="submit"

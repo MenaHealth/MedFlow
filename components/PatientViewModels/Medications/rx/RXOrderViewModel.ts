@@ -4,7 +4,7 @@ import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewM
 
 export function useRXOrderViewModel(patientId: string) {
     const { userSession } = usePatientDashboard();
-    const [rxForm, setRxForm] = useState<RxOrders>({
+    const [rxOrder, setrxOrder] = useState<RxOrders>({
         patientName: '',
         phoneNumber: '',
         referringDr: '',
@@ -43,9 +43,9 @@ export function useRXOrderViewModel(patientId: string) {
                 throw new Error('Failed to publish RX form');
             }
 
-            const newRXForm = await response.json();
-            setPreviousrxOrders(prevForms => [...prevForms, newRXForm]);
-            setRxForm({
+            const newrxOrder = await response.json();
+            setPreviousrxOrders(prevForms => [...prevForms, newrxOrder]);
+            setrxOrder({
                 patientName: '',
                 phoneNumber: '',
                 referringDr: '',
@@ -66,5 +66,5 @@ export function useRXOrderViewModel(patientId: string) {
         }
     };
 
-    return { rxForm, SumbitRxOrder, previousrxOrders, isLoading };
+    return { rxOrder, SumbitRxOrder, previousrxOrders, isLoading };
 }

@@ -8,10 +8,10 @@ export function useMedicationsViewModel(patientId: string) {
     // Destructure all necessary properties from usePatientDashboard at once
     const { userSession, rxOrders, medOrders, loadingMedications, refreshMedications } = usePatientDashboard();
 
-    const [templateType, setTemplateType] = useState<'rxform' | 'medicalrequest'>('rxform');
+    const [templateType, setTemplateType] = useState<'rxOrder' | 'medicalrequest'>('rxOrder');
     const [isLoading, setIsLoading] = useState(false);
 
-    const [rxForm, setRxForm] = useState<IRxOrder['content']>({
+    const [rxOrder, setrxOrder] = useState<IRxOrder['content']>({
         patientName: '',
         phoneNumber: '',
         age: '',
@@ -38,10 +38,10 @@ export function useMedicationsViewModel(patientId: string) {
         frequency: '',
     });
 
-    const setMedicationField = (formType: 'rxform' | 'medicalrequest', name: string, value: string) => {
-        if (formType === 'rxform') {
-            setRxForm({
-                ...rxForm,
+    const setMedicationField = (formType: 'rxOrder' | 'medicalrequest', name: string, value: string) => {
+        if (formType === 'rxOrder') {
+            setrxOrder({
+                ...rxOrder,
                 [name]: value
             });
         } else {
@@ -61,14 +61,14 @@ export function useMedicationsViewModel(patientId: string) {
         let medicationData;
         let endpoint;
 
-        if (templateType === 'rxform') {
+        if (templateType === 'rxOrder') {
             medicationData = {
                 email: userSession.email,
-                noteType: 'rxform',
+                noteType: 'rxOrder',
                 date: new Date().toISOString(),
                 authorName: `${userSession.firstName} ${userSession.lastName}`,
                 authorID: userSession.id,
-                content: rxForm,
+                content: rxOrder,
             };
             endpoint = `/api/patient/${patientId}/medications/rx-order`;  // RX Order endpoint
         } else {
@@ -101,8 +101,8 @@ export function useMedicationsViewModel(patientId: string) {
             await refreshMedications();
 
             // Reset form fields after successful creation
-            if (templateType === 'rxform') {
-                setRxForm({
+            if (templateType === 'rxOrder') {
+                setrxOrder({
                     patientName: '',
                     phoneNumber: '',
                     age: '',
@@ -136,7 +136,7 @@ export function useMedicationsViewModel(patientId: string) {
         } finally {
             setIsLoading(false);
         }
-    }, [templateType, rxForm, medicalOrder, patientId, userSession, refreshMedications]);
+    }, [templateType, rxOrder, medicalOrder, patientId, userSession, refreshMedications]);
 
     return {
         rxOrders,
@@ -144,7 +144,7 @@ export function useMedicationsViewModel(patientId: string) {
         loadingMedications,
         templateType,
         setTemplateType,
-        rxForm,
+        rxOrder,
         medicalOrder,
         setMedicationField,
         createMedication,

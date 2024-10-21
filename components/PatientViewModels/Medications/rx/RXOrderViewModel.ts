@@ -37,6 +37,7 @@ export function useRXOrderViewModel(patientId: string) {
     // Type the previousrxOrders state as an array of RxOrder
     const [previousrxOrders, setPreviousrxOrders] = useState<RxOrder[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [isReadOnly] = useState(true);
 
     // Handle input changes
     const handleInputChange = (field: keyof RxOrder, value: string) => {
@@ -47,7 +48,7 @@ export function useRXOrderViewModel(patientId: string) {
     };
 
     // Accept formData as RxOrder type instead of 'any'
-    const SubmitRxOrder = async (formData: RxOrder) => {
+    const submitRxOrder = async (formData: RxOrder) => {
         setIsLoading(true);
         try {
             const response = await fetch(`/api/patient/${patientId}/medications/rx-order`, {
@@ -92,5 +93,5 @@ export function useRXOrderViewModel(patientId: string) {
         }
     };
 
-    return { rxOrder, SubmitRxOrder, previousrxOrders, isLoading, handleInputChange };
+    return { rxOrder, submitRxOrder, previousrxOrders, isLoading, isReadOnly, handleInputChange };
 }

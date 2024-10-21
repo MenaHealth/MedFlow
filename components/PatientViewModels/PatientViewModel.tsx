@@ -49,13 +49,8 @@ const PatientDashboardContent: React.FC = () => {
             return <CombinedNotesView patientId={patientViewModel?.getPrimaryDetails().patientID || ''} />;
         } else if (section === 'medications') {
             return <MedicationsView
-                user={userSession}
                 patientId={patientViewModel?.getPrimaryDetails().patientID || ''}
-                rxOrders={rxOrders}
-                medOrders={medOrders}
-                loadingMedications={loadingMedications}
-                refreshMedications={refreshMedications}
-            />;
+            />
         } else if (section === 'images') {
             return <ImageGallery />;
         }

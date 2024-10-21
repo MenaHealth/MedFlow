@@ -1,16 +1,16 @@
 import React, { useState } from "react";
 import { Session } from 'next-auth';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar } from '@/components/ui/avatar';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from './../../components/ui/card';
+import { Avatar } from './../../components/ui/avatar';
+import { Label } from './../../components/ui/label';
+import { Button } from './../../components/ui/button';
+import { Input } from './../../components/ui/input';
 import { Pencil, X, Copy, Check } from 'lucide-react';
 import { Countries, CountriesList } from '@/data/countries.enum';
 import { Languages, LanguagesList } from '@/data/languages.enum';
-import { MultiChoiceFormField } from "@/components/form/MultiChoiceFormField";
-import { SingleChoiceFormField } from "@/components/form/SingleChoiceFormField";
-import { DatePickerFormField } from "@/components/form/DatePickerFormField";
+import { MultiChoiceFormField } from "./../../components/form/MultiChoiceFormField";
+import { SingleChoiceFormField } from "./../../components/form/SingleChoiceFormField";
+import { DatePickerFormField } from "./../../components/form/DatePickerFormField";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -45,7 +45,7 @@ export function UserProfile({ user }: UserProfileProps) {
         defaultValues: {
             firstName: user.firstName || '',
             lastName: user.lastName || '',
-            dob: user.dob || '',
+            dob: user.dob instanceof Date ? user.dob.toISOString().split('T')[0] : user.dob || '', // Format the Date
             languages: user.languages || [],
             countries: user.countries || [],
             gender: user.gender || undefined,
@@ -59,12 +59,12 @@ export function UserProfile({ user }: UserProfileProps) {
     const initials = `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`;
 
     const handleEdit = () => {
-        setIsEditing(true);
+        setIsEditing(true); // Only set to editing mode, no reset needed
     };
 
     const handleCancelEdit = () => {
         setIsEditing(false);
-        methods.reset();
+        methods.reset(); // Reset the form when cancelling edit mode
     };
 
     const handleSubmit = async (data: UserProfileFormValues) => {
@@ -79,8 +79,7 @@ export function UserProfile({ user }: UserProfileProps) {
             });
 
             if (response.ok) {
-                setIsEditing(false);
-                // You might want to update the user state in the parent component here
+                setIsEditing(false); // Save and exit editing mode
             } else {
                 console.error('Failed to update user');
             }

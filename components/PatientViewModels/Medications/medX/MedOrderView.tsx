@@ -1,39 +1,35 @@
 // components/form/Medications/MedOrderView.tsx
-import React, {useCallback, useEffect} from 'react';
+import React from 'react';
 import { TextFormField } from '../../../../components/ui/TextFormField';
 import { Button } from '../../../../components/ui/button';
-import { usePatientDashboard } from '../../../PatientViewModels/PatientViewModelContext';
 import { useMedOrderRequestViewModel } from './MedOrderViewModel';
 
-interface MedOrderViewProps {
-    patientId: string;
+interface User {
+    firstName: string;
+    lastName: string;
+    doctorSpecialty: string;
 }
 
-export default function MedOrderView({ patientId }: MedOrderViewProps) {
-    const { userSession, patientViewModel } = usePatientDashboard();
+interface PatientDetails {
+    patientName: string;
+}
+
+interface ExpandedDetails {
+    phone: string;
+}
+
+// Update the MedOrderViewProps interface to use the new types
+interface MedOrderViewProps {
+    user: User;
+    patientId: string;
+    patientDetails: PatientDetails;
+    expandedDetails: ExpandedDetails;
+}
+
+export default function MedOrderView({ patientId, user, patientDetails, expandedDetails }: MedOrderViewProps) {
     const { medOrder, isLoading, isReadOnly, handleInputChange, submitMedOrder } = useMedOrderRequestViewModel(patientId);
 
-    const primaryDetails = patientViewModel?.getPrimaryDetails();
-    const expandedDetails = patientViewModel?.getExpandedDetails();
-
-    // Memoize handleInputChange to prevent redefinition on each render
-    const memoizedHandleInputChange = useCallback(handleInputChange, [handleInputChange]);
-
-    useEffect(() => {
-        if (userSession && primaryDetails && expandedDetails) {
-            // Only update the state if the values are different from the current ones
-            if (userSession.doctorSpecialty !== medOrder.doctorSpecialty) {
-                memoizedHandleInputChange('doctorSpecialty', userSession.doctorSpecialty || '');
-            }
-            if (primaryDetails.patientName !== medOrder.patientName) {
-                memoizedHandleInputChange('patientName', primaryDetails.patientName || '');
-            }
-            if (expandedDetails.phone !== medOrder.phoneNumber) {
-                memoizedHandleInputChange('phoneNumber', expandedDetails.phone || '');
-            }
-        }
-    }, [userSession, primaryDetails, expandedDetails, medOrder, memoizedHandleInputChange]);
-
+    // Use the props directly to populate the form fields
     return (
         <div className="space-y-4">
             {isLoading && <div className="loading-spinner">Loading...</div>}
@@ -41,31 +37,30 @@ export default function MedOrderView({ patientId }: MedOrderViewProps) {
             <TextFormField
                 fieldName="doctorInCharge"
                 fieldLabel="Doctor in Charge"
-                value={`${userSession?.firstName || ''} ${userSession?.lastName || ''}`}
+                value={`${user.firstName} ${user.lastName}`}
                 readOnly={true}
             />
             <TextFormField
                 fieldName="doctorSpecialty"
                 fieldLabel="Doctor Specialty"
-                value={userSession?.doctorSpecialty || ''}
+                value={user.doctorSpecialty}
                 readOnly={true}
             />
-
             <TextFormField
                 fieldName="patientName"
                 fieldLabel="Patient's Full Name"
-                value={medOrder.patientName}
+                value={patientDetails.patientName}
                 readOnly={true}
             />
             <TextFormField
                 fieldName="phoneNumber"
                 fieldLabel="Phone Number"
-                value={medOrder.phoneNumber}
+                value={expandedDetails.phone}
                 onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
             />
             <TextFormField
                 fieldName="address"
-                fieldLabel="address"
+                fieldLabel="Address"
                 value={medOrder.address}
                 onChange={(e) => handleInputChange('address', e.target.value)}
             />
@@ -94,9 +89,9 @@ export default function MedOrderView({ patientId }: MedOrderViewProps) {
                 onChange={(e) => handleInputChange('frequency', e.target.value)}
             />
 
-                <Button onClick={submitMedOrder} disabled={isLoading} variant={"submit"}>
-                    {isLoading ? 'Submitting...' : 'Submit Medical Order'}
-                </Button>
+            <Button onClick={submitMedOrder} disabled={isLoading} variant="submit">
+                {isLoading ? 'Submitting...' : 'Submit Medical Order'}
+            </Button>
         </div>
     );
 }

@@ -1,83 +1,66 @@
 import React, { useEffect, useCallback } from 'react';
-import { useFormContext } from 'react-hook-form';
-import { Button } from '../../../../components/ui/button';
 import { TextFormField } from '../../../../components/ui/TextFormField';
+import { Button } from '../../../../components/ui/button';
 import { SingleChoiceFormField } from '../../../../components/form/SingleChoiceFormField';
 import { Pharmacies } from '../../../../data/pharmacies.enum';
-import { usePatientDashboard } from '../../../../components/PatientViewModels/PatientViewModelContext';
 import { useRXOrderViewModel } from '../../../../components/PatientViewModels/Medications/rx/RXOrderViewModel';
 
-interface RXOrderViewProps {
-    patientId: string;
+interface User {
+    firstName: string;
+    lastName: string;
+    doctorSpecialty: string;
 }
 
-export default function RXOrderView({ patientId }: RXOrderViewProps) {
-    const { handleSubmit } = useFormContext();  // Use form context
-    const { SubmitRxOrder, isLoading, rxOrder, handleInputChange } = useRXOrderViewModel(patientId);
-    const { userSession, patientViewModel } = usePatientDashboard();
+interface PatientDetails {
+    patientName: string;
+}
 
-    const primaryDetails = patientViewModel?.getPrimaryDetails();
-    const expandedDetails = patientViewModel?.getExpandedDetails();
+interface ExpandedDetails {
+    phone: string;
+    age: string;
+}
 
-    // Memoize handleInputChange to prevent redefinition on each render
-    const memoizedHandleInputChange = useCallback(handleInputChange, [handleInputChange]);
+interface RXOrderViewProps {
+    user: User;
+    patientId: string;
+    patientDetails: PatientDetails;
+    expandedDetails: ExpandedDetails;
+}
 
-    useEffect(() => {
-        if (userSession && primaryDetails && expandedDetails) {
-            // Populate form with user and patient info if not already filled
-            if (userSession.doctorSpecialty !== rxOrder.prescribingDr) {
-                memoizedHandleInputChange('prescribingDr', userSession.doctorSpecialty || '');
-            }
-            if (primaryDetails.patientName !== rxOrder.patientName) {
-                memoizedHandleInputChange('patientName', primaryDetails.patientName || '');
-            }
-            if (expandedDetails.phone !== rxOrder.phoneNumber) {
-                memoizedHandleInputChange('phoneNumber', expandedDetails.phone || '');
-            }
-            if (expandedDetails.age !== rxOrder.age) {
-                memoizedHandleInputChange('age', expandedDetails.age || '');
-            }
-        }
-    }, [userSession, primaryDetails, expandedDetails, rxOrder, memoizedHandleInputChange]);
+export default function MedOrderView({ patientId, user, patientDetails, expandedDetails }: RXOrderViewProps) {
+    const { rxOrder, isLoading, isReadOnly, handleInputChange, submitRxOrder } = useRXOrderViewModel(patientId);
 
-    // Handle the form submission
-    const onSubmit = async (data: any) => {
-        await SubmitRxOrder(data);  // Submit RX order here
-    };
-
+    // Now use the props directly to set the field values
     return (
         <div className="space-y-4">
             <TextFormField
                 fieldName="doctorInCharge"
                 fieldLabel="Doctor in Charge"
-                value={`${userSession?.firstName || ''} ${userSession?.lastName || ''}`}
+                value={`${user?.firstName || ''} ${user?.lastName || ''}`}
                 readOnly={true}
             />
             <TextFormField
                 fieldName="prescribingDr"
                 fieldLabel="Prescribing Doctor"
-                value={userSession?.doctorSpecialty || ''}
+                value={user?.doctorSpecialty || ''}
                 readOnly={true}
             />
-
             <TextFormField
                 fieldName="patientName"
                 fieldLabel="Patient's Full Name"
-                value={rxOrder.patientName}
+                value={patientDetails.patientName}
                 readOnly={true}
             />
             <TextFormField
                 fieldName="phoneNumber"
-                fieldLabel="{Patient Phone Number"
-                value={rxOrder.phoneNumber}
-                onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
+                fieldLabel="Patient Phone Number"
+                value={expandedDetails.phone}
                 readOnly={true}
             />
             <TextFormField
                 fieldName="age"
                 fieldLabel="Age"
-                value={rxOrder.age}
-                onChange={(e) => handleInputChange('age', e.target.value)}
+                value={expandedDetails.age}
                 readOnly={true}
             />
             <TextFormField
@@ -123,16 +106,14 @@ export default function RXOrderView({ patientId }: RXOrderViewProps) {
                 value={rxOrder.medication}
                 onChange={(e) => handleInputChange('medication', e.target.value)}
             />
-
-            {/* Submit Button */}
             <Button
-                type="submit"
-                variant="submit"
-                className="mt-4"
-                onClick={handleSubmit(onSubmit)}
+                onClick={(e) => {
+                    submitRxOrder(rxOrder);
+                }}
                 disabled={isLoading}
+                variant="submit"
             >
-                {isLoading ? 'Saving...' : 'Submit RX Order'}
+                {isLoading ? 'Submitting...' : 'Submit Rx Order'}
             </Button>
         </div>
     );

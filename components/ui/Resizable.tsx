@@ -3,11 +3,11 @@
 import * as React from "react"
 import { cn } from "../../utils/classNames"
 
-interface ResizableProps extends React.HTMLAttributes<HTMLDivElement> {
-    minWidth?: number
-    maxWidth?: number
-    defaultWidth?: number
-    onResize?: (width: number) => void
+interface ResizableProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onResize'> { // Omit onResize from HTMLAttributes
+    minWidth?: number;
+    maxWidth?: number;
+    defaultWidth?: number;
+    onResize?: (width: number) => void; // Custom onResize prop with the correct type
 }
 
 const Resizable = React.forwardRef<HTMLDivElement, ResizableProps>(

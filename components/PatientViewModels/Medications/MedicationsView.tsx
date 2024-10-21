@@ -20,16 +20,17 @@ interface MedicationsViewProps {
 }
 
 export default function MedicationsView({ patientId }: MedicationsViewProps) {
-    // Use usePatientDashboard to get rxOrders, medOrders, and loading state
     const {
-        rxOrders,         // Access rxOrders from the context
-        medOrders,        // Access medOrders from the context
+        userSession,
+        rxOrders,
+        medOrders,
         loadingMedications,
+        patientViewModel,
     } = usePatientDashboard();
 
     const {
         rxOrder,
-        SubmitRxOrder,
+        submitRxOrder,
         isLoading: rxLoading,
     } = useRXOrderViewModel(patientId);
 
@@ -39,14 +40,14 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
         isLoading: medLoading,
     } = useMedOrderRequestViewModel(patientId);
 
-    const [isExpanded, setIsExpanded] = useState(false);
+    const patientDetails = patientViewModel?.getPrimaryDetails() || { patientName: '', patientID: '' };
+    const expandedDetails = patientViewModel?.getExpandedDetails();
+
     const [previousMedicationsWidth, setPreviousMedicationsWidth] = useState(400);
     const [templateType, setTemplateType] = useState<'rxOrder' | 'medicalrequest'>('rxOrder');
 
     const methods = useForm({
-        defaultValues: templateType === 'rxOrder'
-            ? rxOrder   // Directly pass rxOrder
-            : medOrder  // Directly pass medOrder
+        defaultValues: templateType === 'rxOrder' ? rxOrder : medOrder,
     });
 
     const handleResize = (width: number) => {
@@ -55,9 +56,16 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
 
     const handleCreateMedication = async (data: any) => {
         if (templateType === 'rxOrder') {
-            await SubmitRxOrder(data);
+            await submitRxOrder(data);
         } else {
             await submitMedOrder();
+        }
+    };
+
+    const handleValueChange = (value: 'rxOrder' | 'medicalrequest') => {
+        if (value !== templateType) {
+            setTemplateType(value);
+            methods.reset(value === 'rxOrder' ? rxOrder : medOrder);
         }
     };
 
@@ -65,7 +73,6 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
         <FormProvider {...methods}>
             <form onSubmit={methods.handleSubmit(handleCreateMedication)}>
                 <div className="flex flex-col md:flex-row h-[100vh] bg-darkBlue overflow-hidden">
-                    {/* Previous Medications Section */}
                     <Resizable
                         className="hidden md:block"
                         minWidth={200}
@@ -89,15 +96,11 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                         </Card>
                     </Resizable>
 
-                    {/* Medications Form Section */}
                     <Card className="flex-grow h-full md:h-auto overflow-hidden">
                         <CardHeader className="px-4 py-2">
                             <RadioCard.Root
                                 defaultValue={templateType}
-                                onValueChange={(value) => {
-                                    setTemplateType(value as "rxOrder" | "medicalrequest");
-                                    methods.reset(value === 'rxOrder' ? rxOrder : medOrder);
-                                }}
+                                onValueChange={handleValueChange}
                                 className="flex w-full"
                             >
                                 <RadioCard.Item
@@ -118,9 +121,34 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                             <ScrollArea className="h-full w-full pb-16">
                                 <div className="mt-4 p-4">
                                     {templateType === 'rxOrder' ? (
-                                        <RXOrderView patientId={patientId} />
+                                        <RXOrderView
+                                            patientId={patientId}
+                                            user={{
+                                                firstName: userSession?.firstName || '',
+                                                lastName: userSession?.lastName || '',
+                                                doctorSpecialty: userSession?.doctorSpecialty ?? 'NOT_SELECTED',
+                                            }}
+                                            patientDetails={patientDetails || { patientName: '' }}
+                                            expandedDetails={{
+                                                ...expandedDetails,
+                                                phone: expandedDetails?.phone ?? '',
+                                                age: expandedDetails?.age ?? '',
+                                            }}
+                                        />
                                     ) : (
-                                        <MedOrderView patientId={patientId} />
+                                        <MedOrderView
+                                            patientId={patientId}
+                                            user={{
+                                                firstName: userSession?.firstName || '',
+                                                lastName: userSession?.lastName || '',
+                                                doctorSpecialty: userSession?.doctorSpecialty ?? 'NOT_SELECTED',
+                                            }}
+                                            patientDetails={patientDetails}
+                                            expandedDetails={{
+                                                ...expandedDetails,
+                                                phone: expandedDetails?.phone ?? '',
+                                            }}
+                                        />
                                     )}
                                 </div>
                             </ScrollArea>

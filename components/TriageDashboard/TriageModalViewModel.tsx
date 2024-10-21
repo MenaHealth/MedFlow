@@ -1,18 +1,29 @@
 // TriageModalViewModel.js
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
+import {INote} from "./../../models/note";
 
-const useTriageModalViewModel = (patientId, onSuccess) => {
+interface TriageData {
+    status: string;
+    priority: string;
+    specialty: string;
+    noteContent: string;
+    email: string;
+    authorId: string;
+    authorName: string;
+}
+
+const useTriageModalViewModel = (patientId: string, onSuccess: () => void) => {
     const { data: session } = useSession(); // Access session data correctly
     const [loading, setLoading] = useState(false);
-    const [fetchedNotes, setFetchedNotes] = useState([]);
+    const [fetchedNotes, setFetchedNotes] = useState<INote[]>([]); // Assuming INote is the correct type
 
     const fetchPreviousNotes = () => {
         setLoading(true);
         fetch(`/api/patient/${patientId}?type=triage`)
             .then((response) => response.json())
             .then((data) => {
-                setFetchedNotes(data);
+                setFetchedNotes(data.notes || []);
                 setLoading(false);
             })
             .catch((error) => {
@@ -21,21 +32,17 @@ const useTriageModalViewModel = (patientId, onSuccess) => {
             });
     };
 
-    const handleSaveTriageData = async ({ status, priority, specialty, noteContent }) => {
+    const handleSaveTriageData = async ({
+                                            status,
+                                            priority,
+                                            specialty,
+                                            noteContent,
+                                            email,
+                                            authorId,
+                                            authorName,
+                                        }: TriageData) => {
         setLoading(true);
         console.log("Session data:", session);
-
-        // Extract author details from session
-        const authorName = session?.user?.name || `${session?.user?.firstName} ${session?.user?.lastName}`; // Ensure name is correct
-        const authorID = session?.user?._id;
-        const email = session?.user?.email;
-
-        if (!authorName || !authorID || !email) {
-            console.log("Session author name:", authorName , "| author ID:" , authorID, "| author email:" , email);
-            console.error("Missing session details for author.");
-            setLoading(false);
-            return;
-        }
 
         try {
             const response = await fetch(`/api/patient/${patientId}/triage`, {
@@ -50,8 +57,8 @@ const useTriageModalViewModel = (patientId, onSuccess) => {
                     noteContent,
                     noteType: 'triage',
                     authorName,
-                    authorID,
-                    email,
+                    authorID: authorId,
+                    email, // Now explicitly passing email here
                 }),
             });
 

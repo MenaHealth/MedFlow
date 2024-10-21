@@ -127,13 +127,20 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
         setPatientViewModel(new PatientInfoViewModel(patientData));
     }, []);
 
+    // PatientViewModelContext.tsx
+
     const formatPreviousNotes = useCallback((notesData: INote[]) => {
         if (Array.isArray(notesData)) {
-            setNotes(notesData.map((note: INote) => ({
-                ...note,
-                title: note.noteType,
-                patientName: patientInfo?.patientName || '',
-            })));
+            // Convert the Mongoose documents to plain objects while preserving the type
+            const formattedNotes = notesData.map((note) => {
+                const plainNote = note.toObject ? note.toObject() : note;
+                return {
+                    ...plainNote,
+                    title: plainNote.noteType,
+                    patientName: patientInfo?.patientName || '',
+                } as INote;
+            });
+            setNotes(formattedNotes);
         } else {
             setNotes([]);
         }

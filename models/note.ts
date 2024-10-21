@@ -18,7 +18,7 @@ export const noteSchema = new Schema<INote>({
     date: { type: Date, default: Date.now },
     authorName: { type: String },
     authorID: { type: String },
-    content: { type: Schema.Types.Mixed }, // Field to store content of different note types
+    content: { type: Schema.Types.Mixed },
 });
 
 // Define the base Note model

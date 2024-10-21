@@ -33,7 +33,7 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ params }) => {
             <PatientSubmenu />
             <h1 className="text-3xl font-bold mb-8 text-center m-4 text-orange-500">Medications</h1>
             <div className="border border-gray-300 p-8 bg-grey-100 shadow rounded-lg">
-                <MedicationsView patientId={patientId} />
+                <MedicationsView patientId={params.id} />
             </div>
         </div>
     );

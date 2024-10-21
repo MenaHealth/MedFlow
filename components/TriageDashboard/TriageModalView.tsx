@@ -8,22 +8,34 @@ import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, MenuItem 
 import { Button } from './../ui/button';
 import EditIcon from '@mui/icons-material/Edit';
 import useTriageModalViewModel from './TriageModalViewModel';
-import { DoctorSpecialties } from '@/data/doctorSpecialty.enum';
+import { DoctorSpecialties } from './../../data/doctorSpecialty.enum';
+
+interface TriageModalViewProps {
+    note: string; // Adjust the type as per your actual note type
+    patientId: string;
+    patientName: string;
+    currentStatus: string;
+    currentPriority: string;
+    currentSpecialty: string;
+    userEmail: string;
+    userId: string;
+    userFirstName: string;
+}
 
 const statusOptions = ['Not Selected', 'Not Started', 'Triaged', 'In-Progress', 'Completed', 'Archived'];
 const priorityOptions = ['Not Selected', 'Routine', 'Moderate', 'Urgent', 'Emergency'];
 
-const TriageModalView = ({
-                             note,
-                             patientId,
-                             patientName,
-                             currentStatus,
-                             currentPriority,
-                             currentSpecialty,
-                             userEmail,
-                             userId,
-                             userFirstName
-                         }) => {
+const TriageModalView: React.FC<TriageModalViewProps> = ({
+                                                             note,
+                                                             patientId,
+                                                             patientName,
+                                                             currentStatus,
+                                                             currentPriority,
+                                                             currentSpecialty,
+                                                             userEmail,
+                                                             userId,
+                                                             userFirstName,
+                                                         }) => {
     const [open, setOpen] = useState(false);
     const [currentNote, setCurrentNote] = useState(note);
     const [status, setStatus] = useState(currentStatus);
@@ -124,7 +136,7 @@ const TriageModalView = ({
                                 {fetchedNotes.map((note) => (
                                     <li key={note._id}>
                                         <p>{new Date(note.date).toLocaleString()}</p>
-                                        <p>{note.content}</p>
+                                        <p>{note.content?.triageDetails || "No content available"}</p> {/* Handle undefined or missing content */}
                                     </li>
                                 ))}
                             </ul>

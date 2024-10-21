@@ -21,19 +21,19 @@ export interface IMedOrders extends Document {
 }
 
 export const medOrdersSchema = new Schema<IMedOrders>({
-    email: { type: String, required: true },
+    email: { type: String },
     date: { type: Date, default: Date.now },
-    authorName: { type: String, required: true },
-    authorID: { type: String, required: true },
+    authorName: { type: String },
+    authorID: { type: String },
     content: {
-        doctorSpecialty: { type: String, enum: DoctorSpecialties, required: true },
-        patientName: { type: String, required: true },
-        phoneNumber: { type: String, required: true }, // Changed from patientPhoneNumber
-        address: { type: String, required: true },
-        diagnosis: { type: String, required: true },
-        medications: { type: String, required: true },
-        dosage: { type: String, required: true },
-        frequency: { type: String, required: true },
+        doctorSpecialty: { type: String, enum: DoctorSpecialties },
+        patientName: { type: String },
+        phoneNumber: { type: String }, // Changed from patientPhoneNumber
+        address: { type: String },
+        diagnosis: { type: String },
+        medications: { type: String },
+        dosage: { type: String },
+        frequency: { type: String },
     },
 });
 

@@ -1,8 +1,7 @@
 import React from 'react';
-import { Textarea } from "@/components/ui/textarea";
 import { SubjectiveNote } from '../CombinedNotesViewModel';
-import {TextFormField} from "@/components/ui/TextFormField";
-import {ScrollArea} from "@/components/form/ScrollArea";
+import {TextFormField} from "./../../../../components/ui/TextFormField";
+import {ScrollArea} from "./../../../../components/form/ScrollArea";
 
 interface SubjectiveNoteViewProps {
     note: SubjectiveNote;

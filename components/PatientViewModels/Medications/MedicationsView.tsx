@@ -79,37 +79,15 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                     <h3 className="text-lg font-semibold">Previous Medications</h3>
                                 </CardHeader>
                                 <CardContent className="h-full p-0">
-                                    {/* Pass rxOrders and medOrders from the context */}
                                     <PreviousMedicationsView
-                                        rxOrders={rxOrders} // Use rxOrders from context
-                                        medOrders={medOrders} // Use medOrders from context
+                                        rxOrders={rxOrders}
+                                        medOrders={medOrders}
                                         loadingMedications={loadingMedications}
                                     />
                                 </CardContent>
                             </ScrollArea>
                         </Card>
                     </Resizable>
-
-                    {/* Mobile Previous Medications Section */}
-                    <Card className="md:hidden w-full">
-                        <CardHeader
-                            className="px-4 py-2 flex justify-between items-center cursor-pointer"
-                            onClick={() => setIsExpanded(!isExpanded)}
-                        >
-                            <h3 className="text-lg font-semibold">Previous Medications</h3>
-                            {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-                        </CardHeader>
-                        <div className={`overflow-hidden transition-all duration-300 ${isExpanded ? 'max-h-[50vh]' : 'max-h-0'}`}>
-                            <ScrollArea className="h-[50vh] w-full">
-                                {/* Pass rxOrders and medOrders from the context */}
-                                <PreviousMedicationsView
-                                    rxOrders={rxOrders} // Use rxOrders from context
-                                    medOrders={medOrders} // Use medOrders from context
-                                    loadingMedications={loadingMedications}
-                                />
-                            </ScrollArea>
-                        </div>
-                    </Card>
 
                     {/* Medications Form Section */}
                     <Card className="flex-grow h-full md:h-auto overflow-hidden">

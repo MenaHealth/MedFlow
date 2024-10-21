@@ -23,22 +23,22 @@ export interface IRxOrder extends Document {
 }
 
 export const RXOrderSchema = new Schema<IRxOrder>({
-    email: { type: String, required: true },
+    email: { type: String },
     date: { type: Date, default: Date.now },
-    authorName: { type: String, required: true },
-    authorID: { type: String, required: true },
+    authorName: { type: String },
+    authorID: { type: String },
     content: {
-        pharmacyOrClinic: { type: String, enum: Pharmacies, required: true },
-        patientName: { type: String, required: true },
-        phoneNumber: { type: String, required: true },
-        age: { type: String, required: true },
-        address: { type: String, required: true },
-        referringDr: { type: String, required: true },
-        prescribingDr: { type: String, required: true },
-        diagnosis: { type: String, required: true },
-        medication: { type: String, required: true },
-        dosage: { type: String, required: true },
-        frequency: { type: String, required: true },
+        pharmacyOrClinic: { type: String, enum: Pharmacies },
+        patientName: { type: String },
+        phoneNumber: { type: String },
+        age: { type: String },
+        address: { type: String },
+        referringDr: { type: String },
+        prescribingDr: { type: String },
+        diagnosis: { type: String },
+        medication: { type: String },
+        dosage: { type: String },
+        frequency: { type: String },
     },
 });
 

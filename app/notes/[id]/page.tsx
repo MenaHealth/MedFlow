@@ -25,7 +25,7 @@ const NotesPage: React.FC<NotesPageProps> = ({ params }) => {
         return <p>Loading...</p>;
     }
 
-    const username = `${session?.user?.firstName} ${session?.user?.lastName}`;
+    const username = `test`;
 
     return (
         <div className="w-full max-w-4xl mx-auto pb-16">

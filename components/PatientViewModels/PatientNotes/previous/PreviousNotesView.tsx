@@ -10,12 +10,11 @@ interface PreviousNotesViewProps {
 
 export function PreviousNotesView({ patientId }: PreviousNotesViewProps) {
 
-    const { notes, loading, error } = usePreviousNotesViewModel();
+    const { notes, loading } = usePreviousNotesViewModel();
     const [expandedNotes, setExpandedNotes] = useState<string[]>([]);
     const [expandAll, setExpandAll] = useState(false);
 
     if (loading) return <p>Loading...</p>; // Render loading state
-    if (error) return <p>Error: {error}</p>;
 
     // Toggles individual note expansion
     const toggleNoteExpansion = (noteId: string) => {
@@ -85,6 +84,11 @@ export function PreviousNotesView({ patientId }: PreviousNotesViewProps) {
                                 {/* Conditionally render full content if note is expanded */}
                                 {expandedNotes.includes(note._id) && (
                                     <div className="mt-2">
+                                        {note.noteType === 'triage' && note.content && (
+                                            <>
+                                                <p><strong>Subjective:</strong> {note.content.triageDetails}</p>
+                                            </>
+                                        )}
                                         {note.noteType === 'subjective' && note.content && (
                                             <>
                                                 <p><strong>Subjective:</strong> {note.content.subjective}</p>

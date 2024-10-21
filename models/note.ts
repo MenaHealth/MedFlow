@@ -24,6 +24,12 @@ export const noteSchema = new Schema<INote>({
 // Define the base Note model
 const Note: Model<INote> = mongoose.models.Note || mongoose.model<INote>('Note', noteSchema);
 
+export interface ITriageNote extends INote {
+    content: {
+        triageDetails: string;
+    };
+}
+
 // Define additional interfaces for the specific note types
 export interface IPhysicianNote extends INote {
     content: {

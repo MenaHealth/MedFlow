@@ -1,11 +1,9 @@
-// app/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import type { Session } from 'next-auth';
-import type {} from './../types/next-auth'; // This import is just to ensure the module augmentation is loaded
 
 export default function Component() {
     const router = useRouter();
@@ -20,7 +18,7 @@ export default function Component() {
 
     useEffect(() => {
         if (userSession) {
-            const userAccountType = userSession.accountType as 'Doctor' | 'Triage' | 'Pending' | undefined;
+            const userAccountType = userSession.accountType;
 
             if (userAccountType === 'Pending') {
                 router.replace('/complete-signup');

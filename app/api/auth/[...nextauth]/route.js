@@ -143,12 +143,12 @@ const handler = NextAuth({
                         );
                     }
             }
-            console.log('Token about to be passed to session callback:', token);
+            // console.log('Token about to be passed to session callback:', token);
             return token;
         },
 
         async session({ session, token }) {
-            console.log('Token in session callback:', token);
+            // console.log('Token in session callback:', token);
             if (token) {
                 session.user._id = token.id;
                 session.user.accountType = token.accountType;

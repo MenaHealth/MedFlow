@@ -39,7 +39,7 @@ import {
 import { PRIORITIES, STATUS } from '@/data/data';
 import { DoctorSpecialties as DOCTOR_SPECIALTIES } from '@/data/doctorSpecialty.enum';
 import Link from 'next/link';
-import TriageNoteModal from "../../../components/TriageDashboard/TriageNoteModal";
+import TriageModalView from "../../../components/TriageDashboard/TriageModalView";
 
 export default function PatientTriage() {
   const { data: session, status } = useSession();
@@ -515,14 +515,16 @@ export default function PatientTriage() {
                         <DropdownMenuSeparator />
                         <DropdownMenuRadioGroup value={row.priority} onValueChange={async (value) => {
                           try {
-                            await fetch("/api/patient/assign", {
+                            await fetch('/api/patient/assign', {
                               method: 'PATCH',
                               headers: {
                                 'Content-Type': 'application/json',
                               },
                               body: JSON.stringify({
                                 _id: rows[index]["_id"],
-                                priority: value,
+                                status: "In-Progress",
+                                priority: value, // New priority value
+                                doctor: doctor
                               }),
                             });
                             const updatedRows = [...rows];
@@ -546,39 +548,50 @@ export default function PatientTriage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent style={{ maxWidth: "20rem", maxHeight: "25rem", overflowY: "auto" }}>
                         <DropdownMenuSeparator />
-                        <DropdownMenuRadioGroup value={row.specialty} onValueChange={async (value) => {
-                          try {
-                            await fetch("/api/patient/", {
-                              method: 'PATCH',
-                              headers: {
-                                'Content-Type': 'application/json',
-                              },
-                              body: JSON.stringify({
-                                _id: rows[index]["_id"],
-                                specialty: value,
-                              }),
-                            }).then(() => {
-                              const updatedRows = [...rows];
-                              updatedRows[index].specialty = value;
-                              setRows(updatedRows);
-                            })
-                          } catch (error) {
-                            console.log(error);
-                          }
-                        }}>
+                        <DropdownMenuRadioGroup
+                            value={row.specialty}
+                            onValueChange={async (value) => {
+                              try {
+                                await fetch(`/api/patient/${rows[index]._id}/specialty`, {
+                                  method: "PATCH",
+                                  headers: {
+                                    "Content-Type": "application/json",
+                                  },
+                                  body: JSON.stringify({
+                                    specialty: value,
+                                  }),
+                                });
+                                const updatedRows = [...rows];
+                                updatedRows[index].specialty = value;
+                                setRows(updatedRows);
+                              } catch (error) {
+                                console.log(error);
+                              }
+                            }}
+                        >
                           {DOCTOR_SPECIALTIES.map((specialty) => (
-                            <DropdownMenuRadioItem key={specialty} value={specialty}>{specialty}</DropdownMenuRadioItem>
+                              <DropdownMenuRadioItem key={specialty} value={specialty}>
+                                {specialty}
+                              </DropdownMenuRadioItem>
                           ))}
                         </DropdownMenuRadioGroup>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
                   <TableCell align="center">
-                        <TriageNoteModal
-                            note={triageNotes[row._id] || ""}
-                            patientId={row._id}
-                            patientName={`${row.firstName} ${row.lastName}`}
-                    />
+                    <TableCell align="center">
+                      <TriageModalView
+                          userEmail={session.user.email}
+                          userId={session.user._id}
+                          userFirstName={session.user.firstName}
+                          note={triageNotes[row._id] || ""}
+                          patientId={row._id}
+                          patientName={`${row.firstName} ${row.lastName}`}
+                          currentStatus={row.status}
+                          currentPriority={row.priority}
+                          currentSpecialty={row.specialty}
+                      />
+                    </TableCell>
                   </TableCell>
                   <TableCell align="center">
                     {getInitials(row.triagedBy?.firstName, row.triagedBy?.lastName)}

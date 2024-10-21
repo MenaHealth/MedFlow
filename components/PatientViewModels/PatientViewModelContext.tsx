@@ -91,7 +91,6 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
 
             setUserSession({
                 id: userId,
-                id: userId,
                 email: session.user.email,
                 firstName,
                 lastName,

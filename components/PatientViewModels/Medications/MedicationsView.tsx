@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader } from './../../../components/ui/card';
 import { RadioCard } from './../../../components/ui/radio-card';
 import { ScrollArea } from './../../../components/form/ScrollArea';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import { useMedicationsViewModel } from './MedicationsViewModel';
 import RXOrderView from './rx/RXOrderView';
 import MedOrderView from './medX/MedOrderView';
 import PreviousMedicationsView from './previous/PreviousMedicationsView';
@@ -14,15 +13,23 @@ import { Resizable } from './../../../components/ui/Resizable';
 import { useRXOrderViewModel } from './../../../components/PatientViewModels/Medications/rx/RXOrderViewModel';
 import { useMedOrderRequestViewModel } from './../../../components/PatientViewModels/Medications/medX/MedOrderViewModel';
 
+import { usePatientDashboard } from './../../PatientViewModels/PatientViewModelContext';
+
 interface MedicationsViewProps {
     patientId: string;
 }
 
 export default function MedicationsView({ patientId }: MedicationsViewProps) {
+    // Use usePatientDashboard to get rxOrders, medOrders, and loading state
+    const {
+        rxOrders,         // Access rxOrders from the context
+        medOrders,        // Access medOrders from the context
+        loadingMedications,
+    } = usePatientDashboard();
+
     const {
         rxOrder,
         SumbitRxOrder,
-        previousrxOrders,
         isLoading: rxLoading,
     } = useRXOrderViewModel(patientId);
 
@@ -70,10 +77,11 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                     <h3 className="text-lg font-semibold">Previous Medications</h3>
                                 </CardHeader>
                                 <CardContent className="h-full p-0">
+                                    {/* Pass rxOrders and medOrders from the context */}
                                     <PreviousMedicationsView
-                                        rxOrders={previousrxOrders}
-                                        medOrders={[]} // Add medical orders here when implemented
-                                        loadingMedications={rxLoading || medLoading}
+                                        rxOrders={rxOrders} // Use rxOrders from context
+                                        medOrders={medOrders} // Use medOrders from context
+                                        loadingMedications={loadingMedications}
                                     />
                                 </CardContent>
                             </ScrollArea>
@@ -91,10 +99,11 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                         </CardHeader>
                         <div className={`overflow-hidden transition-all duration-300 ${isExpanded ? 'max-h-[50vh]' : 'max-h-0'}`}>
                             <ScrollArea className="h-[50vh] w-full">
+                                {/* Pass rxOrders and medOrders from the context */}
                                 <PreviousMedicationsView
-                                    rxOrders={previousrxOrders}
-                                    medOrders={[]} // Add medical orders here when implemented
-                                    loadingMedications={rxLoading || medLoading}
+                                    rxOrders={rxOrders} // Use rxOrders from context
+                                    medOrders={medOrders} // Use medOrders from context
+                                    loadingMedications={loadingMedications}
                                 />
                             </ScrollArea>
                         </div>

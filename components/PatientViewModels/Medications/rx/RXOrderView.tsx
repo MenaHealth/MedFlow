@@ -20,7 +20,7 @@ export default function RXOrderView() {
                     <TextFormField
                         fieldName="age"
                         fieldLabel="Age"
-                    />rxOrder
+                    />
                     <TextFormField
                         fieldName="address"
                         fieldLabel="Address"

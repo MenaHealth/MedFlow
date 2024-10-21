@@ -91,6 +91,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
 
             setUserSession({
                 id: userId,
+                id: userId,
                 email: session.user.email,
                 firstName,
                 lastName,
@@ -154,8 +155,11 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             } else {
                 setNotes([]);
             }
+            // Set rxOrders and medOrders in the state and log them for debugging
             setrxOrders(data.rxOrders || []);
             setmedOrders(data.medOrders || []);
+            console.log("RX Orders:", data.rxOrders);
+            console.log("Med Orders:", data.medOrders);
         } catch (error) {
             console.error('Error fetching patient data:', error);
         } finally {

@@ -41,9 +41,14 @@ export const POST = async (request: Request, { params }: Params) => {
             return new Response(`Patient with ID ${params.id} not found`, { status: 404 });
         }
 
-        // Add the note to the patient's notes array
+        // Add the new note to the patient's notes array
         patient.notes.push(newNote);
-        await patient.save();
+
+        // Save only the notes array in the patient model
+        await Patient.updateOne(
+            { _id: params.id },
+            { $set: { notes: patient.notes } }
+        );
 
         // Return the new note as the response
         return new Response(JSON.stringify(newNote), { status: 201 });
@@ -51,8 +56,8 @@ export const POST = async (request: Request, { params }: Params) => {
         console.error('Failed to add doctor note:', error);
         if (error instanceof Error) {
             return new Response(`Failed to add doctor note: ${error.message}`, { status: 500 });
-            } else {
+        } else {
             return new Response('Failed to add doctor note due to an unknown error', { status: 500 });
-          }
+        }
     }
 };

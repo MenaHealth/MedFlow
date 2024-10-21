@@ -74,35 +74,29 @@ export default function MedOrderView({ patientId }: MedOrderViewProps) {
                 fieldLabel="Diagnosis"
                 value={medOrder.diagnosis}
                 onChange={(e) => handleInputChange('diagnosis', e.target.value)}
-                readOnly={isReadOnly}
             />
             <TextFormField
                 fieldName="medications"
                 fieldLabel="Medications"
                 value={medOrder.medications}
                 onChange={(e) => handleInputChange('medications', e.target.value)}
-                readOnly={isReadOnly}
             />
             <TextFormField
                 fieldName="dosage"
                 fieldLabel="Dosage"
                 value={medOrder.dosage}
                 onChange={(e) => handleInputChange('dosage', e.target.value)}
-                readOnly={isReadOnly}
             />
             <TextFormField
                 fieldName="frequency"
                 fieldLabel="Frequency/Duration"
                 value={medOrder.frequency}
                 onChange={(e) => handleInputChange('frequency', e.target.value)}
-                readOnly={isReadOnly}
             />
 
-            {!isReadOnly && (
                 <Button onClick={submitMedOrder} disabled={isLoading}>
                     {isLoading ? 'Submitting...' : 'Submit Medical Order'}
                 </Button>
-            )}
         </div>
     );
 }

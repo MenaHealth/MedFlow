@@ -1,10 +1,26 @@
-import { useState, useEffect } from 'react';
-import RxOrders from '../../../../models/rxOrders';
-import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewModelContext';
+import { useState } from 'react';
+import { usePatientDashboard } from './../../../../components/PatientViewModels/PatientViewModelContext';
+
+// Define an interface for RXOrder
+interface RxOrder {
+    patientName: string;
+    phoneNumber: string;
+    referringDr: string;
+    prescribingDr: string;
+    age: string;
+    address: string;
+    diagnosis: string;
+    pharmacyOrClinic: string;
+    medication: string;
+    dosage: string;
+    frequency: string;
+}
 
 export function useRXOrderViewModel(patientId: string) {
     const { userSession } = usePatientDashboard();
-    const [rxOrder, setrxOrder] = useState<RxOrders>({
+
+    // Type the state as RxOrder
+    const [rxOrder, setrxOrder] = useState<RxOrder>({
         patientName: '',
         phoneNumber: '',
         referringDr: '',
@@ -12,17 +28,26 @@ export function useRXOrderViewModel(patientId: string) {
         age: '',
         address: '',
         diagnosis: '',
-        medicationsNeeded: '',
         pharmacyOrClinic: '',
         medication: '',
         dosage: '',
         frequency: '',
     });
 
-    const [previousrxOrders, setPreviousrxOrders] = useState<RxOrders[]>([]);
+    // Type the previousrxOrders state as an array of RxOrder
+    const [previousrxOrders, setPreviousrxOrders] = useState<RxOrder[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
-    const SumbitRxOrder = async (formData: RxOrders) => {
+    // Handle input changes
+    const handleInputChange = (field: keyof RxOrder, value: string) => {
+        setrxOrder((prevOrder) => ({
+            ...prevOrder,
+            [field]: value,
+        }));
+    };
+
+    // Accept formData as RxOrder type instead of 'any'
+    const SubmitRxOrder = async (formData: RxOrder) => {
         setIsLoading(true);
         try {
             const response = await fetch(`/api/patient/${patientId}/medications/rx-order`, {
@@ -35,7 +60,7 @@ export function useRXOrderViewModel(patientId: string) {
                     date: new Date().toISOString(),
                     authorName: `${userSession?.firstName} ${userSession?.lastName}`,
                     authorID: userSession?.id,
-                    content: formData,
+                    content: formData,  // Ensure formData follows RxOrder structure
                 }),
             });
 
@@ -45,6 +70,8 @@ export function useRXOrderViewModel(patientId: string) {
 
             const newrxOrder = await response.json();
             setPreviousrxOrders(prevForms => [...prevForms, newrxOrder]);
+
+            // Reset the form
             setrxOrder({
                 patientName: '',
                 phoneNumber: '',
@@ -53,7 +80,6 @@ export function useRXOrderViewModel(patientId: string) {
                 age: '',
                 address: '',
                 diagnosis: '',
-                medicationsNeeded: '',
                 pharmacyOrClinic: '',
                 medication: '',
                 dosage: '',
@@ -66,5 +92,5 @@ export function useRXOrderViewModel(patientId: string) {
         }
     };
 
-    return { rxOrder, SumbitRxOrder, previousrxOrders, isLoading };
+    return { rxOrder, SubmitRxOrder, previousrxOrders, isLoading, handleInputChange };
 }

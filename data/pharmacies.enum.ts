@@ -1,5 +1,6 @@
 // data/pharmacies.enum.ts
 export const Pharmacies = [
+    'not selected',
     'EGH, Khan Younis',
     'Shuhada Al Aqsa, Dier El Balah',
     'Abu Yousif Najjar, Rafah',

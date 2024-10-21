@@ -29,7 +29,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
 
     const {
         rxOrder,
-        SumbitRxOrder,
+        SubmitRxOrder,
         isLoading: rxLoading,
     } = useRXOrderViewModel(patientId);
 
@@ -44,7 +44,9 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
     const [templateType, setTemplateType] = useState<'rxOrder' | 'medicalrequest'>('rxOrder');
 
     const methods = useForm({
-        defaultValues: templateType === 'rxOrder' ? rxOrder : medOrder,
+        defaultValues: templateType === 'rxOrder'
+            ? rxOrder   // Directly pass rxOrder
+            : medOrder  // Directly pass medOrder
     });
 
     const handleResize = (width: number) => {
@@ -53,7 +55,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
 
     const handleCreateMedication = async (data: any) => {
         if (templateType === 'rxOrder') {
-            await SumbitRxOrder(data);
+            await SubmitRxOrder(data);
         } else {
             await submitMedOrder();
         }
@@ -138,18 +140,10 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                             <ScrollArea className="h-full w-full pb-16">
                                 <div className="mt-4 p-4">
                                     {templateType === 'rxOrder' ? (
-                                        <RXOrderView />
+                                        <RXOrderView patientId={patientId} />
                                     ) : (
                                         <MedOrderView patientId={patientId} />
                                     )}
-                                    <Button
-                                        type="submit"
-                                        variant="submit"
-                                        className="mt-4"
-                                        disabled={rxLoading || medLoading}
-                                    >
-                                        {rxLoading || medLoading ? 'Saving...' : 'Create Medication'}
-                                    </Button>
                                 </div>
                             </ScrollArea>
                         </CardContent>

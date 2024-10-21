@@ -3,6 +3,21 @@ import { useState, useCallback } from 'react';
 import { usePatientDashboard } from "../PatientViewModelContext";
 import { IRxOrder } from '@/models/rxOrders';
 import { IMedOrders } from '@/models/medOrders';
+import { DoctorSpecialtyList } from "@/data/doctorSpecialty.enum";
+
+interface RxOrder {
+    patientName: string;
+    phoneNumber: string;
+    referringDr: string;
+    prescribingDr: string;
+    age: string;
+    address: string;
+    diagnosis: string;
+    pharmacyOrClinic: string;
+    medication: string;
+    dosage: string;
+    frequency: string;
+}
 
 export function useMedicationsViewModel(patientId: string) {
     // Destructure all necessary properties from usePatientDashboard at once
@@ -16,22 +31,20 @@ export function useMedicationsViewModel(patientId: string) {
         phoneNumber: '',
         age: '',
         address: '',
-        patientID: '',
         referringDr: '',
         prescribingDr: '',
         diagnosis: '',
-        medicationsNeeded: '',
-        pharmacyOrClinic: '',
+        pharmacyOrClinic: 'not selected',
         medication: '',
         dosage: '',
         frequency: '',
     });
 
     const [medicalOrder, setMedicalOrder] = useState<IMedOrders['content']>({
-        doctorSpecialty: userSession?.doctorSpecialty || '',
+        doctorSpecialty: (userSession?.doctorSpecialty as DoctorSpecialtyList) || undefined,
         patientName: '',
-        patientPhoneNumber: '',
-        patientAddress: '',
+        phoneNumber: '',
+        address: '',
         diagnosis: '',
         medications: '',
         dosage: '',
@@ -107,22 +120,20 @@ export function useMedicationsViewModel(patientId: string) {
                     phoneNumber: '',
                     age: '',
                     address: '',
-                    patientID: '',
                     referringDr: '',
                     prescribingDr: '',
                     diagnosis: '',
-                    medicationsNeeded: '',
-                    pharmacyOrClinic: '',
+                    pharmacyOrClinic: 'not selected',
                     medication: '',
                     dosage: '',
                     frequency: '',
                 });
             } else {
                 setMedicalOrder({
-                    doctorSpecialty: '',
+                    doctorSpecialty: DoctorSpecialtyList.NOT_SELECTED,
                     patientName: '',
-                    patientPhoneNumber: '',
-                    patientAddress: '',
+                    phoneNumber: '',
+                    address: '',
                     diagnosis: '',
                     medications: '',
                     dosage: '',

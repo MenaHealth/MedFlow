@@ -22,17 +22,17 @@ export default function MedOrderView({ patientId }: MedOrderViewProps) {
     useEffect(() => {
         if (userSession && primaryDetails && expandedDetails) {
             // Only update the state if the values are different from the current ones
-            if (userSession.doctorSpecialty !== medOrder.content.doctorSpecialty) {
+            if (userSession.doctorSpecialty !== medOrder.doctorSpecialty) {
                 memoizedHandleInputChange('doctorSpecialty', userSession.doctorSpecialty || '');
             }
-            if (primaryDetails.patientName !== medOrder.content.patientName) {
+            if (primaryDetails.patientName !== medOrder.patientName) {
                 memoizedHandleInputChange('patientName', primaryDetails.patientName || '');
             }
-            if (expandedDetails.phone !== medOrder.content.phoneNumber) {
+            if (expandedDetails.phone !== medOrder.phoneNumber) {
                 memoizedHandleInputChange('phoneNumber', expandedDetails.phone || '');
             }
         }
-    }, [userSession, primaryDetails, expandedDetails, medOrder.content, memoizedHandleInputChange]);
+    }, [userSession, primaryDetails, expandedDetails, medOrder, memoizedHandleInputChange]);
 
     return (
         <div className="space-y-4">
@@ -54,46 +54,46 @@ export default function MedOrderView({ patientId }: MedOrderViewProps) {
             <TextFormField
                 fieldName="patientName"
                 fieldLabel="Patient's Full Name"
-                value={medOrder.content.patientName}
+                value={medOrder.patientName}
                 readOnly={true}
             />
             <TextFormField
                 fieldName="phoneNumber"
                 fieldLabel="Phone Number"
-                value={medOrder.content.phoneNumber}
+                value={medOrder.phoneNumber}
                 onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
             />
             <TextFormField
                 fieldName="address"
                 fieldLabel="address"
-                value={medOrder.content.address}
+                value={medOrder.address}
                 onChange={(e) => handleInputChange('address', e.target.value)}
             />
             <TextFormField
                 fieldName="diagnosis"
                 fieldLabel="Diagnosis"
-                value={medOrder.content.diagnosis}
+                value={medOrder.diagnosis}
                 onChange={(e) => handleInputChange('diagnosis', e.target.value)}
                 readOnly={isReadOnly}
             />
             <TextFormField
                 fieldName="medications"
                 fieldLabel="Medications"
-                value={medOrder.content.medications}
+                value={medOrder.medications}
                 onChange={(e) => handleInputChange('medications', e.target.value)}
                 readOnly={isReadOnly}
             />
             <TextFormField
                 fieldName="dosage"
                 fieldLabel="Dosage"
-                value={medOrder.content.dosage}
+                value={medOrder.dosage}
                 onChange={(e) => handleInputChange('dosage', e.target.value)}
                 readOnly={isReadOnly}
             />
             <TextFormField
                 fieldName="frequency"
                 fieldLabel="Frequency/Duration"
-                value={medOrder.content.frequency}
+                value={medOrder.frequency}
                 onChange={(e) => handleInputChange('frequency', e.target.value)}
                 readOnly={isReadOnly}
             />

@@ -29,7 +29,8 @@ const PatientInfoView: React.FC<{ isExpanded: boolean }> = ({ isExpanded }) => {
                         <ReadOnlyField fieldName="genderPreference" fieldLabel="Gender Preference" value={expandedDetails.genderPreference || 'N/A'}/>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <ReadOnlyField fieldName="dob" fieldLabel="Date of Birth" value={expandedDetails.dob || 'N/A'}/>
+                        <ReadOnlyField fieldName="dob" fieldLabel="Date of Birth" value={expandedDetails.dob instanceof Date ? expandedDetails.dob.toLocaleDateString() : expandedDetails.dob || 'N/A'}
+                        />
                         <ReadOnlyField fieldName="patientID" fieldLabel="Patient ID" value={expandedDetails.patientID || 'N/A'}/>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -37,7 +37,7 @@ const RXPage: React.FC<RXPageProps> = ({ params }) => {
                     <form onSubmit={methods.handleSubmit((data) => {
                         console.log("Form data:", data); // Handle form submission here
                     })}>
-                        <RXOrderView />
+                        <RXOrderView patientId={patientId} />
                         <button type="submit" className="mt-4 bg-blue-500 text-white py-2 px-4 rounded">
                             Submit RX Form
                         </button>

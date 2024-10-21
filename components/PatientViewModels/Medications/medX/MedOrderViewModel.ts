@@ -4,34 +4,41 @@
     import { useState } from 'react';
     import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewModelContext';
 
+    interface MedOrder {
+        patientName: string;
+        phoneNumber: string;
+        address: string;
+        diagnosis: string;
+        medications: string;
+        dosage: string;
+        frequency: string;
+        doctorSpecialty: string;
+    }
+
     export function useMedOrderRequestViewModel(patientId: string) {
         const { userSession } = usePatientDashboard();
-        const [medOrder, setMedOrder] = useState({
-            content: {
-                patientName: '',
-                phoneNumber: '',
-                address: '',
-                diagnosis: '',
-                medications: '',
-                dosage: '',
-                frequency: '',
-                patientAddress: '',
-                doctorSpecialty: ''
-            }
+
+        const [medOrder, setMedOrder] = useState<MedOrder>({
+            patientName: '',
+            phoneNumber: '',
+            address: '',
+            diagnosis: '',
+            medications: '',
+            dosage: '',
+            frequency: '',
+            doctorSpecialty: ''
         });
 
-        const handleInputChange = (field: string, value: string) => {
-            setMedOrder(prevState => ({
-                ...prevState,
-                content: {
-                    ...prevState.content,
-                    [field]: value,
-                },
+        const [previousMedOrders, setPreviousMedOrders] = useState<MedOrder[]>([]); // Explicitly type the state as an array of MedOrder objects
+        const [isLoading, setIsLoading] = useState(false);
+        const [isReadOnly] = useState(true);
+
+        const handleInputChange = (field: keyof MedOrder, value: string) => {
+            setMedOrder((prevOrder) => ({
+                ...prevOrder,
+                [field]: value,
             }));
         };
-
-        const [previousMedOrders, setPreviousMedOrders] = useState([]);
-        const [isLoading, setIsLoading] = useState(false);
 
         const submitMedOrder = async () => {
             setIsLoading(true);
@@ -45,7 +52,7 @@
                         email: userSession?.email,
                         authorName: `${userSession?.firstName} ${userSession?.lastName}`,
                         authorID: userSession?.id,
-                        content: medOrder.content,
+                        content: medOrder,
                     }),
                 });
 
@@ -55,19 +62,16 @@
                 }
 
                 const newMedOrder = await response.json();
-                setPreviousMedOrders(prevForms => [...prevForms, newMedOrder]);
+                setPreviousMedOrders(prevForms => [...prevForms, newMedOrder]); // Type now matches
                 setMedOrder({
-                    content: {
-                        patientName: '',
-                        phoneNumber: '',
-                        address: '',
-                        diagnosis: '',
-                        medications: '',
-                        dosage: '',
-                        frequency: '',
-                        patientAddress: '',
-                        doctorSpecialty: '',
-                    }
+                    patientName: '',
+                    phoneNumber: '',
+                    address: '',
+                    diagnosis: '',
+                    medications: '',
+                    dosage: '',
+                    frequency: '',
+                    doctorSpecialty: ''
                 });
             } catch (error) {
                 console.error('Failed to submit med order:', error);
@@ -76,5 +80,5 @@
             }
         };
 
-        return { medOrder, submitMedOrder, previousMedOrders, isLoading, handleInputChange };
+        return { medOrder, submitMedOrder, previousMedOrders, isLoading, isReadOnly, handleInputChange };
     }

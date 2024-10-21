@@ -94,7 +94,7 @@ export default function MedOrderView({ patientId }: MedOrderViewProps) {
                 onChange={(e) => handleInputChange('frequency', e.target.value)}
             />
 
-                <Button onClick={submitMedOrder} disabled={isLoading}>
+                <Button onClick={submitMedOrder} disabled={isLoading} variant={"submit"}>
                     {isLoading ? 'Submitting...' : 'Submit Medical Order'}
                 </Button>
         </div>

@@ -10,7 +10,6 @@ interface Props {
     tooltip?: string;
     showTooltip?: boolean;
     onFocus?: () => void;
-    onBlur?: () => void;
     error?: string;
     disabled?: boolean;
     autoComplete?: string;
@@ -20,6 +19,7 @@ interface Props {
     multiline?: boolean;
     rows?: number;
     readOnly?: boolean;
+    onBlur?: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 }
 
 const TextFormField: React.FC<Props> = ({
@@ -74,7 +74,7 @@ const TextFormField: React.FC<Props> = ({
     };
 
     const inputClassName = `w-full pt-4 pb-2 pl-2 pr-10 border-2 rounded-md text-gray-700 ${
-        readOnly ? 'bg-gray-50 cursor-not-allowed hover:bg-orange-50' : 'hover:border-orange-500'
+        readOnly ? 'bg-gray-50 cursor-not-allowed hover:bg-grey-100' : 'hover:border-orange-500'
     } ${
         isFocused || hasValue ? 'border-darkBlue' : 'border-gray-300'
     }`;

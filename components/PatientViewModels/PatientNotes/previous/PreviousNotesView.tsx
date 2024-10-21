@@ -4,7 +4,12 @@ import { ChevronDown, ChevronsDown, ChevronsUp, ChevronUp } from 'lucide-react';
 import { usePreviousNotesViewModel } from './PreviousNotesViewModel';
 import { ScrollArea } from './../../../../components/form/ScrollArea';
 
-export function PreviousNotesView() {
+interface PreviousNotesViewProps {
+    patientId: string;
+}
+
+export function PreviousNotesView({ patientId }: PreviousNotesViewProps) {
+
     const { notes, loading, error } = usePreviousNotesViewModel();
     const [expandedNotes, setExpandedNotes] = useState<string[]>([]);
     const [expandAll, setExpandAll] = useState(false);

@@ -1,8 +1,8 @@
 // app/api/admin/denied-users/route.ts
 
 import { NextResponse } from 'next/server';
-import dbConnect from '@/utils/database';
-import User from '@/models/user';
+import dbConnect from './../../../../../utils/database';
+import User from "./../../../../../models/user";
 
 export async function GET(request: Request) {
     await dbConnect();

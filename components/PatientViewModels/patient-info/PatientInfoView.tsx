@@ -1,8 +1,8 @@
 // components/PatientViewModels/patient-info/PatientInfoView.tsx
 import React, { useEffect } from 'react';
-import { Card, CardContent } from "@/components/ui/card";
-import ReadOnlyField from '@/components/form/ReadOnlyField';
-import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewModelContext';
+import { Card, CardContent } from "./../../../components/ui/card";
+import ReadOnlyField from './../../../components/form/ReadOnlyField';
+import { usePatientDashboard } from './../../../components/PatientViewModels/PatientViewModelContext';
 
 const PatientInfoView: React.FC<{ isExpanded: boolean }> = ({ isExpanded }) => {
     const { patientViewModel, loadingPatientInfo } = usePatientDashboard();

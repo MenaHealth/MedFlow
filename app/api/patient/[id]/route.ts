@@ -1,6 +1,6 @@
 // app/api/patient/[id]/route.ts
-import Patient from "@/models/patient";
-import dbConnect from "@/utils/database";
+import Patient from "./../../../../models/patient";
+import dbConnect from "./../../../../utils/database";
 import { Types } from "mongoose";
 
 // Define the type for params

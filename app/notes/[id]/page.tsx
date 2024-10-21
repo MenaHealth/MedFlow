@@ -4,7 +4,7 @@
 import React from 'react';
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
-import NotesForm from "@/components/form/NotesForm";
+import NotesForm from "./../../../components/form/NotesForm";
 
 interface NotesPageProps {
     params: {

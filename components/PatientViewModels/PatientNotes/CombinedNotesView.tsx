@@ -17,6 +17,7 @@ interface NotesViewProps {
     patientId: string;
 }
 
+
 export function CombinedNotesView({ patientId }: NotesViewProps) {
     const { data: session, status } = useSession();
     const [isExpanded, setIsExpanded] = useState(false);

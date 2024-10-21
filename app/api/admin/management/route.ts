@@ -1,9 +1,12 @@
 // app/api/admin/management/route.ts
 import { NextResponse } from 'next/server';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import User from '@/models/user';
-import Admin from '@/models/admin'; // Import the Admin model
-import dbConnect from '@/utils/database';
+import Admin from './../../../../models/admin'; // Import the Admin model
+import dbConnect from './../../../../utils/database';
+import User from './../../../../models/user';
+
+// import dbConnect from './../../../../../utils/database';
+// import User from "./../../../../../models/user";
 
 const SECRET = process.env.JWT_SECRET as string;
 if (!SECRET) {

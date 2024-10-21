@@ -2,7 +2,7 @@
 
 
     import { useState } from 'react';
-    import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewModelContext';
+    import { usePatientDashboard } from './../../../../components/PatientViewModels/PatientViewModelContext';
 
     interface MedOrder {
         patientName: string;

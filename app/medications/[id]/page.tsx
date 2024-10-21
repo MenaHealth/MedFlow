@@ -4,8 +4,8 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from 'next/navigation';
 import { BarLoader } from "react-spinners";
-import MedicationsView from "@/components/PatientViewModels/Medications/MedicationsView";
-import PatientSubmenu from "@/components/PatientSubmenu";
+import MedicationsView from "./../../../components/PatientViewModels/Medications/MedicationsView";
+import PatientSubmenu from "./../../../components/PatientSubmenu";
 
 interface MedicationsPageProps {
     params: {

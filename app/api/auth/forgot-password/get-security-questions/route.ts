@@ -1,7 +1,7 @@
 // app/api/auth/forgot-password/reset-password/route.ts
 import { NextResponse } from 'next/server';
-import User from '@/models/user';
-import dbConnect from '@/utils/database';
+import User from './../../../../../models/user';
+import dbConnect from './../../../../../utils/database';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {

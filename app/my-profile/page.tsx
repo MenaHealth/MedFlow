@@ -1,8 +1,8 @@
 'use client'
 
 import { useSession } from 'next-auth/react'
-import { UserProfile } from '@/components/user-profile/UserProfile'
-import { UserProfileSkeleton } from '@/components/user-profile/userProfileSkeleton'
+import { UserProfile } from './../../components/user-profile/UserProfile'
+import { UserProfileSkeleton } from './../../components/user-profile/userProfileSkeleton'
 
 export default function MyProfilePage() {
     const { data: session, status } = useSession()

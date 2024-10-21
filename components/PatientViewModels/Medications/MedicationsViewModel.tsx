@@ -1,9 +1,9 @@
 // components/PatientViewModels/Medications/MedicationsViewModel.tsx
 import { useState, useCallback } from 'react';
 import { usePatientDashboard } from "../PatientViewModelContext";
-import { IRxOrder } from '@/models/rxOrders';
-import { IMedOrders } from '@/models/medOrders';
-import { DoctorSpecialtyList } from "@/data/doctorSpecialty.enum";
+import { IRxOrder } from './../../../models/rxOrders';
+import { IMedOrders } from './../../../models/medOrders';
+import { DoctorSpecialtyList } from "./../../../data/doctorSpecialty.enum";
 
 interface RxOrder {
     patientName: string;

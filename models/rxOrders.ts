@@ -1,6 +1,13 @@
 // models/rxOrders.ts
 import { Schema, Document, Model, model, models } from 'mongoose';
 import { Pharmacies } from './../data/pharmacies.enum';
+import { DoctorSpecialtyList } from './../data/doctorSpecialty.enum';
+
+interface Prescription {
+    medication: string;
+    dosage: string;
+    frequency: string;
+}
 
 export interface IRxOrder extends Document {
     email: string;
@@ -11,37 +18,32 @@ export interface IRxOrder extends Document {
         patientName: string;
         phoneNumber: string;
         age: string;
-        address: string;
-        referringDr: string;
-        prescribingDr: string;
         diagnosis: string;
         pharmacyOrClinic: typeof Pharmacies[number];
-        medication: string;
-        dosage: string;
-        frequency: string;
+        doctorSpecialization: keyof typeof DoctorSpecialtyList;
+        prescriptions: Prescription[];
     };
 }
 
 export const RXOrderSchema = new Schema<IRxOrder>({
-    email: { type: String },
+    email: { type: String, required: true },
     date: { type: Date, default: Date.now },
-    authorName: { type: String },
-    authorID: { type: String },
+    authorName: { type: String, required: true },
+    authorID: { type: String, required: true },
     content: {
-        pharmacyOrClinic: { type: String, enum: Pharmacies },
-        patientName: { type: String },
+        patientName: { type: String, required: true },
         phoneNumber: { type: String },
         age: { type: String },
-        address: { type: String },
-        referringDr: { type: String },
-        prescribingDr: { type: String },
-        diagnosis: { type: String },
-        medication: { type: String },
-        dosage: { type: String },
-        frequency: { type: String },
+        diagnosis: { type: String, required: true },
+        pharmacyOrClinic: { type: String, enum: Pharmacies, required: true },
+        doctorSpecialization: { type: String, enum: Object.values(DoctorSpecialtyList), required: true },
+        prescriptions: [{
+            medication: { type: String, required: true },
+            dosage: { type: String, required: true },
+            frequency: { type: String, required: true },
+        }],
     },
 });
 
 const RxOrders: Model<IRxOrder> = models.RxOrders || model<IRxOrder>('RxOrders', RXOrderSchema);
-
 export default RxOrders;

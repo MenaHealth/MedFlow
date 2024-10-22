@@ -1,54 +1,58 @@
 import { useState } from 'react';
 import { usePatientDashboard } from './../../../../components/PatientViewModels/PatientViewModelContext';
+import { DoctorSpecialtyList } from './../../../../data/doctorSpecialty.enum';
 
-// Define an interface for RXOrder
-interface RxOrder {
-    patientName: string;
-    phoneNumber: string;
-    referringDr: string;
-    prescribingDr: string;
-    age: string;
-    address: string;
-    diagnosis: string;
-    pharmacyOrClinic: string;
+interface Prescription {
     medication: string;
     dosage: string;
     frequency: string;
 }
 
-export function useRXOrderViewModel(patientId: string) {
+interface RxOrder {
+    patientName: string;
+    phoneNumber: string;
+    age: string;
+    doctorSpecialization: keyof typeof DoctorSpecialtyList;
+    diagnosis: string;
+    pharmacyOrClinic: string;
+    prescriptions: Prescription[];
+}
+
+export function useRXOrderViewModel(patientId: string, patientName: string, phoneNumber: string, age: string) {
     const { userSession } = usePatientDashboard();
 
-    // Type the state as RxOrder
     const [rxOrder, setrxOrder] = useState<RxOrder>({
-        patientName: '',
-        phoneNumber: '',
-        referringDr: '',
-        prescribingDr: '',
-        age: '',
-        address: '',
+        patientName,
+        phoneNumber,
+        age,
+        doctorSpecialization: userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList || DoctorSpecialtyList.NOT_SELECTED,
         diagnosis: '',
         pharmacyOrClinic: '',
-        medication: '',
-        dosage: '',
-        frequency: '',
+        prescriptions: [{ medication: '', dosage: '', frequency: '' }]
     });
 
-    // Type the previousrxOrders state as an array of RxOrder
-    const [previousrxOrders, setPreviousrxOrders] = useState<RxOrder[]>([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [isReadOnly] = useState(true);
 
-    // Handle input changes
-    const handleInputChange = (field: keyof RxOrder, value: string) => {
-        setrxOrder((prevOrder) => ({
-            ...prevOrder,
-            [field]: value,
-        }));
+    const handleInputChange = (field: string, value: any) => {
+        setrxOrder((prevOrder) => {
+            if (field.includes('.')) {
+                const [parentField, childField] = field.split('.');
+                return {
+                    ...prevOrder,
+                    [parentField]: {
+                        ...prevOrder[parentField as keyof RxOrder],
+                        [childField]: value
+                    }
+                };
+            }
+            return {
+                ...prevOrder,
+                [field]: value,
+            };
+        });
     };
 
-    // Accept formData as RxOrder type instead of 'any'
-    const submitRxOrder = async (formData: RxOrder) => {
+    const submitRxOrder = async () => {
         setIsLoading(true);
         try {
             const response = await fetch(`/api/patient/${patientId}/medications/rx-order`, {
@@ -61,7 +65,7 @@ export function useRXOrderViewModel(patientId: string) {
                     date: new Date().toISOString(),
                     authorName: `${userSession?.firstName} ${userSession?.lastName}`,
                     authorID: userSession?.id,
-                    content: formData,  // Ensure formData follows RxOrder structure
+                    content: rxOrder,
                 }),
             });
 
@@ -69,29 +73,26 @@ export function useRXOrderViewModel(patientId: string) {
                 throw new Error('Failed to publish RX form');
             }
 
-            const newrxOrder = await response.json();
-            setPreviousrxOrders(prevForms => [...prevForms, newrxOrder]);
+            const newRxOrder = await response.json();
+            // Handle successful submission (e.g., show success message, reset form, etc.)
 
             // Reset the form
             setrxOrder({
                 patientName: '',
                 phoneNumber: '',
-                referringDr: '',
-                prescribingDr: '',
                 age: '',
-                address: '',
+                doctorSpecialization: userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList || DoctorSpecialtyList.NOT_SELECTED,
                 diagnosis: '',
                 pharmacyOrClinic: '',
-                medication: '',
-                dosage: '',
-                frequency: '',
+                prescriptions: [{ medication: '', dosage: '', frequency: '' }],
             });
         } catch (error) {
             console.error('Failed to publish RX form:', error);
+            // Handle error (e.g., show error message)
         } finally {
             setIsLoading(false);
         }
     };
 
-    return { rxOrder, submitRxOrder, previousrxOrders, isLoading, isReadOnly, handleInputChange };
+    return { rxOrder, submitRxOrder, isLoading, handleInputChange };
 }

@@ -93,7 +93,7 @@ export function SingleChoiceFormField({
                                         <Check
                                             className={cn(
                                                 "mr-2 h-4 w-4",
-                                                field.value === choice ? "opacity-100" : "opacity-0"
+                                                displayValue === choice ? "opacity-100" : "opacity-0"
                                             )}
                                         />
                                         {choice}
@@ -119,5 +119,5 @@ export function SingleChoiceFormField({
     }
 
     // Fallback for cases where FormProvider is not available
-    return renderField({ field: { value: propValue, onChange: propOnChange } });
+    return renderField({ field: { value: propValue, onChange: (value: string) => handleSelect(value) } });
 }

@@ -13,8 +13,7 @@ import { Resizable } from './../../../components/ui/Resizable';
 import { useRXOrderViewModel } from './../../../components/PatientViewModels/Medications/rx/RXOrderViewModel';
 import { useMedOrderRequestViewModel } from './../../../components/PatientViewModels/Medications/med/MedOrderViewModel';
 import { ClipLoader } from 'react-spinners';
-
-import { usePatientDashboard } from './../../PatientViewModels/PatientViewModelContext';
+import {usePatientDashboard} from "./../../../components/PatientViewModels/PatientViewModelContext";
 
 interface MedicationsViewProps {
     patientId: string;
@@ -47,6 +46,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
 
     const [previousMedicationsWidth, setPreviousMedicationsWidth] = useState(400);
     const [templateType, setTemplateType] = useState<'rxOrder' | 'medicalrequest'>('rxOrder');
+    const [isExpanded, setIsExpanded] = useState(false);
 
     const methods = useForm({
         defaultValues: templateType === 'rxOrder' ? rxOrder : medOrder,
@@ -77,7 +77,6 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
         }
     }, [rxOrders, medOrders, fetchPatientData, loadingMedications]);
 
-    // Show loader if data is loading
     if (loadingMedications) {
         return (
             <div className="flex justify-center items-center h-full">
@@ -90,6 +89,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
         <FormProvider {...methods}>
             <form onSubmit={methods.handleSubmit(handleCreateMedication)}>
                 <div className="flex flex-col md:flex-row h-[100vh] bg-darkBlue overflow-hidden">
+                    {/* Desktop Previous Medications */}
                     <Resizable
                         className="hidden md:block"
                         minWidth={200}
@@ -112,6 +112,26 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                             </ScrollArea>
                         </Card>
                     </Resizable>
+
+                    {/* Mobile Previous Medications */}
+                    <Card className="md:hidden w-full">
+                        <CardHeader
+                            className="px-4 py-2 flex justify-between items-center cursor-pointer"
+                            onClick={() => setIsExpanded(!isExpanded)}
+                        >
+                            <h3 className="text-lg font-semibold">Previous Medications</h3>
+                            {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                        </CardHeader>
+                        <div className={`overflow-hidden transition-all duration-300 ${isExpanded ? 'max-h-[50vh]' : 'max-h-0'}`}>
+                            <ScrollArea className="h-[50vh] w-full">
+                                <PreviousMedicationsView
+                                    rxOrders={rxOrders}
+                                    medOrders={medOrders}
+                                    loadingMedications={loadingMedications}
+                                />
+                            </ScrollArea>
+                        </div>
+                    </Card>
 
                     <Card className="flex-grow h-full md:h-auto overflow-hidden">
                         <CardHeader className="px-4 py-2">

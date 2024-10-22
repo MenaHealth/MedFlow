@@ -32,11 +32,15 @@ export function SingleChoiceFormField({
     );
 
     const handleSelect = useCallback((selectedChoice: string) => {
-        if (formContext) {
+
+        if (formContext && formContext.setValue) {
             formContext.setValue(fieldName, selectedChoice);
-        } else if (propOnChange) {
+        }
+
+        if (propOnChange) {
             propOnChange(selectedChoice);
         }
+
         setOpen(false);
     }, [formContext, fieldName, propOnChange]);
 

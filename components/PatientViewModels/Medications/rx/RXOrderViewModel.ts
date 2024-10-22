@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { usePatientDashboard } from './../../../../components/PatientViewModels/PatientViewModelContext';
 import { DoctorSpecialtyList } from './../../../../data/doctorSpecialty.enum';
+import { Pharmacies } from './../../../../data/pharmacies.enum';
 
 interface Prescription {
     medication: string;
@@ -12,9 +13,9 @@ interface RxOrder {
     patientName: string;
     phoneNumber: string;
     age: string;
-    doctorSpecialization: keyof typeof DoctorSpecialtyList;
+    doctorSpecialty: keyof typeof DoctorSpecialtyList;
     diagnosis: string;
-    pharmacyOrClinic: string;
+    pharmacyOrClinic: typeof Pharmacies[number];
     prescriptions: Prescription[];
 }
 
@@ -25,31 +26,20 @@ export function useRXOrderViewModel(patientId: string, patientName: string, phon
         patientName,
         phoneNumber,
         age,
-        doctorSpecialization: userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList || DoctorSpecialtyList.NOT_SELECTED,
+        doctorSpecialty: userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList || DoctorSpecialtyList.NOT_SELECTED,
         diagnosis: '',
-        pharmacyOrClinic: '',
+        pharmacyOrClinic: Pharmacies[0],
         prescriptions: [{ medication: '', dosage: '', frequency: '' }]
     });
 
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleInputChange = (field: string, value: any) => {
-        setrxOrder((prevOrder) => {
-            if (field.includes('.')) {
-                const [parentField, childField] = field.split('.');
-                return {
-                    ...prevOrder,
-                    [parentField]: {
-                        ...prevOrder[parentField as keyof RxOrder],
-                        [childField]: value
-                    }
-                };
-            }
-            return {
-                ...prevOrder,
-                [field]: value,
-            };
-        });
+    const handleInputChange = (field: keyof RxOrder, value: string) => {
+        console.log(`Updating ${field} to ${value}`);
+        setrxOrder((prevOrder) => ({
+            ...prevOrder,
+            [field]: value,
+        }));
     };
 
     const submitRxOrder = async () => {
@@ -81,9 +71,9 @@ export function useRXOrderViewModel(patientId: string, patientName: string, phon
                 patientName: '',
                 phoneNumber: '',
                 age: '',
-                doctorSpecialization: userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList || DoctorSpecialtyList.NOT_SELECTED,
+                doctorSpecialty: userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList || DoctorSpecialtyList.NOT_SELECTED,
                 diagnosis: '',
-                pharmacyOrClinic: '',
+                pharmacyOrClinic: Pharmacies[0],
                 prescriptions: [{ medication: '', dosage: '', frequency: '' }],
             });
         } catch (error) {
@@ -92,6 +82,7 @@ export function useRXOrderViewModel(patientId: string, patientName: string, phon
         } finally {
             setIsLoading(false);
         }
+        console.log(rxOrder)
     };
 
     return { rxOrder, submitRxOrder, isLoading, handleInputChange };

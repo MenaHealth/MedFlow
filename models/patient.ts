@@ -97,7 +97,28 @@ const PatientSchema = new Schema<IPatient>({
   otherDrugs: { type: String },
   allergies: { type: String },
   notes: { type: [noteSchema], default: [] },
-  rxOrders: { type: [RXOrderSchema], default: [] },
+  rxOrders: {
+    type: [{
+      email: { type: String, required: true },
+      date: { type: Date, default: Date.now },
+      authorName: { type: String, required: true },
+      authorID: { type: String, required: true },
+      content: {
+        patientName: { type: String, required: true },
+        phoneNumber: { type: String },
+        age: { type: String },
+        diagnosis: { type: String, required: true },
+        pharmacyOrClinic: { type: String, required: true },
+        doctorSpecialty: { type: String, required: true },
+        prescriptions: [{
+          medication: { type: String, required: true },
+          dosage: { type: String, required: true },
+          frequency: { type: String, required: true },
+        }]
+      }
+    }],
+    default: []
+  },
   medOrders: { type: [medOrdersSchema], default: [] },
   visits: [{ type: Schema.Types.ObjectId, ref: 'Visit' }],
   triagedBy: { type: Object },

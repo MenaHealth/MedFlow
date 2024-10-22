@@ -1,6 +1,7 @@
 // components/PatientViewModels/Medications/MedicationsView.tsx
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm, FormProvider } from "react-hook-form";
+import { IRxOrder } from './../../../models/rxOrders'; // Import the IRxOrder type
 import { Button } from './../../../components/ui/button';
 import { Card, CardContent, CardHeader } from './../../../components/ui/card';
 import { RadioCard } from './../../../components/ui/radio-card';
@@ -13,7 +14,7 @@ import { Resizable } from './../../../components/ui/Resizable';
 import { useRXOrderViewModel } from './../../../components/PatientViewModels/Medications/rx/RXOrderViewModel';
 import { useMedOrderRequestViewModel } from './../../../components/PatientViewModels/Medications/med/MedOrderViewModel';
 import { ClipLoader } from 'react-spinners';
-import {usePatientDashboard} from "./../../../components/PatientViewModels/PatientViewModelContext";
+import { usePatientDashboard } from './../../../components/PatientViewModels/PatientViewModelContext';
 
 interface MedicationsViewProps {
     patientId: string;
@@ -48,7 +49,8 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
     const [templateType, setTemplateType] = useState<'rxOrder' | 'medicalrequest'>('rxOrder');
     const [isExpanded, setIsExpanded] = useState(false);
 
-    const methods = useForm({
+    // Use the IRxOrder type for default values
+    const methods = useForm<IRxOrder>({
         defaultValues: templateType === 'rxOrder' ? rxOrder : medOrder,
     });
 

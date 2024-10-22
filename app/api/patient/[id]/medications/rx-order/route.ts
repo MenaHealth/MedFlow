@@ -1,3 +1,6 @@
+// app/api/patient/[id]/medications/rx-order/route.ts
+
+
 import { NextResponse } from 'next/server';
 import Patient from '../../../../../../models/patient';
 import RxOrders from '../../../../../../models/rxOrders';
@@ -12,48 +15,50 @@ interface Params {
 
 export const POST = async (request: Request, { params }: Params) => {
     try {
+        await dbConnect();
+
         const requestData = await request.json();
         console.log('Received request data:', requestData);
 
-        const {
-            email,
-            date,
-            authorName,
-            authorID,
-            content,
-        } = requestData;
-
-        const { patientName, phoneNumber, age, diagnosis, pharmacyOrClinic, doctorSpecialization, prescriptions } = content;
-
-        console.log('Content to be saved:', content);
-
-        await dbConnect();
-
+        // First, find the patient without validation
         const patient = await Patient.findById(params.id);
         if (!patient) {
             return new NextResponse(`Patient with ID ${params.id} not found`, { status: 404 });
         }
 
-        const newRXOrder = new RxOrders({
-            email,
-            date: date || new Date(),
-            authorName,
-            authorID,
+        // Create the new RX order document
+        const newRXOrder = {
+            email: requestData.email,
+            date: requestData.date || new Date(),
+            authorName: requestData.authorName,
+            authorID: requestData.authorID,
             content: {
-                patientName,
-                phoneNumber,
-                age,
-                diagnosis,
-                pharmacyOrClinic,
-                doctorSpecialization,
-                prescriptions
+                patientName: requestData.content.patientName,
+                phoneNumber: requestData.content.phoneNumber,
+                age: requestData.content.age,
+                diagnosis: requestData.content.diagnosis,
+                pharmacyOrClinic: requestData.content.pharmacyOrClinic,
+                doctorSpecialty: requestData.content.doctorSpecialty,
+                prescriptions: requestData.content.prescriptions
             }
-        });
+        };
 
-        console.log('New RX Order to be saved:', newRXOrder);
+        // Use findOneAndUpdate with $push to add the new order
+        const updatedPatient = await Patient.findOneAndUpdate(
+            { _id: params.id },
+            {
+                $push: { rxOrders: newRXOrder },
+                $set: { updatedAt: new Date() }
+            },
+            {
+                new: true,
+                runValidators: false // Disable validation for existing documents
+            }
+        );
 
-        patient.rxOrders.push(newRXOrder);
-        await patient.save();
+        if (!updatedPatient) {
+            throw new Error('Failed to update patient with new RX order');
+        }
 
         return new NextResponse(JSON.stringify(newRXOrder), { status: 201 });
     } catch (error) {

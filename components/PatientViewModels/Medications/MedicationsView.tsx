@@ -1,5 +1,5 @@
 // components/PatientViewModels/Medications/MedicationsView.tsx
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { useForm, FormProvider } from "react-hook-form";
 import { Button } from './../../../components/ui/button';
 import { Card, CardContent, CardHeader } from './../../../components/ui/card';
@@ -7,11 +7,12 @@ import { RadioCard } from './../../../components/ui/radio-card';
 import { ScrollArea } from './../../../components/form/ScrollArea';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import RXOrderView from './rx/RXOrderView';
-import MedOrderView from './medX/MedOrderView';
+import MedOrderView from './../../../components/PatientViewModels/Medications/med/MedOrderView';
 import PreviousMedicationsView from './previous/PreviousMedicationsView';
 import { Resizable } from './../../../components/ui/Resizable';
 import { useRXOrderViewModel } from './../../../components/PatientViewModels/Medications/rx/RXOrderViewModel';
-import { useMedOrderRequestViewModel } from './../../../components/PatientViewModels/Medications/medX/MedOrderViewModel';
+import { useMedOrderRequestViewModel } from './../../../components/PatientViewModels/Medications/med/MedOrderViewModel';
+import { ClipLoader } from 'react-spinners';
 
 import { usePatientDashboard } from './../../PatientViewModels/PatientViewModelContext';
 
@@ -25,6 +26,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
         rxOrders,
         medOrders,
         loadingMedications,
+        fetchPatientData,
         patientViewModel,
     } = usePatientDashboard();
 
@@ -68,6 +70,21 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
             methods.reset(value === 'rxOrder' ? rxOrder : medOrder);
         }
     };
+
+    useEffect(() => {
+        if (!rxOrders.length && !medOrders.length && !loadingMedications) {
+            fetchPatientData();
+        }
+    }, [rxOrders, medOrders, fetchPatientData, loadingMedications]);
+
+    // Show loader if data is loading
+    if (loadingMedications) {
+        return (
+            <div className="flex justify-center items-center h-full">
+                <ClipLoader size={50} color="orange-500" loading={true} />
+            </div>
+        );
+    }
 
     return (
         <FormProvider {...methods}>

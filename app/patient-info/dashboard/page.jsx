@@ -486,7 +486,7 @@ export default function PatientTriage() {
                   <TableCell align="center">{row.age || ''}</TableCell>
                   <TableCell align="center" style={{ minWidth: '150px' }}>{formatLocation(row.city, row.country)}</TableCell>
                   <TableCell align="center">{row.language}</TableCell>
-                  <TableCellWithTooltip tooltipText={row.chiefComplaint} maxWidth='200px'>
+                  <TableCellWithTooltip tooltipText={row.chiefComplaint} maxWidth='175px'>
                     <div className="block overflow-hidden text-ellipsis text-sm">
                       {row.chiefComplaint}
                     </div>
@@ -597,8 +597,12 @@ export default function PatientTriage() {
                     {getInitials(row.triagedBy?.firstName, row.triagedBy?.lastName)}
                   </TableCell>
                   <TableCell align="center">
-                    {row.genderPreference === 'Male' ? '♂' : row.genderPreference === 'Female' ? '♀' : 'N/A'}
-                      </TableCell>
+                      {row.genderPreference === 'Male' ? (
+                        <span style={{ fontSize: '1.5em'}}>♂</span>
+                        ) : row.genderPreference === 'Female' ? (
+                          <span style={{ fontSize: '1.5em'}}>♀</span>
+                        ) : 'N/A'}
+                  </TableCell>
                       <TableCell align="center">
                         {
                           row.status === 'Not Started'

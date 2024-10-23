@@ -13,9 +13,11 @@ import { IMedOrders } from '../../models/medOrders';
 interface PatientInfo {
     patientName: string;
     age: string;
-    gender: string;
     dob: Date;
-    phoneNumber: string;
+    phoneNumber: {
+        countryCode: string;
+        phoneNumber: string;
+    };
     patientID: string;
 }
 
@@ -39,6 +41,7 @@ interface PatientContext {
     activeTab: string;
     setActiveTab: (tab: string) => void;
     patientInfo: PatientInfo | null;
+    setPatientInfo: (patientInfo: PatientInfo | null) => void;
     notes: INote[];
     loadingPatientInfo: boolean;
     loadingNotes: boolean;
@@ -107,8 +110,6 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
 
             setAuthorName(`${firstName} ${lastName}`.trim());
             setAuthorID(userId);
-
-            console.log('User session:', userSession);
         }
     }, [session, status]);
 
@@ -119,9 +120,11 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
         setPatientInfo({
             patientName: `${patientData.firstName} ${patientData.lastName}`,
             age: patientData.age || '',
-            gender: patientData.genderPreference || '',
             dob: new Date(patientData.dob || Date.now()),
-            phoneNumber: patientData.phone || '',
+            phoneNumber: {
+                countryCode: patientData.phone?.countryCode || '',
+                phoneNumber: patientData.phone?.phoneNumber || '',
+            },
             patientID: patientData._id || '',
         });
         setPatientViewModel(new PatientInfoViewModel(patientData));
@@ -191,6 +194,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 activeTab,
                 setActiveTab,
                 patientInfo,
+                setPatientInfo,
                 notes,
                 loadingPatientInfo,
                 loadingNotes,

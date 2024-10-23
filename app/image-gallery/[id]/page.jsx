@@ -7,7 +7,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ClipLoader } from 'react-spinners';
 import { generateEncryptionKey, encryptPhoto, calculateFileHash, convertToWebP, decryptPhoto } from '@/utils/encryptPhoto';
 import Image from 'next/image';
-import PatientSubmenu from "../../../components/PatientSubmenu";
+// import PatientSubmenu from "../../../components/PatientSubmenu";
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { FiMinus, FiPlus } from 'react-icons/fi';
 

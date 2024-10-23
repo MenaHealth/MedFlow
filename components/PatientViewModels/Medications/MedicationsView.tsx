@@ -30,11 +30,21 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
         patientViewModel,
     } = usePatientDashboard();
 
+    // Extract the required data for the hook
+    const patientDetails = patientViewModel?.getPrimaryDetails() || { patientName: '', patientID: '' };
+    const expandedDetails = patientViewModel?.getExpandedDetails() || { phone: '', age: '', city: '' };
+
     const {
         rxOrder,
         submitRxOrder,
         isLoading: rxLoading,
-    } = useRXOrderViewModel(patientId);
+    } = useRXOrderViewModel(
+        patientId,
+        patientDetails.patientName || '',
+        expandedDetails.phone || '',
+        expandedDetails.age || '',
+        expandedDetails.city || ''
+    );
 
     const {
         medOrder,
@@ -42,16 +52,12 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
         isLoading: medLoading,
     } = useMedOrderRequestViewModel(patientId);
 
-    const patientDetails = patientViewModel?.getPrimaryDetails() || { patientName: '', patientID: '' };
-    const expandedDetails = patientViewModel?.getExpandedDetails();
-
     const [previousMedicationsWidth, setPreviousMedicationsWidth] = useState(400);
     const [templateType, setTemplateType] = useState<'rxOrder' | 'medicalrequest'>('rxOrder');
     const [isExpanded, setIsExpanded] = useState(false);
 
-    // Use the IRxOrder type for default values
     const methods = useForm<IRxOrder>({
-        defaultValues: templateType === 'rxOrder' ? rxOrder : medOrder,
+        defaultValues: templateType === 'rxOrder' ? (rxOrder as IRxOrder) : (medOrder as IRxOrder),
     });
 
     const handleResize = (width: number) => {
@@ -60,7 +66,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
 
     const handleCreateMedication = async (data: any) => {
         if (templateType === 'rxOrder') {
-            await submitRxOrder(data);
+            await submitRxOrder();
         } else {
             await submitMedOrder();
         }
@@ -91,7 +97,6 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
         <FormProvider {...methods}>
             <form onSubmit={methods.handleSubmit(handleCreateMedication)}>
                 <div className="flex flex-col md:flex-row h-[100vh] bg-darkBlue overflow-hidden">
-                    {/* Desktop Previous Medications */}
                     <Resizable
                         className="hidden md:block"
                         minWidth={200}
@@ -115,7 +120,6 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                         </Card>
                     </Resizable>
 
-                    {/* Mobile Previous Medications */}
                     <Card className="md:hidden w-full">
                         <CardHeader
                             className="px-4 py-2 flex justify-between items-center cursor-pointer"
@@ -169,7 +173,6 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                             }}
                                             patientDetails={patientDetails || { patientName: '' }}
                                             expandedDetails={{
-                                                ...expandedDetails,
                                                 phone: expandedDetails?.phone ?? '',
                                                 age: expandedDetails?.age ?? '',
                                             }}
@@ -184,7 +187,6 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                             }}
                                             patientDetails={patientDetails}
                                             expandedDetails={{
-                                                ...expandedDetails,
                                                 phone: expandedDetails?.phone ?? '',
                                             }}
                                         />

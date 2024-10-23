@@ -1,21 +1,16 @@
-// app/api/patient/[id]/medications/med-order/route.ts
+// app/api/med-orders/route.ts
+
 import { NextResponse } from 'next/server';
-import Patient from '../../../../../../models/patient';
-import dbConnect from '../../../../../../utils/database';
+import MedOrders from '../../../../models/medOrders'; // Import the MedOrders model
+import dbConnect from '../../../../utils/database';
 import { Types } from 'mongoose';
 
-interface Params {
-    params: {
-        id: string;
-    };
-}
-
-export const POST = async (request: Request, { params }: Params) => {
-    console.log('Received request for creating med order');
-
+export const POST = async (request: Request) => {
     try {
+        await dbConnect(); // Ensure DB connection
+
         const requestData = await request.json();
-        console.log("Received data:", requestData);
+        console.log('Received med order data:', requestData);
 
         const {
             email,
@@ -25,80 +20,62 @@ export const POST = async (request: Request, { params }: Params) => {
             content: {
                 doctorSpecialty,
                 patientName,
-                phoneNumber,
-                address,
-                diagnosis,
+                city,
                 medications,
                 dosage,
                 frequency
-            }
+            },
+            patientId
         } = requestData;
 
-        // Ensure the content field is an object and contains all required fields
+        // Ensure content fields are valid
         if (
-            typeof doctorSpecialty !== 'string' ||
+            !patientId ||
             typeof patientName !== 'string' ||
-            typeof phoneNumber !== 'string' ||
-            typeof address !== 'string' ||
-            typeof diagnosis !== 'string' ||
+            typeof city !== 'string' ||
             typeof medications !== 'string' ||
             typeof dosage !== 'string' ||
-            typeof frequency !== 'string'
+            typeof frequency !== 'string' ||
+            typeof doctorSpecialty !== 'string'
         ) {
-            return new NextResponse("Invalid content structure", { status: 400 });
+            return new NextResponse("Invalid med order data", { status: 400 });
         }
-
-        await dbConnect();
-        console.log('Database connected');
 
         // Validate patient ID
-        if (!Types.ObjectId.isValid(params.id)) {
-            console.error('Invalid patient ID:', params.id);
-            return new NextResponse("Invalid ID", { status: 400 });
+        if (!Types.ObjectId.isValid(patientId)) {
+            console.error('Invalid patient ID:', patientId);
+            return new NextResponse("Invalid patient ID", { status: 400 });
         }
 
-        // Create a new med order
-        const newMedOrder = {
+        // Create the new Med Order
+        const newMedOrder = new MedOrders({
+            patientId: new Types.ObjectId(patientId), // Reference to the patient
             email,
-            date: date || new Date(), // Default to the current date if not provided
+            date: date || new Date(),
             authorName,
             authorID,
             content: {
                 doctorSpecialty,
                 patientName,
-                phoneNumber,
-                address,
-                diagnosis,
+                city,
                 medications,
                 dosage,
-                frequency
+                frequency,
             }
-        };
+        });
 
-        // Log the new med order before saving
-        console.log('New med order to be saved:', JSON.stringify(newMedOrder, null, 2));
+        // Save the Med Order to the MedOrders collection
+        const savedMedOrder = await newMedOrder.save();
+        console.log('Med order saved successfully:', savedMedOrder);
 
-        // Update the patient document by adding the new med order to the medOrders array
-        const updateResult = await Patient.updateOne(
-            { _id: params.id },
-            { $push: { medOrders: newMedOrder } }
-        );
-
-        if (updateResult.modifiedCount === 0) {
-            console.error(`Patient with ID ${params.id} not found or med order not added`);
-            return new NextResponse(`Failed to add med order for patient with ID ${params.id}`, { status: 404 });
-        }
-
-        console.log('Med order saved successfully');
-
-        // Return the new med order as the response
-        return new NextResponse(JSON.stringify(newMedOrder), { status: 201 });
+        // Return the newly created Med Order
+        return new NextResponse(JSON.stringify(savedMedOrder), { status: 201 });
     } catch (error) {
         console.error('Failed to add med order:', error);
         if (error instanceof Error) {
             return new NextResponse(`Failed to add med order: ${error.message}`, { status: 500 });
         } else {
-            return new NextResponse('Failed to add med order due to an unknown error', { status: 500 });
+            return new NextResponse('An unknown error occurred', { status: 500 });
         }
     }
 };

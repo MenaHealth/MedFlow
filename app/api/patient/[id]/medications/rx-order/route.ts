@@ -63,6 +63,12 @@ export const POST = async (request: Request, { params }: Params) => {
         return new NextResponse(JSON.stringify(newRXOrder), { status: 201 });
     } catch (error) {
         console.error('Failed to add RX order:', error);
-        return new NextResponse(`Failed to add RX order: ${error.message}`, { status: 500 });
+
+        // Type narrowing for error
+        if (error instanceof Error) {
+            return new NextResponse(`Failed to add RX order: ${error.message}`, { status: 500 });
+        } else {
+            return new NextResponse('An unknown error occurred', { status: 500 });
+        }
     }
 };

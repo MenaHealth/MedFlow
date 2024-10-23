@@ -3,35 +3,33 @@
 
     import { useState } from 'react';
     import { usePatientDashboard } from './../../../../components/PatientViewModels/PatientViewModelContext';
+    import { DoctorSpecialtyList } from './../../../../data/doctorSpecialty.enum';
 
     interface MedOrder {
         patientName: string;
-        phoneNumber: string;
-        address: string;
-        diagnosis: string;
+        city: string; // New field for city
         medications: string;
         dosage: string;
         frequency: string;
-        doctorSpecialty: string;
+        doctorSpecialty: keyof typeof DoctorSpecialtyList;
+        doctorId: string; // Added doctorId to track the doctor placing the order
     }
 
-    export function useMedOrderRequestViewModel(patientId: string) {
+    export function useMedOrderRequestViewModel(patientId: string, patientName: string, city: string) {
         const { userSession } = usePatientDashboard();
 
         const [medOrder, setMedOrder] = useState<MedOrder>({
-            patientName: '',
-            phoneNumber: '',
-            address: '',
-            diagnosis: '',
+            patientName,
+            city,
             medications: '',
             dosage: '',
             frequency: '',
-            doctorSpecialty: ''
+            doctorSpecialty: userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList || DoctorSpecialtyList.NOT_SELECTED,
+            doctorId: userSession?.id || '',
         });
 
-        const [previousMedOrders, setPreviousMedOrders] = useState<MedOrder[]>([]); // Explicitly type the state as an array of MedOrder objects
+        const [previousMedOrders, setPreviousMedOrders] = useState<MedOrder[]>([]);
         const [isLoading, setIsLoading] = useState(false);
-        const [isReadOnly] = useState(true);
 
         const handleInputChange = (field: keyof MedOrder, value: string) => {
             setMedOrder((prevOrder) => ({
@@ -43,7 +41,7 @@
         const submitMedOrder = async () => {
             setIsLoading(true);
             try {
-                const response = await fetch(`/api/patient/${patientId}/medications/med-order`, {
+                const response = await fetch(`/api/med-orders`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -62,16 +60,15 @@
                 }
 
                 const newMedOrder = await response.json();
-                setPreviousMedOrders(prevForms => [...prevForms, newMedOrder]); // Type now matches
+                setPreviousMedOrders((prevOrders) => [...prevOrders, newMedOrder]);
                 setMedOrder({
                     patientName: '',
-                    phoneNumber: '',
-                    address: '',
-                    diagnosis: '',
+                    city: '',
                     medications: '',
                     dosage: '',
                     frequency: '',
-                    doctorSpecialty: ''
+                    doctorSpecialty: userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList || DoctorSpecialtyList.NOT_SELECTED,
+                    doctorId: userSession?.id || '',
                 });
             } catch (error) {
                 console.error('Failed to submit med order:', error);
@@ -80,5 +77,5 @@
             }
         };
 
-        return { medOrder, submitMedOrder, previousMedOrders, isLoading, isReadOnly, handleInputChange };
+        return { medOrder, submitMedOrder, previousMedOrders, isLoading, handleInputChange };
     }

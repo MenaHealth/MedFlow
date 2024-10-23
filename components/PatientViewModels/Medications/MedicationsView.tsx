@@ -74,10 +74,10 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
     };
 
     useEffect(() => {
-        if (!rxOrders.length && !medOrders.length && !loadingMedications) {
+        if (!rxOrders.length && !medOrders.length && !loadingMedications && patientId) {
             fetchPatientData();
         }
-    }, [rxOrders, medOrders, fetchPatientData, loadingMedications]);
+    }, [patientId, fetchPatientData]);
 
     if (loadingMedications) {
         return (

@@ -7,7 +7,6 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ClipLoader } from 'react-spinners';
 import { generateEncryptionKey, encryptPhoto, calculateFileHash, convertToWebP, decryptPhoto } from '@/utils/encryptPhoto';
 import Image from 'next/image';
-// import PatientSubmenu from "../../../components/PatientSubmenu";
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { FiMinus, FiPlus } from 'react-icons/fi';
 
@@ -208,7 +207,6 @@ const ImageGallery = () => {
         <>
             <h1 className="text-3xl font-bold mb-8 m-8 text-center">Image Gallery</h1>
             <div className="w-full max-w-4xl mx-auto pb-16">
-                // <PatientSubmenu />
                 <div className="border border-gray-300 p-8 bg-white shadow rounded-lg">
                     <div style={{ minWidth: '75%' }}>
                         {isLoading ? (

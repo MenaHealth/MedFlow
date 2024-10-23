@@ -21,7 +21,10 @@ import {SendHorizonal} from "lucide-react";
 const newPatientFormSchema = z.object({
     firstName: z.string().min(1, "First name is required"),
     lastName: z.string().min(1, "Last name is required"),
-    phone: z.string().min(1, "Phone number is required"),
+    phone: z.object({
+        countryCode: z.string().min(1, "Country code is required"),
+        phoneNumber: z.string().min(1, "Phone number is required"),
+    }),
     age: z.number().min(0, "Please enter a number greater than 0"),
     country: z.string().min(1, "Country is required"),
     city: z.string().min(1, "City is required"),
@@ -48,7 +51,10 @@ export function NewPatientForm({ handleSubmit, submitting, language }: NewPatien
         defaultValues: {
             firstName: '',
             lastName: '',
-            phone: '',
+            phone: {
+                countryCode: '',
+                phoneNumber: '',
+            },
             age: 0,
             country: '',
             city: '',

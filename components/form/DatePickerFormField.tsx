@@ -167,9 +167,10 @@ interface DatePickerFormFieldProps {
     name: string
     label: string
     type?: "future" | "past"
+    classNames?: string
 }
 
-export function DatePickerFormField({ name, label, type = "future" }: DatePickerFormFieldProps) {
+export function DatePickerFormField({ name, label, type = "future", classNames }: DatePickerFormFieldProps) {
     const { control, setValue } = useFormContext()
     const [selectedDate, setSelectedDate] = useState<Date | undefined>()
     const [isOpen, setIsOpen] = useState(false)
@@ -182,50 +183,52 @@ export function DatePickerFormField({ name, label, type = "future" }: DatePicker
     }
 
     return (
-        <FormField
-            control={control}
-            name={name}
-            render={({ field }) => (
-                <FormItem className="flex flex-col">
-                    <FormLabel>{label}</FormLabel>
-                    <Popover open={isOpen} onOpenChange={setIsOpen}>
-                        <PopoverTrigger asChild>
-                            <FormControl>
-                                <Button
-                                    variant={"outline"}
-                                    className={cn(
-                                        "w-[240px] pl-3 text-left font-normal",
-                                        !field.value ? "text-muted-foreground" : ""
-                                    )}
-                                >
-                                    {field.value ? (
-                                        format(new Date(field.value), "PPP")
-                                    ) : (
-                                        <span>Pick a date</span>
-                                    )}
-                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                </Button>
-                            </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                            <div className="p-3">
-                                <Calendar
-                                    mode="single"
-                                    selected={selectedDate}
-                                    onSelect={setSelectedDate}
-                                    type={type}
-                                />
-                                <div className="mt-4">
-                                    <Button className="w-full" onClick={handleSubmit}>
-                                        <Send className="mr-2 h-4 w-4" />
+        <div className={classNames}>
+            <FormField
+                control={control}
+                name={name}
+                render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                        <FormLabel>{label}</FormLabel>
+                        <Popover open={isOpen} onOpenChange={setIsOpen}>
+                            <PopoverTrigger asChild>
+                                <FormControl>
+                                    <Button
+                                        variant={"outline"}
+                                        className={cn(
+                                            "w-[240px] pl-3 text-left font-normal",
+                                            !field.value ? "text-muted-foreground" : ""
+                                        )}
+                                    >
+                                        {field.value ? (
+                                            format(new Date(field.value), "PPP")
+                                        ) : (
+                                            <span>Pick a date</span>
+                                        )}
+                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                     </Button>
+                                </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                                <div className="p-3">
+                                    <Calendar
+                                        mode="single"
+                                        selected={selectedDate}
+                                        onSelect={setSelectedDate}
+                                        type={type}
+                                    />
+                                    <div className="mt-4">
+                                        <Button className="w-full" onClick={handleSubmit}>
+                                            <Send className="mr-2 h-4 w-4" />
+                                        </Button>
+                                    </div>
                                 </div>
-                            </div>
-                        </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                </FormItem>
-            )}
-        />
+                            </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
+        </div>
     )
 }

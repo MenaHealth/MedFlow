@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { usePatientDashboard } from './../../../../components/PatientViewModels/PatientViewModelContext';
 import { DoctorSpecialtyList } from './../../../../data/doctorSpecialty.enum';
-import { Pharmacies } from './../../../../data/pharmacies.enum';
 
 interface Prescription {
     medication: string;
@@ -15,20 +14,20 @@ interface RxOrder {
     age: string;
     doctorSpecialty: keyof typeof DoctorSpecialtyList;
     diagnosis: string;
-    pharmacyOrClinic: typeof Pharmacies[number];
+    city: string;
     prescriptions: Prescription[];
 }
 
-export function useRXOrderViewModel(patientId: string, patientName: string, phoneNumber: string, age: string) {
+export function useRXOrderViewModel(patientId: string, patientName: string, phoneNumber: string, age: string, city: string) {
     const { userSession } = usePatientDashboard();
 
     const [rxOrder, setrxOrder] = useState<RxOrder>({
         patientName,
         phoneNumber,
         age,
+        city,
         doctorSpecialty: userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList || DoctorSpecialtyList.NOT_SELECTED,
         diagnosis: '',
-        pharmacyOrClinic: Pharmacies[0],
         prescriptions: [{ medication: '', dosage: '', frequency: '' }]
     });
 
@@ -71,9 +70,9 @@ export function useRXOrderViewModel(patientId: string, patientName: string, phon
                 patientName: '',
                 phoneNumber: '',
                 age: '',
+                city: '',
                 doctorSpecialty: userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList || DoctorSpecialtyList.NOT_SELECTED,
                 diagnosis: '',
-                pharmacyOrClinic: Pharmacies[0],
                 prescriptions: [{ medication: '', dosage: '', frequency: '' }],
             });
         } catch (error) {

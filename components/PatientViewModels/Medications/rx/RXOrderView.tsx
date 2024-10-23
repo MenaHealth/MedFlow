@@ -34,7 +34,8 @@ export default function RXOrderView({ patientId, user, patientDetails, expandedD
         patientId,
         patientDetails.patientName,
         expandedDetails.phone,
-        expandedDetails.age
+        expandedDetails.age,
+        expandedDetails.city
     );
 
     const [prescriptions, setPrescriptions] = useState(rxOrder.prescriptions || [{ medication: '', dosage: '', frequency: '' }]);
@@ -92,6 +93,12 @@ export default function RXOrderView({ patientId, user, patientDetails, expandedD
                             value={rxOrder.age}
                             readOnly={true}
                         />
+                        <TextFormField
+                            fieldName="city"
+                            fieldLabel="Patient City"
+                            value={rxOrder.city}
+                            readOnly={true}
+                        />
                     </div>
                 </div>
                 <hr className="my-6 border-gray-200" />
@@ -103,13 +110,6 @@ export default function RXOrderView({ patientId, user, patientDetails, expandedD
                         onChange={(e) => handleInputChange('diagnosis', e.target.value)}
                         multiline={true}
                         rows={3}
-                    />
-                    <SingleChoiceFormField
-                        fieldName="pharmacyOrClinic"
-                        fieldLabel="Pharmacy or Clinic"
-                        choices={[...Pharmacies]}
-                        value={rxOrder.pharmacyOrClinic}
-                        onChange={(value) => handleInputChange('pharmacyOrClinic', value)}
                     />
                 </div>
             </fieldset>

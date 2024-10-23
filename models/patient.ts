@@ -108,7 +108,7 @@ const PatientSchema = new Schema<IPatient>({
         phoneNumber: { type: String },
         age: { type: String },
         diagnosis: { type: String, required: true },
-        pharmacyOrClinic: { type: String, required: true },
+        city: { type: String, required: true },
         doctorSpecialty: { type: String, required: true },
         prescriptions: [{
           medication: { type: String, required: true },

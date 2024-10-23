@@ -14,10 +14,20 @@ export const GET = async (request, { params }) => {
 }
 
 export const PATCH = async (request, { params }) => {
-
     const { 
         _id,
-        name,
+        files,
+        firstName,
+        lastName,
+        phone,
+        age,
+        dob,
+        country,
+        city,
+        language,
+        genderPreference,
+        chiefComplaint,
+        email,
         priority,
         specialty,
         hospital,
@@ -40,6 +50,18 @@ export const PATCH = async (request, { params }) => {
         }
         let returnId = null;
 
+        existingPatient.files = files ?? existingPatient.files;
+        existingPatient.firstName = firstName ?? existingPatient.firstName;
+        existingPatient.lastName = lastName ?? existingPatient.lastName;
+        existingPatient.phone = phone ?? existingPatient.phone;
+        existingPatient.age = age ?? existingPatient.age;
+        existingPatient.dob = dob ?? existingPatient.dob;
+        existingPatient.country = country ?? existingPatient.country;
+        existingPatient.city = city ?? existingPatient.city;
+        existingPatient.language = language ?? existingPatient.language;
+        existingPatient.genderPreference = genderPreference ?? existingPatient.genderPreference;
+        existingPatient.chiefComplaint = chiefComplaint ?? existingPatient.chiefComplaint;
+        existingPatient.email = email ?? existingPatient.email;
         existingPatient.priority = priority ?? existingPatient.priority;
         existingPatient.specialty = specialty ?? existingPatient.specialty;
         existingPatient.hospital = hospital ?? existingPatient.hospital;

@@ -16,8 +16,12 @@ export interface IPatient extends Document {
   files?: any[];
   firstName: string;
   lastName: string;
-  phone?: string;
+  phone?: {
+    countryCode: string;
+    phoneNumber: string;
+  }
   age?: string;
+  bmi?: string;
   dob?: Date;
   country?: string;
   city?: string;
@@ -26,8 +30,7 @@ export interface IPatient extends Document {
   previouslyRegistered?: string;
   chiefComplaint?: string;
   coordinatorId?: string;
-  email?: string; // This makes email optional
-  laterality?: 'Not Selected' | 'Left' | 'Right' | 'Bilateral';
+  email?: string;
   diagnosis?: string;
   diagnosisCat?: string;
   hospital?: 'Not Selected' | 'PMC' | 'PRCS' | 'Hugo Chavez';
@@ -39,8 +42,9 @@ export interface IPatient extends Document {
   surgeryDate?: Date;
   occupation?: string;
   baselineAmbu?: 'Not Selected' | 'Independent' | 'Boot' | 'Crutches' | 'Walker' | 'Non-Ambulatory';
-  pmhx?: string[];
-  pshx?: string[];
+  pmhx?: string;
+  pshx?: string;
+  famhx?: string;
   smokeCount?: string;
   drinkCount?: string;
   otherDrugs?: string;
@@ -49,6 +53,8 @@ export interface IPatient extends Document {
   rxOrders?: Types.DocumentArray<IRxOrder>;
   medOrders?: Types.DocumentArray<IMedOrders>;
   visits?: any[];
+  prevMeds?: string;
+  currentMeds?: string;
   triagedBy?: {
     firstName?: string;
     lastName?: string;
@@ -69,7 +75,11 @@ const PatientSchema = new Schema<IPatient>({
   files: [{ type: Object }],
   firstName: { type: String, required: true },
   lastName: { type: String },
-  phone: { type: String },
+  bmi: { type: String },
+  phone: {
+    countryCode: { type: String },
+    phoneNumber: { type: String },
+  },
   age: { type: String },
   dob: { type: Date },
   city: { type: String },
@@ -79,7 +89,6 @@ const PatientSchema = new Schema<IPatient>({
   language: { type: String },
   chiefComplaint: { type: String },
   email: { type: String },
-  laterality: { type: String, enum: ['Not Selected', 'Left', 'Right', 'Bilateral'], default: 'Not Selected' },
   diagnosis: { type: String },
   diagnosisCat: { type: String },
   hospital: { type: String, enum: ['Not Selected', 'PMC', 'PRCS', 'Hugo Chavez'], default: 'Not Selected' },
@@ -90,12 +99,15 @@ const PatientSchema = new Schema<IPatient>({
   surgeryDate: { type: Date },
   occupation: { type: String },
   baselineAmbu: { type: String, enum: ['Not Selected', 'Independent', 'Boot', 'Crutches', 'Walker', 'Non-Ambulatory'] },
-  pmhx: { type: [String], default: [] },
-  pshx: { type: [String], default: [] },
+  pmhx: { type: String },
+  pshx: { type: String },
+  famhx: { type: String },
   smokeCount: { type: String },
   drinkCount: { type: String },
   otherDrugs: { type: String },
   allergies: { type: String },
+  prevMeds: { type: String },
+  currentMeds: { type: String },
   notes: { type: [noteSchema], default: [] },
   rxOrders: { type: [RXOrderSchema], default: [] },
   medOrders: { type: [medOrdersSchema], default: [] },

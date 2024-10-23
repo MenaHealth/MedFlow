@@ -3,7 +3,7 @@ import { FormField, FormItem } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import { useState } from 'react';
 
-export function TextAreaFormField({ form, fieldName, fieldLabel, className }: { form: any, fieldName: string, fieldLabel: string, className?: string }) {
+export function TextAreaFormField({ form, fieldName, fieldLabel, className, defaultValue }: { form: any, fieldName: string, fieldLabel: string, className?: string, defaultValue?: string }) {
     const [isFocused, setIsFocused] = useState(false);
 
     const handleFocus = () => {
@@ -26,6 +26,7 @@ export function TextAreaFormField({ form, fieldName, fieldLabel, className }: { 
                             className="w-full"
                             onFocus={handleFocus}
                             onBlur={handleBlur}
+                            defaultValue={defaultValue}
                         />
                         <label className={`absolute transition-all ${(isFocused || (value !== '')) ? 'text-xs -top-5' : 'text-sm top-1/2 -translate-y-1/2'} left-2`}>{fieldLabel}</label>
                     </div>

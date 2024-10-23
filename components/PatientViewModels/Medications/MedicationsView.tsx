@@ -131,7 +131,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                             patientDetails={patientDetails || { patientName: '' }}
                                             expandedDetails={{
                                                 ...expandedDetails,
-                                                phone: expandedDetails?.phone ?? '',
+                                                phone: `${expandedDetails?.phone?.countryCode || ''} ${expandedDetails?.phone?.phoneNumber || ''}`,
                                                 age: expandedDetails?.age ?? '',
                                             }}
                                         />
@@ -146,7 +146,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                             patientDetails={patientDetails}
                                             expandedDetails={{
                                                 ...expandedDetails,
-                                                phone: expandedDetails?.phone ?? '',
+                                                phone: `${expandedDetails?.phone?.countryCode || ''} ${expandedDetails?.phone?.phoneNumber || ''}`,
                                             }}
                                         />
                                     )}

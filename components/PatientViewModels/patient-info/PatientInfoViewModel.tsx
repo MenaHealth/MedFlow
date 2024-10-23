@@ -1,4 +1,5 @@
 // components/PatientViewModels/patient-info/PatientInfoViewModel.tsx
+import { add } from 'date-fns';
 import { IPatient } from './../../../models/patient';
 
 export class PatientInfoViewModel {
@@ -18,24 +19,23 @@ export class PatientInfoViewModel {
     getExpandedDetails() {
         return {
             age: this.patient?.age,
-            genderPreference: this.patient?.genderPreference,
+            bmi: this.patient?.bmi,
+            pmhx: this.patient?.pmhx,
+            pshx: this.patient?.pshx,
+            famhx: this.patient?.famhx,
             dob: this.patient?.dob || null,
             patientID: this.patient?._id,
             phone: this.patient?.phone,
             country: this.patient?.country,
             city: this.patient?.city,
             language: this.patient?.language,
-            chiefComplaint: this.patient?.chiefComplaint,
             email: this.patient?.email,
-            diagnosis: this.patient?.diagnosis,
-            diagnosisCat: this.patient?.diagnosisCat,
-            hospital: this.patient?.hospital,
-            priority: this.patient?.priority,
-            specialty: this.patient?.specialty,
-            status: this.patient?.status,
             occupation: this.patient?.occupation,
-            baselineAmbu: this.patient?.baselineAmbu,
-            allergies: this.patient?.allergies,
+            drinkCount: this.patient?.drinkCount,
+            smokeCount: this.patient?.smokeCount,
+            otherDrugs: this.patient?.otherDrugs,
+            prevMeds: this.patient?.prevMeds,
+            currentMeds: this.patient?.currentMeds,
         };
     }
 }

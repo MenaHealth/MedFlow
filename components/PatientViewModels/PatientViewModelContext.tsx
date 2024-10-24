@@ -14,7 +14,7 @@ interface PatientInfo {
     patientName: string;
     age: string;
     dob: Date;
-    phoneNumber: {
+    phone: {
         countryCode: string;
         phoneNumber: string;
     };
@@ -121,7 +121,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             patientName: `${patientData.firstName} ${patientData.lastName}`,
             age: patientData.age || '',
             dob: new Date(patientData.dob || Date.now()),
-            phoneNumber: {
+            phone: {
                 countryCode: patientData.phone?.countryCode || '',
                 phoneNumber: patientData.phone?.phoneNumber || '',
             },

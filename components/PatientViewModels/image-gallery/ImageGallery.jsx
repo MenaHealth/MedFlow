@@ -1,582 +1,321 @@
+// app/image-gallery/[id]/page.tsx
 "use client";
+import React, { useEffect, useState, useRef } from 'react';
+import { useParams } from 'next/navigation';
+import { Box, Grid, IconButton, Button } from '@mui/material';
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ClipLoader } from 'react-spinners';
+import { generateEncryptionKey, encryptPhoto, calculateFileHash, convertToWebP, decryptPhoto } from '@/utils/encryptPhoto';
+import Image from 'next/image';
+//import PatientSubmenu from "../../../components/PatientSubmenu";
+import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
+import { FiMinus, FiPlus } from 'react-icons/fi';
 
-import * as React from 'react';
-import { useEffect, useState, useCallback } from "react";
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+const DEFAULT_FORM_VALUES = {
+    age: 0,
+    diagnosis: "",
+    icd10: "",
+    surgeryDate: new Date(),
+    occupation: "",
+    laterality: "Bilateral",
+    priority: "Routine",
+    hospital: "PMC",
+    baselineAmbu: "Independent",
+    medx: [],
+    pmhx: [],
+    pshx: [],
+    smokeCount: "",
+    drinkCount: "",
+    otherDrugs: "",
+    allergies: "",
+    notes: "",
+    status: 'Not Started'
+};
 
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { UserRoundPlus } from "lucide-react"
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
-import EditIcon from "@mui/icons-material/Edit";
-import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
-import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
-import InfoIcon from '@mui/icons-material/Info';
+const ImageGallery = () => {
+    const { id } = useParams();
+    const [patientFiles, setPatientFiles] = useState([]);
+    const [photos, setPhotos] = useState([]);
+    const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+    const [isLoading, setIsLoading] = useState(true);
+    const [selectedFiles, setSelectedFiles] = useState([]);
+    const [clickZoomIn, setClickZoomIn] = useState(false);
+    const [clickZoomOut, setClickZoomOut] = useState(false);
+    const carouselRef = useRef(null);
+    const fileInputRef = useRef(null);
 
-import { Button } from '@/components/ui/button';
-import Tooltip from '../../../components/form/Tooltip';
-import '../../../app/patient-info/dashboard/dashboard.css';
-import TableCellWithTooltip from '@/components/TableCellWithTooltip';
-import * as Toast from '@radix-ui/react-toast';
+    useEffect(() => {
+        if (id !== '') {
+            fetch(`/api/patient/${id}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Fetched patient data:', data);
+                    setPatientFiles(data.files);
+                })
+                .catch(error => {
+                    console.error('Error fetching patient data:', error);
+                    alert('Error: ' + error.message);
+                });
+        }
+    }, [id]);
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdownMenu";
+    useEffect(() => {
+        if (carouselRef.current) {
+            const selectedThumbnail = carouselRef.current.querySelector(`[data-index="${currentPhotoIndex}"]`);
+            if (selectedThumbnail) {
+                carouselRef.current.scrollTo({
+                    left: selectedThumbnail.offsetLeft - (carouselRef.current.clientWidth / 2) + (selectedThumbnail.clientWidth / 2),
+                    behavior: 'smooth'
+                });
+            }
+        }
+    }, [currentPhotoIndex]);
 
-import { PRIORITIES, STATUS } from '@/data/data';
-import { DoctorSpecialties as DOCTOR_SPECIALTIES } from '@/data/doctorSpecialty.enum';
-import Link from 'next/link';
-import TriageModalView from "../../../components/TriageDashboard/TriageModalView";
+    useEffect(() => {
+        const fetchPhotos = async () => {
+            setIsLoading(true); // Set loading to true at the start of the fetch
+            try {
+                if (patientFiles.length > 0) {
+                    const tempPhotos = [];
+                    for (let i = 0; i < patientFiles.length; i++) {
+                        const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+                        const response = await fetch(`${apiUrl}/api/patient/photos/${patientFiles[i].hash}`);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        if (patientFiles[i].encryptionKey) {
+                            const arrayBuffer = await response.arrayBuffer();
+                            const encryptedBase64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+                            const decryptedBlob = await decryptPhoto(encryptedBase64, patientFiles[i].encryptionKey);
+                            const url = URL.createObjectURL(decryptedBlob);
+                            const data = { url };
+                            tempPhotos.push(data);
+                        } else {
+                            const data = { url: response.url };
+                            tempPhotos.push(data);
+                        }
+                    }
+                    console.log('Fetched photos:', tempPhotos);
+                    setPhotos(tempPhotos);
+                }
+            } catch (error) {
+                console.error('Error fetching photos:', error);
+            } finally {
+                setIsLoading(false); // Set loading to false after fetching photos
+            }
+        };
 
-export default function PatientTriage() {
-  const { data: session, status } = useSession();
-  const [rows, setRows] = React.useState([]);
-  const [userSession, setUserSession] = useState(null);
-  const [priorityFilter, setPriorityFilter] = React.useState("all");
-  const [statusFilter, setStatusFilter] = React.useState("all");
-  const [specialtyFilter, setSpecialtyFilter] = React.useState("all");
-  const [triageNotes, setTriageNotes] = useState({});
+        fetchPhotos();
+    }, [patientFiles]);
 
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
-
-  useEffect(() => {
-    if (status === 'authenticated' && session?.user) {
-      const userSessionData = {
-        id: session.user._id,
-        email: session.user.email,
-        firstName: session.user.firstName,
-        lastName: session.user.lastName,
-        accountType: session.user.accountType,
-        isAdmin: session.user.isAdmin,
-        image: session.user.image,
-        doctorSpecialty: session.user.doctorSpecialty,
-        languages: session.user.languages,
-        token: session.user.token,
-        gender: session.user.gender,
-        dob: session.user.dob,
-        countries: session.user.countries,
-      };
-      setUserSession(userSessionData);
-      console.log('Full user session object:', userSessionData);
-    }
-  }, [session, status]);
-
-  useEffect(() => {
-    // Fetch rows from API
-    const fetchPatients = async () => {
-      const response = await fetch('/api/patient');
-      const data = await response.json();
-      setRows(data);
+    const handleThumbnailClick = (index) => {
+        setCurrentPhotoIndex(index);
     };
 
-    fetchPatients();
-  }, []);
-
-  const [open, setOpen] = useState(false);
-  const [message, setMessage] = useState('');
-
-  const triggerToast = (msg) => {
-    setMessage(msg);
-    setOpen(true);
-  };
-
-  const [shouldShowClearButton, setShouldShowClearButton] = useState([
-    priorityFilter !== "all",
-    statusFilter !== "all",
-    specialtyFilter !== "all"
-  ].filter(Boolean).length >= 2);
-
-  useEffect(() => {
-    setShouldShowClearButton([
-      priorityFilter !== "all",
-      statusFilter !== "all",
-      specialtyFilter !== "all"
-    ].filter(Boolean).length >= 2);
-  }, [priorityFilter, statusFilter, specialtyFilter]);
-
-  const sortAndFilterRows = useCallback(
-    (rows, priorityFilter, statusFilter, specialtyFilter) => {
-      if (!session) return [];
-      let filteredRows = rows;
-
-      if (priorityFilter !== "all") {
-        filteredRows = filteredRows.filter(
-          (row) => row.priority === priorityFilter
-        );
-      }
-
-      if (statusFilter !== "all") {
-        filteredRows = filteredRows.filter(
-          (row) => row.status === statusFilter
-        );
-      }
-
-      if (specialtyFilter !== "all") {
-        filteredRows = filteredRows.filter(
-          (row) => row.specialty === specialtyFilter
-        );
-      }
-
-      if (session?.user?.accountType === "Doctor") {
-        filteredRows = filteredRows.filter(
-          (row) =>
-            row.triagedBy &&
-            Object.keys(row.triagedBy).length !== 0 &&
-            session.user.languages.includes(row?.language) &&
-            session.user.doctorSpecialty === row.specialty
-        );
-      }
-
-      if (statusFilter !== "Archived") {
-        filteredRows = filteredRows.filter(
-          (row) => row.status !== "Archived"
-        );
-      }
-
-      // Sorting by createdAt (or ID in descending order)
-      return filteredRows.sort((a, b) => b._id.localeCompare(a._id));
-    },
-    [session]
-  );
-
-  useEffect(() => {
-    const fetchAndSortRows = async () => {
-      try {
-        const response = await fetch("/api/patient/");
-        const data = await response.json();
-
-        const sortedAndFilteredData = sortAndFilterRows(
-          data,
-          priorityFilter,
-          statusFilter,
-          specialtyFilter
-        );
-        setRows(sortedAndFilteredData);
-      } catch (error) {
-        console.log(error);
-      }
+    const handlePrevClick = () => {
+        setCurrentPhotoIndex(prevIndex => (prevIndex === 0 ? photos.length - 1 : prevIndex - 1));
     };
 
-    fetchAndSortRows();
-  }, [priorityFilter, statusFilter, specialtyFilter, session, sortAndFilterRows]);
+    const handleNextClick = () => {
+        setCurrentPhotoIndex(prevIndex => (prevIndex === photos.length - 1 ? 0 : prevIndex + 1));
+    };
 
-  const handlePriorityChange = async (value, patientId, index) => {
-    try {
-      const response = await fetch(`/api/patient/${patientId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          priority: value,  // New priority value
-        }),
-      });
+    const handleFileChange = (event) => {
+        const filesArray = Array.from(event.target.files);
+        setSelectedFiles(filesArray);
+    };
 
-      if (!response.ok) {
-        throw new Error(`Failed to update priority: ${response.statusText}`);
-      }
+    const handleFormSubmit = async (event) => {
+        event.preventDefault();
+        let encryptedImages = [];
+        try {
+            let convertedFiles = await Promise.all(selectedFiles.map(file => convertToWebP(file)));
+            const fileHashes = await Promise.all(convertedFiles.map(file => calculateFileHash(file)));
 
-      const updatedPatient = await response.json();
-      console.log('Priority updated successfully:', updatedPatient);
+            const formData = new FormData();
+            convertedFiles.forEach((convertedFile, index) => {
+                formData.append('file', new Blob([convertedFile]), `${fileHashes[index]}.webp`);
+            });
 
-      const updatedRows = [...rows];
-      updatedRows[index].priority = value;
-      setRows(updatedRows);
+            console.log('Uploading files:', formData);
 
-    } catch (error) {
-      console.error('Error updating priority:', error);
-    }
-  };
+            const response = await fetch('/api/patient/photos', {
+                method: 'POST',
+                body: formData,
+            });
 
-  const handleStatusChange = async (value, row, index) => {
-    let triagedBy = row.triagedBy ?? {};
-    let doctor = row.doctor ?? {};
-    if (value === 'Not Started') {
-      doctor = {};
-      triagedBy = {};
-    } else if (value === 'Triaged') {
-      if (session.user.accountType !== 'Triage') {
-        triggerToast('You do not have the correct permissions to triage patients');
-        return;
-      }
-      triagedBy = { firstName: session.user?.firstName, lastName: session.user?.lastName, email: session.user?.email };
-    }
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+            }
 
-    try {
-      await fetch('/api/patient/', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          _id: rows[index]["_id"],
-          status: value,
-          triagedBy,
-          doctor
-        }),
-      });
-      const updatedRows = [...rows];
-      updatedRows[index].status = value;
-      updatedRows[index].triagedBy = triagedBy;
-      updatedRows[index].doctor = doctor;
-      setRows(updatedRows);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+            const result = await response.json();
+            console.log('Upload result:', result);
 
-  const formatLocation = (city, country) => {
-    if (!city && !country) {
-      return "";
-    } else if (!city) {
-      return country;
-    } else if (!country) {
-      return city;
-    } else {
-      return `${city}, ${country}`;
-    }
-  };
+            encryptedImages = convertedFiles.map((file, index) => ({ hash: fileHashes[index] }));
+        } catch (err) {
+            console.error('Error uploading encrypted files:', err);
+        }
 
-  const getInitials = (firstName, lastName) => {
-    if (!firstName && !lastName) {
-      return "";
-    } else if (!firstName) {
-      return lastName[0];
-    } else if (!lastName) {
-      return firstName[0];
-    } else {
-      return `${firstName[0]}${lastName[0]}`;
-    }
-  }
+        try {
+            const currentPatient = await fetch(`/api/patient/${id}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
 
-  const handleTakeCase = async (index) => {
-    let doctor = { firstName: session.user?.firstName, lastName: session.user?.lastName, email: session.user?.email };
+            if (!currentPatient.ok) {
+                const errorText = await currentPatient.text();
+                throw new Error(`HTTP error! status: ${currentPatient.status} - ${errorText}`);
+            }
 
-    try {
-      await fetch('/api/patient/', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          _id: rows[index]["_id"],
-          status: "In-Progress",
-          doctor: doctor
-        }),
-      });
-      const updatedRows = [...rows];
-      updatedRows[index].status = "In-Progress";
-      updatedRows[index].doctor = doctor;
-      setRows(updatedRows);
-    } catch (error) {
-      console.log(error);
-    }
-  }
+            const currentPhotos = (await currentPatient.json()).files;
+            const patchResponse = await fetch(`/api/patient/${id}`, {
+                method: 'PATCH',
+                body: JSON.stringify({ ...DEFAULT_FORM_VALUES, files: currentPhotos.length > 0 ? [...currentPhotos, ...encryptedImages] : encryptedImages }),
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
 
-  const handleArchive = async (index) => {
-    try {
-      await fetch('/api/patient/', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          _id: rows[index]["_id"],
-          status: "Archived",
-        }),
-      });
-      const updatedRows = [...rows];
-      updatedRows[index].status = "Archived";
-      setRows(updatedRows);
-    } catch (error) {
-      console.log(error);
-    }
-  }
+            if (!patchResponse.ok) {
+                const errorText = await patchResponse.text();
+                throw new Error(`HTTP error! status: ${patchResponse.status} - ${errorText}`);
+            }
 
-  const handlePatientClick = (patientId) => {
-    if (router) {
-      router.push(`/patient/${patientId}`);
-    }
-  };
+            const updatedPatient = await patchResponse.json();
+            console.log('Updated patient:', updatedPatient);
 
-  return (
-    <>
-      <div className="w-full relative dashboard-page">
-        <div className="flex justify-between items-center py-3">
-          <Link
-            href="/create-patient"
-            className="flex items-center justify-center no-underline"
-          >
-            <div className="relative group ml-4 bg-darkBlue p-2">
-              <UserRoundPlus color={"white"} bsize={22} />
-              <span className="absolute left-full ml-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap bg-white px-2 py-1 rounded shadow-lg">
-                Add New Patient
-              </span>
-            </div>
-          </Link>
-          <h2
-            className="flex-1 text-center font-bold"
-            style={{ fontSize: "24px" }}
-          >
-            <span className="blue_gradient">Patient List</span>
-          </h2>
-          <div style={{ width: 48 }}>
-            {" "}
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-2 mb-4">
-          {priorityFilter !== "all" && (
-            <div className="bg-green-100 text-green-800 px-2 py-1 rounded flex items-center">
-              <EditIcon className="mr-2 cursor-pointer" />
-              Priority: {priorityFilter}
-              <RemoveCircleIcon
-                className="ml-2 cursor-pointer"
-                onClick={() => setPriorityFilter("all")}
-              />
-            </div>
-          )}
-          {statusFilter !== "all" && (
-            <div className="bg-purple-100 text-purple-800 px-2 py-1 rounded flex items-center">
-              <EditIcon className="mr-2 cursor-pointer" />
-              Status: {statusFilter}
-              <RemoveCircleIcon
-                className="ml-2 cursor-pointer"
-                onClick={() => setStatusFilter("all")}
-              />
-            </div>
-          )}
-          {specialtyFilter !== "all" && (
-            <div className="bg-blue-100 text-blue-800 px-2 py-1 rounded flex items-center">
-              <EditIcon className="mr-2 cursor-pointer" />
-              Specialty: {specialtyFilter}
-              <RemoveCircleIcon
-                className="ml-2 cursor-pointer"
-                onClick={() => setSpecialtyFilter("all")}
-              />
-            </div>
-          )}
-          {shouldShowClearButton && (
-            <div
-              className="bg-red-100 text-red-800 px-2 py-1 rounded cursor-pointer"
-              onClick={() => {
-                setPriorityFilter("all");
-                setStatusFilter("all");
-                setSpecialtyFilter("all");
-              }}
-            >
-              <DeleteSweepIcon className="mr-2" />
-              Clear all filters
-            </div>
-          )}
-        </div>
-        <TableContainer component={Paper} style={{ maxHeight: '80vh', overflowY: 'auto' }}>
-          <Table sx={{ minWidth: 650 }} aria-label="simple table">
-            <TableHead className="MuiTableHead-root">
-              <TableRow>
-                <TableCell
-                  align="left"
-                  className="whitespace-nowrap"
-                >
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                  }}>
-                    <span>Patient ID</span>
-                    <Tooltip tooltipText="Hover to see full patient ID" showTooltip={true}>
-                      <InfoIcon className="ml-2" style={{ height: '1rem', width: '1rem' }} />
-                    </Tooltip>
-                  </div>
-                </TableCell>
-                <TableCell align="center">Last Name</TableCell>
-                <TableCell align="center">Age</TableCell>
-                <TableCell align="center">Location</TableCell>
-                <TableCell align="center">Language Spoken</TableCell>
-                <TableCell
-                  align="left"
-                  className="whitespace-nowrap">
-                  <div className='flex items-center'>
-                    <span>Chief Complaint</span>
-                    <Tooltip tooltipText="Hover to see full text" showTooltip={true}>
-                      <InfoIcon className="ml-2" style={{ height: '1rem', width: '1rem' }} />
-                    </Tooltip>
-                  </div>
-                </TableCell>
+            setPatientFiles((prev) => [...prev, ...encryptedImages]);
 
-                <TableCell align="center">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        className="h-8 w-full justify-start"
-                        style={{ fontSize: "0.7rem", fontWeight: 500, letterSpacing: "0.05rem" }}>
-                        STATUS
-                        <KeyboardArrowDownIcon className="ml-2 h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuRadioGroup value={statusFilter} onValueChange={setStatusFilter}>
-                        <DropdownMenuRadioItem value="all">All</DropdownMenuRadioItem>
-                        {STATUS.map((status) => (
-                          <DropdownMenuRadioItem key={status} value={status}>{status}</DropdownMenuRadioItem>
-                        ))}
-                      </DropdownMenuRadioGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-                <TableCell align="center">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-full justify-start" style={{ fontSize: "0.7rem", fontWeight: 500, letterSpacing: "0.05rem" }}>
-                        PRIORITY
-                        <KeyboardArrowDownIcon className="ml-2 h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuRadioGroup value={priorityFilter} onValueChange={setPriorityFilter}>
-                        <DropdownMenuRadioItem value="all">All</DropdownMenuRadioItem>
-                        {PRIORITIES.map((priority) => (
-                          <DropdownMenuRadioItem key={priority} value={priority}>{priority}</DropdownMenuRadioItem>
-                        ))}
-                      </DropdownMenuRadioGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-                <TableCell align="center">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-full justify-start" style={{ fontSize: "0.7rem", fontWeight: 500, letterSpacing: "0.05rem" }}>
-                        SPECIALTY
-                        <KeyboardArrowDownIcon className="ml-2 h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" style={{ maxWidth: "20rem", maxHeight: "30rem", overflowY: "auto" }}>
-                      <DropdownMenuRadioGroup value={specialtyFilter} onValueChange={setSpecialtyFilter}>
-                        <DropdownMenuRadioItem value="all">All</DropdownMenuRadioItem>
-                        {DOCTOR_SPECIALTIES.map((specialty) => (
-                          <DropdownMenuRadioItem key={specialty} value={specialty}>{specialty}</DropdownMenuRadioItem>
-                        ))}
-                      </DropdownMenuRadioGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-                <TableCell align="center"><span>TRIAGE NOTE</span>
-                </TableCell>
-                <TableCell align="center">Triaged By</TableCell>
-                <TableCell align="center">Dr. Pref</TableCell>
-                <TableCell align="center">Doctor</TableCell>
-                <TableCell align="center">Created At</TableCell> {/* Header for Created At */}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {rows.map((row, index) => (
-                <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                  <TableCellWithTooltip tooltipText={row._id} maxWidth="100px">
-                    <div onClick={() => handlePatientClick(row._id)} className="block overflow-hidden text-ellipsis text-sm cursor-pointer" style={{ maxWidth: '100px', whiteSpace: 'nowrap' }}>
-                      {row._id}
+            // Reset the file input and selected files
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
+            setSelectedFiles([]);
+        } catch (error) {
+            console.error('Error updating patient:', error);
+            alert('Error: ' + error.message);
+        }
+    };
+
+    return (
+        <>
+            <div className="w-full max-w-4xl mx-auto pb-16">
+                <div className="border border-gray-300 p-8 my-2 bg-white shadow rounded-lg">
+                    <div style={{ minWidth: '75%' }}>
+                        {isLoading ? (
+                            <div className="flex justify-center items-center h-full">
+                                <ClipLoader size={50} color={"#123abc"} loading={isLoading} />
+                            </div>
+                        ) : (
+                            <>
+                                {photos.length > 0 ? (
+                                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                    <Box sx={{ position: 'relative', mb: 4, width: '100%', maxWidth: '600px' }}>
+                                        <TransformWrapper
+                                            initialScale={1}
+                                            alignmentAnimation={{ sizeX: 0, sizeY: 0 }}
+                                        >
+                                            {({ zoomIn, zoomOut }) => (
+                                                <div className="relative">
+                                                    <TransformComponent>
+                                                        <Image
+                                                            src={photos[currentPhotoIndex].url ?? ''}
+                                                            alt={`Photo ${currentPhotoIndex + 1}`}
+                                                            className="max-w-full h-auto mx-auto cursor-pointer"
+                                                            width={400}
+                                                            height={400}
+                                                        />
+                                                    </TransformComponent>
+                                                    <div className={`absolute bottom-3 left-5 flex gap-5 text-lg rounded-md border border-white bg-gray-800 p-2 ${clickZoomIn ? 'animate-pop' : ''} ${clickZoomOut ? 'animate-pop' : ''}`}>
+                                                        <button
+                                                            className="border-none bg-transparent text-white"
+                                                            onClick={() => {
+                                                                setClickZoomOut(true);
+                                                                zoomOut();
+                                                            }}
+                                                            onAnimationEnd={() => setClickZoomOut(false)}
+                                                        >
+                                                            <FiMinus />
+                                                        </button>
+                                                        <button
+                                                            className="border-none bg-transparent text-white"
+                                                            onClick={() => {
+                                                                setClickZoomIn(true);
+                                                                zoomIn();
+                                                            }}
+                                                            onAnimationEnd={() => setClickZoomIn(false)}
+                                                        >
+                                                            <FiPlus />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </TransformWrapper>
+                                    </Box>
+                                    {photos.length > 1 && (
+                                        <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+                                            <IconButton onClick={handlePrevClick} sx={{ flex: '0 0 auto' }}>
+                                                <ChevronLeft />
+                                            </IconButton>
+                                            <Box ref={carouselRef} sx={{ display: 'flex', overflowX: 'auto', maxWidth: '300px', flex: '1 1 auto' }}>
+                                                {photos.map((photo, index) => (
+                                                    <IconButton
+                                                        key={index}
+                                                        data-index={index}
+                                                        onClick={() => handleThumbnailClick(index)}
+                                                        sx={{ minWidth: '75px', minHeight: '75px', padding: '10px' }}
+                                                    >
+                                                        <Image
+                                                            src={photo.url ?? ''}
+                                                            alt={`Thumbnail ${index + 1}`}
+                                                            className="object-cover rounded"
+                                                            width={75}
+                                                            height={75}
+                                                            style={{
+                                                                border: currentPhotoIndex === index ? '2px solid gray' : 'none',
+                                                            }}
+                                                        />
+                                                    </IconButton>
+                                                ))}
+                                            </Box>
+                                            <IconButton onClick={handleNextClick} sx={{ flex: '0 0 auto' }}>
+                                                <ChevronRight />
+                                            </IconButton>
+                                        </Box>
+                                    )}
+                                </Box>
+                                ) : (
+                                    <p className="text-center text-gray-500 mt-8">This user has no associated files.</p>
+                                )}
+                            </>
+                        )}
                     </div>
-                  </TableCellWithTooltip>
-                  <TableCell align="center" style={{ minWidth: '150px' }}>{row.lastName}</TableCell>
-                  <TableCell align="center">{row.age || ''}</TableCell>
-                  <TableCell align="center" style={{ minWidth: '150px' }}>{formatLocation(row.city, row.country)}</TableCell>
-                  <TableCell align="center">{row.language}</TableCell>
-                  <TableCellWithTooltip tooltipText={row.chiefComplaint} maxWidth='175px'>
-                    <div className="block overflow-hidden text-ellipsis text-sm">{row.chiefComplaint}</div>
-                  </TableCellWithTooltip>
-                  <TableCell align="center">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline">{row.status ?? 'Not Started'}</Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className="w-46">
-                        <DropdownMenuSeparator />
-                        <DropdownMenuRadioGroup value={row.status} onValueChange={(value) => handleStatusChange(value, row, index)}>
-                          {STATUS.map((status) => (
-                            <DropdownMenuRadioItem key={status} value={status}>{status}</DropdownMenuRadioItem>
-                          ))}
-                        </DropdownMenuRadioGroup>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                  <TableCell align="center">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline">{row.priority}</Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className="w-46">
-                        <DropdownMenuSeparator />
-                        <DropdownMenuRadioGroup value={row.priority} onValueChange={(value) => handlePriorityChange(value, row._id, index)}>
-                          {PRIORITIES.map((priority) => (
-                            <DropdownMenuRadioItem key={priority} value={priority}>{priority}</DropdownMenuRadioItem>
-                          ))}
-                        </DropdownMenuRadioGroup>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                  <TableCell align="center">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline">{row.specialty}</Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent style={{ maxWidth: "20rem", maxHeight: "25rem", overflowY: "auto" }}>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuRadioGroup value={row.specialty} onValueChange={async (value) => {
-                          try {
-                            await fetch(`/api/patient/`, {
-                              method: "PATCH",
-                              headers: {
-                                "Content-Type": "application/json",
-                              },
-                              body: JSON.stringify({ specialty: value }),
-                            });
-                            const updatedRows = [...rows];
-                            updatedRows[index].specialty = value;
-                            setRows(updatedRows);
-                          } catch (error) {
-                            console.log(error);
-                          }
-                        }}>
-                          {DOCTOR_SPECIALTIES.map((specialty) => (
-                            <DropdownMenuRadioItem key={specialty} value={specialty}>{specialty}</DropdownMenuRadioItem>
-                          ))}
-                        </DropdownMenuRadioGroup>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                  <TableCell align="center">
-                    <TriageModalView userEmail={session.user.email} userId={session.user._id} userFirstName={session.user.firstName} note={triageNotes[row._id] || ""} patientId={row._id} patientName={`${row.firstName} ${row.lastName}`} currentStatus={row.status} currentPriority={row.priority} currentSpecialty={row.specialty} />
-                  </TableCell>
-                  <TableCell align="center">{getInitials(row.triagedBy?.firstName, row.triagedBy?.lastName)}</TableCell>
-                  <TableCell align="center">{row.genderPreference === 'Male' ? <span style={{ fontSize: '1.5em'}}>♂</span> : row.genderPreference === 'Female' ? <span style={{ fontSize: '1.5em'}}>♀</span> : 'N/A'}</TableCell>
-                  <TableCell align="center">{row.createdAt ? new Date(row.createdAt).toLocaleString() : 'N/A'}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        {rows.length === 0 && (
-          <div className="text-center text-gray-500 my-6">
-            <p>No patient data found matching your expertise.</p>
-          </div>
-        )}
-      </div>
-      <Toast.Provider>
-        <Toast.Root className="bg-black text-white p-3 rounded-lg shadow-lg" open={open} onOpenChange={setOpen} duration={3000}>
-          <Toast.Title>{message}</Toast.Title>
-        </Toast.Root>
-        <Toast.Viewport className="fixed bottom-5 left-1/2 transform -translate-x-1/2" />
-      </Toast.Provider>
-    </>
-  );
-}
+                </div>
+
+                <div>
+                    <h1 className="text-2xl font-bold mb-4 mt-4">Upload Files</h1>
+                    <form onSubmit={handleFormSubmit} className='flex flex-col'>
+                    <input
+                            type="file"
+                            multiple
+                            onChange={handleFileChange}
+                            ref={fileInputRef}
+                        />
+                        <Button type="submit" variant="contained" color="primary" style={{ width: '110px', marginTop: '5px' }}>
+                            Submit
+                        </Button>
+                    </form>
+                </div>
+                </div>
+        </>
+    );
+};
+
+export default ImageGallery;

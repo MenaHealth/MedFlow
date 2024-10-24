@@ -45,7 +45,7 @@ const useTriageModalViewModel = (patientId: string, onSuccess: () => void) => {
         console.log("Session data:", session);
 
         try {
-            const response = await fetch(`/api/patient/${patientId}`, {
+            const response = await fetch(`/api/patient/${patientId}/triage`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',

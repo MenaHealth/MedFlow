@@ -65,31 +65,6 @@ type PatientFormValues = z.infer<typeof patientFormSchema> & {
     prevMeds?: string;
 };
 
-const defaultValues: Partial<PatientFormValues> = {
-    patientName: '',
-    patientID: '',
-    language: '',
-    age: '',
-    dob: undefined,
-    bmi: '',
-    country: '',
-    city: '',
-    phone: {
-        countryCode: '',
-        phoneNumber: '',
-    },
-    email: '',
-    occupation: '',
-    pmhx: '',
-    pshx: '',
-    famhx: '',
-    drinkCount: '',
-    smokeCount: '',
-    otherDrugs: '',
-    currentMeds: '',
-    prevMeds: '',
-};
-
 const PatientInfoView: React.FC<{ isExpanded: boolean }> = ({ isExpanded }) => {
     const { patientViewModel, loadingPatientInfo, setPatientInfo } = usePatientDashboard();
     const [isEditing, setIsEditing] = useState(false);
@@ -107,10 +82,6 @@ const PatientInfoView: React.FC<{ isExpanded: boolean }> = ({ isExpanded }) => {
             // Call fetch function here if patientViewModel is not loaded
         }
     }, [patientViewModel]);
-
-    if (loadingPatientInfo || !patientViewModel) {
-        return <div>Loading...</div>;
-    }
 
 
     const toggleEditMode = () => {
@@ -139,7 +110,6 @@ const PatientInfoView: React.FC<{ isExpanded: boolean }> = ({ isExpanded }) => {
         setIsEditing(!isEditing);
     };
 
-
     const hasResetRef = useRef(false);
 
     useEffect(() => {
@@ -149,6 +119,9 @@ const PatientInfoView: React.FC<{ isExpanded: boolean }> = ({ isExpanded }) => {
         }
     }, [expandedDetails]);
 
+    if (loadingPatientInfo || !patientViewModel) {
+        return <div>Loading...</div>;
+    }
 
     return (
         <Card className="p-4 bg-orange-50">

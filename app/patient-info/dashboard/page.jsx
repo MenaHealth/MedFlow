@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from 'react';
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
@@ -25,6 +25,7 @@ import Tooltip from '../../../components/form/Tooltip';
 import './dashboard.css';
 import TableCellWithTooltip from '@/components/TableCellWithTooltip';
 import * as Toast from '@radix-ui/react-toast';
+import NotesCell from '@/components/NotesCell';
 
 
 import {
@@ -39,18 +40,16 @@ import {
 import { PRIORITIES, STATUS } from '@/data/data';
 import { DoctorSpecialties as DOCTOR_SPECIALTIES } from '@/data/doctorSpecialty.enum';
 import Link from 'next/link';
-import TriageModalView from "../../../components/TriageDashboard/TriageModalView";
 
 export default function PatientTriage() {
   const { data: session, status } = useSession();
+  const [allData, setAllData] = useState([]);
   const [rows, setRows] = React.useState([]);
   const [userSession, setUserSession] = useState(null);
   const [priorityFilter, setPriorityFilter] = React.useState("all");
   const [statusFilter, setStatusFilter] = React.useState("all");
   const [specialtyFilter, setSpecialtyFilter] = React.useState("all");
-  const [triageNotes, setTriageNotes] = useState({});
 
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -76,18 +75,6 @@ export default function PatientTriage() {
   }, [session, status]);
 
 
-  useEffect(() => {
-    // Fetch rows from API
-    const fetchPatients = async () => {
-      const response = await fetch('/api/patient');
-      const data = await response.json();
-      setRows(data);
-    };
-
-    fetchPatients();
-  }, []);
-
-
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -110,71 +97,68 @@ export default function PatientTriage() {
     ].filter(Boolean).length >= 2);
   }, [priorityFilter, statusFilter, specialtyFilter]);
 
-  const sortAndFilterRows = useCallback(
-    (rows, priorityFilter, statusFilter, specialtyFilter) => {
-      if (!session) return [];
-      let filteredRows = rows;
-
-      if (priorityFilter !== "all") {
-        filteredRows = filteredRows.filter(
-          (row) => row.priority === priorityFilter
-        );
-      }
-
-      if (statusFilter !== "all") {
-        filteredRows = filteredRows.filter(
-          (row) => row.status === statusFilter
-        );
-      }
-
-      if (specialtyFilter !== "all") {
-        filteredRows = filteredRows.filter(
-          (row) => row.specialty === specialtyFilter
-        );
-      }
-
-      if (session?.user?.accountType === "Doctor") {
-        filteredRows = filteredRows.filter(
-          (row) =>
-            row.triagedBy &&
-            Object.keys(row.triagedBy).length !== 0 &&
-            session.user.languages.includes(row?.language) &&
-            session.user.doctorSpecialty === row.specialty
-        );
-      }
-
-      if (statusFilter !== "Archived") {
-        filteredRows = filteredRows.filter(
-          (row) => row.status !== "Archived"
-        );
-      }
-
-      // Sorting by createdAt (or ID in descending order)
-      return filteredRows.sort((a, b) => b._id.localeCompare(a._id));
-    },
-    [session]
-  );
-
   useEffect(() => {
     const fetchAndSortRows = async () => {
       try {
         const response = await fetch("/api/patient/");
         const data = await response.json();
 
-        const sortedAndFilteredData = sortAndFilterRows(
-          data,
-          priorityFilter,
-          statusFilter,
-          specialtyFilter
-        );
-        setRows(sortedAndFilteredData);
+        // Update the rows with filtered and sorted data
+        setAllData(data);
       } catch (error) {
         console.log(error);
       }
     };
 
     fetchAndSortRows();
-  }, [priorityFilter, statusFilter, specialtyFilter, session, sortAndFilterRows]);
+  }, []); // Only fetch data on mount
+
+  // Memoize the filtered and sorted rows
+  const sortedAndFilteredRows = useMemo(() => {
+    if (!session || allData.length === 0) return [];
+
+    let filteredRows = [...allData];
+
+    // Apply filters
+    if (priorityFilter !== "all") {
+      filteredRows = filteredRows.filter(
+        (row) => row.priority === priorityFilter
+      );
+    }
+
+    if (statusFilter !== "all") {
+      filteredRows = filteredRows.filter(
+        (row) => row.status === statusFilter
+      );
+    }
+
+    if (specialtyFilter !== "all") {
+      filteredRows = filteredRows.filter(
+        (row) => row.specialty === specialtyFilter
+      );
+    }
+
+    if (session?.user?.accountType === "Doctor") {
+      filteredRows = filteredRows.filter(
+        (row) =>
+          row.triagedBy &&
+          Object.keys(row.triagedBy).length !== 0 &&
+          session.user.languages.includes(row.language) &&
+          session.user.doctorSpecialty === row.specialty
+      );
+    }
+
+    if (statusFilter !== "Archived") {
+      filteredRows = filteredRows.filter((row) => row.status !== "Archived");
+    }
+
+    return filteredRows.sort((a, b) => b._id.localeCompare(a._id));
+  }, [allData, priorityFilter, statusFilter, specialtyFilter, session]);
+
+  // Update state whenever sorted and filtered rows change
+  useEffect(() => {
+    setRows(sortedAndFilteredRows);
+  }, [sortedAndFilteredRows]);
 
   const handleStatusChange = async (value, row, index) => {
     let triagedBy = row.triagedBy ?? {};
@@ -396,7 +380,6 @@ export default function PatientTriage() {
                     </Tooltip>
                   </div>
                 </TableCell>
-
                 <TableCell align="center">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -460,12 +443,24 @@ export default function PatientTriage() {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
-                <TableCell align="center"><span>TRIAGE NOTE</span>
-                </TableCell>
+                <TableCell
+                    align="left">
+                    <span>Additional</span>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      whiteSpace: 'nowrap',
+                    }}>
+                      <span>Notes</span>
+                      <Tooltip tooltipText={`Hover description icon to see full text.\nClick pencil icon to edit.`} showTooltip={true}>
+                        <InfoIcon className="ml-2" style={{ height: '1rem', width: '1rem' }}/>
+                      </Tooltip>
+                    </div>
+                  </TableCell>
                 <TableCell align="center">Triaged By</TableCell>
                 <TableCell align="center">Dr. Pref</TableCell>
                 <TableCell align="center">Doctor</TableCell>
-                <TableCell align="center">Created At</TableCell> {/* Header for Created At */}
+                <TableCell align="center">Created At</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -499,7 +494,7 @@ export default function PatientTriage() {
                       <DropdownMenuContent className="w-46">
                         <DropdownMenuSeparator />
                         <DropdownMenuRadioGroup value={row.status} onValueChange={(value) => handleStatusChange(value, row, index)}>
-                          {STATUS.map((status) => (
+                          {STATUS.map((status) => status !== 'Archived' && (
                             <DropdownMenuRadioItem key={status} value={status}>{status}</DropdownMenuRadioItem>
                           ))}
                         </DropdownMenuRadioGroup>
@@ -515,7 +510,7 @@ export default function PatientTriage() {
                         <DropdownMenuSeparator />
                         <DropdownMenuRadioGroup value={row.priority} onValueChange={async (value) => {
                           try {
-                            await fetch('/api/patient/assign', {
+                            await fetch('/api/patient/', {
                               method: 'PATCH',
                               headers: {
                                 'Content-Type': 'application/json',
@@ -524,7 +519,6 @@ export default function PatientTriage() {
                                 _id: rows[index]["_id"],
                                 status: "In-Progress",
                                 priority: value, // New priority value
-                                doctor: doctor
                               }),
                             });
                             const updatedRows = [...rows];
@@ -552,12 +546,13 @@ export default function PatientTriage() {
                             value={row.specialty}
                             onValueChange={async (value) => {
                               try {
-                                await fetch(`/api/patient/${rows[index]._id}/specialty`, {
+                                await fetch(`/api/patient/`, {
                                   method: "PATCH",
                                   headers: {
                                     "Content-Type": "application/json",
                                   },
                                   body: JSON.stringify({
+                                    _id: rows[index]._id,
                                     specialty: value,
                                   }),
                                 });
@@ -578,21 +573,28 @@ export default function PatientTriage() {
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
-                  <TableCell align="center">
-                    <TableCell align="center">
-                      <TriageModalView
-                          userEmail={session.user.email}
-                          userId={session.user._id}
-                          userFirstName={session.user.firstName}
-                          note={triageNotes[row._id] || ""}
-                          patientId={row._id}
-                          patientName={`${row.firstName} ${row.lastName}`}
-                          currentStatus={row.status}
-                          currentPriority={row.priority}
-                          currentSpecialty={row.specialty}
-                      />
-                    </TableCell>
-                  </TableCell>
+                  <NotesCell
+                    notes={row.dashboardNotes}
+                    onUpdate={async (newNotes) => {
+                      try {
+                        await fetch("/api/patient/", {
+                          method: 'PATCH',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
+                          body: JSON.stringify({
+                            _id: rows[index]["_id"],
+                            dashboardNotes: newNotes,
+                          }),
+                        });
+                        const updatedRows = [...rows];
+                        updatedRows[index].dashboardNotes = newNotes;
+                        setRows(updatedRows);
+                      } catch (error) {
+                        console.log(error);
+                      }
+                    }}
+                  />
                   <TableCell align="center">
                     {getInitials(row.triagedBy?.firstName, row.triagedBy?.lastName)}
                   </TableCell>
@@ -636,7 +638,7 @@ export default function PatientTriage() {
                   </TableCell>
                   <TableCell align="center">
                     {row.createdAt ? new Date(row.createdAt).toLocaleString() : 'N/A'}
-                  </TableCell> {/* Data for Created At */}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

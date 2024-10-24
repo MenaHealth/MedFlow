@@ -31,68 +31,67 @@ export default function AboutPage() {
                 </div>
 
                 <div className="mt-20">
-                    <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-                        <Card className="p-6 bg-white bg-opacity-30 card-container">
-                            <div className="card-header">
-                                <div className="flex items-center justify-center w-12 h-12 rounded-md bg-orange text-white">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="var(--darkOrange)" className="w-6 h-6">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                                    </svg>
-                                </div>
-                            </div>
-                            <h3 className="text-lg font-medium text-black">Patients</h3>
-                            <div className="card-animation">
-                                <div className="ball-first ball1-first"></div>
-                                <div className="ball-first ball2-first"></div>
-                                <div className="ball-first ball3-first"></div>
-                                <div className="ball-first ball4-first"></div>
-                                <div className="ball-first ball5-first"></div>
-                            </div>
-                            <div className="card-content">
-                                <p className="mt-2 text-base text-darkBlue">
-                                    Patients do not create profiles. Instead, they fill out a comprehensive survey, providing essential information for their care.
-                                </p>
-                            </div>
-                        </Card>
+    <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <Card className="p-6 bg-white bg-opacity-30 card-container">
+            <div className="card-header">
+                <div className="flex items-center justify-center w-12 h-12 rounded-md bg-orange text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="var(--darkOrange)" className="w-6 h-6">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    </svg>
+                </div>
+            </div>
+            <h3 className="text-lg font-medium text-black text-center">Patients</h3> {/* Added text-center */}
+            <div className="card-animation">
+                <div className="ball-first ball1-first"></div>
+                <div className="ball-first ball2-first"></div>
+                <div className="ball-first ball3-first"></div>
+                <div className="ball-first ball4-first"></div>
+                <div className="ball-first ball5-first"></div>
+            </div>
+            <div className="card-content">
+                <p className="mt-2 text-base text-darkBlue">
+                    Patients do not create profiles. Instead, they fill out a comprehensive survey, providing essential information for their care.
+                </p>
+            </div>
+        </Card>
 
-                        <Card className="p-6 bg-white bg-opacity-60 card-container">
-                            <div className="card-header">
-                                <div className="flex items-center justify-center w-12 h-12 rounded-md bg-yellow text-darkBlue">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="var(--orange)" className="w-6 h-6">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                                    </svg>
-                                </div>
-                            </div>
-                            <h3 className="text-lg font-medium text-black">Triage Specialists</h3>
-                            <div className="card-animation">
-                                <div className="ball ball1"></div>
-                                <div className="ball ball2"></div>
-                                <div className="ball ball3"></div>
-                                <div className="ball ball4"></div>
-                                <div className="ball ball5"></div>
-                            </div>
-                            <div className="card-content">
-                                <p className="mt-2 text-base text-darkBlue">
-                                    The triage coordinators manage patient information, direct it to appropriate doctors, and ensure language compatibility.
-                                </p>
-                            </div>
-                        </Card>
-
-                        <Card className="p-6 bg-white bg-opacity-100 card-container">
-                            <div className="card-header">
-                                <div className="flex items-center justify-center w-12 h-12 rounded-md bg-orange text-white">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="var(--lightOrange)" className="w-6 h-6">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                            </div>
-                            <h3 className="text-lg font-medium text-black">Doctors</h3>
-                            <div className="card-animation">
-                                <div className="heart-rate">
-                                    <svg viewBox="0 9 498.778 54.805" className="w-full h-full">
-                                        <polyline fill="none" stroke="var(--lightOrange)" strokeWidth="2" strokeMiterlimit="10" points="0 45.486 64.133 45.486 74.259 33.324 84.385 45.486 96.2 45.486 104.637 55.622 119.825 9 133.327 63.729 140.079 45.486 162.018 45.486 172.146 40.419 183.958 45.486 249.778 45.486" />
-                                        <polyline fill="none" stroke="var(--lightOrange)" strokeWidth="2" strokeMiterlimit="10" points="249 45.562 313.133 45.562 323.259 33.4 333.385 45.562 345.2 45.562 353.637 55.698 368.825 9.076 382.327 63.805 389.079 45.562 411.018 45.562 421.146 40.495 432.958 45.562 498.778 45.562" />
-                                    </svg>
+        <Card className="p-6 bg-white bg-opacity-60 card-container">
+            <div className="card-header">
+                <div className="flex items-center justify-center w-12 h-12 rounded-md bg-yellow text-darkBlue">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="var(--orange)" className="w-6 h-6">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg>
+                </div>
+            </div>
+            <h3 className="text-lg font-medium text-black text-center">Triage Specialists</h3> {/* Added text-center */}
+            <div className="card-animation">
+                <div className="ball ball1"></div>
+                <div className="ball ball2"></div>
+                <div className="ball ball3"></div>
+                <div className="ball ball4"></div>
+                <div className="ball ball5"></div>
+            </div>
+            <div className="card-content">
+                <p className="mt-2 text-base text-darkBlue">
+                    The triage coordinators manage patient information, direct it to appropriate doctors, and ensure language compatibility.
+                </p>
+            </div>
+        </Card>
+        <Card className="p-6 bg-white bg-opacity-100 card-container">
+            <div className="card-header">
+                <div className="flex items-center justify-center w-12 h-12 rounded-md bg-orange text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="var(--lightOrange)" className="w-6 h-6">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+            </div>
+            <h3 className="text-lg font-medium text-black text-center">Doctors</h3> {/* Added text-center */}
+            <div className="card-animation">
+                <div className="heart-rate">
+                    <svg viewBox="0 9 498.778 54.805" className="w-full h-full">
+                        <polyline fill="none" stroke="var(--lightOrange)" strokeWidth="2" strokeMiterlimit="10" points="0 45.486 64.133 45.486 74.259 33.324 84.385 45.486 96.2 45.486 104.637 55.622 119.825 9 133.327 63.729 140.079 45.486 162.018 45.486 172.146 40.419 183.958 45.486 249.778 45.486" />
+                        <polyline fill="none" stroke="var(--lightOrange)" strokeWidth="2" strokeMiterlimit="10" points="249 45.562 313.133 45.562 323.259 33.4 333.385 45.562 345.2 45.562 353.637 55.698 368.825 9.076 382.327 63.805 389.079 45.562 411.018 45.562 421.146 40.495 432.958 45.562 498.778 45.562" />
+                    </svg>
                                     <div className="fade-in"></div>
                                     <div className="fade-out"></div>
                                 </div>
@@ -107,13 +106,13 @@ export default function AboutPage() {
                 </div>
 
                 <div className="mt-20">
-                    <Card className="w-full max-w-3xl mx-auto">
-                        <h2 className="text-2xl font-bold mb-2">Patient Submission Process</h2>
-                        <p className="text-gray-600 mb-6">How patients interact with MedFlow for remote health consultations</p>
-
-                        <div className="space-y-6">
-                            <div className="space-y-4">
-                                {[
+    <Card className="w-full max-w-3xl mx-auto p-10"> 
+        <h2 className="text-2xl font-bold mb-4">Patient Submission Process</h2>
+        <p className="text-gray-600 mb-8">How patients interact with MedFlow for remote health consultations</p> 
+        
+        <div className="space-y-8"> 
+            <div className="space-y-6">
+                {[
                                     {
                                         title: "Access the Intake Form",
                                         description: "Patients visit our secure online platform to access the multilingual intake form."
@@ -135,7 +134,7 @@ export default function AboutPage() {
                                         description: "Based on the patient's needs, a suitable doctor is assigned for the consultation."
                                     }
                                 ].map((step, index) => (
-                                    <div key={index} className="flex items-start space-x-4">
+                                    <div key={index} className="flex items-start space-x-6">
                                         <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[var(--orange)] flex items-center justify-center text-white font-bold">
                                             {index + 1}
                                         </div>

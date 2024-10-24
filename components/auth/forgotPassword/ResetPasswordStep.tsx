@@ -47,7 +47,6 @@ export function ResetPasswordStep() {
     }, [newPassword, confirmNewPassword, isValid]);
 
     const onSubmit = async (data: ResetPasswordFormValues) => {
-        console.log('Handling password reset submission...', data);
         setSubmitting(true);
         try {
             await handleResetPassword(data);

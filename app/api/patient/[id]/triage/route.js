@@ -8,8 +8,6 @@ export async function PATCH(req, { params }) {
     const { id } = params;
     const { specialty, priority, status, noteContent, noteType, authorName, authorID, email } = await req.json();
 
-    console.log("Incoming PATCH data:", { specialty, priority, status, noteContent, noteType, authorName, authorID, email });
-
     await dbConnect();
 
     // Validate patient ID
@@ -31,7 +29,6 @@ export async function PATCH(req, { params }) {
         patient.status = status;
         patient.updatedAt = new Date();
 
-        // Create the new triage note, keeping the structure consistent with other notes
         const newNote = new Note({
             noteType,
             date: new Date(),
@@ -49,9 +46,6 @@ export async function PATCH(req, { params }) {
         // Save the updated patient document
         await patient.save();
 
-        console.log("Patient updated successfully with new triage note:", newNote);
-
-        // Respond with success and the updated patient data
         return new Response(JSON.stringify({ message: "Patient updated successfully!", patient }), { status: 200 });
     } catch (error) {
         console.error("Error updating patient:", error);

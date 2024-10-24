@@ -70,7 +70,6 @@ export default function PatientTriage() {
         countries: session.user.countries,
       };
       setUserSession(userSessionData);
-      console.log('Full user session object:', userSessionData);
     }
   }, [session, status]);
 

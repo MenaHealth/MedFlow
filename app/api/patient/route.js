@@ -85,7 +85,7 @@ export const PATCH = async (request, { params }) => {
         try {
             await existingPatient.save();
         } catch (e) {
-            console.log(e)
+            console.error('Error saving patient:', e.message);
         }
 
         return new Response(JSON.stringify(returnId), { status: 200 });

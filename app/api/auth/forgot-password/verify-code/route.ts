@@ -8,7 +8,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     const { email, tempCode } = await request.json();
 
-    console.log('Received verification request:', { email, tempCode });
 
     if (!email || !tempCode) {
         console.error('Missing email or verification code in request');
@@ -21,12 +20,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             console.error(`User with email ${email} not found`);
             return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 });
         }
-
-        console.log('User found:', {
-            email: user.email,
-            tempCode: user.tempPasswordResetCode,
-            tempCodeExpiry: user.tempCodeExpiry
-        });
 
         // Check if the code has expired
         if (Date.now() > user.tempCodeExpiry) {
@@ -45,7 +38,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         user.tempCodeExpiry = undefined;
         await user.save();
 
-        console.log(`Verification code verified successfully for user with email ${email}`);
         return NextResponse.json({ success: true }, { status: 200 });
     } catch (error) {
         console.error('Error verifying verification code:', error);

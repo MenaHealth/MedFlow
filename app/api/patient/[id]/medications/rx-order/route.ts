@@ -17,7 +17,6 @@ export const POST = async (request: Request, { params }: Params) => {
 
     try {
         const requestData = await request.json();
-        console.log("Received data:", requestData);
 
         // Destructure fields from the request body
         const {
@@ -39,20 +38,6 @@ export const POST = async (request: Request, { params }: Params) => {
                 frequency,
             }
         } = requestData;
-
-        console.log('Data received in content:', {
-            patientName,
-            phoneNumber,
-            age,
-            address,
-            referringDr,
-            prescribingDr,
-            diagnosis,
-            pharmacyOrClinic,
-            medication,
-            dosage,
-            frequency,
-        });
 
         await dbConnect();
         console.log('Database connected');
@@ -92,7 +77,6 @@ export const POST = async (request: Request, { params }: Params) => {
         });
 
         // Log the new RX order before saving
-        console.log('New RX order to be saved:', newRXOrder);
 
         // Add the RX order to the patient's rxOrders array
         patient.rxOrders.push(newRXOrder);

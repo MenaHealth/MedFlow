@@ -1,4 +1,3 @@
-// app/api/patient/[id]/route.ts
 import Patient from "./../../../../models/patient";
 import dbConnect from "./../../../../utils/database";
 import { Types } from "mongoose";
@@ -10,8 +9,13 @@ interface Params {
     };
 }
 
-// Update the type annotations for the GET and PATCH handlers
-export const GET = async (request: Request, { params }: Params) => {
+// Combined PATCH handler
+export const PATCH = async (request: Request, { params }: Params) => {
+    const newPatientData = await request.json();
+
+    // Log priority being updated
+    console.log("Priority being updated:", newPatientData.priority);
+    
     try {
         await dbConnect();
 
@@ -20,29 +24,13 @@ export const GET = async (request: Request, { params }: Params) => {
             return new Response("Invalid ID", { status: 400 });
         }
 
-        const patient = await Patient.findById(params.id);
-        if (!patient) {
-            return new Response("Patient Not Found", { status: 404 });
-        }
+        // Find and update the patient
+        const updatedPatient = await Patient.findByIdAndUpdate(
+            params.id,
+            { $set: newPatientData },
+            { new: true, runValidators: true }
+        );
 
-        return new Response(JSON.stringify(patient), { status: 200 });
-    } catch (error) {
-        console.error("Error fetching patient:", error);
-        return new Response("Internal Server Error", { status: 500 });
-    }
-};
-
-export const PATCH = async (request: Request, { params }: Params) => {
-    const newPatientData = await request.json();
-
-    try {
-        await dbConnect();
-
-        if (!Types.ObjectId.isValid(params.id)) {
-            return new Response("Invalid ID", { status: 400 });
-        }
-
-        const updatedPatient = await Patient.findByIdAndUpdate(params.id, { $set: newPatientData }, { new: true, runValidators: true });
         if (!updatedPatient) {
             return new Response("Patient not found", { status: 404 });
         }

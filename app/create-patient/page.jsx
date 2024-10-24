@@ -37,7 +37,6 @@ const CreatePatient = () => {
       return;
     }
 
-    console.log("Creating patient:", formData ? formData : formDataState);
 
     try {
       const response = await fetch(`/api/patient/new`, {

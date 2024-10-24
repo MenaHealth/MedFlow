@@ -81,13 +81,11 @@ export const SignupProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const [doctorSignupFormCompleted, setDoctorSignupFormCompleted] = useState(false);
     const [triageSignupFormCompleted, setTriageSignupFormCompleted] = useState(false);
     const totalQuestions = useMemo(() => {
-        console.log('Calculating total questions for account type:', accountType);
         return accountType === 'Doctor' ? 17 : 13;
     }, [accountType]);
 
     const updateProgress = useCallback(() => {
-        const newProgress = (answeredQuestions / totalQuestions) * 100;
-        console.log(`Answered Questions: ${answeredQuestions}, Total Questions: ${totalQuestions}, New Progress: ${newProgress}%`); // Log for debugging
+        const newProgress = (answeredQuestions / totalQuestions) * 100;// Log for debugging
         setProgress(newProgress);
     }, [answeredQuestions, totalQuestions]);
 

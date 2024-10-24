@@ -67,7 +67,6 @@ export function NewPatientForm({ handleSubmit, submitting, language }: NewPatien
     });
 
     const onSubmit = (data: NewPatientFormValues) => {
-        console.log("Submitting data:", data);
         if (language !== "english") {
             const inputLanguage = data.language; // User's selection in their language
             const inputCountry = data.country;

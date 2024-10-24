@@ -46,7 +46,6 @@
 
         useEffect(() => {
             const subscription = methods.watch((data) => {
-                console.log("Form data:", data);
 
                 setFormData((prevData) => ({
                     ...prevData,
@@ -65,13 +64,11 @@
                     data.gender
                 ].filter(Boolean).length;
 
-                console.log("Filled fields count:", filledFields);
 
                 // Adjust the step number from 7 to the correct index
                 updateAnsweredQuestions(3, filledFields); // Correct the step index
 
                 const isFormComplete = filledFields === 7;
-                console.log("Is form complete?", isFormComplete);
 
                 setDoctorSignupFormCompleted(isFormComplete);
             });

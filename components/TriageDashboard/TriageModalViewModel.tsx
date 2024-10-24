@@ -42,8 +42,8 @@ const useTriageModalViewModel = (patientId: string, onSuccess: () => void) => {
                                             authorName,
                                         }: TriageData) => {
         setLoading(true);
-        console.log("Session data:", session);
-
+        if (process.env.NODE_ENV === 'development') {
+        }
         try {
             const response = await fetch(`/api/patient/${patientId}/triage`, {
                 method: 'PATCH',

@@ -167,22 +167,18 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             // Set rxOrders and medOrders in the state and log them for debugging
             setrxOrders(data.rxOrders || []);
             setmedOrders(data.medOrders || []);
-            console.log("RX Orders:", data.rxOrders);
-            console.log("Med Orders:", data.medOrders);
         } catch (error) {
             console.error('Error fetching patient data:', error);
         } finally {
             setLoadingPatientInfo(false);
             setLoadingMedications(false);
         }
-        console.log("format patient info", patientId);
     }, [patientId, formatPatientInfo, formatPreviousNotes]);
 
     useEffect(() => {
         if (patientId) {
             fetchPatientData();
         }
-        console.log('Patient ID:', patientId);
     }, [patientId, fetchPatientData]);
 
     const refreshPatientNotes = () => fetchPatientData();

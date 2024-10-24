@@ -110,7 +110,9 @@ const sendApprovalEmail = async (email: string, firstName: string, lastName: str
             throw new Error(`Failed to send approval email. Status: ${response.status}`);
         }
 
-        console.log(`Approval email sent successfully to: ${email}`);
+        if (process.env.NODE_ENV === 'development') {
+            console.log(`Approval email sent successfully to: ${email}`);
+        }
     } catch (error) {
         console.error('Error sending approval email:', error);
         throw error;

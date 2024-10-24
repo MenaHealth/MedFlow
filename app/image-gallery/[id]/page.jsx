@@ -53,7 +53,6 @@ const ImageGallery = () => {
                     return response.json();
                 })
                 .then(data => {
-                    console.log('Fetched patient data:', data);
                     setPatientFiles(data.files);
                 })
                 .catch(error => {
@@ -99,7 +98,6 @@ const ImageGallery = () => {
                             tempPhotos.push(data);
                         }
                     }
-                    console.log('Fetched photos:', tempPhotos);
                     setPhotos(tempPhotos);
                 }
             } catch (error) {
@@ -141,7 +139,6 @@ const ImageGallery = () => {
                 formData.append('file', new Blob([convertedFile]), `${fileHashes[index]}.webp`);
             });
 
-            console.log('Uploading files:', formData);
 
             const response = await fetch('/api/patient/photos', {
                 method: 'POST',
@@ -154,7 +151,6 @@ const ImageGallery = () => {
             }
 
             const result = await response.json();
-            console.log('Upload result:', result);
 
             encryptedImages = convertedFiles.map((file, index) => ({ hash: fileHashes[index] }));
         } catch (err) {
@@ -188,7 +184,6 @@ const ImageGallery = () => {
             }
 
             const updatedPatient = await patchResponse.json();
-            console.log('Updated patient:', updatedPatient);
 
             setPatientFiles((prev) => [...prev, ...encryptedImages]);
 

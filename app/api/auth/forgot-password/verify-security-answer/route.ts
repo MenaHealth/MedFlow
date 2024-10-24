@@ -10,8 +10,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     const { email, securityAnswer, securityQuestion }: { email: string; securityAnswer: string; securityQuestion: string } = await request.json();
 
-    console.log('Received security answer verification request:', { email, securityQuestion });
-
     if (!email || !securityAnswer || !securityQuestion) {
         console.error('Missing email, security answer, or security question in request');
         return NextResponse.json({ success: false, error: 'Email, security answer, and security question are required' }, { status: 400 });
@@ -30,16 +28,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             return NextResponse.json({ success: false, error: 'Security question not found' }, { status: 404 });
         }
 
-        console.log('Verifying security answer...');
-        console.log('Expected question:', securityQuestionData.question);
-        console.log('Provided answer:', securityAnswer);
-        console.log('Expected answer hash:', securityQuestionData.answer);
 
         // Logging hash generation and comparison process
         const isValid = await bcrypt.compare(securityAnswer, securityQuestionData.answer);
-        console.log(`bcrypt.compare(securityAnswer, securityQuestionData.answer) result: ${isValid}`);
-        console.log(`Plain answer provided: ${securityAnswer}`);
-        console.log(`Stored answer hash: ${securityQuestionData.answer}`);
 
         if (!isValid) {
             console.error('Incorrect security answer');

@@ -42,8 +42,6 @@ export function SecurityQuestionStep({ onNext }: SecurityQuestionStepProps) {
         }
 
         console.log('Handling security question submission...');
-        console.log('Provided question:', securityQuestion.question);
-        console.log('Provided answer (first 3 characters):', data.securityAnswer.slice(0, 3) + '...');
         setLoading(true);
         try {
             await handleSecurityQuestionStep(data.securityAnswer, securityQuestion.question); // Pass both answer and question

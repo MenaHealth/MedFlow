@@ -29,7 +29,6 @@ export async function GET(request: Request) {
         const randomIndex = Math.floor(Math.random() * user.securityQuestions.length);
         const selectedQuestion = user.securityQuestions[randomIndex];
 
-        console.log('Selected security question:', selectedQuestion);
 
         return NextResponse.json({
             question: selectedQuestion.question,

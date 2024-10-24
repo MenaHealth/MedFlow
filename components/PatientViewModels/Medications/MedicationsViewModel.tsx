@@ -141,7 +141,6 @@ export function useMedicationsViewModel(patientId: string) {
                 });
             }
 
-            console.log('Medication created:', newMedication);
         } catch (error) {
             console.error('Error creating medication:', error);
         } finally {

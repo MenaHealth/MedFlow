@@ -1,3 +1,4 @@
+// app/patient-info/dashboard/page.jsx
 "use client";
 
 import * as React from 'react';
@@ -21,9 +22,10 @@ import InfoIcon from '@mui/icons-material/Info';
 
 import { Button } from '@/components/ui/button';
 import Tooltip from '../../../components/form/Tooltip';
-import '../../../app/patient-info/dashboard/dashboard.css';
+import './dashboard.css';
 import TableCellWithTooltip from '@/components/TableCellWithTooltip';
 import * as Toast from '@radix-ui/react-toast';
+
 
 import {
   DropdownMenu,
@@ -73,6 +75,7 @@ export default function PatientTriage() {
     }
   }, [session, status]);
 
+
   useEffect(() => {
     // Fetch rows from API
     const fetchPatients = async () => {
@@ -83,6 +86,7 @@ export default function PatientTriage() {
 
     fetchPatients();
   }, []);
+
 
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState('');
@@ -171,34 +175,6 @@ export default function PatientTriage() {
 
     fetchAndSortRows();
   }, [priorityFilter, statusFilter, specialtyFilter, session, sortAndFilterRows]);
-
-  const handlePriorityChange = async (value, patientId, index) => {
-    try {
-      const response = await fetch(`/api/patient/${patientId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          priority: value,  // New priority value
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to update priority: ${response.statusText}`);
-      }
-
-      const updatedPatient = await response.json();
-      console.log('Priority updated successfully:', updatedPatient);
-
-      const updatedRows = [...rows];
-      updatedRows[index].priority = value;
-      setRows(updatedRows);
-
-    } catch (error) {
-      console.error('Error updating priority:', error);
-    }
-  };
 
   const handleStatusChange = async (value, row, index) => {
     let triagedBy = row.triagedBy ?? {};
@@ -304,6 +280,13 @@ export default function PatientTriage() {
       console.log(error);
     }
   }
+
+
+
+
+  useEffect(() => {
+    // This ensures the component has mounted before using the router
+  }, [router]);
 
   const handlePatientClick = (patientId) => {
     if (router) {
@@ -438,7 +421,10 @@ export default function PatientTriage() {
                 <TableCell align="center">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-full justify-start" style={{ fontSize: "0.7rem", fontWeight: 500, letterSpacing: "0.05rem" }}>
+                      <Button
+                        variant="ghost"
+                        className="h-8 w-full justify-start"
+                        style={{ fontSize: "0.7rem", fontWeight: 500, letterSpacing: "0.05rem" }}>
                         PRIORITY
                         <KeyboardArrowDownIcon className="ml-2 h-4 w-4" />
                       </Button>
@@ -456,7 +442,10 @@ export default function PatientTriage() {
                 <TableCell align="center">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-full justify-start" style={{ fontSize: "0.7rem", fontWeight: 500, letterSpacing: "0.05rem" }}>
+                      <Button
+                        variant="ghost"
+                        className="h-8 w-full justify-start"
+                        style={{ fontSize: "0.7rem", fontWeight: 500, letterSpacing: "0.05rem" }}>
                         SPECIALTY
                         <KeyboardArrowDownIcon className="ml-2 h-4 w-4" />
                       </Button>
@@ -481,9 +470,15 @@ export default function PatientTriage() {
             </TableHead>
             <TableBody>
               {rows.map((row, index) => (
-                <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                <TableRow
+                  key={index}
+                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                   <TableCellWithTooltip tooltipText={row._id} maxWidth="100px">
-                    <div onClick={() => handlePatientClick(row._id)} className="block overflow-hidden text-ellipsis text-sm cursor-pointer" style={{ maxWidth: '100px', whiteSpace: 'nowrap' }}>
+                    <div
+                        onClick={() => handlePatientClick(row._id)}
+                        className="block overflow-hidden text-ellipsis text-sm cursor-pointer"
+                        style={{ maxWidth: '100px', whiteSpace: 'nowrap' }}
+                    >
                       {row._id}
                     </div>
                   </TableCellWithTooltip>
@@ -492,7 +487,9 @@ export default function PatientTriage() {
                   <TableCell align="center" style={{ minWidth: '150px' }}>{formatLocation(row.city, row.country)}</TableCell>
                   <TableCell align="center">{row.language}</TableCell>
                   <TableCellWithTooltip tooltipText={row.chiefComplaint} maxWidth='175px'>
-                    <div className="block overflow-hidden text-ellipsis text-sm">{row.chiefComplaint}</div>
+                    <div className="block overflow-hidden text-ellipsis text-sm">
+                      {row.chiefComplaint}
+                    </div>
                   </TableCellWithTooltip>
                   <TableCell align="center">
                     <DropdownMenu>
@@ -516,7 +513,27 @@ export default function PatientTriage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent className="w-46">
                         <DropdownMenuSeparator />
-                        <DropdownMenuRadioGroup value={row.priority} onValueChange={(value) => handlePriorityChange(value, row._id, index)}>
+                        <DropdownMenuRadioGroup value={row.priority} onValueChange={async (value) => {
+                          try {
+                            await fetch('/api/patient/assign', {
+                              method: 'PATCH',
+                              headers: {
+                                'Content-Type': 'application/json',
+                              },
+                              body: JSON.stringify({
+                                _id: rows[index]["_id"],
+                                status: "In-Progress",
+                                priority: value, // New priority value
+                                doctor: doctor
+                              }),
+                            });
+                            const updatedRows = [...rows];
+                            updatedRows[index].priority = value;
+                            setRows(updatedRows);
+                          } catch (error) {
+                            console.log(error);
+                          }
+                        }}>
                           {PRIORITIES.map((priority) => (
                             <DropdownMenuRadioItem key={priority} value={priority}>{priority}</DropdownMenuRadioItem>
                           ))}
@@ -531,35 +548,95 @@ export default function PatientTriage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent style={{ maxWidth: "20rem", maxHeight: "25rem", overflowY: "auto" }}>
                         <DropdownMenuSeparator />
-                        <DropdownMenuRadioGroup value={row.specialty} onValueChange={async (value) => {
-                          try {
-                            await fetch(`/api/patient/`, {
-                              method: "PATCH",
-                              headers: {
-                                "Content-Type": "application/json",
-                              },
-                              body: JSON.stringify({ specialty: value }),
-                            });
-                            const updatedRows = [...rows];
-                            updatedRows[index].specialty = value;
-                            setRows(updatedRows);
-                          } catch (error) {
-                            console.log(error);
-                          }
-                        }}>
+                        <DropdownMenuRadioGroup
+                            value={row.specialty}
+                            onValueChange={async (value) => {
+                              try {
+                                await fetch(`/api/patient/${rows[index]._id}/specialty`, {
+                                  method: "PATCH",
+                                  headers: {
+                                    "Content-Type": "application/json",
+                                  },
+                                  body: JSON.stringify({
+                                    specialty: value,
+                                  }),
+                                });
+                                const updatedRows = [...rows];
+                                updatedRows[index].specialty = value;
+                                setRows(updatedRows);
+                              } catch (error) {
+                                console.log(error);
+                              }
+                            }}
+                        >
                           {DOCTOR_SPECIALTIES.map((specialty) => (
-                            <DropdownMenuRadioItem key={specialty} value={specialty}>{specialty}</DropdownMenuRadioItem>
+                              <DropdownMenuRadioItem key={specialty} value={specialty}>
+                                {specialty}
+                              </DropdownMenuRadioItem>
                           ))}
                         </DropdownMenuRadioGroup>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
                   <TableCell align="center">
-                    <TriageModalView userEmail={session.user.email} userId={session.user._id} userFirstName={session.user.firstName} note={triageNotes[row._id] || ""} patientId={row._id} patientName={`${row.firstName} ${row.lastName}`} currentStatus={row.status} currentPriority={row.priority} currentSpecialty={row.specialty} />
+                    <TableCell align="center">
+                      <TriageModalView
+                          userEmail={session.user.email}
+                          userId={session.user._id}
+                          userFirstName={session.user.firstName}
+                          note={triageNotes[row._id] || ""}
+                          patientId={row._id}
+                          patientName={`${row.firstName} ${row.lastName}`}
+                          currentStatus={row.status}
+                          currentPriority={row.priority}
+                          currentSpecialty={row.specialty}
+                      />
+                    </TableCell>
                   </TableCell>
-                  <TableCell align="center">{getInitials(row.triagedBy?.firstName, row.triagedBy?.lastName)}</TableCell>
-                  <TableCell align="center">{row.genderPreference === 'Male' ? <span style={{ fontSize: '1.5em'}}>♂</span> : row.genderPreference === 'Female' ? <span style={{ fontSize: '1.5em'}}>♀</span> : 'N/A'}</TableCell>
-                  <TableCell align="center">{row.createdAt ? new Date(row.createdAt).toLocaleString() : 'N/A'}</TableCell>
+                  <TableCell align="center">
+                    {getInitials(row.triagedBy?.firstName, row.triagedBy?.lastName)}
+                  </TableCell>
+                  <TableCell align="center">
+                      {row.genderPreference === 'Male' ? (
+                        <span style={{ fontSize: '1.5em'}}>♂</span>
+                        ) : row.genderPreference === 'Female' ? (
+                          <span style={{ fontSize: '1.5em'}}>♀</span>
+                        ) : 'N/A'}
+                  </TableCell>
+                      <TableCell align="center">
+                        {
+                          row.status === 'Not Started'
+                            ? ''
+                            : row.status === 'In-Progress' || row.status === 'Archived'
+                              ? getInitials(row.doctor?.firstName, row.doctor?.lastName)
+                              : row.status === 'Triaged'
+                                ? session.user.accountType === 'Doctor'
+                                  ?  (
+                                        <Button onClick={() => handleTakeCase(index)}
+                                          variant="contained"
+                                          color="primary"
+                                          style={{
+                                            backgroundColor: 'black',
+                                            color: 'white',
+                                            borderRadius: '4px',
+                                            padding: '8px 16px',
+                                            fontSize: '14px',
+                                            textTransform: 'none',
+                                  boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)'
+                                }}>
+                                Take Case
+                              </Button>
+                            )
+                            : ''
+                          : (
+                            <Button onClick={() => handleArchive(index)}>
+                              Archive
+                            </Button>
+                          )}
+                  </TableCell>
+                  <TableCell align="center">
+                    {row.createdAt ? new Date(row.createdAt).toLocaleString() : 'N/A'}
+                  </TableCell> {/* Data for Created At */}
                 </TableRow>
               ))}
             </TableBody>
@@ -570,9 +647,14 @@ export default function PatientTriage() {
             <p>No patient data found matching your expertise.</p>
           </div>
         )}
-      </div>
-      <Toast.Provider>
-        <Toast.Root className="bg-black text-white p-3 rounded-lg shadow-lg" open={open} onOpenChange={setOpen} duration={3000}>
+        </div>
+        <Toast.Provider>
+        <Toast.Root
+          className="bg-black text-white p-3 rounded-lg shadow-lg"
+          open={open}
+          onOpenChange={setOpen}
+          duration={3000}
+        >
           <Toast.Title>{message}</Toast.Title>
         </Toast.Root>
         <Toast.Viewport className="fixed bottom-5 left-1/2 transform -translate-x-1/2" />

@@ -49,6 +49,7 @@ export interface IPatient extends Document {
   drinkCount?: string;
   otherDrugs?: string;
   allergies?: string;
+  dashboardNotes?: string;
   notes?: Types.DocumentArray<INote>;
   rxOrders?: Types.DocumentArray<IRxOrder>;
   medOrders?: Types.DocumentArray<IMedOrders>;
@@ -109,6 +110,7 @@ const PatientSchema = new Schema<IPatient>({
   prevMeds: { type: String },
   currentMeds: { type: String },
   notes: { type: [noteSchema], default: [] },
+  dashboardNotes: { type: String },
   rxOrders: { type: [RXOrderSchema], default: [] },
   medOrders: { type: [medOrdersSchema], default: [] },
   visits: [{ type: Schema.Types.ObjectId, ref: 'Visit' }],

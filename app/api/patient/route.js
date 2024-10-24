@@ -37,6 +37,7 @@ export const PATCH = async (request, { params }) => {
         status,
         triagedBy,
         notes,
+        dashboardNotes,
         doctor
     } = await request.json();
 
@@ -69,6 +70,7 @@ export const PATCH = async (request, { params }) => {
         existingPatient.triagedBy = triagedBy ?? existingPatient.triagedBy;
         existingPatient.notes = notes ?? existingPatient.notes;
         existingPatient.doctor = doctor ?? existingPatient.doctor;
+        existingPatient.dashboardNotes = dashboardNotes ?? existingPatient.dashboardNotes;
 
         if (assignedDocId) {
             existingPatient.assignedDocId = assignedDocId === "unassign" ? null : assignedDocId;

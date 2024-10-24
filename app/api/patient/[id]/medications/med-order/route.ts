@@ -15,7 +15,6 @@ export const POST = async (request: Request, { params }: Params) => {
 
     try {
         const requestData = await request.json();
-        console.log("Received data:", requestData);
 
         const {
             email,
@@ -74,9 +73,6 @@ export const POST = async (request: Request, { params }: Params) => {
                 frequency
             }
         };
-
-        // Log the new med order before saving
-        console.log('New med order to be saved:', JSON.stringify(newMedOrder, null, 2));
 
         // Update the patient document by adding the new med order to the medOrders array
         const updateResult = await Patient.updateOne(

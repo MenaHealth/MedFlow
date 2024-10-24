@@ -77,16 +77,12 @@ export function LoginForm() {
 
     const onSubmit = async (data: LoginFormValues) => {
         setSubmitting(true);
-        // console.log("Login button clicked! Form data:", data);
-
         try {
             const response = await signIn('credentials', {
                 email: data.email,
                 password: data.password,
                 redirect: false,
             });
-            // console.log("Full response from signIn:", response);
-
             if (response && !response.error) {
                 setToast?.({ title: '✓', description: 'You have successfully logged in.', variant: 'default' });
                 router.replace('/patient-info/dashboard');

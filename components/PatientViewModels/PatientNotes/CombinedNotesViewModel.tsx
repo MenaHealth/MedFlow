@@ -105,8 +105,6 @@ export function CombinedNotesViewModel(patientId: string) {
     }, []);
 
     const createNote = useCallback(async () => {
-        console.log('authorID:', authorID); // Log authorID to check if it's available
-        console.log('patientId:', patientId);
 
         if (!authorID || !patientId) {
             console.error('Missing authorID or patientId');
@@ -163,7 +161,6 @@ export function CombinedNotesViewModel(patientId: string) {
             // Reset the form fields after successful note creation
             resetNoteFields();
 
-            console.log('Note created:', newNote);
         } catch (error) {
             console.error('Error creating note:', error);
         } finally {

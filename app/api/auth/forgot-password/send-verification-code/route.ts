@@ -18,7 +18,6 @@ export async function POST(request: Request) {
 
         const user = await User.findOne({ email });
         if (!user) {
-            console.log(`Forgot password: User not found for email ${email}`);
             return NextResponse.json({ message: 'If the email exists, a verification code has been sent.' }, { status: 200 });
         }
 
@@ -28,11 +27,8 @@ export async function POST(request: Request) {
         user.tempCodeExpiry = Date.now() + 15 * 60 * 1000;
         await user.save();
 
-        console.log(`Forgot password: Verification code generated for ${email}`);
-
         try {
             await sendVerificationEmail(user.email, tempCode);
-            console.log(`Forgot password: Verification email sent to ${email}`);
         } catch (error) {
             console.error(`Forgot password: Error sending verification email to ${email}:`, error);
             return NextResponse.json({ message: 'Error sending verification email' }, { status: 500 });

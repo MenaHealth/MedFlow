@@ -43,25 +43,16 @@ const handler = NextAuth({
                     throw new Error('Your account has not been approved yet.');
                 }
 
-                // Validate the password
                 const isPasswordValid = await bcrypt.compare(password, user.password);
-                console.log('Plain password:', password);
-                console.log('Hashed password from DB:', user.password);
-                console.log('Password validation result:', isPasswordValid);
-
-                // Log password validation for debugging
-                console.log('Password validation result:', isPasswordValid);
 
                 if (!isPasswordValid) {
                     console.error('Invalid password for user:', email); // Debugging
                     throw new Error('Invalid password');
                 }
 
-                // Update last login date
                 user.lastLogin = new Date();
                 await user.save();
 
-                // Check if the user is an admin
                 const isAdmin = await Admin.findOne({ userId: user._id });
 
                 const session = {
@@ -110,7 +101,6 @@ const handler = NextAuth({
         // Updated jwt callback to include the accessToken
         async jwt({ token, user, account }) {
             if (account && user) {
-                console.log('User data in jwt callback:', user);
                 token.id = user._id.toString();
                     if (account.provider === 'google') {
                         // Handle Google user
@@ -143,12 +133,10 @@ const handler = NextAuth({
                         );
                     }
             }
-            // console.log('Token about to be passed to session callback:', token);
             return token;
         },
 
         async session({ session, token }) {
-            // console.log('Token in session callback:', token);
             if (token) {
                 session.user._id = token.id;
                 session.user.accountType = token.accountType;

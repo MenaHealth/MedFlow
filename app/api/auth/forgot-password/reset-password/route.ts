@@ -10,10 +10,8 @@
 
             try {
                 const body = await request.json();
-                console.log('Request body:', body);
 
                 const { email, newPassword } = body;
-                console.log('Parsed data:', { email, newPassword: newPassword ? '[REDACTED]' : undefined });
 
                 if (!email || !newPassword) {
                     console.error('Email or newPassword missing');
@@ -32,9 +30,6 @@
 
                 user.password = hashedPassword;
                 await user.save();
-
-                console.log('Password reset successfully for user:', email);
-                console.log('Saved password hash in DB:', user.password);
 
                 return NextResponse.json({ message: 'Password reset successfully' }, { status: 200 });
             } catch (error) {

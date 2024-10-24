@@ -109,7 +109,6 @@ export function AccountForm() {
     })
 
     function onSubmit(data: AccountFormValues) {
-        console.log(data)
     }
 
     const [search, setSearch] = React.useState('');

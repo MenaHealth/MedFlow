@@ -34,7 +34,6 @@ export const POST = async (req, res) => {
         });
 
         const uploadResults = await Promise.all(uploadPromises);
-        console.log('Upload successful:', uploadResults);
 
         res.status(200).json({ success: true, uploadResults });
     } catch (error) {

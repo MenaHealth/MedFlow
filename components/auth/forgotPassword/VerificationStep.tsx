@@ -29,7 +29,6 @@ export function VerificationStep({ onNext }: VerificationStepProps) {
     });
 
     const onSubmit = async (data: VerificationFormValues) => {
-        console.log('Handling verification submission...', data);
         setLoading(true);
         try {
             await handleVerificationStep(data.tempCode);

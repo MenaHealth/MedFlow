@@ -65,7 +65,6 @@ export const ForgotPasswordProvider: React.FC<{ children: ReactNode }> = ({ chil
                 if (form.formState.isValid) {
                     const email = form.getValues('email');
                     const code = form.getValues('tempCode');
-                    console.log('Code is valid, sending verification request', { email, code });
                     const verifyResponse = await fetch('/api/auth/forgot-password/verify-code', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -180,9 +179,6 @@ export const ForgotPasswordProvider: React.FC<{ children: ReactNode }> = ({ chil
             }
 
             console.log('Sending security answer verification request...');
-            console.log('Email:', email);
-            console.log('Question:', securityQuestion.question);
-            console.log('Provided answer (first  characters):', securityAnswer);
 
             const hashedAnswer = await bcrypt.hash(securityAnswer, 10);
             const response = await fetch('/api/auth/forgot-password/verify-security-answer', {
@@ -214,7 +210,6 @@ export const ForgotPasswordProvider: React.FC<{ children: ReactNode }> = ({ chil
     };
 
     const handleResetPassword = async (data: ForgotPasswordFormValues) => {
-        console.log('handleResetPassword called with data:', data);
         try {
             setSubmitting(true);
             const email = form.getValues('email');
@@ -245,7 +240,6 @@ export const ForgotPasswordProvider: React.FC<{ children: ReactNode }> = ({ chil
             }
 
             const result = await response.json();
-            console.log('Reset password response body:', result);
 
             if (result.message === 'Password reset successfully') {
                 setToast({

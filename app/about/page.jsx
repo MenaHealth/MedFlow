@@ -107,7 +107,7 @@ export default function AboutPage() {
                 </div>
 
                 <div className="mt-20">
-                    <Card className="w-full max-w-3xl mx-auto p-10"> {/* Increased padding for Card */}
+                    <Card className="w-full max-w-3xl mx-auto p-10"> 
                         <h2 className="text-2xl font-bold mb-4">Patient Submission Process</h2>
                         <p className="text-gray-600 mb-8">How patients interact with MedFlow for remote health consultations</p>
         

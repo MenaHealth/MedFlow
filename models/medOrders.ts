@@ -3,40 +3,48 @@
 import { Schema, Document, Model, model, models } from 'mongoose';
 import { DoctorSpecialties } from './../data/doctorSpecialty.enum';
 
-export interface IMedOrders extends Document {
-    email: string;
-    date: Date;
-    authorName: string;
-    authorID: string;
-    content: {
-        doctorSpecialty: typeof DoctorSpecialties[number];
+export interface IMedOrder extends Document {
+    orderDate: Date;
+    doctorSpecialization: typeof DoctorSpecialties[number];
+    doctorEmail: string;
+    prescribingDr: string;
+    drId: string;
+    order: {
         patientName: string;
-        phoneNumber: string;
-        address: string;
-        diagnosis: string;
-        medications: string;
-        dosage: string;
-        frequency: string;
+        patientNumber: string;
+        patientCity: string;
+        medications: {
+            diagnosis: string;
+            medication: string;
+            dosage: string;
+            frequency: string;
+            quantity: string;
+        }[];
     };
 }
 
-export const medOrdersSchema = new Schema<IMedOrders>({
-    email: { type: String },
-    date: { type: Date, default: Date.now },
-    authorName: { type: String },
-    authorID: { type: String },
-    content: {
-        doctorSpecialty: { type: String, enum: DoctorSpecialties },
-        patientName: { type: String },
-        phoneNumber: { type: String }, // Changed from patientPhoneNumber
-        address: { type: String },
-        diagnosis: { type: String },
-        medications: { type: String },
-        dosage: { type: String },
-        frequency: { type: String },
+export const medOrderSchema = new Schema<IMedOrder>({
+    orderDate: { type: Date, default: Date.now },
+    doctorSpecialization: { type: String, enum: DoctorSpecialties, required: true },
+    doctorEmail: { type: String, required: true },
+    prescribingDr: { type: String, required: true },
+    drId: { type: String, required: true },
+    order: {
+        patientName: { type: String, required: true },
+        patientNumber: { type: String, required: true },
+        patientCity: { type: String, required: true },
+        medications: [
+            {
+                diagnosis: { type: String, required: true },
+                medication: { type: String, required: true },
+                dosage: { type: String, required: true },
+                frequency: { type: String, required: true },
+                quantity: { type: String, required: true },
+            },
+        ],
     },
 });
 
-const MedOrders: Model<IMedOrders> = models.MedOrders || model<IMedOrders>('MedOrders', medOrdersSchema);
+const MedOrders: Model<IMedOrder> = models.MedOrders || model<IMedOrder>('MedOrders', medOrderSchema);
 
 export default MedOrders;

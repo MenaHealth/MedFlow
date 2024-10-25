@@ -14,33 +14,39 @@ interface RxOrder {
     prescribingDr: string;
     drId: string;
     prescribedDate: Date;
-    Rx: {
+    prescriptions: {
         validTill: Date;
+        city: string;
         prescriptions: Prescription[];
-    }
+    };
+    validated?: boolean;
 }
 
 export function useRXOrderViewModel(patientId: string) {
     const { userSession, patientInfo, patientViewModel } = usePatientDashboard();
 
     const [rxOrder, setRxOrder] = useState<RxOrder>({
-        doctorSpecialization: userSession?.doctorSpecialty || DoctorSpecialties.NOT_SELECTED,
+        doctorSpecialization: userSession?.doctorSpecialty || 'Not Selected',
         prescribingDr: `${userSession?.firstName} ${userSession?.lastName}`,
         drId: userSession?.id || '',
         prescribedDate: new Date(),
-        Rx: {
+        prescriptions: {
             validTill: new Date(new Date().setMonth(new Date().getMonth() + 1)),
-            prescriptions: [{ diagnosis: '', medication: '', dosage: '', frequency: '' }]
-        }
+            city: patientViewModel?.getExpandedDetails()?.city || '',
+            prescriptions: [
+                { diagnosis: '', medication: '', dosage: '', frequency: '' }
+            ],
+        },
+        validated: false
     });
 
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleInputChange = (field: keyof RxOrder['Rx'], value: any) => {
+    const handleInputChange = (field: keyof RxOrder['prescriptions'], value: any) => {
         setRxOrder((prevOrder) => ({
             ...prevOrder,
-            Rx: {
-                ...prevOrder.Rx,
+            prescriptions: {
+                ...prevOrder.prescriptions,
                 [field]: value,
             },
         }));
@@ -48,12 +54,12 @@ export function useRXOrderViewModel(patientId: string) {
 
     const handlePrescriptionChange = (index: number, field: keyof Prescription, value: string) => {
         setRxOrder((prevOrder) => {
-            const newPrescriptions = [...prevOrder.Rx.prescriptions];
+            const newPrescriptions = [...prevOrder.prescriptions.prescriptions];
             newPrescriptions[index] = { ...newPrescriptions[index], [field]: value };
             return {
                 ...prevOrder,
-                Rx: {
-                    ...prevOrder.Rx,
+                prescriptions: {
+                    ...prevOrder.prescriptions,
                     prescriptions: newPrescriptions,
                 },
             };
@@ -63,9 +69,9 @@ export function useRXOrderViewModel(patientId: string) {
     const addPrescription = () => {
         setRxOrder((prevOrder) => ({
             ...prevOrder,
-            Rx: {
-                ...prevOrder.Rx,
-                prescriptions: [...prevOrder.Rx.prescriptions, { diagnosis: '', medication: '', dosage: '', frequency: '' }],
+            prescriptions: {
+                ...prevOrder.prescriptions,
+                prescriptions: [...prevOrder.prescriptions.prescriptions, { diagnosis: '', medication: '', dosage: '', frequency: '' }],
             },
         }));
     };
@@ -73,9 +79,9 @@ export function useRXOrderViewModel(patientId: string) {
     const removePrescription = (index: number) => {
         setRxOrder((prevOrder) => ({
             ...prevOrder,
-            Rx: {
-                ...prevOrder.Rx,
-                prescriptions: prevOrder.Rx.prescriptions.filter((_, idx) => idx !== index),
+            prescriptions: {
+                ...prevOrder.prescriptions,
+                prescriptions: prevOrder.prescriptions.prescriptions.filter((_, idx) => idx !== index),
             },
         }));
     };
@@ -88,7 +94,7 @@ export function useRXOrderViewModel(patientId: string) {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(rxOrder), // Make sure RxOrder contains prescriptions
+                body: JSON.stringify(rxOrder),
             });
 
             if (!response.ok) {
@@ -100,14 +106,16 @@ export function useRXOrderViewModel(patientId: string) {
 
             // Reset the form
             setRxOrder({
-                doctorSpecialization: userSession?.doctorSpecialty || DoctorSpecialties.NOT_SELECTED,
+                doctorSpecialization: userSession?.doctorSpecialty || 'Not Selected',
                 prescribingDr: `${userSession?.firstName} ${userSession?.lastName}`,
                 drId: userSession?.id || '',
                 prescribedDate: new Date(),
-                Rx: {
+                prescriptions: {
                     validTill: new Date(new Date().setMonth(new Date().getMonth() + 1)),
-                    prescriptions: [{ diagnosis: '', medication: '', dosage: '', frequency: '' }]
-                }
+                    city: patientViewModel?.getExpandedDetails()?.city || '',
+                    prescriptions: [{ diagnosis: '', medication: '', dosage: '', frequency: '' }],
+                },
+                validated: false
             });
         } catch (error) {
             console.error('Failed to publish RX form:', error);

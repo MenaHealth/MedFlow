@@ -2,7 +2,6 @@
 import { Schema, model, models, Document, Types } from 'mongoose';
 import { DoctorSpecialties as SPECIALTIES } from './../data/doctorSpecialty.enum';
 import { INote, noteSchema } from './note';
-import {IRxOrder, RXOrderSchema} from "./rxOrders";
 import {IMedOrders, medOrdersSchema} from "./medOrders";
 
 
@@ -46,8 +45,8 @@ export interface IPatient extends Document {
   otherDrugs?: string;
   allergies?: string;
   notes?: Types.DocumentArray<INote>;
-  rxOrders?: Types.DocumentArray<IRxOrder>;
-  medOrders?: Types.DocumentArray<IMedOrders>;
+  rxOrders?: string[];
+  medOrders?: string[];
   visits?: any[];
   triagedBy?: {
     firstName?: string;
@@ -103,17 +102,18 @@ const PatientSchema = new Schema<IPatient>({
       prescribingDr: { type: String, required: true },
       drId: { type: String, required: true },
       prescribedDate: { type: Date, default: Date.now },
-      Rx: {
+      prescriptions: {
         validTill: { type: Date, default: Date.now },
-        prescriptions: [{
+        city: { type: String, required: true },
+        prescription: [{
           diagnosis: { type: String, required: true },
           medication: { type: String, required: true },
           dosage: { type: String, required: true },
           frequency: { type: String, required: true },
-        }]
+        }],
+        validated: { type: Boolean, default: false },
       }
     }],
-    default: []
   },
   medOrders: { type: [medOrdersSchema], default: [] },
   visits: [{ type: Schema.Types.ObjectId, ref: 'Visit' }],

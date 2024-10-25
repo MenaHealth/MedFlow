@@ -4,7 +4,8 @@ import { Button } from './../../../../components/ui/button';
 import { useRXOrderViewModel } from './../../../../components/PatientViewModels/Medications/rx/RXOrderViewModel';
 import { DoctorSpecialties } from './../../../../data/doctorSpecialty.enum';
 import { Plus, Minus } from 'lucide-react';
-import {DatePickerFormField} from "./../../../../components/form/DatePickerFormField";
+import { DatePickerFormField } from "./../../../../components/form/DatePickerFormField";
+import { addDays } from 'date-fns'
 
 interface User {
     firstName: string;
@@ -33,9 +34,9 @@ export default function RXOrderView({ patientId, user }: RXOrderViewProps) {
     const expandedDetails = patientViewModel?.getExpandedDetails();
 
     return (
-        <div className="space-y-6 max-w-2xl mx-auto bg-orange-900">
+        <div className="space-y-6 max-w-2xl mx-auto bg-orange-950">
             <fieldset className="border rounded-lg p-6 bg-white shadow-sm">
-                <legend className="text-lg font-semibold px-2 bg-orange-900 text-white rounded-lg">Prescriber and Patient Details</legend>
+                <legend className="text-lg font-semibold px-2 bg-orange-950 text-white rounded-lg">Prescriber and Patient Details</legend>
                 <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                         <TextFormField
@@ -79,23 +80,24 @@ export default function RXOrderView({ patientId, user }: RXOrderViewProps) {
                     />
                 </div>
                 <hr className="my-6 border-gray-200" />
-                <div className="space-y-4">
-
+                <div className="space-y-4 flex flex-col items-center justify-center text-center border-2 border-darkBlue rounded-lg p-4">
                     <DatePickerFormField
                         name="validTill"
                         label="Valid Till"
-                        value={rxOrder.Rx.validTill.toISOString()}
-                        onChange={(e) => handleInputChange('validTill', new Date(e.target.value))}
+                        type="future"
+                        value={rxOrder.prescriptions.validTill}
+                        onChange={(date) => handleInputChange('validTill', date)}
                     />
                 </div>
             </fieldset>
 
-            {rxOrder.Rx.prescriptions.map((prescription, index) => (
+            {rxOrder.prescriptions.prescriptions.map((prescription, index) => (
                 <fieldset key={index} className="border rounded-lg p-6 bg-white shadow-sm relative overflow-hidden">
-                    <legend className="text-lg font-semibold px-2 flex items-center w-full bg-orange-900 text-white rounded-lg">
+                    <legend
+                        className="text-lg font-semibold px-2 flex items-center w-full bg-orange-950 text-white rounded-lg">
                         <span>Prescription {index + 1}</span>
                         <div className="ml-auto flex space-x-2">
-                            {index === rxOrder.Rx.prescriptions.length - 1 && (
+                            {index === rxOrder.prescriptions.prescriptions.length - 1 && (
                                 <Button
                                     variant="ghost"
                                     size="icon"
@@ -106,7 +108,7 @@ export default function RXOrderView({ patientId, user }: RXOrderViewProps) {
                                     <Plus className="h-4 w-4" />
                                 </Button>
                             )}
-                            {rxOrder.Rx.prescriptions.length > 1 && (
+                            {rxOrder.prescriptions.prescriptions.length > 1 && (
                                 <Button
                                     variant="ghost"
                                     size="icon"
@@ -123,8 +125,8 @@ export default function RXOrderView({ patientId, user }: RXOrderViewProps) {
                         <TextFormField
                             fieldName="diagnosis"
                             fieldLabel="Diagnosis"
-                            value={rxOrder.Rx.prescriptions[0].diagnosis}
-                            onChange={(e) => handlePrescriptionChange(0, 'diagnosis', e.target.value)}
+                            value={prescription.diagnosis}
+                            onChange={(e) => handlePrescriptionChange(index, 'diagnosis', e.target.value)}
                             multiline={true}
                             rows={3}
                         />

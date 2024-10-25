@@ -36,11 +36,6 @@ export const RXOrderSchema = new Schema<IRxOrder>({
         age: { type: String },
         diagnosis: { type: String, required: true },
         pharmacyOrClinic: { type: String, enum: Pharmacies, required: true },
-        doctorSpecialty: {
-            type: String, // Ensure the type is String
-            enum: Object.values(DoctorSpecialtyList),
-            required: true
-        },
         prescriptions: [{
             medication: { type: String, required: true },
             dosage: { type: String, required: true },

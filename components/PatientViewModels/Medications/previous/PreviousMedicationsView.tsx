@@ -79,9 +79,11 @@ export default function PreviousMedicationsView({
                         ))}
                     </ul>
                 ) : (
-                    <p>No previous medications found for this patient.</p>
-                )}
-            </ScrollArea>
-        </div>
-    );
-}
+                    <div className="mt-2 border-white border-2 text-white rounded-lg m-4 p-4 text-center">
+                        <p><strong>No previous medications</strong> for this patient.</p>
+                    </div>
+                        )}
+                    </ScrollArea>
+                    </div>
+                    );
+                }

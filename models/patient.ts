@@ -98,7 +98,7 @@ const PatientSchema = new Schema<IPatient>({
   allergies: { type: String },
   notes: { type: [noteSchema], default: [] },
   rxOrders: {
-    type: [{
+    Orders: [{
       doctorSpecialization: { type: String, required: true },
       prescribingDr: { type: String, required: true },
       drId: { type: String, required: true },

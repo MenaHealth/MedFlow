@@ -10,6 +10,7 @@ import Image from 'next/image';
 //import PatientSubmenu from "../../../components/PatientSubmenu";
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { FiMinus, FiPlus } from 'react-icons/fi';
+import { useSession } from 'next-auth/react';
 
 const DEFAULT_FORM_VALUES = {
     age: 0,
@@ -21,9 +22,9 @@ const DEFAULT_FORM_VALUES = {
     priority: "Routine",
     hospital: "PMC",
     baselineAmbu: "Independent",
-    medx: [],
-    pmhx: [],
-    pshx: [],
+    medx: '',
+    pmhx: '',
+    pshx: '',
     smokeCount: "",
     drinkCount: "",
     otherDrugs: "",
@@ -43,6 +44,9 @@ const ImageGallery = () => {
     const [clickZoomOut, setClickZoomOut] = useState(false);
     const carouselRef = useRef(null);
     const fileInputRef = useRef(null);
+    const [isDoctor, setIsDoctor] = useState(false);
+
+    const { data: session } = useSession();
 
     useEffect(() => {
         if (id !== '') {
@@ -199,6 +203,13 @@ const ImageGallery = () => {
         }
     };
 
+    useEffect(() => {
+        if (!session) return;
+        if (session.user.accountType === 'Doctor') {
+            setIsDoctor(true);
+        }
+    }, [session]);
+
     return (
         <>
             <div className="w-full max-w-4xl mx-auto pb-16">
@@ -294,20 +305,22 @@ const ImageGallery = () => {
                     </div>
                 </div>
 
-                <div>
-                    <h1 className="text-2xl font-bold mb-4 mt-4">Upload Files</h1>
-                    <form onSubmit={handleFormSubmit} className='flex flex-col'>
-                    <input
-                            type="file"
-                            multiple
-                            onChange={handleFileChange}
-                            ref={fileInputRef}
-                        />
-                        <Button type="submit" variant="contained" color="primary" style={{ width: '110px', marginTop: '5px' }}>
-                            Submit
-                        </Button>
-                    </form>
-                </div>
+                {isDoctor && (
+                    <div>
+                        <h1 className="text-2xl font-bold mb-4 mt-4">Upload Files</h1>
+                        <form onSubmit={handleFormSubmit} className='flex flex-col'>
+                        <input
+                                type="file"
+                                multiple
+                                onChange={handleFileChange}
+                                ref={fileInputRef}
+                            />
+                            <Button type="submit" variant="contained" color="primary" style={{ width: '110px', marginTop: '5px' }}>
+                                Submit
+                            </Button>
+                        </form>
+                    </div>
+                )}
                 </div>
         </>
     );

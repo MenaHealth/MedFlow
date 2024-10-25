@@ -99,18 +99,14 @@ const PatientSchema = new Schema<IPatient>({
   notes: { type: [noteSchema], default: [] },
   rxOrders: {
     type: [{
-      email: { type: String, required: true },
-      date: { type: Date, default: Date.now },
-      authorName: { type: String, required: true },
-      authorID: { type: String, required: true },
-      content: {
-        patientName: { type: String, required: true },
-        phoneNumber: { type: String },
-        age: { type: String },
-        diagnosis: { type: String, required: true },
-        city: { type: String, required: true },
-        doctorSpecialty: { type: String, required: true },
+      doctorSpecialization: { type: String, required: true },
+      prescribingDr: { type: String, required: true },
+      drId: { type: String, required: true },
+      prescribedDate: { type: Date, default: Date.now },
+      Rx: {
+        validTill: { type: Date, default: Date.now },
         prescriptions: [{
+          diagnosis: { type: String, required: true },
           medication: { type: String, required: true },
           dosage: { type: String, required: true },
           frequency: { type: String, required: true },

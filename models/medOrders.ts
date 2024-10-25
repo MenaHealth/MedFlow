@@ -3,38 +3,37 @@
 import { Schema, Document, Model, model, models, Types } from 'mongoose';
 import { DoctorSpecialties } from './../data/doctorSpecialty.enum';
 
+interface MedicationDetails {
+    medication: string;
+    dosage: string;
+    frequency: string;
+}
+
 export interface IMedOrders extends Document {
-    patientId: Types.ObjectId; // Reference to the patient
-    doctorId?: Types.ObjectId;  // Optional reference to the doctor
-    email: string;
+    doctorId?: Types.ObjectId;
+    doctorSpecialty: keyof typeof DoctorSpecialties;
+    doctorEmail: string;
+    patientName: string;
+    patientId: Types.ObjectId;
+    medications: MedicationDetails[]; // Updated to support multiple medications
+    city: string;
     date: Date;
-    authorName: string;
-    authorID: string;
-    content: {
-        doctorSpecialty: keyof typeof DoctorSpecialties;
-        patientName: string;
-        city: string; // Added city field similar to RX order
-        medications: string;
-        dosage: string;
-        frequency: string;
-    };
 }
 
 export const medOrdersSchema = new Schema<IMedOrders>({
-    patientId: { type: Schema.Types.ObjectId, ref: 'Patient', required: true }, // Reference to the patient
-    doctorId: { type: Schema.Types.ObjectId, ref: 'Doctor' }, // Optional reference to the doctor
-    email: { type: String },
+    patientId: { type: Schema.Types.ObjectId, ref: 'Patient', required: true },
+    doctorId: { type: Schema.Types.ObjectId, ref: 'Doctor' },
+    doctorSpecialty: { type: String, enum: Object.keys(DoctorSpecialties), required: true },
+    doctorEmail: { type: String },
     date: { type: Date, default: Date.now },
-    authorName: { type: String },
-    authorID: { type: String },
-    content: {
-        doctorSpecialty: { type: String, enum: Object.keys(DoctorSpecialties), required: true },
-        patientName: { type: String },
-        city: { type: String, required: true }, // Added city field
-        medications: { type: String },
-        dosage: { type: String },
-        frequency: { type: String },
-    },
+    city: { type: String, required: true }, // Added city field
+    medications: [
+        {
+            medication: { type: String, required: true },
+            dosage: { type: String, required: true },
+            frequency: { type: String, required: true },
+        }
+    ]
 });
 
 const MedOrders: Model<IMedOrders> = models.MedOrders || model<IMedOrders>('MedOrders', medOrdersSchema);

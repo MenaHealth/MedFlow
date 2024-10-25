@@ -35,7 +35,7 @@ export default function PreviousMedicationsView({
                 {rxOrders.length > 0 || medOrders.length > 0 ? (
                     <ul className="list-none p-0">
                         {rxOrders.map((rxOrder) => (
-                            <li key={rxOrder._id} className="p-4 border-b border-gray-200 bg-white">
+                            <li key={rxOrder._id} className="p-4 border-b border-gray-200 bg-white rounded-lg">
                                 <div className="flex justify-between items-center">
                                     <div>
                                         <h3 className="font-bold">RX Form: {rxOrder.content.medication}</h3>
@@ -55,19 +55,22 @@ export default function PreviousMedicationsView({
                             </li>
                         ))}
                         {medOrders.map((medOrder) => (
-                            <li key={medOrder._id} className="p-4 border-b border-gray-200 bg-white">
-                                <div className="flex justify-between items-center">
+                            <li key={medOrder._id} className="p-4 border-b border-white border-2 rounded-lg">
+                                <div className="flex justify-between items-center text-white">
                                     <div>
-                                        <h3 className="font-bold">Medical Order: {medOrder.content.medications}</h3>
+                                        <h3 className="border-2 text-white">Medical
+                                            Order: <strong>{medOrder.content.medications}
+                                                </strong></h3>
                                         <p>{new Date(medOrder.date).toLocaleDateString()}</p>
-                                        <h4 className="font-bold">Ordered by: {medOrder.authorName}</h4>
+                                        <h4 className="text-white">Ordered by: <strong>{medOrder.authorName}</strong>
+                                        </h4>
                                     </div>
-                                    <button onClick={() => toggleItemExpansion(medOrder._id)} className="text-gray-600">
+                                    <button onClick={() => toggleItemExpansion(medOrder._id)} className="text-white">
                                         {expandedItems.includes(medOrder._id) ? <ChevronUp /> : <ChevronDown />}
                                     </button>
                                 </div>
                                 {expandedItems.includes(medOrder._id) && (
-                                    <div className="mt-2">
+                                    <div className="mt-2 bg-white text-darkBlue">
                                         <p><strong>Dosage:</strong> {medOrder.content.dosage}</p>
                                         <p><strong>Frequency:</strong> {medOrder.content.frequency}</p>
                                     </div>

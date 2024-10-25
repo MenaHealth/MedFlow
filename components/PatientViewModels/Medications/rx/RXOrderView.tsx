@@ -1,126 +1,101 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { TextFormField } from './../../../../components/ui/TextFormField';
 import { Button } from './../../../../components/ui/button';
-import { SingleChoiceFormField } from './../../../../components/form/SingleChoiceFormField';
-import { Pharmacies } from './../../../../data/pharmacies.enum';
 import { useRXOrderViewModel } from './../../../../components/PatientViewModels/Medications/rx/RXOrderViewModel';
-import { DoctorSpecialtyList } from './../../../../data/doctorSpecialty.enum';
+import { DoctorSpecialties } from './../../../../data/doctorSpecialty.enum';
 import { Plus, Minus } from 'lucide-react';
+import {DatePickerFormField} from "./../../../../components/form/DatePickerFormField";
 
 interface User {
     firstName: string;
     lastName: string;
-    doctorSpecialty: keyof typeof DoctorSpecialtyList;
-}
-
-interface PatientDetails {
-    patientName: string;
-}
-
-interface ExpandedDetails {
-    phone: string;
-    age: string;
+    doctorSpecialty: keyof typeof DoctorSpecialties;
 }
 
 interface RXOrderViewProps {
     user: User;
     patientId: string;
-    patientDetails: PatientDetails;
-    expandedDetails: ExpandedDetails;
 }
 
-export default function RXOrderView({ patientId, user, patientDetails, expandedDetails }: RXOrderViewProps) {
-    const { rxOrder, isLoading, handleInputChange, submitRxOrder } = useRXOrderViewModel(
-        patientId,
-        patientDetails.patientName,
-        expandedDetails.phone,
-        expandedDetails.age,
-        expandedDetails.city
-    );
+export default function RXOrderView({ patientId, user }: RXOrderViewProps) {
+    const {
+        rxOrder,
+        isLoading,
+        handleInputChange,
+        handlePrescriptionChange,
+        addPrescription,
+        removePrescription,
+        submitRxOrder,
+        patientInfo,
+        patientViewModel
+    } = useRXOrderViewModel(patientId);
 
-    const [prescriptions, setPrescriptions] = useState(rxOrder.prescriptions || [{ medication: '', dosage: '', frequency: '' }]);
-
-    const addPrescription = () => {
-        setPrescriptions([...prescriptions, { medication: '', dosage: '', frequency: '' }]);
-    };
-
-    const removePrescription = (index: number) => {
-        setPrescriptions(prescriptions.filter((_, idx) => idx !== index));
-    };
-
-    const handlePrescriptionChange = (index: number, field: keyof typeof prescriptions[0], value: string) => {
-        const updatedPrescriptions = [...prescriptions];
-        updatedPrescriptions[index] = { ...updatedPrescriptions[index], [field]: value };
-        setPrescriptions(updatedPrescriptions);
-        handleInputChange('prescriptions', updatedPrescriptions);
-    };
+    const expandedDetails = patientViewModel?.getExpandedDetails();
 
     return (
-        <div className="space-y-6 max-w-2xl mx-auto">
+        <div className="space-y-6 max-w-2xl mx-auto bg-orange-900">
             <fieldset className="border rounded-lg p-6 bg-white shadow-sm">
-                <legend className="text-lg font-semibold px-2">Prescriber and Patient Details</legend>
+                <legend className="text-lg font-semibold px-2 bg-orange-900 text-white rounded-lg">Prescriber and Patient Details</legend>
                 <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                         <TextFormField
                             fieldName="prescribingDoctor"
                             fieldLabel="Dr."
-                            value={`${user?.firstName || ''} ${user?.lastName || ''}`}
+                            value={rxOrder.prescribingDr}
                             readOnly={true}
                         />
                         <TextFormField
                             fieldName="doctorSpecialization"
                             fieldLabel="Specialization"
-                            value={user.doctorSpecialty}
+                            value={rxOrder.doctorSpecialization}
                             readOnly={true}
                         />
                     </div>
                     <TextFormField
                         fieldName="patientName"
                         fieldLabel="Patient's Full Name"
-                        value={rxOrder.patientName}
+                        value={patientInfo?.patientName || ''}
                         readOnly={true}
                     />
                     <div className="grid grid-cols-2 gap-4">
                         <TextFormField
                             fieldName="phoneNumber"
                             fieldLabel="Patient Phone Number"
-                            value={rxOrder.phoneNumber}
+                            value={expandedDetails?.phone || ''}
                             readOnly={true}
                         />
                         <TextFormField
                             fieldName="age"
                             fieldLabel="Age"
-                            value={rxOrder.age}
-                            readOnly={true}
-                        />
-                        <TextFormField
-                            fieldName="city"
-                            fieldLabel="Patient City"
-                            value={rxOrder.city}
+                            value={expandedDetails?.age || ''}
                             readOnly={true}
                         />
                     </div>
+                    <TextFormField
+                        fieldName="city"
+                        fieldLabel="City"
+                        value={expandedDetails?.city || ''}
+                        readOnly={true}
+                    />
                 </div>
                 <hr className="my-6 border-gray-200" />
                 <div className="space-y-4">
-                    <TextFormField
-                        fieldName="diagnosis"
-                        fieldLabel="Diagnosis"
-                        value={rxOrder.diagnosis}
-                        onChange={(e) => handleInputChange('diagnosis', e.target.value)}
-                        multiline={true}
-                        rows={3}
+
+                    <DatePickerFormField
+                        name="validTill"
+                        label="Valid Till"
+                        value={rxOrder.Rx.validTill.toISOString()}
+                        onChange={(e) => handleInputChange('validTill', new Date(e.target.value))}
                     />
                 </div>
             </fieldset>
 
-            {/* Prescription Fields */}
-            {prescriptions.map((prescription, index) => (
+            {rxOrder.Rx.prescriptions.map((prescription, index) => (
                 <fieldset key={index} className="border rounded-lg p-6 bg-white shadow-sm relative overflow-hidden">
-                    <legend className="text-lg font-semibold px-2 flex items-center w-full">
+                    <legend className="text-lg font-semibold px-2 flex items-center w-full bg-orange-900 text-white rounded-lg">
                         <span>Prescription {index + 1}</span>
                         <div className="ml-auto flex space-x-2">
-                            {index === prescriptions.length - 1 && (
+                            {index === rxOrder.Rx.prescriptions.length - 1 && (
                                 <Button
                                     variant="ghost"
                                     size="icon"
@@ -131,12 +106,12 @@ export default function RXOrderView({ patientId, user, patientDetails, expandedD
                                     <Plus className="h-4 w-4" />
                                 </Button>
                             )}
-                            {prescriptions.length > 1 && (
+                            {rxOrder.Rx.prescriptions.length > 1 && (
                                 <Button
                                     variant="ghost"
                                     size="icon"
                                     onClick={() => removePrescription(index)}
-                                    className="h-7 w-7 rounded-full text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                                    className="h-7 w-7 rounded-full text-white hover:bg-accent hover:text-accent-foreground"
                                     aria-label="Remove prescription"
                                 >
                                     <Minus className="h-4 w-4" />
@@ -145,6 +120,14 @@ export default function RXOrderView({ patientId, user, patientDetails, expandedD
                         </div>
                     </legend>
                     <div className="space-y-4 mt-4">
+                        <TextFormField
+                            fieldName="diagnosis"
+                            fieldLabel="Diagnosis"
+                            value={rxOrder.Rx.prescriptions[0].diagnosis}
+                            onChange={(e) => handlePrescriptionChange(0, 'diagnosis', e.target.value)}
+                            multiline={true}
+                            rows={3}
+                        />
                         <TextFormField
                             fieldName={`medication-${index}`}
                             fieldLabel="Medication"
@@ -173,7 +156,7 @@ export default function RXOrderView({ patientId, user, patientDetails, expandedD
                 onClick={submitRxOrder}
                 disabled={isLoading}
                 className="w-full"
-                variant={"submit"}
+                variant="submit"
             >
                 {isLoading ? 'Submitting...' : 'Submit Rx'}
             </Button>

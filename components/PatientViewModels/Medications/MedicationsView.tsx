@@ -96,7 +96,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
     return (
         <FormProvider {...methods}>
             <form onSubmit={methods.handleSubmit(handleCreateMedication)}>
-                <div className="flex flex-col md:flex-row h-[100vh] bg-darkBlue overflow-hidden">
+                <div className="flex flex-col md:flex-row h-[100vh]  overflow-hidden">
                     <Resizable
                         className="hidden md:block"
                         minWidth={200}
@@ -105,9 +105,9 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                         onResize={handleResize}
                     >
                         <Card className="h-full">
-                            <ScrollArea className="h-full w-full">
+                            <ScrollArea className="h-full w-full bg-orange-900">
                                 <CardHeader className="px-4 py-2">
-                                    <h3 className="text-lg font-semibold">Previous Medications</h3>
+                                    <h3 className="text-lg font-semibold text-white">Previous Medications</h3>
                                 </CardHeader>
                                 <CardContent className="h-full p-0">
                                     <PreviousMedicationsView
@@ -148,20 +148,20 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                             >
                                 <RadioCard.Item
                                     value="rxOrder"
-                                    className={`flex-1 ${templateType === 'rxOrder' ? 'border-2 border-orange-500' : 'border border-gray-200'}`}
+                                    className={`flex-1 ${templateType === 'rxOrder' ? 'bg-white' : ''}`}
                                 >
                                     Rx Order
                                 </RadioCard.Item>
                                 <RadioCard.Item
                                     value="medicalrequest"
-                                    className={`flex-1 ${templateType === 'medicalrequest' ? 'border-2 border-orange-500' : 'border border-gray-200'}`}
+                                    className={`flex-1 ${templateType === 'medicalrequest' ? 'bg-white' : ''}`}
                                 >
                                     Medication Order
                                 </RadioCard.Item>
                             </RadioCard.Root>
                         </CardHeader>
-                        <CardContent className="h-full md:h-[calc(100vh-120px)] p-0">
-                            <ScrollArea className="h-full w-full pb-16">
+                        <CardContent className="h-full p-0">
+                            <ScrollArea className="h-full w-full pb-16 bg-orange-900">
                                 <div className="mt-4 p-4">
                                     {templateType === 'rxOrder' ? (
                                         <RXOrderView
@@ -175,6 +175,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                             expandedDetails={{
                                                 phone: expandedDetails?.phone ?? '',
                                                 age: expandedDetails?.age ?? '',
+                                                city: expandedDetails?.city ?? '',
                                             }}
                                         />
                                     ) : (

@@ -1,43 +1,82 @@
 import { useState } from 'react';
 import { usePatientDashboard } from './../../../../components/PatientViewModels/PatientViewModelContext';
-import { DoctorSpecialtyList } from './../../../../data/doctorSpecialty.enum';
+import { DoctorSpecialties } from './../../../../data/doctorSpecialty.enum';
 
 interface Prescription {
+    diagnosis: string;
     medication: string;
     dosage: string;
     frequency: string;
 }
 
 interface RxOrder {
-    patientName: string;
-    phoneNumber: string;
-    age: string;
-    doctorSpecialty: keyof typeof DoctorSpecialtyList;
-    diagnosis: string;
-    city: string;
-    prescriptions: Prescription[];
+    doctorSpecialization: string;
+    prescribingDr: string;
+    drId: string;
+    prescribedDate: Date;
+    Rx: {
+        validTill: Date;
+        prescriptions: Prescription[];
+    }
 }
 
-export function useRXOrderViewModel(patientId: string, patientName: string, phoneNumber: string, age: string, city: string) {
-    const { userSession } = usePatientDashboard();
+export function useRXOrderViewModel(patientId: string) {
+    const { userSession, patientInfo, patientViewModel } = usePatientDashboard();
 
-    const [rxOrder, setrxOrder] = useState<RxOrder>({
-        patientName,
-        phoneNumber,
-        age,
-        city,
-        doctorSpecialty: userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList || DoctorSpecialtyList.NOT_SELECTED,
-        diagnosis: '',
-        prescriptions: [{ medication: '', dosage: '', frequency: '' }]
+    const [rxOrder, setRxOrder] = useState<RxOrder>({
+        doctorSpecialization: userSession?.doctorSpecialty || DoctorSpecialties.NOT_SELECTED,
+        prescribingDr: `${userSession?.firstName} ${userSession?.lastName}`,
+        drId: userSession?.id || '',
+        prescribedDate: new Date(),
+        Rx: {
+            validTill: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+            prescriptions: [{ diagnosis: '', medication: '', dosage: '', frequency: '' }]
+        }
     });
 
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleInputChange = (field: keyof RxOrder, value: string) => {
-        console.log(`Updating ${field} to ${value}`);
-        setrxOrder((prevOrder) => ({
+    const handleInputChange = (field: keyof RxOrder['Rx'], value: any) => {
+        setRxOrder((prevOrder) => ({
             ...prevOrder,
-            [field]: value,
+            Rx: {
+                ...prevOrder.Rx,
+                [field]: value,
+            },
+        }));
+    };
+
+    const handlePrescriptionChange = (index: number, field: keyof Prescription, value: string) => {
+        setRxOrder((prevOrder) => {
+            const newPrescriptions = [...prevOrder.Rx.prescriptions];
+            newPrescriptions[index] = { ...newPrescriptions[index], [field]: value };
+            return {
+                ...prevOrder,
+                Rx: {
+                    ...prevOrder.Rx,
+                    prescriptions: newPrescriptions,
+                },
+            };
+        });
+    };
+
+    const addPrescription = () => {
+        setRxOrder((prevOrder) => ({
+            ...prevOrder,
+            Rx: {
+                ...prevOrder.Rx,
+                prescriptions: [...prevOrder.Rx.prescriptions, { diagnosis: '', medication: '', dosage: '', frequency: '' }],
+            },
+        }));
+    };
+
+    const removePrescription = (index: number) => {
+        setRxOrder((prevOrder) => ({
+            ...prevOrder,
+            Rx: {
+                ...prevOrder.Rx,
+                prescriptions: prevOrder.Rx.prescriptions.filter((_, idx) => idx !== index),
+            },
         }));
     };
 
@@ -49,13 +88,7 @@ export function useRXOrderViewModel(patientId: string, patientName: string, phon
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    email: userSession?.email,
-                    date: new Date().toISOString(),
-                    authorName: `${userSession?.firstName} ${userSession?.lastName}`,
-                    authorID: userSession?.id,
-                    content: rxOrder,
-                }),
+                body: JSON.stringify(rxOrder), // Make sure RxOrder contains prescriptions
             });
 
             if (!response.ok) {
@@ -63,26 +96,35 @@ export function useRXOrderViewModel(patientId: string, patientName: string, phon
             }
 
             const newRxOrder = await response.json();
-            // Handle successful submission (e.g., show success message, reset form, etc.)
+            // Handle successful submission
 
             // Reset the form
-            setrxOrder({
-                patientName: '',
-                phoneNumber: '',
-                age: '',
-                city: '',
-                doctorSpecialty: userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList || DoctorSpecialtyList.NOT_SELECTED,
-                diagnosis: '',
-                prescriptions: [{ medication: '', dosage: '', frequency: '' }],
+            setRxOrder({
+                doctorSpecialization: userSession?.doctorSpecialty || DoctorSpecialties.NOT_SELECTED,
+                prescribingDr: `${userSession?.firstName} ${userSession?.lastName}`,
+                drId: userSession?.id || '',
+                prescribedDate: new Date(),
+                Rx: {
+                    validTill: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+                    prescriptions: [{ diagnosis: '', medication: '', dosage: '', frequency: '' }]
+                }
             });
         } catch (error) {
             console.error('Failed to publish RX form:', error);
-            // Handle error (e.g., show error message)
         } finally {
             setIsLoading(false);
         }
-        console.log(rxOrder)
     };
 
-    return { rxOrder, submitRxOrder, isLoading, handleInputChange };
+    return {
+        rxOrder,
+        submitRxOrder,
+        isLoading,
+        handleInputChange,
+        handlePrescriptionChange,
+        addPrescription,
+        removePrescription,
+        patientInfo,
+        patientViewModel
+    };
 }

@@ -35,7 +35,7 @@ export default function RXOrderView({ patientId, user }: RXOrderViewProps) {
 
     return (
         <div className="space-y-6 max-w-2xl mx-auto bg-orange-950">
-            <fieldset className="border rounded-lg p-6 bg-white shadow-sm">
+            <fieldset className="border rounded-lg bg-white shadow-sm">
                 <legend className="text-lg font-semibold px-2 bg-orange-950 text-white rounded-lg">Prescriber and Patient Details</legend>
                 <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">

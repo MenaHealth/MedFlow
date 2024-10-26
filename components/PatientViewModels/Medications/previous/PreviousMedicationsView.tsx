@@ -23,7 +23,7 @@ export default function PreviousMedicationsView() {
                     <ul className="list-none m-2">
                         {rxOrders.map((rxOrder) => (
                             <li key={rxOrder._id}
-                                className="text-white border-white border-2 p-4 m-4 rounded-lg">
+                                className="text-white border-white border-t-2 border-l-2 p-4 m-4 rounded-lg">
                                 <div className="flex justify-between">
                                     <div>
                                         <h3 className="border-white border-2 p-2 text-white">RX: <strong>{rxOrder.medication}</strong></h3>

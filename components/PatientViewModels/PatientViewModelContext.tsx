@@ -7,7 +7,7 @@ import { useSession } from 'next-auth/react';
 import { PatientInfoViewModel } from "./patient-info/PatientInfoViewModel";
 import { IPatient } from '../../models/patient';
 import { INote } from '../../models/note';
-import { IRxOrder } from '../../models/rxOrders';
+import { IRxOrder } from '../../models/patient';
 import { IMedOrders } from '../../models/medOrders';
 
 interface PatientInfo {
@@ -173,6 +173,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             setLoadingMedications(false);
         }
         console.log("format patient info", patientId);
+        console.log("format rx orders", rxOrders);
     }, [patientId, formatPatientInfo, formatPreviousNotes]);
 
     useEffect(() => {

@@ -5,11 +5,25 @@ import { INote, noteSchema } from './note';
 import {IMedOrders, medOrdersSchema} from "./medOrders";
 
 
-  interface Prescription {
-    medName: string;
-    medDosage: string;
-    medFrequency: string;
-  }
+export interface IRxOrder {
+  doctorSpecialization: string;
+  prescribingDr: string;
+  drId: string;
+  prescribedDate: string; // assuming this is a date string, adjust if necessary
+  prescriptions: {
+    validTill: string;
+    city: string;
+    validated: boolean;
+    prescription: {
+      diagnosis: string;
+      medication: string;
+      dosage: string;
+      frequency: string;
+      _id: string;
+    }[];
+  };
+  _id: string;
+}
 
 export interface IPatient extends Document {
   files?: any[];
@@ -62,7 +76,6 @@ export interface IPatient extends Document {
   updatedAt?: Date;
 }
 
-  // models/patient.ts
 
 const PatientSchema = new Schema<IPatient>({
   files: [{ type: Object }],

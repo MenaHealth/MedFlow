@@ -2,31 +2,20 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { ScrollArea } from '../../../form/ScrollArea';
-import { IMedOrders } from './../../../../models/medOrders'; // Import medOrders interface
-import { IRxOrder } from './../../../../models/rxOrders'; // Import RxOrders interface
+import { IMedOrders } from '../../../../models/medOrders';
+import { IRxOrder } from '../../../../models/patient';
+import { usePreviousMedicationsViewModel } from './PreviousMedicationsViewModel';
 
-// Define props interface for PreviousMedicationsView
-interface PreviousMedicationsViewProps {
-    rxOrders: IRxOrder[];
-    medOrders: IMedOrders[];
-    loadingMedications: boolean;
-}
-
-export default function PreviousMedicationsView({
-                                                    rxOrders,
-                                                    medOrders,
-                                                    loadingMedications,
-                                                }: PreviousMedicationsViewProps) {
+export default function PreviousMedicationsView() {
+    const { rxOrders, medOrders, loadingMedications } = usePreviousMedicationsViewModel();
     const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
     if (loadingMedications) return <p>Loading medications...</p>;
 
     const toggleItemExpansion = (itemId: string) => {
-        if (expandedItems.includes(itemId)) {
-            setExpandedItems(expandedItems.filter((id) => id !== itemId));
-        } else {
-            setExpandedItems([...expandedItems, itemId]);
-        }
+        setExpandedItems(prev =>
+            prev.includes(itemId) ? prev.filter(id => id !== itemId) : [...prev, itemId]
+        );
     };
 
     return (
@@ -58,12 +47,9 @@ export default function PreviousMedicationsView({
                             <li key={medOrder._id} className="p-4 border-b border-white border-2 rounded-lg">
                                 <div className="flex justify-between items-center text-white">
                                     <div>
-                                        <h3 className="border-2 text-white">Medical
-                                            Order: <strong>{medOrder.content.medications}
-                                                </strong></h3>
+                                        <h3 className="border-2 text-white">Medical Order: <strong>{medOrder.content.medications}</strong></h3>
                                         <p>{new Date(medOrder.date).toLocaleDateString()}</p>
-                                        <h4 className="text-white">Ordered by: <strong>{medOrder.authorName}</strong>
-                                        </h4>
+                                        <h4 className="text-white">Ordered by: <strong>{medOrder.authorName}</strong></h4>
                                     </div>
                                     <button onClick={() => toggleItemExpansion(medOrder._id)} className="text-white">
                                         {expandedItems.includes(medOrder._id) ? <ChevronUp /> : <ChevronDown />}
@@ -82,8 +68,8 @@ export default function PreviousMedicationsView({
                     <div className="mt-2 border-white border-2 text-white rounded-lg m-4 p-4 text-center">
                         <p><strong>No previous medications</strong> for this patient.</p>
                     </div>
-                        )}
-                    </ScrollArea>
-                    </div>
-                    );
-                }
+                )}
+            </ScrollArea>
+        </div>
+    );
+}

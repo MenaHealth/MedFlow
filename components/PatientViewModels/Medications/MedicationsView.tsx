@@ -41,17 +41,13 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
         isLoading: rxLoading,
     } = useRXOrderViewModel(
         patientId,
-        patientDetails.patientName || '',
-        expandedDetails.phone || '',
-        expandedDetails.age || '',
-        expandedDetails.city || ''
     );
 
     const {
         medOrder,
         submitMedOrder,
         isLoading: medLoading,
-    } = useMedOrderRequestViewModel(patientId);
+    } = useMedOrderRequestViewModel(patientId, patientDetails.patientName, expandedDetails.city );
 
     const [previousMedicationsWidth, setPreviousMedicationsWidth] = useState(400);
     const [templateType, setTemplateType] = useState<'rxOrder' | 'medicalrequest'>('rxOrder');

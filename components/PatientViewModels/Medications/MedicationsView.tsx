@@ -107,7 +107,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                         <Card className="h-full">
                             <ScrollArea className="h-full w-full bg-orange-950">
                                 <CardHeader className="px-4 py-2">
-                                    <h3 className="text-lg font-semibold border-white border-2 text-white text-center rounded-lg p-2">Previous Medications</h3>
+                                    <h3 className="text-lg font-semibold bg-gradient-to-b from-orange-900 to-orange-950 text-white text-center rounded-lg p-2">Previous Medications</h3>
                                 </CardHeader>
                                 <CardContent className="h-full p-0">
                                     <PreviousMedicationsView
@@ -122,11 +122,11 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
 
                     <Card className="md:hidden w-full">
                         <CardHeader
-                            className="px-4 py-2 flex justify-between items-center cursor-pointer"
+                            className="px-4 py-2 flex justify-between items-center cursor-pointer bg-gradient-to-b from-orange-900 to-orange-950"
                             onClick={() => setIsExpanded(!isExpanded)}
                         >
-                            <h3 className="text-lg font-semibold text-center">Previous Medications</h3>
-                            {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                            <h3 className="text-lg font-semibold text-center text-white">Previous Medications</h3>
+                            {isExpanded ? <ChevronUp className="h-5 w-5 text-white" /> : <ChevronDown className="h-5 w-5 text-white" />}
                         </CardHeader>
                         <div className={`overflow-hidden transition-all duration-300 ${isExpanded ? 'max-h-[50vh]' : 'max-h-0'}`}>
                             <ScrollArea className="h-[50vh] w-full">

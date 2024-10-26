@@ -11,13 +11,14 @@ export function usePreviousMedicationsViewModel() {
     const formatRxOrders = (orders: IRxOrder[]): IRxOrder[] => {
         return orders.map(order => ({
             ...order,
-            content: {
-                medication: order.prescriptions.prescription[0]?.medication || '',
-                dosage: order.prescriptions.prescription[0]?.dosage || '',
-                frequency: order.prescriptions.prescription[0]?.frequency || '',
-            },
+            medication: order.prescriptions.prescription[0]?.medication || '',
+            dosage: order.prescriptions.prescription[0]?.dosage || '',
+            frequency: order.prescriptions.prescription[0]?.frequency || '',
             date: order.prescribedDate,
             authorName: order.prescribingDr,
+            city: order.prescriptions.city,
+            validTill: order.prescriptions.validTill,
+            validated: order.prescriptions.validated,
         }));
     };
 

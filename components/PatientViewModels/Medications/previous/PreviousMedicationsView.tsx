@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, Share } from 'lucide-react';
 import { ScrollArea } from '../../../form/ScrollArea';
 import { usePreviousMedicationsViewModel } from './PreviousMedicationsViewModel';
+import RxOrderDrawer from './../rx/RxOrderDrawer'
+
 
 export default function PreviousMedicationsView() {
     const { rxOrders, medOrders, loadingMedications } = usePreviousMedicationsViewModel();
     const [expandedItems, setExpandedItems] = useState<string[]>([]);
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const [selectedRxOrder, setSelectedRxOrder] = useState<RxOrder | null>(null);
+
 
     if (loadingMedications) return <p>Loading medications...</p>;
 
@@ -13,6 +18,11 @@ export default function PreviousMedicationsView() {
         setExpandedItems(prev =>
             prev.includes(itemId) ? prev.filter(id => id !== itemId) : [...prev, itemId]
         );
+    };
+
+    const handleOpenDrawer = (rxOrder: RxOrder) => {
+        setSelectedRxOrder(rxOrder);
+        setIsDrawerOpen(true);
     };
 
     return (
@@ -29,9 +39,14 @@ export default function PreviousMedicationsView() {
                                         <p>{new Date(rxOrder.date).toLocaleDateString()}</p>
                                         <h4 className="text-center">Dr. {rxOrder.prescribingDr}</h4>
                                     </div>
-                                    <button onClick={() => toggleItemExpansion(rxOrder._id)} className="text-white">
-                                        {expandedItems.includes(rxOrder._id) ? <ChevronUp/> : <ChevronDown/>}
-                                    </button>
+                                    <div className="flex items-center">
+                                        <button onClick={(e) => { e.preventDefault(); toggleItemExpansion(rxOrder._id); }} className="text-white">
+                                            {expandedItems.includes(rxOrder._id) ? <ChevronUp /> : <ChevronDown />}
+                                        </button>
+                                        <button onClick={(e) => { e.preventDefault(); handleOpenDrawer(rxOrder); }} className="text-white ml-2">
+                                            <Share />
+                                        </button>
+                                    </div>
                                 </div>
                                 {expandedItems.includes(rxOrder._id) && (
                                     <div className="mt-2 p-2 bg-white text-darkBlue rounded-sm">
@@ -57,6 +72,12 @@ export default function PreviousMedicationsView() {
                     </div>
                 )}
             </ScrollArea>
+
+            <RxOrderDrawer
+                isOpen={isDrawerOpen}
+                onClose={() => setIsDrawerOpen(false)}
+                rxOrder={selectedRxOrder}
+            />
         </div>
     );
 }

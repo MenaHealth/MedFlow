@@ -1,7 +1,7 @@
 // components/PatientViewModels/PatientViewModelContext.tsx
 "use client"
 
-import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
+import React, {createContext, useContext, useState, useCallback, ReactNode, useEffect, useMemo} from 'react';
 import { useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { PatientInfoViewModel } from "./patient-info/PatientInfoViewModel";
@@ -88,7 +88,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
         if (status === 'authenticated' && session?.user) {
             const firstName = session.user.firstName || '';
             const lastName = session.user.lastName || '';
-            const userId = session.user._id || ''; // Check if this field is being populated properly
+            const userId = session.user._id || '';
 
             setUserSession({
                 id: userId,
@@ -114,6 +114,8 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
     }, [session, status]);
 
 
+    const memoizedUserSession = useMemo(() => userSession, [userSession]);
+
     const toggleExpand = () => setIsExpanded(prev => !prev);
 
     const formatPatientInfo = useCallback((patientData: IPatient) => {
@@ -129,24 +131,23 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
         setPatientViewModel(new PatientInfoViewModel(patientData));
     }, []);
 
-    // PatientViewModelContext.tsx
+    const memoizedPatientInfo = useMemo(() => patientInfo, [patientInfo]);
 
     const formatPreviousNotes = useCallback((notesData: INote[]) => {
         if (Array.isArray(notesData)) {
-            // Convert the Mongoose documents to plain objects while preserving the type
             const formattedNotes = notesData.map((note) => {
                 const plainNote = note.toObject ? note.toObject() : note;
                 return {
                     ...plainNote,
                     title: plainNote.noteType,
-                    patientName: patientInfo?.patientName || '',
+                    patientName: memoizedPatientInfo?.patientName || '',
                 } as INote;
             });
             setNotes(formattedNotes);
         } else {
             setNotes([]);
         }
-    }, [patientInfo?.patientName]);
+    }, [memoizedPatientInfo?.patientName]);
 
     const fetchPatientData = useCallback(async () => {
         setLoadingPatientInfo(true);
@@ -163,37 +164,32 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             } else {
                 setNotes([]);
             }
-            // Set rxOrders and medOrders in the state and log them for debugging
             setrxOrders(data.rxOrders || []);
             setmedOrders(data.medOrders || []);
-            console.log("RX Orders:", data.rxOrders);
-            console.log("Med Orders:", data.medOrders);
         } catch (error) {
             console.error('Error fetching patient data:', error);
         } finally {
             setLoadingPatientInfo(false);
             setLoadingMedications(false);
         }
-        console.log("format patient info", patientId);
-        console.log("format rx orders", rxOrders);
     }, [patientId, formatPatientInfo, formatPreviousNotes]);
 
     useEffect(() => {
         if (patientId) {
             fetchPatientData();
         }
-        console.log('Patient ID:', patientId);
     }, [patientId, fetchPatientData]);
 
     const refreshPatientNotes = () => fetchPatientData();
     const refreshMedications = () => fetchPatientData();
+
 
     return (
         <PatientViewModelContext.Provider
             value={{
                 activeTab,
                 setActiveTab,
-                patientInfo,
+                patientInfo: memoizedPatientInfo,
                 notes,
                 loadingPatientInfo,
                 loadingNotes,
@@ -202,7 +198,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 isExpanded,
                 toggleExpand,
                 refreshPatientNotes,
-                userSession,
+                userSession: memoizedUserSession,
                 authorName,
                 authorID,
                 rxOrders,

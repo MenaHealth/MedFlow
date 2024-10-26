@@ -12,6 +12,7 @@ import { IMedOrders } from '../../models/medOrders';
 
 interface PatientInfo {
     patientName: string;
+    city: string;
     age: string;
     gender: string;
     dob: Date;
@@ -119,6 +120,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
         setPatientInfo({
             patientName: `${patientData.firstName} ${patientData.lastName}`,
             age: patientData.age || '',
+            city: patientData.city || '',
             gender: patientData.genderPreference || '',
             dob: new Date(patientData.dob || Date.now()),
             phoneNumber: patientData.phone || '',

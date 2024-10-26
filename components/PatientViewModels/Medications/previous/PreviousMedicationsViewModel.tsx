@@ -1,6 +1,5 @@
 import { usePatientDashboard } from '../../PatientViewModelContext';
 import { IRxOrder } from '../../../../models/patient';
-import { IMedOrders } from '../../../../models/medOrders';
 
 export function usePreviousMedicationsViewModel() {
     const { rxOrders, medOrders, loadingMedications } = usePatientDashboard();
@@ -11,13 +10,17 @@ export function usePreviousMedicationsViewModel() {
     const formatRxOrders = (orders: IRxOrder[]): IRxOrder[] => {
         return orders.map(order => ({
             ...order,
-            medication: order.prescriptions.prescription[0]?.medication || '',
-            dosage: order.prescriptions.prescription[0]?.dosage || '',
-            frequency: order.prescriptions.prescription[0]?.frequency || '',
+            prescribingDr: order.prescribingDr,
+            doctorSpecialization: order.doctorSpecialization,
             date: order.prescribedDate,
-            authorName: order.prescribingDr,
-            city: order.prescriptions.city,
             validTill: order.prescriptions.validTill,
+            city: order.prescriptions.city,
+            prescriptions: order.prescriptions.prescription.map(prescription => ({
+                diagnosis: prescription.diagnosis,
+                medication: prescription.medication,
+                dosage: prescription.dosage,
+                frequency: prescription.frequency,
+            })),
             validated: order.prescriptions.validated,
         }));
     };

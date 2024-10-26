@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { ScrollArea } from '../../../form/ScrollArea';
-import { IMedOrders } from '../../../../models/medOrders';
 import { usePreviousMedicationsViewModel } from './PreviousMedicationsViewModel';
 
 export default function PreviousMedicationsView() {
@@ -26,9 +25,9 @@ export default function PreviousMedicationsView() {
                                 className="text-white border-white border-t-2 border-l-2 p-4 m-4 rounded-lg">
                                 <div className="flex justify-between">
                                     <div>
-                                        <h3 className="border-white border-2 p-2 text-white">RX: <strong>{rxOrder.medication}</strong></h3>
+                                        <h3 className="border-white border-2 p-2 text-white">Rx Order</h3>
                                         <p>{new Date(rxOrder.date).toLocaleDateString()}</p>
-                                        <h4 className="text-center">Dr. {rxOrder.authorName}</h4>
+                                        <h4 className="text-center">Dr. {rxOrder.prescribingDr}</h4>
                                     </div>
                                     <button onClick={() => toggleItemExpansion(rxOrder._id)} className="text-white">
                                         {expandedItems.includes(rxOrder._id) ? <ChevronUp/> : <ChevronDown/>}
@@ -36,34 +35,17 @@ export default function PreviousMedicationsView() {
                                 </div>
                                 {expandedItems.includes(rxOrder._id) && (
                                     <div className="mt-2 p-2 bg-white text-darkBlue rounded-sm">
-                                        <p><strong>Medication:</strong> {rxOrder.medication}</p>
-                                        <p><strong>Dosage:</strong> {rxOrder.dosage}</p>
-                                        <p><strong>Frequency:</strong> {rxOrder.frequency}</p>
                                         <p><strong>City:</strong> {rxOrder.city}</p>
-                                        <p><strong>Valid
-                                            Till:</strong> {new Date(rxOrder.validTill).toLocaleDateString()}</p>
-                                    </div>
-                                )}
-                            </li>
-                        ))}
-                        {medOrders.map((medOrder) => (
-                            <li key={medOrder._id} className="p-4 border-b border-white border-2 rounded-lg">
-                                <div className="flex justify-between items-center text-white">
-                                    <div>
-                                        <h3 className="border-2 text-white">Medical
-                                            Order: <strong>{medOrder.content.medications}</strong></h3>
-                                        <p>{new Date(medOrder.date).toLocaleDateString()}</p>
-                                        <h4 className="text-white">Ordered by: <strong>{medOrder.authorName}</strong>
-                                        </h4>
-                                    </div>
-                                    <button onClick={() => toggleItemExpansion(medOrder._id)} className="text-white">
-                                        {expandedItems.includes(medOrder._id) ? <ChevronUp/> : <ChevronDown/>}
-                                    </button>
-                                </div>
-                                {expandedItems.includes(medOrder._id) && (
-                                    <div className="mt-2 bg-white text-darkBlue">
-                                        <p><strong>Dosage:</strong> {medOrder.content.dosage}</p>
-                                        <p><strong>Frequency:</strong> {medOrder.content.frequency}</p>
+                                        <p><strong>Valid Till:</strong> {new Date(rxOrder.validTill).toLocaleDateString()}</p>
+                                        <h4 className="mt-2 font-bold">Prescriptions:</h4>
+                                        {rxOrder.prescriptions.map((prescription, index) => (
+                                            <div key={index} className="mt-2 p-2 bg-gray-100 rounded-sm">
+                                                <p><strong>Diagnosis:</strong> {prescription.diagnosis}</p>
+                                                <p><strong>Medication:</strong> {prescription.medication}</p>
+                                                <p><strong>Dosage:</strong> {prescription.dosage}</p>
+                                                <p><strong>Frequency:</strong> {prescription.frequency}</p>
+                                            </div>
+                                        ))}
                                     </div>
                                 )}
                             </li>

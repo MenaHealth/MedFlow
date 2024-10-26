@@ -16,7 +16,7 @@ interface User {
 interface RXOrderViewProps {
     user: User;
     patientId: string;
-    patientInfo: { // Directly receive patient info as props
+    patientInfo: { //
         patientName: string;
         phoneNumber: string;
         age: string;
@@ -67,8 +67,8 @@ export default function RXOrderView({ patientId, user }: RXOrderViewProps) {
                     <div className="grid grid-cols-2 gap-4">
                         <TextFormField
                             fieldName="phoneNumber"
+                            fieldLabel="phone"
                             value={patientInfo.phoneNumber} // Use patientInfo prop directly
-                            value={expandedDetails?.phone || ''}
                             readOnly={true}
                         />
                         <TextFormField
@@ -81,7 +81,7 @@ export default function RXOrderView({ patientId, user }: RXOrderViewProps) {
                     <TextFormField
                         fieldName="city"
                         fieldLabel="City"
-                        value={patientInfo.city} // Use patientInfo prop directly
+                        value={patientInfo.city}
                         readOnly={true}
                     />
                 </div>

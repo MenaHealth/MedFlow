@@ -6,23 +6,22 @@ import {IMedOrders, medOrdersSchema} from "./medOrders";
 
 
 export interface IRxOrder {
-  doctorSpecialization: string;
-  prescribingDr: string;
-  drId: string;
-  prescribedDate: string; // assuming this is a date string, adjust if necessary
-  prescriptions: {
-    validTill: string;
-    city: string;
-    validated: boolean;
-    prescription: {
-      diagnosis: string;
-      medication: string;
-      dosage: string;
-      frequency: string;
-      _id: string;
-    }[];
-  };
-  _id: string;
+  orders: {}
+    doctorSpecialization: string;
+    prescribingDr: string;
+    drId: string;
+    prescribedDate: string; // assuming this is a date string, adjust if necessary
+    prescriptions: {
+      validTill: string;
+      city: string;
+      validated: boolean;
+      prescription: {
+        diagnosis: string;
+        medication: string;
+        dosage: string;
+        frequency: string;
+      }[];
+    };
 }
 
 export interface IPatient extends Document {

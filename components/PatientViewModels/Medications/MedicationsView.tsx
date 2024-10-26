@@ -80,11 +80,11 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
         }
     };
 
-    useEffect(() => {
-        if (!rxOrders.length && !medOrders.length && !loadingMedications && patientId) {
-            fetchPatientData();
-        }
-    }, [patientId, fetchPatientData]);
+    // useEffect(() => {
+    //     if (!rxOrders.length && !medOrders.length && !loadingMedications && patientId) {
+    //         fetchPatientData();
+    //     }
+    // }, [patientId, fetchPatientData]);
 
     if (loadingMedications) {
         return (
@@ -125,7 +125,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
 
                     <Card className="md:hidden w-full">
                         <CardHeader
-                            className="border-t-2 border-b-2 rounded-lg border-white px-4 py-2 flex items-center cursor-pointer bg-orange-950 gap-x-2"
+                            className="pr-2 pl-2 border-b-2 rounded-lg border-white px-4 py-2 flex items-center bg-orange-950"
                             onClick={() => setIsExpanded(!isExpanded)}
                         >
                             <div className="flex items-center gap-x-2">

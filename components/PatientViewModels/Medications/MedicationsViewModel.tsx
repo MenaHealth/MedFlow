@@ -1,13 +1,12 @@
 // components/PatientViewModels/Medications/MedicationsViewModel.tsx
 
 import { useState } from 'react';
-import { usePatientDashboard } from "../PatientViewModelContext";
+import { usePatientDashboard } from "../PatientView*ModelContext";
 import { IRxOrder } from '../../../models/patient';
 import { IMedOrders } from '../../../models/medOrders';
 import { DoctorSpecialtyList } from '../../../data/doctorSpecialty.enum';
 
 export function useMedicationsViewModel(patientId: string) {
-    // Get necessary data from the context
     const { userSession, rxOrders, medOrders, loadingMedications, patientInfo } = usePatientDashboard();
 
     const [templateType, setTemplateType] = useState<'rxOrder' | 'medicalrequest'>('rxOrder');
@@ -21,9 +20,9 @@ export function useMedicationsViewModel(patientId: string) {
         prescriptions: {
             validTill: new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString(),
             city: patientInfo?.city || '',
-            prescriptions: [{ diagnosis: '', medication: '', dosage: '', frequency: '' }],
+            validated: false,
+            prescription: [{ diagnosis: '', medication: '', dosage: '', frequency: '' }],
         },
-        validated: false,
     });
 
     const [medicalOrder, setMedicalOrder] = useState<IMedOrders>({

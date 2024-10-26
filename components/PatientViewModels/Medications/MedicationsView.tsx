@@ -1,7 +1,8 @@
 // components/PatientViewModels/Medications/MedicationsView.tsx
+
 import React, { useEffect, useState } from 'react';
 import { useForm, FormProvider } from "react-hook-form";
-import { IRxOrder } from './../../../models/rxOrders'; // Import the IRxOrder type
+import { IRxOrder } from './../../../models/rxOrders';
 import { Button } from './../../../components/ui/button';
 import { Card, CardContent, CardHeader } from './../../../components/ui/card';
 import { RadioCard } from './../../../components/ui/radio-card';
@@ -29,8 +30,8 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
         fetchPatientData,
         patientViewModel,
     } = usePatientDashboard();
+    const { patientInfo } = usePatientDashboard();
 
-    // Extract the required data for the hook
     const patientDetails = patientViewModel?.getPrimaryDetails() || { patientName: '', patientID: '' };
     const expandedDetails = patientViewModel?.getExpandedDetails() || { phone: '', age: '', city: '' };
 
@@ -96,7 +97,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
     return (
         <FormProvider {...methods}>
             <form onSubmit={methods.handleSubmit(handleCreateMedication)}>
-                <div className="flex flex-col md:flex-row h-[100vh]  overflow-hidden">
+                <div className="flex flex-col md:flex-row h-[100vh] overflow-hidden">
                     <Resizable
                         className="hidden md:block"
                         minWidth={200}
@@ -107,8 +108,9 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                         <Card className="h-full">
                             <ScrollArea className="h-full w-full bg-orange-950">
                                 <CardHeader className="px-4 py-2">
-                                    <h3 className="text-lg font-semibold bg-orange-950 text-white text-center rounded-lg p-2 border-b-2 border-white">Previous
-                                        Medications</h3>
+                                    <h3 className="text-lg font-semibold bg-orange-950 text-white text-center rounded-lg p-2 border-b-2 border-white">
+                                        Previous Medications
+                                    </h3>
                                 </CardHeader>
                                 <CardContent className="h-full p-0">
                                     <PreviousMedicationsView
@@ -170,22 +172,23 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                         <CardContent className="h-full p-0">
                             <ScrollArea className="h-full w-full pb-16 bg-orange-950">
                                 <div className="mt-4 p-4">
-                                    {templateType === 'rxOrder' ? (
+                                    {templateType === 'rxOrder' && patientInfo && (
                                         <RXOrderView
-                                            patientId={patientId}
                                             user={{
                                                 firstName: userSession?.firstName || '',
                                                 lastName: userSession?.lastName || '',
-                                                doctorSpecialty: userSession?.doctorSpecialty ?? 'NOT_SELECTED',
+                                                doctorSpecialty: userSession?.doctorSpecialty ?? 'Not Selected',
                                             }}
-                                            patientDetails={patientDetails || { patientName: '' }}
-                                            expandedDetails={{
-                                                phone: expandedDetails?.phone ?? '',
-                                                age: expandedDetails?.age ?? '',
-                                                city: expandedDetails?.city ?? '',
+                                            patientId={patientId}
+                                            patientInfo={{
+                                                patientName: patientInfo.patientName,
+                                                phoneNumber: patientInfo.phoneNumber,
+                                                age: patientInfo.age,
+                                                city: patientInfo.city,
                                             }}
                                         />
-                                    ) : (
+                                    )}
+                                    {templateType === 'medicalrequest' && (
                                         <MedOrderView
                                             patientId={patientId}
                                             user={{
@@ -195,7 +198,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                             }}
                                             patientDetails={patientDetails}
                                             expandedDetails={{
-                                                phone: expandedDetails?.phone ?? '',
+                                                phone: expandedDetails.phone,
                                             }}
                                         />
                                     )}

@@ -2,13 +2,22 @@
 
 import * as React from "react"
 import { Drawer as DrawerPrimitive } from "vaul"
+import { X } from "lucide-react"
 
 import { cn } from "../../utils/classNames";
+import { ScrollArea } from "./../../components/form/ScrollArea";
+
+type DrawerDirection = 'left' | 'right' | 'top' | 'bottom';
+
+interface DrawerProps extends React.ComponentProps<typeof DrawerPrimitive.Root> {
+    direction?: DrawerDirection;
+}
 
 const Drawer = ({
                     shouldScaleBackground = true,
+                    direction = 'bottom',
                     ...props
-                }: React.ComponentProps<typeof DrawerPrimitive.Root>) => (
+                }: DrawerProps) => (
     <DrawerPrimitive.Root
         shouldScaleBackground={shouldScaleBackground}
         {...props}
@@ -28,38 +37,76 @@ const DrawerOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <DrawerPrimitive.Overlay
         ref={ref}
-        className={cn("fixed inset-0 z-50 bg-black/80", className || '')}
+        className={cn("fixed inset-0 z-50 bg-black/80", className)}
         {...props}
     />
 ))
 DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName
 
+interface DrawerContentProps extends React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content> {
+    direction?: DrawerDirection;
+    size?: string;
+}
+
 const DrawerContent = React.forwardRef<
     React.ElementRef<typeof DrawerPrimitive.Content>,
-    React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content>
->(({ className, children, ...props }, ref) => (
-    <DrawerPortal>
-        <DrawerOverlay />
-        <DrawerPrimitive.Content
-            ref={ref}
-            className={cn(
-                "fixed inset-x-0 top-0 z-50 h-full max-h-[96%] border-b bg-background p-6 shadow-lg transition-transform duration-300 ease-in-out data-[state=open]:translate-y-0 data-[state=closed]:translate-y-[-100%]",
-                className || ''
-            )}
-            {...props}
-        >
-            {children}
-        </DrawerPrimitive.Content>
-    </DrawerPortal>
-))
-DrawerContent.displayName = "DrawerContent"
+    DrawerContentProps
+>(({ className, children, direction = 'bottom', size = '100%', ...props }, ref) => {
+    const sizeValue = size.endsWith('%') ? size : `${size}px`;
+    const directionStyles = {
+        left: `left-0 h-full max-w-[${sizeValue}] border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left`,
+        right: `right-0 h-full max-w-[${sizeValue}] border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right`,
+        top: `top-0 w-full max-h-[${sizeValue}] border-b data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top`,
+        bottom: `bottom-0 w-full max-h-[${sizeValue}] border-t data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom`
+    };
+
+    return (
+        <DrawerPortal>
+            <DrawerOverlay />
+            <DrawerPrimitive.Content
+                ref={ref}
+                className={cn(
+                    "fixed z-50 scale-100 bg-background opacity-100 shadow-lg flex flex-col",
+                    directionStyles[direction],
+                    className
+                )}
+                style={{
+                    height: ['top', 'bottom'].includes(direction) ? sizeValue : '100%',
+                    width: ['left', 'right'].includes(direction) ? sizeValue : '100%',
+                }}
+                {...props}
+            >
+                <div className="flex flex-col h-full overflow-hidden">
+                    <DrawerHeader className="flex-shrink-0">
+                        <DrawerTitle className="text-2xl font-bold mb-6">Prescription Details</DrawerTitle>
+                        <DrawerPrimitive.Close className="mr-3 absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
+                            <X className="hover:bg-primary hover:text-secondary h-8 w-8" />
+                            <span className="sr-only">Close</span>
+                        </DrawerPrimitive.Close>
+                    </DrawerHeader>
+
+                    <ScrollArea className="flex-grow overflow-auto">
+                        <div className="p-6">
+                            {children}
+                        </div>
+                    </ScrollArea>
+
+                    <DrawerFooter className="flex-shrink-0 md:hidden">
+                        {/* Footer content here */}
+                    </DrawerFooter>
+                </div>
+            </DrawerPrimitive.Content>
+        </DrawerPortal>
+    )
+});
+DrawerContent.displayName = "DrawerContent";
 
 const DrawerHeader = ({
                           className,
                           ...props
                       }: React.HTMLAttributes<HTMLDivElement>) => (
     <div
-        className={cn("flex flex-col space-y-2 text-center sm:text-left", className || '')}
+        className={cn("relative px-6 py-4", className)}
         {...props}
     />
 )
@@ -70,7 +117,7 @@ const DrawerFooter = ({
                           ...props
                       }: React.HTMLAttributes<HTMLDivElement>) => (
     <div
-        className={cn("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2", className || '')}
+        className={cn("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 px-6 py-4", className)}
         {...props}
     />
 )
@@ -82,7 +129,7 @@ const DrawerTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <DrawerPrimitive.Title
         ref={ref}
-        className={cn("text-lg font-semibold text-foreground", className || '')}
+        className={cn("text-lg font-semibold text-foreground", className)}
         {...props}
     />
 ))
@@ -94,7 +141,7 @@ const DrawerDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <DrawerPrimitive.Description
         ref={ref}
-        className={cn("text-sm text-muted-foreground", className || '')}
+        className={cn("text-sm text-muted-foreground", className)}
         {...props}
     />
 ))

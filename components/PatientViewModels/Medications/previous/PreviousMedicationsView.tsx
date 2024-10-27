@@ -35,20 +35,28 @@ export default function PreviousMedicationsView() {
                                 className="text-white border-white border-t-2 border-l-2 p-4 m-4 rounded-lg">
                                 <div className="flex justify-between">
                                     <div>
-                                        <h3 className="border-white border-2 p-2 text-white">Rx Order</h3>
-                                        <p>{new Date(rxOrder.date).toLocaleDateString()}</p>
-                                        <h4 className="text-center">Dr. {rxOrder.prescribingDr}</h4>
+                                        <div className="flex items-center">
+                                            <button onClick={(e) => {
+                                                e.preventDefault();
+                                                toggleItemExpansion(rxOrder._id);
+                                            }} className="text-white">
+                                                {expandedItems.includes(rxOrder._id) ? <ChevronUp/> : <ChevronDown/>}
+                                            </button>
+                                        </div>
+                                            <h3 className="border-white border-2 p-2 text-white">Rx Order</h3>
+                                            <p>{new Date(rxOrder.date).toLocaleDateString()}</p>
+                                            <h4 className="text-center">Dr. {rxOrder.prescribingDr}</h4>
+                                        </div>
+                                        <div className="flex items-center">
+                                            <button onClick={(e) => {
+                                                e.preventDefault();
+                                                handleOpenDrawer(rxOrder);
+                                            }} className="text-white ml-2">
+                                                <Share/>
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div className="flex items-center">
-                                        <button onClick={(e) => { e.preventDefault(); toggleItemExpansion(rxOrder._id); }} className="text-white">
-                                            {expandedItems.includes(rxOrder._id) ? <ChevronUp /> : <ChevronDown />}
-                                        </button>
-                                        <button onClick={(e) => { e.preventDefault(); handleOpenDrawer(rxOrder); }} className="text-white ml-2">
-                                            <Share />
-                                        </button>
-                                    </div>
-                                </div>
-                                {expandedItems.includes(rxOrder._id) && (
+                                    {expandedItems.includes(rxOrder._id) && (
                                     <div className="mt-2 p-2 bg-white text-darkBlue rounded-sm">
                                         <p><strong>City:</strong> {rxOrder.city}</p>
                                         <p><strong>Valid Till:</strong> {new Date(rxOrder.validTill).toLocaleDateString()}</p>

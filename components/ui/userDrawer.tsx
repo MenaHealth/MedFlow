@@ -37,7 +37,7 @@ export function UserDrawer({ isOpen, setIsOpen, user }: UserDrawerProps) {
 
     return (
         <Drawer open={isOpen} onOpenChange={setIsOpen}>
-            <DrawerContent className="bg-orange-50 text-darkBlue">
+            <DrawerContent direction="right" size="75%" className="bg-orange-50 text-darkBlue">
                 <DrawerHeader className="flex justify-between items-start p-4">
                     <div>
                         <DrawerTitle className="text-2xl font-bold">User Menu</DrawerTitle>
@@ -45,9 +45,6 @@ export function UserDrawer({ isOpen, setIsOpen, user }: UserDrawerProps) {
                             Manage your account and settings
                         </DrawerDescription>
                     </div>
-                    <DrawerClose className="rounded-full hover:bg-orange-100 p-2 absolute top-4 right-4">
-                        <X size={24} />
-                    </DrawerClose>
                 </DrawerHeader>
                 <div className="p-4 space-y-6">
                     <div className="flex items-center space-x-4">

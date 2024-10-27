@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { usePatientDashboard } from './../../../../components/PatientViewModels/PatientViewModelContext';
-import { DoctorSpecialties } from './../../../../data/doctorSpecialty.enum';
 
 interface Prescription {
     diagnosis: string;
@@ -13,6 +12,7 @@ interface RxOrder {
     doctorSpecialization: string;
     prescribingDr: string;
     drId: string;
+    drEmail: string;
     prescribedDate: Date;
     prescriptions: {
         validTill: Date;
@@ -24,10 +24,12 @@ interface RxOrder {
 
 export function useRXOrderViewModel(patientId: string) {
     const { userSession, patientInfo, patientViewModel } = usePatientDashboard();
+    console.log("User session email:", userSession?.email);
 
     const [rxOrder, setRxOrder] = useState<RxOrder>({
         doctorSpecialization: userSession?.doctorSpecialty || 'Not Selected',
         prescribingDr: `${userSession?.firstName} ${userSession?.lastName}`,
+        drEmail: userSession?.email || '',
         drId: userSession?.id || '',
         prescribedDate: new Date(),
         prescriptions: {
@@ -109,6 +111,7 @@ export function useRXOrderViewModel(patientId: string) {
                 doctorSpecialization: userSession?.doctorSpecialty || 'Not Selected',
                 prescribingDr: `${userSession?.firstName} ${userSession?.lastName}`,
                 drId: userSession?.id || '',
+                drEmail: userSession?.email || '',
                 prescribedDate: new Date(),
                 prescriptions: {
                     validTill: new Date(new Date().setMonth(new Date().getMonth() + 1)),
@@ -120,6 +123,7 @@ export function useRXOrderViewModel(patientId: string) {
         } catch (error) {
             console.error('Failed to publish RX form:', error);
         } finally {
+            console.log("RX Order before submission:", rxOrder); // Verify structure and values
             setIsLoading(false);
         }
     };

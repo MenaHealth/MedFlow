@@ -53,7 +53,7 @@ const DrawerClose = React.forwardRef<
         )}
         {...props}
     >
-        <div className="bg-gray-200 rounded-full p-2 transition-colors hover:bg-gray-300">
+        <div className="bg-gray-200 rounded-full p-2 transition-colors hover:bg-gray-300 z-50">
             <X className="h-6 w-6" />
         </div>
         <span className="sr-only">Close</span>
@@ -98,7 +98,7 @@ const DrawerContent = React.forwardRef<
                 <div className="flex flex-col h-full overflow-hidden">
                     <DrawerHeader className="flex-shrink-0">
                         {title && <DrawerTitle className="text-2xl font-bold text-center">{title}</DrawerTitle>}
-                        <DrawerClose className="absolute right-4 top-4 rounded-full p-4 text-orange-950 transition-colors hover:bg-orange-100">
+                        <DrawerClose className="z-50 absolute right-4 top-4 rounded-full p-4 text-orange-950 transition-colors hover:bg-orange-100">
                             <X className="h-6 w-6" />
                             <span className="sr-only">Close</span>
                         </DrawerClose>

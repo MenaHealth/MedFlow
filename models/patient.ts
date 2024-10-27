@@ -9,10 +9,11 @@ export interface IRxOrder {
   orders: {}
     doctorSpecialization: string;
     prescribingDr: string;
+    drEmail: string;
     drId: string;
-    prescribedDate: string; // assuming this is a date string, adjust if necessary
+    prescribedDate: string;
     prescriptions: {
-      validTill: string;
+      validTill: Date;
       city: string;
       validated: boolean;
       prescription: {
@@ -112,6 +113,7 @@ const PatientSchema = new Schema<IPatient>({
     Orders: [{
       doctorSpecialization: { type: String, required: true },
       prescribingDr: { type: String, required: true },
+      drEmail: { type: String, required: true },
       drId: { type: String, required: true },
       prescribedDate: { type: Date, default: Date.now },
       prescriptions: {

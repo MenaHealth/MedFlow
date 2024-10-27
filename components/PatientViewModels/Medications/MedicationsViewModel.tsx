@@ -16,6 +16,7 @@ export function useMedicationsViewModel(patientId: string) {
         doctorSpecialization: userSession?.doctorSpecialty || 'Not Selected',
         prescribingDr: `${userSession?.firstName} ${userSession?.lastName}`,
         drId: userSession?.id || '',
+        drEmail: userSession?.email || '',
         prescribedDate: new Date().toISOString(),
         prescriptions: {
             validTill: new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString(),

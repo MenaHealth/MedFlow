@@ -11,6 +11,7 @@ export const POST = async (request: Request, { params }: { params: { id: string 
         const {
             doctorSpecialization,
             prescribingDr,
+            drEmail,
             drId,
             prescriptions
         } = requestData;
@@ -23,6 +24,7 @@ export const POST = async (request: Request, { params }: { params: { id: string 
             doctorSpecialization,
             prescribingDr,
             drId,
+            drEmail,
             prescribedDate: new Date(),
             prescriptions: {
                 validTill: prescriptions.validTill,
@@ -36,6 +38,7 @@ export const POST = async (request: Request, { params }: { params: { id: string 
             },
             validated: false
         };
+        console.log("New RX Order:", newRxOrder);
 
         // Update patient's rxOrders array by adding the new Rx order
         const updatedPatient = await Patient.findByIdAndUpdate(
@@ -47,7 +50,7 @@ export const POST = async (request: Request, { params }: { params: { id: string 
         if (!updatedPatient) {
             return new NextResponse('Failed to update patient record', { status: 500 });
         }
-
+        console.log("Updated Patient after adding RX Order:", updatedPatient);
         return new NextResponse(JSON.stringify(updatedPatient), { status: 201 });
     } catch (error) {
         console.error('Failed to add rx order:', error);

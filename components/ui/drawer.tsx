@@ -29,8 +29,6 @@ const DrawerTrigger = DrawerPrimitive.Trigger
 
 const DrawerPortal = DrawerPrimitive.Portal
 
-const DrawerClose = DrawerPrimitive.Close
-
 const DrawerOverlay = React.forwardRef<
     React.ElementRef<typeof DrawerPrimitive.Overlay>,
     React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Overlay>
@@ -43,15 +41,36 @@ const DrawerOverlay = React.forwardRef<
 ))
 DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName
 
+const DrawerClose = React.forwardRef<
+    React.ElementRef<typeof DrawerPrimitive.Close>,
+    React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Close>
+>(({ className, ...props }, ref) => (
+    <DrawerPrimitive.Close
+        ref={ref}
+        className={cn(
+            "absolute right-4 top-4 rounded-full p-2 text-foreground/50 transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring disabled:pointer-events-none",
+            className
+        )}
+        {...props}
+    >
+        <div className="bg-gray-200 rounded-full p-2 transition-colors hover:bg-gray-300">
+            <X className="h-6 w-6" />
+        </div>
+        <span className="sr-only">Close</span>
+    </DrawerPrimitive.Close>
+))
+DrawerClose.displayName = DrawerPrimitive.Close.displayName
+
 interface DrawerContentProps extends React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content> {
     direction?: DrawerDirection;
     size?: string;
+    title?: string;
 }
 
 const DrawerContent = React.forwardRef<
     React.ElementRef<typeof DrawerPrimitive.Content>,
     DrawerContentProps
->(({ className, children, direction = 'bottom', size = '100%', ...props }, ref) => {
+>(({ className, children, direction = 'bottom', size = '100%', title, ...props }, ref) => {
     const sizeValue = size.endsWith('%') ? size : `${size}px`;
     const directionStyles = {
         left: `left-0 h-full max-w-[${sizeValue}] border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left`,
@@ -78,11 +97,11 @@ const DrawerContent = React.forwardRef<
             >
                 <div className="flex flex-col h-full overflow-hidden">
                     <DrawerHeader className="flex-shrink-0">
-                        <DrawerTitle className="text-2xl font-bold mb-6">Prescription Details</DrawerTitle>
-                        <DrawerPrimitive.Close className="mr-3 absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
-                            <X className="hover:bg-primary hover:text-secondary h-8 w-8" />
+                        {title && <DrawerTitle className="text-2xl font-bold text-center">{title}</DrawerTitle>}
+                        <DrawerClose className="absolute right-4 top-4 rounded-full p-4 text-orange-950 transition-colors hover:bg-orange-100">
+                            <X className="h-6 w-6" />
                             <span className="sr-only">Close</span>
-                        </DrawerPrimitive.Close>
+                        </DrawerClose>
                     </DrawerHeader>
 
                     <ScrollArea className="flex-grow overflow-auto">

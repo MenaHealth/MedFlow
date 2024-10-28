@@ -77,7 +77,7 @@
     allergies?: string;
     notes?: Types.DocumentArray<INote>;
     rxOrders?: string[];
-    medOrders?: string[];
+    medOrders?: Types.ObjectId[];
     visits?: any[];
     triagedBy?: {
       firstName?: string;
@@ -129,7 +129,8 @@
     // Make `rxOrders` optional by removing the required properties and default value
     rxOrders: { type: [rxOrderSchema], required: false },
     // Make `medOrders` optional by removing the default empty array
-    medOrders: { type: [medOrderSchema], required: false },
+
+    medOrders: [{ type: Schema.Types.ObjectId, ref: 'MedOrder', required: false }],
     visits: [{ type: Schema.Types.ObjectId, ref: 'Visit' }],
     triagedBy: { type: Object },
     doctor: { type: Object },

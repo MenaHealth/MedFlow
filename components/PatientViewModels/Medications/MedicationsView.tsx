@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useForm, FormProvider } from "react-hook-form";
-import { IRxOrder } from './../../../models/rxOrders';
+import { IRxOrder } from './../../../models/patient';
 import { Button } from './../../../components/ui/button';
 import { Card, CardContent, CardHeader } from './../../../components/ui/card';
 import { RadioCard } from './../../../components/ui/radio-card';
@@ -13,7 +13,7 @@ import MedOrderView from './../../../components/PatientViewModels/Medications/me
 import PreviousMedicationsView from './previous/PreviousMedicationsView';
 import { Resizable } from './../../../components/ui/Resizable';
 import { useRXOrderViewModel } from './../../../components/PatientViewModels/Medications/rx/RXOrderViewModel';
-import { useMedOrderRequestViewModel } from './../../../components/PatientViewModels/Medications/med/MedOrderViewModel';
+import { useMedOrderViewModel } from './../../../components/PatientViewModels/Medications/med/MedOrderViewModel';
 import { ClipLoader } from 'react-spinners';
 import { usePatientDashboard } from './../../../components/PatientViewModels/PatientViewModelContext';
 
@@ -47,7 +47,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
         medOrder,
         submitMedOrder,
         isLoading: medLoading,
-    } = useMedOrderRequestViewModel(patientId, patientDetails.patientName, expandedDetails.city );
+    } = useMedOrderViewModel(patientId, patientDetails.patientName, expandedDetails.city );
 
     const [previousMedicationsWidth, setPreviousMedicationsWidth] = useState(400);
     const [templateType, setTemplateType] = useState<'rxOrder' | 'medicalrequest'>('rxOrder');

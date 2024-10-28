@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { usePatientDashboard } from "../PatientView*ModelContext";
 import { IRxOrder } from '../../../models/patient';
-import { IMedOrders } from '../../../models/medOrders';
+import { IMedOrder } from '../../../models/medOrder';
 import { DoctorSpecialtyList } from '../../../data/doctorSpecialty.enum';
 
 export function useMedicationsViewModel(patientId: string) {
@@ -26,7 +26,7 @@ export function useMedicationsViewModel(patientId: string) {
         },
     });
 
-    const [medicalOrder, setMedicalOrder] = useState<IMedOrders>({
+    const [medicalOrder, setMedicalOrder] = useState<IMedOrder>({
         doctorSpecialty: (userSession?.doctorSpecialty as DoctorSpecialtyList) || undefined,
         medications: '',
         dosage: '',

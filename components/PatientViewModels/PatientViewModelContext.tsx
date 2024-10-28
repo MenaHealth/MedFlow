@@ -8,7 +8,7 @@ import { PatientInfoViewModel } from "./patient-info/PatientInfoViewModel";
 import { IPatient } from '../../models/patient';
 import { INote } from '../../models/note';
 import { IRxOrder } from '../../models/patient';
-import { IMedOrders } from '../../models/medOrders';
+import { IMedOrder } from '../../models/medOrder';
 
 interface PatientInfo {
     patientName: string;
@@ -52,7 +52,7 @@ interface PatientContext {
     authorName: string;
     authorID: string;
     rxOrders: IRxOrder[];
-    medOrders: IMedOrders[];
+    medOrders: IMedOrder[];
     loadingMedications: boolean;
     refreshMedications: () => Promise<void>;
 }
@@ -81,7 +81,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
     const [authorName, setAuthorName] = useState('');
     const [authorID, setAuthorID] = useState('');
     const [rxOrders, setrxOrders] = useState<IRxOrder[]>([]);
-    const [medOrders, setmedOrders] = useState<IMedOrders[]>([]);
+    const [medOrders, setmedOrders] = useState<IMedOrder[]>([]);
     const [loadingMedications, setLoadingMedications] = useState(false);
 
     useEffect(() => {

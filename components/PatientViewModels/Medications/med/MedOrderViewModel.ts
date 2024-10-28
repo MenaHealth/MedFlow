@@ -1,37 +1,53 @@
 // components/form/Medications/MedOrderViewModel.ts
 
+'use client'
+
 import { useState } from 'react';
-import { usePatientDashboard } from './../../../../components/PatientViewModels/PatientViewModelContext';
-import { DoctorSpecialtyList } from './../../../../data/doctorSpecialty.enum';
+import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewModelContext';
+import { DoctorSpecialtyList } from '@/data/doctorSpecialty.enum';
 
 interface Medication {
+    diagnosis: string;
     medication: string;
     dosage: string;
     frequency: string;
+    quantity: string;
 }
 
 interface MedOrder {
     doctorSpecialty: keyof typeof DoctorSpecialtyList;
-    doctorId: string;
+    prescribingDr: string;
+    drEmail: string;
+    drId: string;
     patientName: string;
-    city: string;
+    patientPhone: string;
+    patientCity: string;
+    patientId: string;
+    orderDate: Date;
+    validated: boolean;
     medications: Medication[];
 }
 
-export function useMedOrderRequestViewModel(patientId: string, patientName: string, city: string) {
-    const { userSession } = usePatientDashboard();
+export function useMedOrderViewModel(patientId: string, patientName: string, city: string) {
+    const { userSession, patientInfo, patientViewModel } = usePatientDashboard();
 
     const [medOrder, setMedOrder] = useState<MedOrder>({
-        patientName,
-        city,
-        medications: [{ medication: '', dosage: '', frequency: '' }],
         doctorSpecialty: userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList || DoctorSpecialtyList.NOT_SELECTED,
-        doctorId: userSession?.id || '',
+        prescribingDr: `${userSession?.firstName} ${userSession?.lastName}`,
+        drEmail: userSession?.email || '',
+        drId: userSession?.id || '',
+        patientName: patientInfo?.patientName || '',
+        patientPhone: patientViewModel?.getExpandedDetails()?.phone || '',
+        patientCity: patientViewModel?.getExpandedDetails()?.city || '',
+        patientId: patientId,
+        orderDate: new Date(),
+        validated: false,
+        medications: [{ diagnosis: '', medication: '', dosage: '', frequency: '', quantity: '' }],
     });
 
-    const [previousMedOrders, setPreviousMedOrders] = useState<MedOrder[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
+    // Handle input changes
     const handleInputChange = (field: keyof MedOrder, value: any) => {
         setMedOrder((prevOrder) => ({
             ...prevOrder,
@@ -39,6 +55,35 @@ export function useMedOrderRequestViewModel(patientId: string, patientName: stri
         }));
     };
 
+    // Handle individual medication field changes
+    const handleMedicationChange = (index: number, field: keyof Medication, value: string) => {
+        setMedOrder((prevOrder) => {
+            const newMedications = [...prevOrder.medications];
+            newMedications[index] = { ...newMedications[index], [field]: value };
+            return {
+                ...prevOrder,
+                medications: newMedications,
+            };
+        });
+    };
+
+    // Add a new medication entry
+    const addMedication = () => {
+        setMedOrder((prevOrder) => ({
+            ...prevOrder,
+            medications: [...prevOrder.medications, { diagnosis: '', medication: '', dosage: '', frequency: '', quantity: '' }],
+        }));
+    };
+
+    // Remove a medication entry
+    const removeMedication = (index: number) => {
+        setMedOrder((prevOrder) => ({
+            ...prevOrder,
+            medications: prevOrder.medications.filter((_, idx) => idx !== index),
+        }));
+    };
+
+    // Submit the medical order to the API
     const submitMedOrder = async () => {
         setIsLoading(true);
         try {
@@ -48,26 +93,46 @@ export function useMedOrderRequestViewModel(patientId: string, patientName: stri
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    email: userSession?.email,
-                    authorName: `${userSession?.firstName} ${userSession?.lastName}`,
-                    authorID: userSession?.id,
-                    content: medOrder,
+                    doctorSpecialty: medOrder.doctorSpecialty,
+                    prescribingDr: medOrder.prescribingDr,
+                    drEmail: medOrder.drEmail,
+                    drId: medOrder.drId,
+                    patientName: medOrder.patientName,
+                    patientPhone: medOrder.patientPhone,
+                    patientCity: medOrder.patientCity,
+                    patientId: medOrder.patientId,
+                    orderDate: medOrder.orderDate,
+                    validated: medOrder.validated,
+                    medications: medOrder.medications.map(med => ({
+                        diagnosis: med.diagnosis,
+                        medication: med.medication,
+                        dosage: med.dosage,
+                        frequency: med.frequency,
+                        quantity: med.quantity
+                    })),
                 }),
             });
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to submit med order');
+                throw new Error('Failed to submit med order');
             }
 
-            const newMedOrder = await response.json();
-            setPreviousMedOrders((prevOrders) => [...prevOrders, newMedOrder]);
+            // Handle successful submission
+            console.log('Med order submitted successfully');
+
+            // Reset the form after successful submission
             setMedOrder({
-                patientName: '',
-                city: '',
-                medications: [{ medication: '', dosage: '', frequency: '' }],
                 doctorSpecialty: userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList || DoctorSpecialtyList.NOT_SELECTED,
-                doctorId: userSession?.id || '',
+                prescribingDr: `${userSession?.firstName} ${userSession?.lastName}`,
+                drEmail: userSession?.email || '',
+                drId: userSession?.id || '',
+                patientName: patientInfo?.patientName || '',
+                patientPhone: patientViewModel?.getExpandedDetails()?.phone || '',
+                patientCity: patientViewModel?.getExpandedDetails()?.city || '',
+                patientId: patientId,
+                orderDate: new Date(),
+                validated: false,
+                medications: [{ diagnosis: '', medication: '', dosage: '', frequency: '', quantity: '' }],
             });
         } catch (error) {
             console.error('Failed to submit med order:', error);
@@ -76,5 +141,15 @@ export function useMedOrderRequestViewModel(patientId: string, patientName: stri
         }
     };
 
-    return { medOrder, submitMedOrder, previousMedOrders, isLoading, handleInputChange };
+    return {
+        medOrder,
+        isLoading,
+        handleInputChange,
+        handleMedicationChange,
+        addMedication,
+        removeMedication,
+        submitMedOrder,
+        patientInfo,
+        patientViewModel,
+    };
 }

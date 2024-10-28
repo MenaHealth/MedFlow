@@ -38,7 +38,7 @@ export default function RxOrderDrawer({ isOpen, onClose, rxOrder }: RxOrderDrawe
             const pdf = new jsPDF({
                 orientation: 'portrait',
                 unit: 'px',
-                format: [canvas.width, canvas.height + 160]
+                format: [canvas.width, canvas.height + 200] // Adjusted for additional text
             });
 
             const pdfWidth = pdf.internal.pageSize.getWidth();
@@ -46,6 +46,7 @@ export default function RxOrderDrawer({ isOpen, onClose, rxOrder }: RxOrderDrawe
 
             const logo = new Image();
             logo.src = '/assets/images/mena_health_logo.jpeg';
+
             logo.onload = () => {
                 const logoWidth = 300;
                 const logoHeight = 120;
@@ -57,7 +58,15 @@ export default function RxOrderDrawer({ isOpen, onClose, rxOrder }: RxOrderDrawe
                 const contentYPosition = yPosition + logoHeight + 20;
                 pdf.addImage(imgData, 'JPEG', 0, contentYPosition, pdfWidth, pdfHeight);
 
-                pdf.save("PrescriptionDetails.pdf");
+                // Gather dynamic values for file name
+                const patientName = patientInfo.patientName.replace(/\s+/g, '_'); // Replace spaces with underscores
+                const doctorName = rxOrder.prescribingDr.replace(/\s+/g, '_');
+                const prescribedDate = new Date(rxOrder.prescribedDate).toLocaleDateString().replace(/\//g, '-'); // Format date for filename
+
+                // Create the file name using patient name, prescribed date, and doctor name
+                const fileName = `Prescription_${patientName}_${prescribedDate}_Dr_${doctorName}.pdf`;
+
+                pdf.save(fileName);
             };
         }
     };
@@ -74,7 +83,7 @@ export default function RxOrderDrawer({ isOpen, onClose, rxOrder }: RxOrderDrawe
 
     return (
         <Drawer open={isOpen} onOpenChange={onClose}>
-            <DrawerContent direction="bottom" size="75%" title="Prescription Details">
+            <DrawerContent direction="bottom" size="75%" title="Export Rx">
                 <DrawerHeader className="border-b border-orange-200 z-50 mb-4">
                     <div className="absolute right-20 top-4 flex space-x-2">
                         <div className="rounded-full p-3 bg-orange-100 hover:bg-orange-200 transition-colors">
@@ -92,7 +101,7 @@ export default function RxOrderDrawer({ isOpen, onClose, rxOrder }: RxOrderDrawe
                     </div>
                 </DrawerHeader>
                 <ScrollArea className="flex-grow">
-                    <div ref={drawerRef} className="p-6 space-y-6">
+                    <div ref={drawerRef} className="p-6 space-y-6 bg-orange-950">
                         <div className="bg-orange-50 p-4 rounded-lg">
                             <h3 className="font-semibold text-lg mb-4 text-center text-orange-900 border-b border-orange-200 pb-2">Patient
                                 Information</h3>

@@ -1,8 +1,8 @@
 // app/api/med-orders/route.ts
 
 import { NextResponse } from 'next/server';
-import MedOrders from '../../../../models/medOrders'; // Import the MedOrders model
-import dbConnect from '../../../../utils/database';
+import MedOrder from '../../../../../../models/medOrder'; // Import the MedOrder model
+import dbConnect from '../../../../../../utils/database';
 import { Types } from 'mongoose';
 
 export const POST = async (request: Request) => {
@@ -13,30 +13,37 @@ export const POST = async (request: Request) => {
         console.log('Received med order data:', requestData);
 
         const {
-            email,
-            date,
-            authorName,
-            authorID,
-            content: {
-                doctorSpecialty,
-                patientName,
-                city,
-                medications,
-                dosage,
-                frequency
-            },
-            patientId
+            doctorSpecialty,
+            prescribingDr,
+            drEmail,
+            drId,
+            patientName,
+            patientPhone,
+            patientCity,
+            patientId,
+            orderDate,
+            validated,
+            medications
         } = requestData;
 
-        // Ensure content fields are valid
+        // Ensure required fields are valid
         if (
             !patientId ||
+            typeof doctorSpecialty !== 'string' ||
+            typeof prescribingDr !== 'string' ||
+            typeof drEmail !== 'string' ||
+            typeof drId !== 'string' ||
             typeof patientName !== 'string' ||
-            typeof city !== 'string' ||
-            typeof medications !== 'string' ||
-            typeof dosage !== 'string' ||
-            typeof frequency !== 'string' ||
-            typeof doctorSpecialty !== 'string'
+            typeof patientPhone !== 'string' ||
+            typeof patientCity !== 'string' ||
+            !Array.isArray(medications) ||
+            medications.some(med => (
+                typeof med.diagnosis !== 'string' ||
+                typeof med.medication !== 'string' ||
+                typeof med.dosage !== 'string' ||
+                typeof med.frequency !== 'string' ||
+                typeof med.quantity !== 'string'
+            ))
         ) {
             return new NextResponse("Invalid med order data", { status: 400 });
         }
@@ -47,24 +54,28 @@ export const POST = async (request: Request) => {
             return new NextResponse("Invalid patient ID", { status: 400 });
         }
 
-        // Create the new Med Order
-        const newMedOrder = new MedOrders({
-            patientId: new Types.ObjectId(patientId), // Reference to the patient
-            email,
-            date: date || new Date(),
-            authorName,
-            authorID,
-            content: {
-                doctorSpecialty,
-                patientName,
-                city,
-                medications,
-                dosage,
-                frequency,
-            }
+        // Create the new Med Order document
+        const newMedOrder = new MedOrder({
+            doctorSpecialization: doctorSpecialty,
+            prescribingDr,
+            drEmail,
+            drId,
+            patientName,
+            patientPhone,
+            patientCity,
+            patientId: new Types.ObjectId(patientId),
+            orderDate: orderDate || new Date(),
+            validated: validated || false, // default to false if not provided
+            medications: medications.map(med => ({
+                diagnosis: med.diagnosis,
+                medication: med.medication,
+                dosage: med.dosage,
+                frequency: med.frequency,
+                quantity: med.quantity
+            }))
         });
 
-        // Save the Med Order to the MedOrders collection
+        // Save the Med Order to the medOrders collection
         const savedMedOrder = await newMedOrder.save();
         console.log('Med order saved successfully:', savedMedOrder);
 

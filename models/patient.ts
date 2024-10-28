@@ -11,25 +11,16 @@
     drEmail: string;
     drId: string;
     prescribedDate: Date;
-    prescriptions: {
-      validTill: Date;
-      city: string;
-      validated: boolean;
-      prescription: {
-        diagnosis: string;
-        medication: string;
-        dosage: string;
-        frequency: string;
-      }[];
-    };
+    validTill: Date;
+    city: string;
+    validated: boolean;
+    prescriptions: Array<{
+      diagnosis: string;
+      medication: string;
+      dosage: string;
+      frequency: string;
+    }>;
   }
-
-  const prescriptionSchema = new Schema({
-    diagnosis: { type: String, required: true },
-    medication: { type: String, required: true },
-    dosage: { type: String, required: true },
-    frequency: { type: String, required: true },
-  });
 
   const rxOrderSchema = new Schema({
     doctorSpecialization: { type: String, required: true },
@@ -37,12 +28,17 @@
     drEmail: { type: String, required: true },
     drId: { type: String, required: true },
     prescribedDate: { type: Date, required: true },
-    prescriptions: {
-      validTill: { type: Date, required: true },  // Define validTill as a Date
-      city: { type: String, required: true },
-      validated: { type: Boolean, required: true },
-      prescription: [prescriptionSchema],
-    },
+    validTill: { type: Date, required: true },
+    city: { type: String, required: true },
+    validated: { type: Boolean, default: false },
+    prescriptions: [
+      {
+        diagnosis: { type: String, required: true },
+        medication: { type: String, required: true },
+        dosage: { type: String, required: true },
+        frequency: { type: String, required: true },
+      }
+    ]
   });
 
   export interface IPatient extends Document {

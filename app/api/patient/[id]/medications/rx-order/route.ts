@@ -10,36 +10,46 @@ export const POST = async (request: Request, { params }: { params: { id: string 
 
         const patientId = params.id;
         const requestData = await request.json();
-        const { doctorSpecialization, prescribingDr, drEmail, drId, prescriptions } = requestData;
+        const {
+            doctorSpecialization,
+            prescribingDr,
+            drEmail,
+            drId,
+            validTill,
+            city,
+            validated,
+            prescriptions
+        } = requestData;
 
-        // Check if required fields are provided
-        if (!doctorSpecialization || !prescriptions || !prescriptions.prescription || prescriptions.prescription.length === 0) {
+        // Validate required fields
+        if (!doctorSpecialization || !prescriptions || prescriptions.length === 0) {
             return new NextResponse("Missing required fields", { status: 400 });
         }
 
-        // Create a new RX order using the updated `prescriptions` structure
+        // Map each prescription entry to match the schema
+        const formattedPrescriptions = prescriptions.map((p: any) => ({
+            diagnosis: p.diagnosis,
+            medication: p.medication,
+            dosage: p.dosage,
+            frequency: p.frequency,
+        }));
+
+        // Create a new RX order object
         const newRxOrder = {
             doctorSpecialization,
             prescribingDr,
             drEmail,
             drId,
             prescribedDate: new Date(),
-            prescriptions: {
-                validTill: prescriptions.validTill,
-                city: prescriptions.city,
-                validated: prescriptions.validated,
-                prescription: prescriptions.prescription.map((p: any) => ({
-                    diagnosis: p.diagnosis,
-                    medication: p.medication,
-                    dosage: p.dosage,
-                    frequency: p.frequency,
-                })),
-            }
+            validTill: new Date(validTill),
+            city,
+            validated,
+            prescriptions: formattedPrescriptions,
         };
 
         console.log("New RX Order:", newRxOrder);
 
-        // Update the patient's rxOrders array by adding the new RX order
+        // Add the new RX order to the patient's rxOrders array
         const updatedPatient = await Patient.findByIdAndUpdate(
             patientId,
             { $push: { rxOrders: newRxOrder } },
@@ -49,6 +59,7 @@ export const POST = async (request: Request, { params }: { params: { id: string 
         if (!updatedPatient) {
             return new NextResponse('Failed to update patient record', { status: 500 });
         }
+
         console.log("Updated Patient after adding RX Order:", updatedPatient);
         return new NextResponse(JSON.stringify(updatedPatient), { status: 201 });
     } catch (error) {

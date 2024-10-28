@@ -9,8 +9,12 @@ interface Prescription {
     frequency: string;
 }
 
-export function useRXOrderViewModel(patientId: string, onNewRxOrderSaved: (rxOrder: IRxOrder) => void) {
-    const { userSession, refreshMedications } = usePatientDashboard();
+export function useRXOrderViewModel(
+    patientId: string,
+    onNewRxOrderSaved: (rxOrder: IRxOrder) => void,
+    city: string // Add city as a parameter
+) {
+    const { userSession, refreshMedications, addRxOrder } = usePatientDashboard();
 
     const [rxOrder, setRxOrder] = useState<IRxOrder>({
         doctorSpecialization: userSession?.doctorSpecialty || 'Not Selected',
@@ -18,14 +22,12 @@ export function useRXOrderViewModel(patientId: string, onNewRxOrderSaved: (rxOrd
         drEmail: userSession?.email || '',
         drId: userSession?.id || '',
         prescribedDate: new Date(),
-        prescriptions: {
-            validTill: new Date(new Date().setMonth(new Date().getMonth() + 1)),
-            city: '',
-            validated: false,
-            prescription: [
-                { diagnosis: '', medication: '', dosage: '', frequency: '' }
-            ],
-        },
+        validTill: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+        city: city, // Set city directly
+        validated: false,
+        prescriptions: [
+            { diagnosis: '', medication: '', dosage: '', frequency: '' }
+        ],
     });
 
     const [isLoading, setIsLoading] = useState(false);
@@ -38,16 +40,13 @@ export function useRXOrderViewModel(patientId: string, onNewRxOrderSaved: (rxOrd
     };
 
     const handlePrescriptionChange = (index: number, field: keyof Prescription, value: string) => {
-        setRxOrder((prevOrder) => {
-            const newPrescriptions = [...prevOrder.prescriptions.prescription];
+        setRxOrder(prevOrder => {
+            const newPrescriptions = [...prevOrder.prescriptions];
             newPrescriptions[index] = { ...newPrescriptions[index], [field]: value };
 
             return {
                 ...prevOrder,
-                prescriptions: {
-                    ...prevOrder.prescriptions,
-                    prescription: newPrescriptions,
-                },
+                prescriptions: newPrescriptions,
             };
         });
     };
@@ -55,59 +54,51 @@ export function useRXOrderViewModel(patientId: string, onNewRxOrderSaved: (rxOrd
     const addPrescription = () => {
         setRxOrder(prevOrder => ({
             ...prevOrder,
-            prescriptions: {
+            prescriptions: [
                 ...prevOrder.prescriptions,
-                prescription: [
-                    ...prevOrder.prescriptions.prescription,
-                    { diagnosis: '', medication: '', dosage: '', frequency: '' }
-                ],
-            },
+                { diagnosis: '', medication: '', dosage: '', frequency: '' }
+            ],
         }));
     };
 
     const removePrescription = (index: number) => {
         setRxOrder(prevOrder => ({
             ...prevOrder,
-            prescriptions: {
-                ...prevOrder.prescriptions,
-                prescription: prevOrder.prescriptions.prescription.filter((_, i) => i !== index),
-            },
+            prescriptions: prevOrder.prescriptions.filter((_, i) => i !== index),
         }));
     };
 
-    const submitRxOrder = async () => {
-        setIsLoading(true);
-        try {
-            const response = await fetch(`/api/patient/${patientId}/medications/rx-order`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(rxOrder),
-            });
+const submitRxOrder = async () => {
+    setIsLoading(true);
+    try {
+        const response = await fetch(`/api/patient/${patientId}/medications/rx-order`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(rxOrder),
+        });
 
-            if (!response.ok) throw new Error('Failed to save RX order');
+        if (!response.ok) throw new Error('Failed to save RX order');
 
-            // const savedRxOrder = await response.json(); // Wait for the response to confirm save
-            // onNewRxOrderSaved(savedRxOrder); // Update the UI or state with the saved RX order
+        const savedRxOrder = await response.json();
 
-            // Refresh medications only after RX order is saved
-            await refreshMedications();
+        addRxOrder(savedRxOrder);
+        await refreshMedications();
 
-            // Reset RX order form
-            setRxOrder(prevOrder => ({
-                ...prevOrder,
-                prescribedDate: new Date(),
-                prescriptions: {
-                    ...prevOrder.prescriptions,
-                    validTill: prevOrder.prescriptions.validTill,
-                    prescription: [{ diagnosis: '', medication: '', dosage: '', frequency: '' }],
-                },
-            }));
-        } catch (error) {
-            console.error('Failed to save RX order:', error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+        setRxOrder(prevOrder => ({
+            ...prevOrder,
+            prescribedDate: new Date(),
+            validTill: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+            city, // Reset city to the passed value
+            prescriptions: [{ diagnosis: '', medication: '', dosage: '', frequency: '' }],
+        }));
+
+        onNewRxOrderSaved(savedRxOrder);
+    } catch (error) {
+        console.error('Failed to save RX order:', error);
+    } finally {
+        setIsLoading(false);
+    }
+};
 
     return {
         rxOrder,

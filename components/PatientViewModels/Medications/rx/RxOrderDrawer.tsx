@@ -2,19 +2,18 @@
 
 import React, { useRef } from 'react';
 import { X, MessageSquareShare, Mail, Calendar, Phone, MapPin, User, Activity, Clock9, Clock, Aperture, BadgeAlert, PillBottle, Tablets, Hourglass, Download } from 'lucide-react';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter, DrawerClose } from "./../../../../components/ui/drawer";
+import { Drawer, DrawerContent, DrawerHeader } from "./../../../../components/ui/drawer";
 import { ScrollArea } from "./../../../form/ScrollArea";
 import { usePatientDashboard } from './.././../PatientViewModelContext';
-import { RxOrder } from './../../../../models/patient';
+import { IRxOrder } from './../../../../models/patient';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
 interface RxOrderDrawerProps {
     isOpen: boolean;
     onClose: () => void;
-    rxOrder: RxOrder | null;
+    rxOrder: IRxOrder | null;
 }
-
 
 export default function RxOrderDrawer({ isOpen, onClose, rxOrder }: RxOrderDrawerProps) {
     const { patientInfo } = usePatientDashboard();
@@ -25,11 +24,11 @@ export default function RxOrderDrawer({ isOpen, onClose, rxOrder }: RxOrderDrawe
     const onDownload = async () => {
         if (drawerRef.current) {
             const canvas = await html2canvas(drawerRef.current, {
-                scale: 2, // Higher scale for better resolution
+                scale: 2,
                 width: 1080,
                 windowWidth: 1080,
-                useCORS: true, // Allows cross-origin content to render properly
-                scrollX: 0, // Fix potential scroll issues
+                useCORS: true,
+                scrollX: 0,
                 scrollY: 0,
             });
 
@@ -38,7 +37,7 @@ export default function RxOrderDrawer({ isOpen, onClose, rxOrder }: RxOrderDrawe
             const pdf = new jsPDF({
                 orientation: 'portrait',
                 unit: 'px',
-                format: [canvas.width, canvas.height + 200] // Adjusted for additional text
+                format: [canvas.width, canvas.height + 200]
             });
 
             const pdfWidth = pdf.internal.pageSize.getWidth();
@@ -58,12 +57,10 @@ export default function RxOrderDrawer({ isOpen, onClose, rxOrder }: RxOrderDrawe
                 const contentYPosition = yPosition + logoHeight + 20;
                 pdf.addImage(imgData, 'JPEG', 0, contentYPosition, pdfWidth, pdfHeight);
 
-                // Gather dynamic values for file name
-                const patientName = patientInfo.patientName.replace(/\s+/g, '_'); // Replace spaces with underscores
+                const patientName = patientInfo.patientName.replace(/\s+/g, '_');
                 const doctorName = rxOrder.prescribingDr.replace(/\s+/g, '_');
-                const prescribedDate = new Date(rxOrder.prescribedDate).toLocaleDateString().replace(/\//g, '-'); // Format date for filename
+                const prescribedDate = new Date(rxOrder.prescribedDate).toLocaleDateString().replace(/\//g, '-');
 
-                // Create the file name using patient name, prescribed date, and doctor name
                 const fileName = `Prescription_${patientName}_${prescribedDate}_Dr_${doctorName}.pdf`;
 
                 pdf.save(fileName);
@@ -75,8 +72,8 @@ export default function RxOrderDrawer({ isOpen, onClose, rxOrder }: RxOrderDrawe
         const phoneNumber = patientInfo.phoneNumber;
         const patientName = patientInfo.patientName;
         const doctorName = rxOrder?.prescribingDr || "Your Doctor";
-        const medicationsList = rxOrder?.prescriptions.map((prescription) => prescription.medication).join(", ") || "your prescription";
-        const message = `Hello ${patientName},\n\nThis is Dr. ${doctorName}. Attached is your prescription for: ${medicationsList}.`;
+        const medicationsList = rxOrder?.prescriptions?.[0]?.medication || "your prescription";
+        const message = `Hello ${patientName},\n\nThis is Dr. ${doctorName}. Here are your prescribed medications: ${medicationsList}.`;
 
         window.location.href = `sms:${phoneNumber}?body=${encodeURIComponent(message)}`;
     };
@@ -103,8 +100,7 @@ export default function RxOrderDrawer({ isOpen, onClose, rxOrder }: RxOrderDrawe
                 <ScrollArea className="flex-grow">
                     <div ref={drawerRef} className="p-6 space-y-6 bg-orange-950">
                         <div className="bg-orange-50 p-4 rounded-lg">
-                            <h3 className="font-semibold text-lg mb-4 text-center text-orange-900 border-b border-orange-200 pb-2">Patient
-                                Information</h3>
+                            <h3 className="font-semibold text-lg mb-4 text-center text-orange-900 border-b border-orange-200 pb-2">Patient Information</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <p className="flex items-center"><User className="h-4 w-4 mr-2 text-orange-500"/><strong
                                     className="text-orange-900 mr-2">Name:</strong> {patientInfo.patientName}</p>
@@ -122,25 +118,19 @@ export default function RxOrderDrawer({ isOpen, onClose, rxOrder }: RxOrderDrawe
                         </div>
 
                         <div className="bg-orange-50 p-4 rounded-lg">
-                            <h3 className="font-semibold text-lg mb-4 text-center text-orange-900 border-b border-orange-200 pb-2">Prescribing
-                                Doctor</h3>
+                            <h3 className="font-semibold text-lg mb-4 text-center text-orange-900 border-b border-orange-200 pb-2">Prescribing Doctor</h3>
                             <p className="flex items-center justify-center mb-4"><Mail
                                 className="h-4 w-4 mr-2 text-orange-500"/><strong
                                 className="text-orange-900 mr-2">Email:</strong> {rxOrder.drEmail}</p>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <p className="flex items-center"><Activity
-                                    className="h-4 w-4 mr-2 text-orange-500"/><strong className="text-orange-900 mr-2">Prescribed
-                                    By:</strong> Dr. {rxOrder.prescribingDr}</p>
+                                    className="h-4 w-4 mr-2 text-orange-500"/><strong className="text-orange-900 mr-2">Prescribed By:</strong> Dr. {rxOrder.prescribingDr}</p>
                                 <p className="flex items-center"><Aperture
-                                    className="h-4 w-4 mr-2 text-orange-500"/><strong
-                                    className="text-orange-900 mr-2">Specialization:</strong> {rxOrder.doctorSpecialization}
-                                </p>
+                                    className="h-4 w-4 mr-2 text-orange-500"/><strong className="text-orange-900 mr-2">Specialization:</strong> {rxOrder.doctorSpecialization}</p>
                                 <p className="flex items-center"><Clock9
-                                    className="h-4 w-4 mr-2 text-orange-500"/><strong className="text-orange-900 mr-2">Prescribed
-                                    Date:</strong> {new Date(rxOrder.prescribedDate).toLocaleDateString()}</p>
+                                    className="h-4 w-4 mr-2 text-orange-500"/><strong className="text-orange-900 mr-2">Prescribed Date:</strong> {new Date(rxOrder.prescribedDate).toLocaleDateString()}</p>
                                 <p className="flex items-center"><Clock
-                                    className="h-4 w-4 mr-2 text-orange-500"/><strong className="text-orange-900 mr-2">Valid
-                                    Till:</strong> {new Date(rxOrder.prescriptions.validTill).toLocaleDateString()}</p>
+                                    className="h-4 w-4 mr-2 text-orange-500"/><strong className="text-orange-900 mr-2">Valid Till:</strong> {new Date(rxOrder.validTill).toLocaleDateString()}</p>
                             </div>
                         </div>
 

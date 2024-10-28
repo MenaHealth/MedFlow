@@ -55,6 +55,7 @@ interface PatientContext {
     medOrders: IMedOrder[];
     loadingMedications: boolean;
     refreshMedications: () => Promise<void>;
+    addRxOrder: (newRxOrder: IRxOrder) => void;
 }
 
 const PatientViewModelContext = createContext<PatientContext | undefined>(undefined);
@@ -83,6 +84,8 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
     const [rxOrders, setrxOrders] = useState<IRxOrder[]>([]);
     const [medOrders, setmedOrders] = useState<IMedOrder[]>([]);
     const [loadingMedications, setLoadingMedications] = useState(false);
+
+
 
     useEffect(() => {
         if (status === 'authenticated' && session?.user) {
@@ -196,6 +199,10 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
         }
     };
 
+    const addRxOrder = useCallback((newRxOrder: IRxOrder) => {
+        setrxOrders(prevOrders => [...prevOrders, newRxOrder]);
+    }, []);
+
 
     return (
         <PatientViewModelContext.Provider
@@ -218,6 +225,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 medOrders,
                 loadingMedications,
                 refreshMedications,
+                addRxOrder,
             }}
         >
             {children}

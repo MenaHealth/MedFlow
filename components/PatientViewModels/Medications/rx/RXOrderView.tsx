@@ -43,7 +43,7 @@ export default function RXOrderView({ patientId, user, patientInfo }: RXOrderVie
         addPrescription,
         removePrescription,
         submitRxOrder,
-    } = useRXOrderViewModel(patientId, onNewRxOrderSaved);
+    } = useRXOrderViewModel(patientId, onNewRxOrderSaved, patientInfo.city);
 
     return (
         <div className="space-y-6 max-w-2xl mx-auto bg-orange-950">
@@ -55,13 +55,13 @@ export default function RXOrderView({ patientId, user, patientInfo }: RXOrderVie
                             fieldName="prescribingDoctor"
                             fieldLabel="Dr."
                             value={rxOrder.prescribingDr}
-                            onChange={(e) => handleInputChange('prescribingDr', e.target.value)}
+                            readOnly={true}
                         />
                         <TextFormField
                             fieldName="doctorSpecialization"
                             fieldLabel="Specialization"
                             value={rxOrder.doctorSpecialization}
-                            onChange={(e) => handleInputChange('doctorSpecialization', e.target.value)}
+                            readOnly={true}
                         />
                     </div>
                     <TextFormField
@@ -70,28 +70,11 @@ export default function RXOrderView({ patientId, user, patientInfo }: RXOrderVie
                         value={patientInfo.patientName}
                         readOnly={true}
                     />
-                    <div className="grid grid-cols-2 gap-4">
-                        <TextFormField
-                            fieldName="phoneNumber"
-                            fieldLabel="Phone"
-                            value={patientInfo.phoneNumber}
-                            readOnly={true}
-                        />
-                        <TextFormField
-                            fieldName="age"
-                            fieldLabel="Age"
-                            value={patientInfo.age}
-                            readOnly={true}
-                        />
-                    </div>
                     <TextFormField
                         fieldName="city"
-                        fieldLabel="City"
-                        value={rxOrder.prescriptions.city}
-                        onChange={(e) => setRxOrder(prev => ({
-                            ...prev,
-                            prescriptions: { ...prev.prescriptions, city: e.target.value }
-                        }))}
+                        fieldLabel="Patient City"
+                        value={patientInfo.city}
+                        readOnly={true}
                     />
                 </div>
                 <hr className="my-6 border-gray-200" />
@@ -100,22 +83,22 @@ export default function RXOrderView({ patientId, user, patientInfo }: RXOrderVie
                         name="validTill"
                         label="Valid Till"
                         type="future"
-                        value={rxOrder.prescriptions.validTill}
+                        value={rxOrder.validTill}
                         onChange={(date) => setRxOrder(prev => ({
                             ...prev,
-                            prescriptions: { ...prev.prescriptions, validTill: date || prev.prescriptions.validTill } // Fallback to default
+                            validTill: date || prev.validTill
                         }))}
                     />
                 </div>
             </fieldset>
 
-            {rxOrder.prescriptions.prescription.map((prescription, index) => (
+            {rxOrder.prescriptions.map((prescription, index) => (
                 <fieldset key={index} className="border rounded-lg p-6 bg-white shadow-sm relative overflow-hidden">
                     <legend
                         className="text-lg font-semibold px-2 flex items-center w-full bg-orange-950 text-white rounded-lg">
                         <span>Prescription {index + 1}</span>
                         <div className="ml-auto flex space-x-2">
-                            {index === rxOrder.prescriptions.prescription.length - 1 && (
+                            {index === rxOrder.prescriptions.length - 1 && (
                                 <Button
                                     variant="ghost"
                                     size="icon"
@@ -126,7 +109,7 @@ export default function RXOrderView({ patientId, user, patientInfo }: RXOrderVie
                                     <Plus className="h-4 w-4" />
                                 </Button>
                             )}
-                            {rxOrder.prescriptions.prescription.length > 1 && (
+                            {rxOrder.prescriptions.length > 1 && (
                                 <Button
                                     variant="ghost"
                                     size="icon"

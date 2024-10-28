@@ -1,3 +1,4 @@
+// components/PatientViewModels/Medications/previous/PreviousMedicationsViewModel.tsx
 import { usePatientDashboard } from '../../PatientViewModelContext';
 import { IRxOrder } from '../../../../models/patient';
 
@@ -10,15 +11,15 @@ export function usePreviousMedicationsViewModel() {
             prescribingDr: order.prescribingDr,
             doctorSpecialization: order.doctorSpecialization,
             date: order.prescribedDate,
-            validTill: order.prescriptions.validTill,
-            city: order.prescriptions.city,
-            prescriptions: order.prescriptions.prescription.map(prescription => ({
+            validTill: order.validTill, // top-level property in IRxOrder
+            city: order.city, // top-level property in IRxOrder
+            prescriptions: order.prescriptions.map(prescription => ({
                 diagnosis: prescription.diagnosis,
                 medication: prescription.medication,
                 dosage: prescription.dosage,
                 frequency: prescription.frequency,
             })),
-            validated: order.prescriptions.validated,
+            validated: order.validated, // top-level property in IRxOrder
         }));
     };
 

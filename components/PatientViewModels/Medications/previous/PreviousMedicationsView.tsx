@@ -1,3 +1,4 @@
+// components/PatientViewModels/Medications/previous/PreviousMedicationsView.tsx
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp, Share } from 'lucide-react';
 import { ScrollArea } from '../../../form/ScrollArea';
@@ -57,10 +58,10 @@ export default function PreviousMedicationsView() {
                                 </div>
                                 {expandedItems.includes(rxOrder._id) && (
                                     <div className="mt-2 p-2 bg-white text-darkBlue rounded-sm">
-                                        <p><strong>City:</strong> {rxOrder.prescriptions.city}</p>
-                                        <p><strong>Valid Till:</strong> {new Date(rxOrder.prescriptions.validTill).toLocaleDateString()}</p>
+                                        <p><strong>City:</strong> {rxOrder.city}</p>
+                                        <p><strong>Valid Till:</strong> {new Date(rxOrder.validTill).toLocaleDateString()}</p>
                                         <h4 className="mt-2 font-bold">Prescriptions:</h4>
-                                        {rxOrder.prescriptions.prescription.map((prescription, index) => (
+                                        {rxOrder.prescriptions.map((prescription, index) => (
                                             <div key={index} className="mt-2 p-2 bg-gray-100 rounded-sm">
                                                 <p><strong>Diagnosis:</strong> {prescription.diagnosis}</p>
                                                 <p><strong>Medication:</strong> {prescription.medication}</p>

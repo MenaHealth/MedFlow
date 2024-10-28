@@ -62,7 +62,7 @@ export function PreviousNotesView({ patientId }: PreviousNotesViewProps) {
                         {notes.map((note) => (
                             <li
                                 key={note._id}
-                                className={`p-4 border-b border-gray-200 last:border-b-0 transition-all duration-500 ease-out ${getBackgroundColor(note.noteType)}`}
+                                className={`p-4 border-b border-gray-100 last:border-b-0 transition-all duration-500 ease-out ${getBackgroundColor(note.noteType)}`}
                             >
                                 <div className="flex justify-between items-center">
                                     <div>

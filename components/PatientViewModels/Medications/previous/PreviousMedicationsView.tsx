@@ -2,15 +2,14 @@ import React, { useState } from 'react';
 import { ChevronDown, ChevronUp, Share } from 'lucide-react';
 import { ScrollArea } from '../../../form/ScrollArea';
 import { usePreviousMedicationsViewModel } from './PreviousMedicationsViewModel';
-import RxOrderDrawer from './../rx/RxOrderDrawer'
-
+import RxOrderDrawer from './../rx/RxOrderDrawer';
+import { IRxOrder } from '../../../../models/patient';
 
 export default function PreviousMedicationsView() {
     const { rxOrders, medOrders, loadingMedications } = usePreviousMedicationsViewModel();
     const [expandedItems, setExpandedItems] = useState<string[]>([]);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-    const [selectedRxOrder, setSelectedRxOrder] = useState<RxOrder | null>(null);
-
+    const [selectedRxOrder, setSelectedRxOrder] = useState<IRxOrder | null>(null);
 
     if (loadingMedications) return <p>Loading medications...</p>;
 
@@ -20,7 +19,7 @@ export default function PreviousMedicationsView() {
         );
     };
 
-    const handleOpenDrawer = (rxOrder: RxOrder) => {
+    const handleOpenDrawer = (rxOrder: IRxOrder) => {
         setSelectedRxOrder(rxOrder);
         setIsDrawerOpen(true);
     };
@@ -43,25 +42,25 @@ export default function PreviousMedicationsView() {
                                                 {expandedItems.includes(rxOrder._id) ? <ChevronUp/> : <ChevronDown/>}
                                             </button>
                                         </div>
-                                            <h3 className="border-white border-2 p-2 text-white">Rx Order</h3>
-                                            <p>{new Date(rxOrder.date).toLocaleDateString()}</p>
-                                            <h4 className="text-center">Dr. {rxOrder.prescribingDr}</h4>
-                                        </div>
-                                        <div className="flex items-center">
-                                            <button onClick={(e) => {
-                                                e.preventDefault();
-                                                handleOpenDrawer(rxOrder);
-                                            }} className="text-white ml-2">
-                                                <Share/>
-                                            </button>
-                                        </div>
+                                        <h3 className="border-white border-2 p-2 text-white">Rx Order</h3>
+                                        <p>{new Date(rxOrder.prescribedDate).toLocaleDateString()}</p>
+                                        <h4 className="text-center">Dr. {rxOrder.prescribingDr}</h4>
                                     </div>
-                                    {expandedItems.includes(rxOrder._id) && (
+                                    <div className="flex items-center">
+                                        <button onClick={(e) => {
+                                            e.preventDefault();
+                                            handleOpenDrawer(rxOrder);
+                                        }} className="text-white ml-2">
+                                            <Share/>
+                                        </button>
+                                    </div>
+                                </div>
+                                {expandedItems.includes(rxOrder._id) && (
                                     <div className="mt-2 p-2 bg-white text-darkBlue rounded-sm">
-                                        <p><strong>City:</strong> {rxOrder.city}</p>
-                                        <p><strong>Valid Till:</strong> {new Date(rxOrder.validTill).toLocaleDateString()}</p>
+                                        <p><strong>City:</strong> {rxOrder.prescriptions.city}</p>
+                                        <p><strong>Valid Till:</strong> {new Date(rxOrder.prescriptions.validTill).toLocaleDateString()}</p>
                                         <h4 className="mt-2 font-bold">Prescriptions:</h4>
-                                        {rxOrder.prescriptions.map((prescription, index) => (
+                                        {rxOrder.prescriptions.prescription.map((prescription, index) => (
                                             <div key={index} className="mt-2 p-2 bg-gray-100 rounded-sm">
                                                 <p><strong>Diagnosis:</strong> {prescription.diagnosis}</p>
                                                 <p><strong>Medication:</strong> {prescription.medication}</p>

@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { usePatientDashboard } from './../../../../components/PatientViewModels/PatientViewModelContext';
+import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewModelContext';
+import { IRxOrder } from "@/models/patient";
 
 interface Prescription {
     diagnosis: string;
@@ -8,25 +9,10 @@ interface Prescription {
     frequency: string;
 }
 
-interface RxOrder {
-    doctorSpecialization: string;
-    prescribingDr: string;
-    drId: string;
-    drEmail: string;
-    prescribedDate: Date;
-    prescriptions: {
-        validTill: Date;
-        city: string;
-        prescriptions: Prescription[];
-    };
-    validated?: boolean;
-}
+export function useRXOrderViewModel(patientId: string, onNewRxOrderSaved: (rxOrder: IRxOrder) => void) {
+    const { userSession, refreshMedications } = usePatientDashboard();
 
-export function useRXOrderViewModel(patientId: string) {
-    const { userSession, patientInfo, patientViewModel } = usePatientDashboard();
-    console.log("User session email:", userSession?.email);
-
-    const [rxOrder, setRxOrder] = useState<RxOrder>({
+    const [rxOrder, setRxOrder] = useState<IRxOrder>({
         doctorSpecialization: userSession?.doctorSpecialty || 'Not Selected',
         prescribingDr: `${userSession?.firstName} ${userSession?.lastName}`,
         drEmail: userSession?.email || '',
@@ -34,56 +20,57 @@ export function useRXOrderViewModel(patientId: string) {
         prescribedDate: new Date(),
         prescriptions: {
             validTill: new Date(new Date().setMonth(new Date().getMonth() + 1)),
-            city: patientViewModel?.getExpandedDetails()?.city || '',
-            prescriptions: [
+            city: '',
+            validated: false,
+            prescription: [
                 { diagnosis: '', medication: '', dosage: '', frequency: '' }
             ],
         },
-        validated: false
     });
 
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleInputChange = (field: keyof RxOrder['prescriptions'], value: any) => {
-        setRxOrder((prevOrder) => ({
+    const handleInputChange = (field: keyof IRxOrder, value: any) => {
+        setRxOrder(prevOrder => ({
             ...prevOrder,
-            prescriptions: {
-                ...prevOrder.prescriptions,
-                [field]: value,
-            },
+            [field]: value,
         }));
     };
 
     const handlePrescriptionChange = (index: number, field: keyof Prescription, value: string) => {
         setRxOrder((prevOrder) => {
-            const newPrescriptions = [...prevOrder.prescriptions.prescriptions];
+            const newPrescriptions = [...prevOrder.prescriptions.prescription];
             newPrescriptions[index] = { ...newPrescriptions[index], [field]: value };
+
             return {
                 ...prevOrder,
                 prescriptions: {
                     ...prevOrder.prescriptions,
-                    prescriptions: newPrescriptions,
+                    prescription: newPrescriptions,
                 },
             };
         });
     };
 
     const addPrescription = () => {
-        setRxOrder((prevOrder) => ({
+        setRxOrder(prevOrder => ({
             ...prevOrder,
             prescriptions: {
                 ...prevOrder.prescriptions,
-                prescriptions: [...prevOrder.prescriptions.prescriptions, { diagnosis: '', medication: '', dosage: '', frequency: '' }],
+                prescription: [
+                    ...prevOrder.prescriptions.prescription,
+                    { diagnosis: '', medication: '', dosage: '', frequency: '' }
+                ],
             },
         }));
     };
 
     const removePrescription = (index: number) => {
-        setRxOrder((prevOrder) => ({
+        setRxOrder(prevOrder => ({
             ...prevOrder,
             prescriptions: {
                 ...prevOrder.prescriptions,
-                prescriptions: prevOrder.prescriptions.prescriptions.filter((_, idx) => idx !== index),
+                prescription: prevOrder.prescriptions.prescription.filter((_, i) => i !== index),
             },
         }));
     };
@@ -93,50 +80,43 @@ export function useRXOrderViewModel(patientId: string) {
         try {
             const response = await fetch(`/api/patient/${patientId}/medications/rx-order`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(rxOrder),
             });
 
-            if (!response.ok) {
-                throw new Error('Failed to publish RX form');
-            }
+            if (!response.ok) throw new Error('Failed to save RX order');
 
-            const newRxOrder = await response.json();
-            // Handle successful submission
+            // const savedRxOrder = await response.json(); // Wait for the response to confirm save
+            // onNewRxOrderSaved(savedRxOrder); // Update the UI or state with the saved RX order
 
-            // Reset the form
-            setRxOrder({
-                doctorSpecialization: userSession?.doctorSpecialty || 'Not Selected',
-                prescribingDr: `${userSession?.firstName} ${userSession?.lastName}`,
-                drId: userSession?.id || '',
-                drEmail: userSession?.email || '',
+            // Refresh medications only after RX order is saved
+            await refreshMedications();
+
+            // Reset RX order form
+            setRxOrder(prevOrder => ({
+                ...prevOrder,
                 prescribedDate: new Date(),
                 prescriptions: {
-                    validTill: new Date(new Date().setMonth(new Date().getMonth() + 1)),
-                    city: patientViewModel?.getExpandedDetails()?.city || '',
-                    prescriptions: [{ diagnosis: '', medication: '', dosage: '', frequency: '' }],
+                    ...prevOrder.prescriptions,
+                    validTill: prevOrder.prescriptions.validTill,
+                    prescription: [{ diagnosis: '', medication: '', dosage: '', frequency: '' }],
                 },
-                validated: false
-            });
+            }));
         } catch (error) {
-            console.error('Failed to publish RX form:', error);
+            console.error('Failed to save RX order:', error);
         } finally {
-            console.log("RX Order before submission:", rxOrder); // Verify structure and values
             setIsLoading(false);
         }
     };
 
     return {
         rxOrder,
+        setRxOrder,
         submitRxOrder,
         isLoading,
         handleInputChange,
         handlePrescriptionChange,
         addPrescription,
         removePrescription,
-        patientInfo,
-        patientViewModel
     };
 }

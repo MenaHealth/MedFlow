@@ -1,6 +1,8 @@
+// app/api/patient/[id]/medications/rx-order/route.ts
+
 import { NextResponse } from 'next/server';
 import Patient from '../../../../../../models/patient';
-import dbConnect from './../../../../../../utils/database';
+import dbConnect from '../../../../../../utils/database';
 
 export const POST = async (request: Request, { params }: { params: { id: string } }) => {
     try {
@@ -8,42 +10,39 @@ export const POST = async (request: Request, { params }: { params: { id: string 
 
         const patientId = params.id;
         const requestData = await request.json();
-        const {
-            doctorSpecialization,
-            prescribingDr,
-            drEmail,
-            drId,
-            prescriptions
-        } = requestData;
+        const { doctorSpecialization, prescribingDr, drEmail, drId, prescriptions } = requestData;
 
-        if (!doctorSpecialization || !prescriptions || !prescriptions.prescriptions || prescriptions.prescriptions.length === 0) {
+        // Check if required fields are provided
+        if (!doctorSpecialization || !prescriptions || !prescriptions.prescription || prescriptions.prescription.length === 0) {
             return new NextResponse("Missing required fields", { status: 400 });
         }
 
+        // Create a new RX order using the updated `prescriptions` structure
         const newRxOrder = {
             doctorSpecialization,
             prescribingDr,
-            drId,
             drEmail,
+            drId,
             prescribedDate: new Date(),
             prescriptions: {
                 validTill: prescriptions.validTill,
                 city: prescriptions.city,
-                prescription: prescriptions.prescriptions.map((p: any) => ({
+                validated: prescriptions.validated,
+                prescription: prescriptions.prescription.map((p: any) => ({
                     diagnosis: p.diagnosis,
                     medication: p.medication,
                     dosage: p.dosage,
-                    frequency: p.frequency
+                    frequency: p.frequency,
                 })),
-            },
-            validated: false
+            }
         };
+
         console.log("New RX Order:", newRxOrder);
 
-        // Update patient's rxOrders array by adding the new Rx order
+        // Update the patient's rxOrders array by adding the new RX order
         const updatedPatient = await Patient.findByIdAndUpdate(
             patientId,
-            { $push: { "rxOrders.Orders": newRxOrder } },
+            { $push: { rxOrders: newRxOrder } },
             { new: true, runValidators: true }
         );
 

@@ -4,9 +4,6 @@ import { IRxOrder } from '../../../../models/patient';
 export function usePreviousMedicationsViewModel() {
     const { rxOrders, medOrders, loadingMedications } = usePatientDashboard();
 
-    // Access the Orders array within rxOrders
-    const ordersArray = rxOrders?.Orders || [];
-
     const formatRxOrders = (orders: IRxOrder[]): IRxOrder[] => {
         return orders.map(order => ({
             ...order,
@@ -25,7 +22,7 @@ export function usePreviousMedicationsViewModel() {
         }));
     };
 
-    const formattedRxOrders = formatRxOrders(ordersArray);
+    const formattedRxOrders = formatRxOrders(rxOrders);
 
     return {
         rxOrders: formattedRxOrders,

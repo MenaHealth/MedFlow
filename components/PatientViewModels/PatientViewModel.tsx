@@ -23,9 +23,6 @@ const PatientDashboardContent: React.FC = () => {
 
     const [openSections, setOpenSections] = useState<string[]>(['patient-info']);
 
-    // useEffect(() => {
-    //     fetchPatientData();
-    // }, [fetchPatientData]);
 
     const toggleSection = (section: string) => {
         if (openSections.includes(section)) {

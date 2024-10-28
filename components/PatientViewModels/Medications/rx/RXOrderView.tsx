@@ -1,22 +1,23 @@
-import React from 'react';
-import { TextFormField } from './../../../../components/ui/TextFormField';
-import { Button } from './../../../../components/ui/button';
-import { useRXOrderViewModel } from './../../../../components/PatientViewModels/Medications/rx/RXOrderViewModel';
-import { DoctorSpecialties } from './../../../../data/doctorSpecialty.enum';
+import React, { useState } from 'react';
+import { TextFormField } from '@/components/ui/TextFormField';
+import { Button } from '@/components/ui/button';
+import { useRXOrderViewModel } from '@/components/PatientViewModels/Medications/rx/RXOrderViewModel';
+import { DoctorSpecialtyList } from '@/data/doctorSpecialty.enum';
 import { Plus, Minus } from 'lucide-react';
-import { DatePickerFormField } from "./../../../../components/form/DatePickerFormField";
-import { addDays } from 'date-fns'
+import { DatePickerFormField } from "@/components/form/DatePickerFormField";
+import RxOrderDrawer from './RxOrderDrawer';
+import { IRxOrder } from "@/models/patient";
 
 interface User {
     firstName: string;
     lastName: string;
-    doctorSpecialty: keyof typeof DoctorSpecialties;
+    doctorSpecialty: keyof typeof DoctorSpecialtyList;
 }
 
 interface RXOrderViewProps {
     user: User;
     patientId: string;
-    patientInfo: { //
+    patientInfo: {
         patientName: string;
         phoneNumber: string;
         age: string;
@@ -24,20 +25,25 @@ interface RXOrderViewProps {
     };
 }
 
-export default function RXOrderView({ patientId, user }: RXOrderViewProps) {
+export default function RXOrderView({ patientId, user, patientInfo }: RXOrderViewProps) {
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const [selectedRxOrder, setSelectedRxOrder] = useState<IRxOrder | null>(null);
+
+    const onNewRxOrderSaved = (rxOrder: IRxOrder) => {
+        setSelectedRxOrder(rxOrder);
+        setIsDrawerOpen(true);
+    };
+
     const {
         rxOrder,
+        setRxOrder,
         isLoading,
         handleInputChange,
         handlePrescriptionChange,
         addPrescription,
         removePrescription,
         submitRxOrder,
-        patientInfo,
-        patientViewModel
-    } = useRXOrderViewModel(patientId);
-
-    const expandedDetails = patientViewModel?.getExpandedDetails();
+    } = useRXOrderViewModel(patientId, onNewRxOrderSaved);
 
     return (
         <div className="space-y-6 max-w-2xl mx-auto bg-orange-950">
@@ -49,13 +55,13 @@ export default function RXOrderView({ patientId, user }: RXOrderViewProps) {
                             fieldName="prescribingDoctor"
                             fieldLabel="Dr."
                             value={rxOrder.prescribingDr}
-                            readOnly={true}
+                            onChange={(e) => handleInputChange('prescribingDr', e.target.value)}
                         />
                         <TextFormField
                             fieldName="doctorSpecialization"
                             fieldLabel="Specialization"
                             value={rxOrder.doctorSpecialization}
-                            readOnly={true}
+                            onChange={(e) => handleInputChange('doctorSpecialization', e.target.value)}
                         />
                     </div>
                     <TextFormField
@@ -67,43 +73,49 @@ export default function RXOrderView({ patientId, user }: RXOrderViewProps) {
                     <div className="grid grid-cols-2 gap-4">
                         <TextFormField
                             fieldName="phoneNumber"
-                            fieldLabel="phone"
-                            value={patientInfo.phoneNumber} // Use patientInfo prop directly
+                            fieldLabel="Phone"
+                            value={patientInfo.phoneNumber}
                             readOnly={true}
                         />
                         <TextFormField
                             fieldName="age"
                             fieldLabel="Age"
-                            value={patientInfo.age} // Use patientInfo prop directly
+                            value={patientInfo.age}
                             readOnly={true}
                         />
                     </div>
                     <TextFormField
                         fieldName="city"
                         fieldLabel="City"
-                        value={patientInfo.city}
-                        readOnly={true}
+                        value={rxOrder.prescriptions.city}
+                        onChange={(e) => setRxOrder(prev => ({
+                            ...prev,
+                            prescriptions: { ...prev.prescriptions, city: e.target.value }
+                        }))}
                     />
                 </div>
                 <hr className="my-6 border-gray-200" />
-                <div className="space-y-4 flex flex-col items-center justify-center text-center border-2 border-darkBlue rounded-lg p-4">
+                <div className="space-y-4 flex flex-col items-center justify-center text-center border-t-4 border-t-orange-950 rounded-lg p-4">
                     <DatePickerFormField
                         name="validTill"
                         label="Valid Till"
                         type="future"
                         value={rxOrder.prescriptions.validTill}
-                        onChange={(date) => handleInputChange('validTill', date)}
+                        onChange={(date) => setRxOrder(prev => ({
+                            ...prev,
+                            prescriptions: { ...prev.prescriptions, validTill: date || prev.prescriptions.validTill } // Fallback to default
+                        }))}
                     />
                 </div>
             </fieldset>
 
-            {rxOrder.prescriptions.prescriptions.map((prescription, index) => (
+            {rxOrder.prescriptions.prescription.map((prescription, index) => (
                 <fieldset key={index} className="border rounded-lg p-6 bg-white shadow-sm relative overflow-hidden">
                     <legend
                         className="text-lg font-semibold px-2 flex items-center w-full bg-orange-950 text-white rounded-lg">
                         <span>Prescription {index + 1}</span>
                         <div className="ml-auto flex space-x-2">
-                            {index === rxOrder.prescriptions.prescriptions.length - 1 && (
+                            {index === rxOrder.prescriptions.prescription.length - 1 && (
                                 <Button
                                     variant="ghost"
                                     size="icon"
@@ -114,7 +126,7 @@ export default function RXOrderView({ patientId, user }: RXOrderViewProps) {
                                     <Plus className="h-4 w-4" />
                                 </Button>
                             )}
-                            {rxOrder.prescriptions.prescriptions.length > 1 && (
+                            {rxOrder.prescriptions.prescription.length > 1 && (
                                 <Button
                                     variant="ghost"
                                     size="icon"
@@ -129,7 +141,7 @@ export default function RXOrderView({ patientId, user }: RXOrderViewProps) {
                     </legend>
                     <div className="space-y-4 mt-4">
                         <TextFormField
-                            fieldName="diagnosis"
+                            fieldName={`diagnosis-${index}`}
                             fieldLabel="Diagnosis"
                             value={prescription.diagnosis}
                             onChange={(e) => handlePrescriptionChange(index, 'diagnosis', e.target.value)}
@@ -168,6 +180,12 @@ export default function RXOrderView({ patientId, user }: RXOrderViewProps) {
             >
                 {isLoading ? 'Submitting...' : 'Submit Rx'}
             </Button>
+
+            <RxOrderDrawer
+                isOpen={isDrawerOpen}
+                onClose={() => setIsDrawerOpen(false)}
+                rxOrder={selectedRxOrder}
+            />
         </div>
     );
 }

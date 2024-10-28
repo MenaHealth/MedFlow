@@ -181,7 +181,20 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
     }, [patientId, fetchPatientData]);
 
     const refreshPatientNotes = () => fetchPatientData();
-    const refreshMedications = () => fetchPatientData();
+    const refreshMedications = async () => {
+        setLoadingMedications(true);
+        try {
+            const response = await fetch(`/api/patient/${patientId}/medications`);
+            if (!response.ok) throw new Error("Error fetching medications data");
+            const data = await response.json();
+            setrxOrders(data.rxOrders || []); // Update rxOrders with fresh data
+            setmedOrders(data.medOrders || []);
+        } catch (error) {
+            console.error('Error refreshing medications:', error);
+        } finally {
+            setLoadingMedications(false);
+        }
+    };
 
 
     return (

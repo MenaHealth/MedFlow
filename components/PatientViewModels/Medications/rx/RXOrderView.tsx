@@ -31,24 +31,27 @@ export default function RXOrderView({ patientId, user, patientInfo }: RXOrderVie
 
     const onNewRxOrderSaved = (rxOrder: IRxOrder) => {
         setSelectedRxOrder(rxOrder);
-        setIsDrawerOpen(true);
+        setIsDrawerOpen(true);  // Open drawer only after saving
     };
 
     const {
         rxOrder,
         setRxOrder,
+        submitRxOrder,
         isLoading,
         handleInputChange,
         handlePrescriptionChange,
         addPrescription,
         removePrescription,
-        submitRxOrder,
     } = useRXOrderViewModel(patientId, onNewRxOrderSaved, patientInfo.city);
+
 
     return (
         <div className="space-y-6 max-w-2xl mx-auto bg-orange-950">
             <fieldset className="border rounded-lg bg-white shadow-sm">
-                <legend className="text-lg font-semibold px-2 bg-orange-950 text-white rounded-lg">Prescriber and Patient Details</legend>
+                <legend className="text-lg font-semibold px-2 bg-orange-950 text-white rounded-lg">Prescriber and
+                    Patient Details
+                </legend>
                 <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                         <TextFormField
@@ -77,8 +80,9 @@ export default function RXOrderView({ patientId, user, patientInfo }: RXOrderVie
                         readOnly={true}
                     />
                 </div>
-                <hr className="my-6 border-gray-200" />
-                <div className="space-y-4 flex flex-col items-center justify-center text-center border-t-4 border-t-orange-950 rounded-lg p-4">
+                <hr className="my-6 border-gray-200"/>
+                <div
+                    className="space-y-4 flex flex-col items-center justify-center text-center border-t-4 border-t-orange-950 rounded-lg p-4">
                     <DatePickerFormField
                         name="validTill"
                         label="Valid Till"
@@ -106,7 +110,7 @@ export default function RXOrderView({ patientId, user, patientInfo }: RXOrderVie
                                     className="h-7 w-7 rounded-full"
                                     aria-label="Add prescription"
                                 >
-                                    <Plus className="h-4 w-4" />
+                                    <Plus className="h-4 w-4"/>
                                 </Button>
                             )}
                             {rxOrder.prescriptions.length > 1 && (
@@ -117,7 +121,7 @@ export default function RXOrderView({ patientId, user, patientInfo }: RXOrderVie
                                     className="h-7 w-7 rounded-full text-white hover:bg-accent hover:text-accent-foreground"
                                     aria-label="Remove prescription"
                                 >
-                                    <Minus className="h-4 w-4" />
+                                    <Minus className="h-4 w-4"/>
                                 </Button>
                             )}
                         </div>
@@ -155,20 +159,15 @@ export default function RXOrderView({ patientId, user, patientInfo }: RXOrderVie
                 </fieldset>
             ))}
 
-            <Button
-                onClick={submitRxOrder}
-                disabled={isLoading}
-                className="w-full"
-                variant="submit"
-            >
-                {isLoading ? 'Loading…' : 'Submit Rx'}
-            </Button>
+            <div className="space-y-6 max-w-2xl mx-auto bg-orange-950">
+                {/* RX Order Form Fields */}
+                <Button onClick={submitRxOrder} disabled={isLoading} className="w-full" variant="submit">
+                    {isLoading ? 'Loading…' : 'Submit Rx'}
+                </Button>
 
-            <RxOrderDrawer
-                isOpen={isDrawerOpen}
-                onClose={() => setIsDrawerOpen(false)}
-                rxOrder={selectedRxOrder}
-            />
+                {/* Drawer */}
+                <RxOrderDrawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} rxOrder={selectedRxOrder}/>
+            </div>
         </div>
     );
 }

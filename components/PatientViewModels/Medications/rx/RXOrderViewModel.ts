@@ -12,10 +12,9 @@ interface Prescription {
 export function useRXOrderViewModel(
     patientId: string,
     onNewRxOrderSaved: (rxOrder: IRxOrder) => void,
-    city: string // Add city as a parameter
+    city: string
 ) {
     const { userSession, refreshMedications, addRxOrder } = usePatientDashboard();
-
     const [rxOrder, setRxOrder] = useState<IRxOrder>({
         doctorSpecialization: userSession?.doctorSpecialty || 'Not Selected',
         prescribingDr: `${userSession?.firstName} ${userSession?.lastName}`,
@@ -23,13 +22,10 @@ export function useRXOrderViewModel(
         drId: userSession?.id || '',
         prescribedDate: new Date(),
         validTill: new Date(new Date().setMonth(new Date().getMonth() + 1)),
-        city: city, // Set city directly
+        city,
         validated: false,
-        prescriptions: [
-            { diagnosis: '', medication: '', dosage: '', frequency: '' }
-        ],
+        prescriptions: [{ diagnosis: '', medication: '', dosage: '', frequency: '' }],
     });
-
     const [isLoading, setIsLoading] = useState(false);
 
     const handleInputChange = (field: keyof IRxOrder, value: any) => {
@@ -80,19 +76,17 @@ export function useRXOrderViewModel(
             if (!response.ok) throw new Error('Failed to save RX order');
 
             const savedRxOrder = await response.json();
-
-            addRxOrder(savedRxOrder);  // Update patient context with new RX order
+            addRxOrder(savedRxOrder);
             await refreshMedications();
+            onNewRxOrderSaved(savedRxOrder);  // Trigger drawer opening here
 
-            setRxOrder(prevOrder => ({
-                ...prevOrder,
+            // Reset form after saving
+            setRxOrder({
+                ...rxOrder,
                 prescribedDate: new Date(),
                 validTill: new Date(new Date().setMonth(new Date().getMonth() + 1)),
-                city, // Reset city to the passed value
                 prescriptions: [{ diagnosis: '', medication: '', dosage: '', frequency: '' }],
-            }));
-
-            onNewRxOrderSaved(savedRxOrder);  // Open drawer with new RX order
+            });
         } catch (error) {
             console.error('Failed to save RX order:', error);
         } finally {

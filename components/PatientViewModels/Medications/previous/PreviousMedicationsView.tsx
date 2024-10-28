@@ -1,13 +1,13 @@
 // components/PatientViewModels/Medications/previous/PreviousMedicationsView.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, Share } from 'lucide-react';
 import { ScrollArea } from '../../../form/ScrollArea';
-import { usePreviousMedicationsViewModel } from './PreviousMedicationsViewModel';
+import { usePatientDashboard } from './.././../PatientViewModelContext';
 import RxOrderDrawer from './../rx/RxOrderDrawer';
 import { IRxOrder } from '../../../../models/patient';
 
 export default function PreviousMedicationsView() {
-    const { rxOrders, medOrders, loadingMedications } = usePreviousMedicationsViewModel();
+    const { rxOrders, medOrders, loadingMedications } = usePatientDashboard();
     const [expandedItems, setExpandedItems] = useState<string[]>([]);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [selectedRxOrder, setSelectedRxOrder] = useState<IRxOrder | null>(null);
@@ -38,9 +38,10 @@ export default function PreviousMedicationsView() {
                                         <div className="flex items-center">
                                             <button onClick={(e) => {
                                                 e.preventDefault();
-                                                toggleItemExpansion(rxOrder._id);
+                                                toggleItemExpansion(rxOrder._id ?? '');
                                             }} className="text-white">
-                                                {expandedItems.includes(rxOrder._id) ? <ChevronUp/> : <ChevronDown/>}
+                                                {expandedItems.includes(rxOrder._id ?? '') ? <ChevronUp/> :
+                                                    <ChevronDown/>}
                                             </button>
                                         </div>
                                         <h3 className="border-white border-2 p-2 text-white">Rx Order</h3>
@@ -56,7 +57,7 @@ export default function PreviousMedicationsView() {
                                         </button>
                                     </div>
                                 </div>
-                                {expandedItems.includes(rxOrder._id) && (
+                                {expandedItems.includes(rxOrder._id ?? '') && (
                                     <div className="mt-2 p-2 bg-white text-darkBlue rounded-sm">
                                         <p><strong>City:</strong> {rxOrder.city}</p>
                                         <p><strong>Valid Till:</strong> {new Date(rxOrder.validTill).toLocaleDateString()}</p>

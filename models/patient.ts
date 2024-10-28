@@ -6,6 +6,7 @@
 
 
   export interface IRxOrder {
+    _id?: string;
     doctorSpecialization: string;
     prescribingDr: string;
     drEmail: string;

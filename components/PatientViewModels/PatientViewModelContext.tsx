@@ -200,12 +200,13 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
     };
 
     const addRxOrder = useCallback((newRxOrder: IRxOrder) => {
-        setrxOrders(prevOrders => {
+        setrxOrders((prevOrders) => {
             const updatedOrders = [...prevOrders, newRxOrder];
             console.log("Updated RX Orders:", updatedOrders); // Logging for verification
+            fetchPatientData(); // Ensure all components receive the updated data
             return updatedOrders;
         });
-    }, []);
+    }, [fetchPatientData]);
 
 
     return (

@@ -1,12 +1,10 @@
 // components/PatientViewModels/Medications/MedicationsView.tsx
 
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import { useForm, FormProvider } from "react-hook-form";
-import { Button } from './../../../components/ui/button';
 import { Card, CardContent, CardHeader } from './../../../components/ui/card';
 import { RadioCard } from './../../../components/ui/radio-card';
 import { ScrollArea } from './../../../components/form/ScrollArea';
-import { ChevronDown, ChevronUp } from 'lucide-react';
 import RXOrderView from './rx/RXOrderView';
 import MedOrderView from './../../../components/PatientViewModels/Medications/med/MedOrderView';
 import PreviousMedicationsView from './previous/PreviousMedicationsView';
@@ -14,6 +12,7 @@ import { Resizable } from './../../../components/ui/Resizable';
 import { useRXOrderViewModel } from './../../../components/PatientViewModels/Medications/rx/RXOrderViewModel';
 import { useMedOrderViewModel } from './../../../components/PatientViewModels/Medications/med/MedOrderViewModel';
 import { usePatientDashboard } from './../../../components/PatientViewModels/PatientViewModelContext';
+import { BarLoader } from "react-spinners";
 
 interface MedicationsViewProps {
     patientId: string;
@@ -28,13 +27,13 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
         patientInfo,
     } = usePatientDashboard();
 
-    const { rxOrder, submitRxOrder, isLoading: rxLoading } = useRXOrderViewModel(patientId);
-    const { medOrder, submitMedOrder, isLoading: medLoading } = useMedOrderViewModel(patientId);
+    const { submitRxOrder, isLoading: rxLoading } = useRXOrderViewModel(patientId);
+    const { submitMedOrder, isLoading: medLoading } = useMedOrderViewModel(patientId);
 
     const [templateType, setTemplateType] = useState<'rxOrder' | 'medicalrequest'>('rxOrder');
 
     const methods = useForm({
-        defaultValues: templateType === 'rxOrder' ? rxOrder : medOrder,
+        defaultValues: templateType === 'rxOrder' ? { rxOrder: rxOrders } : { medOrder: medOrders },
     });
 
     const handleCreateMedication = async () => {
@@ -44,6 +43,15 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
             await submitMedOrder();
         }
     };
+
+    // Check if data is still loading
+    if (loadingMedications) {
+        return (
+            <div className="flex items-center justify-center h-[100vh] text-white bg-orange-950">
+                <BarLoader color="#ffffff" />
+            </div>
+        );
+    }
 
     return (
         <FormProvider {...methods}>
@@ -77,7 +85,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                         <CardHeader className="px-4 py-2">
                             <RadioCard.Root
                                 defaultValue={templateType}
-                                onValueChange={(value) => setTemplateType(value)}
+                                onValueChange={(value) => setTemplateType(value as 'rxOrder' | 'medicalrequest')}
                                 className="flex w-full"
                             >
                                 <RadioCard.Item value="rxOrder" className={`flex-1 ${templateType === 'rxOrder' ? 'bg-white' : ''}`}>
@@ -96,10 +104,10 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                             user={{
                                                 firstName: userSession?.firstName || '',
                                                 lastName: userSession?.lastName || '',
-                                                doctorSpecialty: userSession?.doctorSpecialty ?? 'Not Selected',
+                                                doctorSpecialty: userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList || 'NOT_SELECTED',
                                             }}
                                             patientId={patientId}
-                                            patientInfo={patientInfo}
+                                            patientInfo={patientInfo || { patientName: '', phoneNumber: '', age: '', city: '' }}
                                         />
                                     )}
                                     {templateType === 'medicalrequest' && (
@@ -108,7 +116,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                             user={{
                                                 firstName: userSession?.firstName || '',
                                                 lastName: userSession?.lastName || '',
-                                                doctorSpecialty: userSession?.doctorSpecialty ?? 'NOT_SELECTED',
+                                                doctorSpecialty: userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList || 'NOT_SELECTED',
                                             }}
                                         />
                                     )}

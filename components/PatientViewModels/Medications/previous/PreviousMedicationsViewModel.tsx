@@ -13,7 +13,7 @@ export function usePreviousMedicationsViewModel() {
             date: order.prescribedDate,
             validTill: order.validTill, // top-level property in IRxOrder
             city: order.city, // top-level property in IRxOrder
-            prescriptions: order.prescriptions.map(prescription => ({
+            prescriptions: (order.prescriptions || []).map(prescription => ({
                 diagnosis: prescription.diagnosis,
                 medication: prescription.medication,
                 dosage: prescription.dosage,

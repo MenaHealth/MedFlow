@@ -161,7 +161,7 @@ export default function RXOrderView({ patientId, user, patientInfo }: RXOrderVie
                 className="w-full"
                 variant="submit"
             >
-                {isLoading ? 'Submitting...' : 'Submit Rx'}
+                {isLoading ? 'Loading…' : 'Submit Rx'}
             </Button>
 
             <RxOrderDrawer

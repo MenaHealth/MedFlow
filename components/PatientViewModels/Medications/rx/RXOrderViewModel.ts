@@ -68,37 +68,37 @@ export function useRXOrderViewModel(
         }));
     };
 
-const submitRxOrder = async () => {
-    setIsLoading(true);
-    try {
-        const response = await fetch(`/api/patient/${patientId}/medications/rx-order`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(rxOrder),
-        });
+    const submitRxOrder = async () => {
+        setIsLoading(true);
+        try {
+            const response = await fetch(`/api/patient/${patientId}/medications/rx-order`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(rxOrder),
+            });
 
-        if (!response.ok) throw new Error('Failed to save RX order');
+            if (!response.ok) throw new Error('Failed to save RX order');
 
-        const savedRxOrder = await response.json();
+            const savedRxOrder = await response.json();
 
-        addRxOrder(savedRxOrder);
-        await refreshMedications();
+            addRxOrder(savedRxOrder);  // Update patient context with new RX order
+            await refreshMedications();
 
-        setRxOrder(prevOrder => ({
-            ...prevOrder,
-            prescribedDate: new Date(),
-            validTill: new Date(new Date().setMonth(new Date().getMonth() + 1)),
-            city, // Reset city to the passed value
-            prescriptions: [{ diagnosis: '', medication: '', dosage: '', frequency: '' }],
-        }));
+            setRxOrder(prevOrder => ({
+                ...prevOrder,
+                prescribedDate: new Date(),
+                validTill: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+                city, // Reset city to the passed value
+                prescriptions: [{ diagnosis: '', medication: '', dosage: '', frequency: '' }],
+            }));
 
-        onNewRxOrderSaved(savedRxOrder);
-    } catch (error) {
-        console.error('Failed to save RX order:', error);
-    } finally {
-        setIsLoading(false);
-    }
-};
+            onNewRxOrderSaved(savedRxOrder);  // Open drawer with new RX order
+        } catch (error) {
+            console.error('Failed to save RX order:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return {
         rxOrder,

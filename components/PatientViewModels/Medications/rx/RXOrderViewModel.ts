@@ -16,7 +16,7 @@ export function useRXOrderViewModel(
 ) {
     const { userSession, refreshMedications, addRxOrder } = usePatientDashboard();
     const [rxOrder, setRxOrder] = useState<IRxOrder>({
-        doctorSpecialization: userSession?.doctorSpecialty || 'Not Selected',
+        doctorSpecialty: userSession?.doctorSpecialty || 'Not Selected',
         prescribingDr: `${userSession?.firstName} ${userSession?.lastName}`,
         drEmail: userSession?.email || '',
         drId: userSession?.id || '',

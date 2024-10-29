@@ -61,9 +61,9 @@ export default function RXOrderView({ patientId, user, patientInfo }: RXOrderVie
                             readOnly={true}
                         />
                         <TextFormField
-                            fieldName="doctorSpecialization"
+                            fieldName="doctorSpecialty"
                             fieldLabel="Specialization"
-                            value={rxOrder.doctorSpecialization}
+                            value={rxOrder.doctorSpecialty}
                             readOnly={true}
                         />
                     </div>

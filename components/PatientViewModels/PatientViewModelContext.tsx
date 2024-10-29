@@ -56,6 +56,7 @@ interface PatientContext {
     loadingMedications: boolean;
     refreshMedications: () => Promise<void>;
     addRxOrder: (newRxOrder: IRxOrder) => void;
+    addMedOrder: (newMedOrder: IMedOrder) => void;
 }
 
 const PatientViewModelContext = createContext<PatientContext | undefined>(undefined);
@@ -184,6 +185,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
     }, [patientId, fetchPatientData]);
 
     const refreshPatientNotes = () => fetchPatientData();
+
     const refreshMedications = async () => {
         setLoadingMedications(true);
         try {
@@ -191,7 +193,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             if (!response.ok) throw new Error("Error fetching medications data");
             const data = await response.json();
             setrxOrders(data.rxOrders || []); // Update rxOrders with fresh data
-            setmedOrders(data.medOrders || []);
+            setmedOrders(data.medOrders || []); // Update medOrders with fresh data
         } catch (error) {
             console.error('Error refreshing medications:', error);
         } finally {
@@ -207,6 +209,14 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             return updatedOrders;
         });
     }, [fetchPatientData]);
+
+    const addMedOrder = useCallback((newMedOrder: IMedOrder) => {
+        setmedOrders((prevOrders) => {
+            const updatedMedOrders = [...prevOrders, newMedOrder];
+            console.log("Updated Med Orders:", updatedMedOrders); // Logging for verification
+            return updatedMedOrders;
+        });
+    }, []);
 
 
     return (
@@ -231,6 +241,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 loadingMedications,
                 refreshMedications,
                 addRxOrder,
+                addMedOrder,
             }}
         >
             {children}

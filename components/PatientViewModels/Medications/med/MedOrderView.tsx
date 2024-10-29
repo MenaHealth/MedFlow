@@ -3,12 +3,11 @@
 'use client'
 
 import React from 'react';
-import { TextFormField } from './../../../../components/ui/TextFormField';
-import { Button } from './../../../ui/button';
-import { IMedOrder } from '../../../../models/medOrder';
-import { DoctorSpecialtyList } from './../../../../data/doctorSpecialty.enum';
+import { TextFormField } from '@/components/ui/TextFormField';
+import { Button } from '@/components/ui/button';
 import { Plus, Minus } from 'lucide-react';
 import { useMedOrderViewModel } from './MedOrderViewModel';
+import {DoctorSpecialtyList} from "@/data/doctorSpecialty.enum";
 
 interface User {
     firstName: string;
@@ -25,16 +24,11 @@ export default function MedOrderView({ patientId, user }: MedOrderViewProps) {
     const {
         medOrder,
         isLoading,
-        handleInputChange,
         handleMedicationChange,
         addMedication,
         removeMedication,
         submitMedOrder,
-        patientInfo,
-        patientViewModel,
     } = useMedOrderViewModel(patientId, user.firstName, user.doctorSpecialty);
-
-    const expandedDetails = patientViewModel?.getExpandedDetails();
 
     return (
         <div className="space-y-6 max-w-2xl mx-auto bg-orange-950">
@@ -51,7 +45,7 @@ export default function MedOrderView({ patientId, user }: MedOrderViewProps) {
                         <TextFormField
                             fieldName="doctorSpecialty"
                             fieldLabel="Specialization"
-                            value={user.doctorSpecialty}
+                            value={DoctorSpecialtyList[medOrder.doctorSpecialty]}
                             readOnly={true}
                         />
                     </div>

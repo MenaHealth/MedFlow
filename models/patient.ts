@@ -7,7 +7,7 @@
 
   export interface IRxOrder {
     _id?: string;
-    doctorSpecialization: string;
+    doctorSpecialty: string;
     prescribingDr: string;
     drEmail: string;
     drId: string;
@@ -24,7 +24,7 @@
   }
 
   const rxOrderSchema = new Schema({
-    doctorSpecialization: { type: String, required: true },
+    doctorSpecialty: { type: String, required: true },
     prescribingDr: { type: String, required: true },
     drEmail: { type: String, required: true },
     drId: { type: String, required: true },

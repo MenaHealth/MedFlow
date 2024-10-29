@@ -4,7 +4,7 @@ import { Schema, Document, Model, model, models, Types } from 'mongoose';
 import { DoctorSpecialtyList } from './../data/doctorSpecialty.enum';
 
 export interface IMedOrder extends Document {
-    doctorSpecialization: string;
+    doctorSpecialty: string;
     prescribingDr: string;
     drEmail: string;
     drId: string;
@@ -24,7 +24,7 @@ export interface IMedOrder extends Document {
 }
 
 export const medOrderSchema = new Schema<IMedOrder>({
-    doctorSpecialization: { type: String, enum: Object.values(DoctorSpecialtyList), required: true },
+    doctorSpecialty: { type: String, enum: Object.values(DoctorSpecialtyList), required: true },
     prescribingDr: { type: String, required: true },
     drEmail: { type: String, required: true },
     drId: { type: String, required: true },

@@ -11,7 +11,7 @@ export const POST = async (request: Request, { params }: { params: { id: string 
         const patientId = params.id;
         const requestData = await request.json();
         const {
-            doctorSpecialization,
+            doctorSpecialty,
             prescribingDr,
             drEmail,
             drId,
@@ -22,7 +22,7 @@ export const POST = async (request: Request, { params }: { params: { id: string 
         } = requestData;
 
         // Validate required fields
-        if (!doctorSpecialization || !prescriptions || prescriptions.length === 0) {
+        if (!doctorSpecialty || !prescriptions || prescriptions.length === 0) {
             return new NextResponse("Missing required fields", { status: 400 });
         }
 
@@ -36,7 +36,7 @@ export const POST = async (request: Request, { params }: { params: { id: string 
 
         // Create a new RX order object
         const newRxOrder = {
-            doctorSpecialization,
+            doctorSpecialty,
             prescribingDr,
             drEmail,
             drId,

@@ -131,7 +131,7 @@ export default function RxOrderDrawer({ isOpen, onClose, rxOrder }: RxOrderDrawe
                                 <p className="flex items-center"><Activity
                                     className="h-4 w-4 mr-2 text-orange-500" /><strong className="text-orange-900 mr-2">Prescribed By:</strong> Dr. {rxOrder.prescribingDr}</p>
                                 <p className="flex items-center"><Aperture
-                                    className="h-4 w-4 mr-2 text-orange-500" /><strong className="text-orange-900 mr-2">Specialization:</strong> {rxOrder.doctorSpecialization}</p>
+                                    className="h-4 w-4 mr-2 text-orange-500" /><strong className="text-orange-900 mr-2">Specialization:</strong> {rxOrder.doctorSpecialty}</p>
                                 <p className="flex items-center"><Clock9
                                     className="h-4 w-4 mr-2 text-orange-500" /><strong className="text-orange-900 mr-2">Prescribed Date:</strong> {new Date(rxOrder.prescribedDate).toLocaleDateString()}</p>
                                 <p className="flex items-center"><Clock

@@ -29,7 +29,7 @@ interface MedOrder {
 }
 
 export function useMedOrderViewModel(patientId: string, patientName: string, city: string) {
-    const { userSession, patientInfo, patientViewModel } = usePatientDashboard();
+    const { userSession, patientInfo, patientViewModel, addMedOrder } = usePatientDashboard();
 
     const [medOrder, setMedOrder] = useState<MedOrder>({
         doctorSpecialty: userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList || DoctorSpecialtyList.NOT_SELECTED,
@@ -84,58 +84,22 @@ export function useMedOrderViewModel(patientId: string, patientName: string, cit
     };
 
     // Submit the medical order to the API
+    // Inside submitMedOrder function in MedOrderViewModel
     const submitMedOrder = async () => {
         setIsLoading(true);
         try {
-            const response = await fetch(`/api/med-orders`, {
+            const response = await fetch(`/api/patient/${patientId}/medications/med-order`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    doctorSpecialty: medOrder.doctorSpecialty,
-                    prescribingDr: medOrder.prescribingDr,
-                    drEmail: medOrder.drEmail,
-                    drId: medOrder.drId,
-                    patientName: medOrder.patientName,
-                    patientPhone: medOrder.patientPhone,
-                    patientCity: medOrder.patientCity,
-                    patientId: medOrder.patientId,
-                    orderDate: medOrder.orderDate,
-                    validated: medOrder.validated,
-                    medications: medOrder.medications.map(med => ({
-                        diagnosis: med.diagnosis,
-                        medication: med.medication,
-                        dosage: med.dosage,
-                        frequency: med.frequency,
-                        quantity: med.quantity
-                    })),
-                }),
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(medOrder),
             });
 
-            if (!response.ok) {
-                throw new Error('Failed to submit med order');
-            }
+            if (!response.ok) throw new Error('Failed to save Med Order');
 
-            // Handle successful submission
-            console.log('Med order submitted successfully');
-
-            // Reset the form after successful submission
-            setMedOrder({
-                doctorSpecialty: userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList || DoctorSpecialtyList.NOT_SELECTED,
-                prescribingDr: `${userSession?.firstName} ${userSession?.lastName}`,
-                drEmail: userSession?.email || '',
-                drId: userSession?.id || '',
-                patientName: patientInfo?.patientName || '',
-                patientPhone: patientViewModel?.getExpandedDetails()?.phone || '',
-                patientCity: patientViewModel?.getExpandedDetails()?.city || '',
-                patientId: patientId,
-                orderDate: new Date(),
-                validated: false,
-                medications: [{ diagnosis: '', medication: '', dosage: '', frequency: '', quantity: '' }],
-            });
+            const newMedOrder = await response.json();
+            addMedOrder(newMedOrder); // Add to context after successful save
         } catch (error) {
-            console.error('Failed to submit med order:', error);
+            console.error("Failed to save Med Order:", error);
         } finally {
             setIsLoading(false);
         }

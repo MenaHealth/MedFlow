@@ -1,4 +1,4 @@
-// app/api/admin/existing-users/route.ts
+// app/api/adminDashboard/existing-users/route.ts
 import { NextResponse } from 'next/server';
 import dbConnect from './../../../../../utils/database';
 import User from "./../../../../../models/user";

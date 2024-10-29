@@ -1,4 +1,4 @@
-    // components/auth/admin/PendingUsers.tsx
+    // components/auth/adminDashboard/PendingUsers.tsx
     'use client';
 
     import { useState, useEffect } from 'react';
@@ -39,7 +39,7 @@
         const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
 
         // Handle approve-users or deny-users action
-// components/auth/admin/PendingUsers.tsx
+// components/auth/adminDashboard/PendingUsers.tsx
         async function handleBulkAction(actionType: 'approve-users' | 'deny-users') {
             if (!session?.user?.token || selectedUsers.length === 0) {
                 setToast?.({

@@ -25,6 +25,7 @@ import Tooltip from '../../../components/form/Tooltip';
 import './dashboard.css';
 import TableCellWithTooltip from '@/components/TableCellWithTooltip';
 import * as Toast from '@radix-ui/react-toast';
+import { Languages } from '@/utils/languages.enum';
 
 import NotesCell from '@/components/NotesCell';
 
@@ -144,7 +145,7 @@ export default function PatientTriage() {
           (row) =>
               row.triagedBy &&
               Object.keys(row.triagedBy).length !== 0 &&
-              session.user.languages.includes(row.language) &&
+              (session.user.languages || [Languages.ENGLISH]).includes(row.language) &&  // Default to English
               session.user.doctorSpecialty === row.specialty
       );
     }

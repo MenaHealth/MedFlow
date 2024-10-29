@@ -155,14 +155,19 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                             <ScrollArea className="h-full w-full pb-16">
                                 <div className="mt-4 p-4">
                                     {templateType === 'rxOrder' && (
-                                        <RXOrderView
+                                        < RXOrderView
                                             user={{
                                                 firstName: userSession?.firstName || '',
                                                 lastName: userSession?.lastName || '',
                                                 doctorSpecialty: (userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList) || 'NOT_SELECTED',
                                             }}
                                             patientId={patientId}
-                                            patientInfo={patientInfo || { patientName: '', phoneNumber: '', age: '', city: '' }}
+                                            patientInfo={{
+                                                patientName: patientInfo?.patientName || '',
+                                                phoneNumber: patientInfo?.phone?.phoneNumber || '',
+                                                age: patientInfo?.age || '',
+                                                city: patientInfo?.city || ''
+                                            }}
                                         />
                                     )}
                                     {templateType === 'medOrder' && (

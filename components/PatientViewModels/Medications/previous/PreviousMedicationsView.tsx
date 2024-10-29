@@ -1,14 +1,19 @@
 // components/PatientViewModels/Medications/previous/PreviousMedicationsView.tsx
+
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp, Share } from 'lucide-react';
 import { ScrollArea } from '../../../form/ScrollArea';
-import { usePreviousMedicationsViewModel } from './PreviousMedicationsViewModel';
 import RxOrderDrawer from './../rx/RxOrderDrawer';
 import { IRxOrder } from '../../../../models/patient';
 import { IMedOrder } from '../../../../models/medOrder';
 
-export default function PreviousMedicationsView() {
-    const { rxOrders, medOrders, loadingMedications } = usePreviousMedicationsViewModel();
+interface PreviousMedicationsViewProps {
+    rxOrders: IRxOrder[];
+    medOrders: IMedOrder[];
+    loadingMedications: boolean;
+}
+
+const PreviousMedicationsView: React.FC<PreviousMedicationsViewProps> = ({ rxOrders, medOrders, loadingMedications }) => {
     const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [selectedRxOrder, setSelectedRxOrder] = useState<IRxOrder | null>(null);
@@ -116,4 +121,6 @@ export default function PreviousMedicationsView() {
             />
         </div>
     );
-}
+};
+
+export default PreviousMedicationsView;

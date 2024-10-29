@@ -74,7 +74,7 @@ export default function RxOrderDrawer({ isOpen, onClose, rxOrder }: RxOrderDrawe
     };
 
     const sendTextMessage = () => {
-        const phoneNumber = patientInfo.phoneNumber;
+        const phoneNumber = `${patientInfo.phone?.countryCode || ''}${patientInfo.phone?.phoneNumber || ''}`;
         const patientName = patientInfo.patientName;
         const doctorName = rxOrder?.prescribingDr || "Your Doctor";
         const medicationsList = rxOrder?.prescriptions?.[0]?.medication || "your prescription";
@@ -107,17 +107,18 @@ export default function RxOrderDrawer({ isOpen, onClose, rxOrder }: RxOrderDrawe
                         <div className="bg-orange-50 p-4 rounded-lg">
                             <h3 className="font-semibold text-lg mb-4 text-center text-orange-900 border-b border-orange-200 pb-2">Patient Information</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <p className="flex items-center"><User className="h-4 w-4 mr-2 text-orange-500" /><strong
+                                <p className="flex items-center"><User className="h-4 w-4 mr-2 text-orange-500"/><strong
                                     className="text-orange-900 mr-2">Name:</strong> {patientInfo.patientName}</p>
                                 <p className="flex items-center"><Calendar
-                                    className="h-4 w-4 mr-2 text-orange-500" /><strong
+                                    className="h-4 w-4 mr-2 text-orange-500"/><strong
                                     className="text-orange-900 mr-2">DOB:</strong> {patientInfo.dob.toLocaleDateString()}
                                 </p>
                                 <p className="flex items-center"><Phone
-                                    className="h-4 w-4 mr-2 text-orange-500" /><strong
-                                    className="text-orange-900 mr-2">Phone:</strong> {patientInfo.phoneNumber}</p>
+                                    className="h-4 w-4 mr-2 text-orange-500"/><strong
+                                    className="text-orange-900 mr-2">Phone:</strong> {`${patientInfo.phone?.countryCode || ''} ${patientInfo.phone?.phoneNumber || ''}`}
+                                </p>
                                 <p className="flex items-center"><MapPin
-                                    className="h-4 w-4 mr-2 text-orange-500" /><strong
+                                    className="h-4 w-4 mr-2 text-orange-500"/><strong
                                     className="text-orange-900 mr-2">City:</strong> {patientInfo.city}</p>
                             </div>
                         </div>

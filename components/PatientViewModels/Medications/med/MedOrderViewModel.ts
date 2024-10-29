@@ -37,7 +37,7 @@ export function useMedOrderViewModel(patientId: string, patientName: string, cit
         drEmail: userSession?.email || '',
         drId: userSession?.id || '',
         patientName: patientInfo?.patientName || '',
-        patientPhone: patientViewModel?.getExpandedDetails()?.phone || '',
+        patientPhone: `${patientViewModel?.getExpandedDetails()?.phone?.countryCode || ''} ${patientViewModel?.getExpandedDetails()?.phone?.phoneNumber || ''}`,
         patientCity: patientViewModel?.getExpandedDetails()?.city || '',
         patientId: patientId,
         orderDate: new Date(),

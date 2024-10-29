@@ -51,9 +51,11 @@ export enum CountryCodes {
     EGYPT = '+20',
     AFGHANISTAN = '+93',
     LEBANON = '+961',
+    JORDAN = '+962',
     SYRIA = '+963',
     YEMEN = '+967',
     PALESTINE = '+970',
+    ISRAEL = '+972',
 }
 
 export const CountryCodesList = Object.values(CountryCodes)

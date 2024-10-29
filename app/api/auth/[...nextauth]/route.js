@@ -65,9 +65,6 @@ const handler = NextAuth({
                     isAdmin: !!isAdmin,
                     dob: user.dob,
                     gender: user.gender,
-                    countries: user.countries || [],
-                    languages: user.languages || [],
-                    doctorSpecialty: user.doctorSpecialty,
                 };
 
                 if (user.accountType === 'Doctor') {
@@ -121,6 +118,8 @@ const handler = NextAuth({
                     token.image = user.image;
                     token.isAdmin = user.isAdmin;
                     token.dob = user.dob;
+                    token.languages = user.languages;
+                    token.doctorSpecialty = user.doctorSpecialty;
 
                         token.accessToken = jwt.sign(
                             { id: user._id, email: user.email, isAdmin: user.isAdmin },

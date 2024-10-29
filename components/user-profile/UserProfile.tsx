@@ -1,13 +1,12 @@
 import React, { useState } from "react";
-import { Session } from 'next-auth';
 import { Card, CardContent, CardHeader, CardTitle } from './../../components/ui/card';
 import { Avatar } from './../../components/ui/avatar';
 import { Label } from './../../components/ui/label';
 import { Button } from './../../components/ui/button';
 import { Input } from './../../components/ui/input';
 import { Pencil, X, Copy, Check } from 'lucide-react';
-import { Countries, CountriesList } from '@/data/countries.enum';
-import { Languages, LanguagesList } from '@/data/languages.enum';
+import { CountriesList } from '@/data/countries.enum';
+import { LanguagesList } from '@/data/languages.enum';
 import { MultiChoiceFormField } from "./../../components/form/MultiChoiceFormField";
 import { SingleChoiceFormField } from "./../../components/form/SingleChoiceFormField";
 import { DatePickerFormField } from "./../../components/form/DatePickerFormField";
@@ -16,10 +15,23 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 interface UserProfileProps {
-    user: Session["user"];
+    user: {
+        _id: string;
+        firstName: string;
+        lastName: string;
+        dob: Date;
+        languages: string[];
+        countries: string[];
+        gender: 'male' | 'female';
+        image?: string;
+        email?: string;
+        accountType?: 'Doctor' | 'Triage';
+        doctorSpecialty?: string;
+    }
 }
 
 const userProfileSchema = z.object({
+    _id: z.string(),
     firstName: z.string().min(1, "First name is required"),
     lastName: z.string().min(1, "Last name is required"),
     dob: z.string().refine((value) => {
@@ -31,6 +43,10 @@ const userProfileSchema = z.object({
     languages: z.array(z.string()).min(1, "At least one language is required"),
     countries: z.array(z.string()).min(1, "At least one country is required"),
     gender: z.enum(['male', 'female'], { errorMap: () => ({ message: "Gender is required" }) }),
+    image: z.string().optional(),
+    email: z.string().optional(),
+    accountType: z.enum(['Doctor', 'Triage'], { errorMap: () => ({ message: "Account type is required" }) }),
+    doctorSpecialty: z.string().optional(),
 });
 
 type UserProfileFormValues = z.infer<typeof userProfileSchema>;
@@ -39,6 +55,7 @@ export function UserProfile({ user }: UserProfileProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isCopied, setIsCopied] = useState(false);
+    console.log(user)
 
     const methods = useForm<UserProfileFormValues>({
         resolver: zodResolver(userProfileSchema),
@@ -49,6 +66,10 @@ export function UserProfile({ user }: UserProfileProps) {
             languages: user.languages || [],
             countries: user.countries || [],
             gender: user.gender || undefined,
+            image: user.image || undefined,
+            email: user.email || undefined,
+            accountType: user.accountType || undefined,
+            doctorSpecialty: user.doctorSpecialty || undefined,
         },
     });
 

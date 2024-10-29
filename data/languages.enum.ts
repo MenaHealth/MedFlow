@@ -1,4 +1,4 @@
-// utils/languages.enum.ts
+// data/languages.enum.ts
 export enum Languages {
     ENGLISH = 'English',
     ARABIC = 'Arabic',

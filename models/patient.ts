@@ -2,10 +2,9 @@
   import { Schema, model, models, Document, Types } from 'mongoose';
   import { DoctorSpecialties as SPECIALTIES } from './../data/doctorSpecialty.enum';
   import { INote, noteSchema } from './note';
-  import {IMedOrder, medOrderSchema} from "./medOrder";
 
 
-  export interface IRxOrder {
+export interface IRxOrder {
     _id?: string;
     doctorSpecialty: string;
     prescribingDr: string;
@@ -21,9 +20,9 @@
       dosage: string;
       frequency: string;
     }>;
-  }
+}
 
-  const rxOrderSchema = new Schema({
+const rxOrderSchema = new Schema({
     doctorSpecialty: { type: String, required: true },
     prescribingDr: { type: String, required: true },
     drEmail: { type: String, required: true },
@@ -42,12 +41,16 @@
     ]
   });
 
-  export interface IPatient extends Document {
+export interface IPatient extends Document {
     files?: any[];
     firstName: string;
     lastName: string;
-    phone?: string;
+        phone?: {
+          countryCode: string;
+          phoneNumber: string;
+        }
     age?: string;
+    bmi?: string;
     dob?: Date;
     country?: string;
     city?: string;
@@ -56,8 +59,7 @@
     previouslyRegistered?: string;
     chiefComplaint?: string;
     coordinatorId?: string;
-    email?: string; // This makes email optional
-    laterality?: 'Not Selected' | 'Left' | 'Right' | 'Bilateral';
+    email?: string;
     diagnosis?: string;
     diagnosisCat?: string;
     hospital?: 'Not Selected' | 'PMC' | 'PRCS' | 'Hugo Chavez';
@@ -69,36 +71,44 @@
     surgeryDate?: Date;
     occupation?: string;
     baselineAmbu?: 'Not Selected' | 'Independent' | 'Boot' | 'Crutches' | 'Walker' | 'Non-Ambulatory';
-    pmhx?: string[];
-    pshx?: string[];
+    pmhx?: string;
+    pshx?: string;
+    famhx?: string;
     smokeCount?: string;
     drinkCount?: string;
     otherDrugs?: string;
     allergies?: string;
+    dashboardNotes?: string;
     notes?: Types.DocumentArray<INote>;
     rxOrders?: string[];
     medOrders?: Types.ObjectId[];
     visits?: any[];
+    prevMeds?: string;
+    currentMeds?: string;
     triagedBy?: {
-      firstName?: string;
-      lastName?: string;
-      email?: string;
+        firstName?: string;
+        lastName?: string;
+        email?: string;
     };
     doctor?: {
-      firstName?: string;
-      lastName?: string;
-      email?: string;
+        firstName?: string;
+        lastName?: string;
+        email?: string;
     };
     createdAt?: Date;
     updatedAt?: Date;
-  }
+}
 
 
-  const PatientSchema = new Schema<IPatient>({
+const PatientSchema = new Schema<IPatient>({
     files: [{ type: Object }],
     firstName: { type: String, required: true },
     lastName: { type: String },
-    phone: { type: String },
+    bmi: { type: String },
+    phone: {
+        countryCode: { type: String },
+        phoneNumber: { type: String },
+    },
     age: { type: String },
     dob: { type: Date },
     city: { type: String },
@@ -108,7 +118,6 @@
     language: { type: String },
     chiefComplaint: { type: String },
     email: { type: String },
-    laterality: { type: String, enum: ['Not Selected', 'Left', 'Right', 'Bilateral'], default: 'Not Selected' },
     diagnosis: { type: String },
     diagnosisCat: { type: String },
     hospital: { type: String, enum: ['Not Selected', 'PMC', 'PRCS', 'Hugo Chavez'], default: 'Not Selected' },
@@ -119,25 +128,26 @@
     surgeryDate: { type: Date },
     occupation: { type: String },
     baselineAmbu: { type: String, enum: ['Not Selected', 'Independent', 'Boot', 'Crutches', 'Walker', 'Non-Ambulatory'] },
-    pmhx: { type: [String], default: [] },
-    pshx: { type: [String], default: [] },
+    pmhx: { type: String },
+    pshx: { type: String },
+    famhx: { type: String },
     smokeCount: { type: String },
     drinkCount: { type: String },
     otherDrugs: { type: String },
     allergies: { type: String },
+    prevMeds: { type: String },
+    currentMeds: { type: String },
     notes: { type: [noteSchema], default: [] },
-    // Make `rxOrders` optional by removing the required properties and default value
+    dashboardNotes: { type: String },
     rxOrders: { type: [rxOrderSchema], required: false },
-    // Make `medOrders` optional by removing the default empty array
-
     medOrders: [{ type: Schema.Types.ObjectId, ref: 'MedOrder', required: false }],
     visits: [{ type: Schema.Types.ObjectId, ref: 'Visit' }],
     triagedBy: { type: Object },
     doctor: { type: Object },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date }
-  });
+});
 
-  const Patient = models.Patient || model<IPatient>('Patient', PatientSchema);
+const Patient = models.Patient || model<IPatient>('Patient', PatientSchema);
 
-  export default Patient;
+export default Patient;

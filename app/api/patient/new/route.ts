@@ -5,7 +5,6 @@ import dbConnect from "@/utils/database";
 export const POST = async (request: Request) => {
   try {
     const patientData: IPatient = await request.json();
-    console.log('Received patient data:', patientData);
 
     if (!patientData) {
       return new Response('Invalid patient data', { status: 400 });
@@ -20,7 +19,6 @@ export const POST = async (request: Request) => {
     });
 
     await newPatient.save();
-    console.log('Patient created successfully:', newPatient);
 
     return new Response(JSON.stringify(newPatient), { status: 201 });
   } catch (error: any) {

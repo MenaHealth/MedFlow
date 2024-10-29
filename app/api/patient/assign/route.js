@@ -5,9 +5,6 @@ import { ObjectId } from 'mongodb';
 export async function PATCH(req, res) {
   const { patientId, doctor, status, priority, medOrders, rxOrders } = await req.json();
 
-  // Log incoming request data
-  console.log("Received request:", { patientId, doctor, status, priority, medOrders, rxOrders });
-
   try {
     // Validate patientId
     if (!ObjectId.isValid(patientId)) {

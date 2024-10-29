@@ -14,10 +14,20 @@ export const GET = async (request, { params }) => {
 }
 
 export const PATCH = async (request, { params }) => {
-
     const { 
         _id,
-        name,
+        files,
+        firstName,
+        lastName,
+        phone,
+        age,
+        dob,
+        country,
+        city,
+        language,
+        genderPreference,
+        chiefComplaint,
+        email,
         priority,
         specialty,
         hospital,
@@ -27,6 +37,7 @@ export const PATCH = async (request, { params }) => {
         status,
         triagedBy,
         notes,
+        dashboardNotes,
         doctor
     } = await request.json();
 
@@ -40,6 +51,18 @@ export const PATCH = async (request, { params }) => {
         }
         let returnId = null;
 
+        existingPatient.files = files ?? existingPatient.files;
+        existingPatient.firstName = firstName ?? existingPatient.firstName;
+        existingPatient.lastName = lastName ?? existingPatient.lastName;
+        existingPatient.phone = phone ?? existingPatient.phone;
+        existingPatient.age = age ?? existingPatient.age;
+        existingPatient.dob = dob ?? existingPatient.dob;
+        existingPatient.country = country ?? existingPatient.country;
+        existingPatient.city = city ?? existingPatient.city;
+        existingPatient.language = language ?? existingPatient.language;
+        existingPatient.genderPreference = genderPreference ?? existingPatient.genderPreference;
+        existingPatient.chiefComplaint = chiefComplaint ?? existingPatient.chiefComplaint;
+        existingPatient.email = email ?? existingPatient.email;
         existingPatient.priority = priority ?? existingPatient.priority;
         existingPatient.specialty = specialty ?? existingPatient.specialty;
         existingPatient.hospital = hospital ?? existingPatient.hospital;
@@ -47,6 +70,7 @@ export const PATCH = async (request, { params }) => {
         existingPatient.triagedBy = triagedBy ?? existingPatient.triagedBy;
         existingPatient.notes = notes ?? existingPatient.notes;
         existingPatient.doctor = doctor ?? existingPatient.doctor;
+        existingPatient.dashboardNotes = dashboardNotes ?? existingPatient.dashboardNotes;
 
         if (assignedDocId) {
             existingPatient.assignedDocId = assignedDocId === "unassign" ? null : assignedDocId;
@@ -61,7 +85,7 @@ export const PATCH = async (request, { params }) => {
         try {
             await existingPatient.save();
         } catch (e) {
-            console.log(e)
+            console.error('Error saving patient:', e.message);
         }
 
         return new Response(JSON.stringify(returnId), { status: 200 });

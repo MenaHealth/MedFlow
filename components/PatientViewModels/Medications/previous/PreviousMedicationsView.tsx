@@ -1,5 +1,4 @@
 // components/PatientViewModels/Medications/previous/PreviousMedicationsView.tsx
-
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp, Share } from 'lucide-react';
 import { ScrollArea } from '../../../form/ScrollArea';
@@ -105,7 +104,7 @@ export default function PreviousMedicationsView() {
                     </ul>
                 ) : (
                     <div className="mt-2 border-white border-2 text-white rounded-lg m-4 p-4 text-center">
-                        <p><strong>No previous medications</strong> for this patient.</p>
+                        <p><strong>No previous medications found</strong> for this patient.</p>
                     </div>
                 )}
             </ScrollArea>

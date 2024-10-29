@@ -32,15 +32,11 @@ export function SingleChoiceFormField({
     );
 
     const handleSelect = useCallback((selectedChoice: string) => {
-
-        if (formContext && formContext.setValue) {
+        if (formContext) {
             formContext.setValue(fieldName, selectedChoice);
-        }
-
-        if (propOnChange) {
+        } else if (propOnChange) {
             propOnChange(selectedChoice);
         }
-
         setOpen(false);
     }, [formContext, fieldName, propOnChange]);
 
@@ -97,7 +93,7 @@ export function SingleChoiceFormField({
                                         <Check
                                             className={cn(
                                                 "mr-2 h-4 w-4",
-                                                displayValue === choice ? "opacity-100" : "opacity-0"
+                                                field.value === choice ? "opacity-100" : "opacity-0"
                                             )}
                                         />
                                         {choice}
@@ -123,5 +119,5 @@ export function SingleChoiceFormField({
     }
 
     // Fallback for cases where FormProvider is not available
-    return renderField({ field: { value: propValue, onChange: (value: string) => handleSelect(value) } });
+    return renderField({ field: { value: propValue, onChange: propOnChange } });
 }

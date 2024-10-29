@@ -7,9 +7,10 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ClipLoader } from 'react-spinners';
 import { generateEncryptionKey, encryptPhoto, calculateFileHash, convertToWebP, decryptPhoto } from '@/utils/encryptPhoto';
 import Image from 'next/image';
-import PatientSubmenu from "../../../components/PatientSubmenu";
+//import PatientSubmenu from "../../../components/PatientSubmenu";
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { FiMinus, FiPlus } from 'react-icons/fi';
+import { useSession } from 'next-auth/react';
 
 const DEFAULT_FORM_VALUES = {
     age: 0,
@@ -21,9 +22,9 @@ const DEFAULT_FORM_VALUES = {
     priority: "Routine",
     hospital: "PMC",
     baselineAmbu: "Independent",
-    medx: [],
-    pmhx: [],
-    pshx: [],
+    medx: '',
+    pmhx: '',
+    pshx: '',
     smokeCount: "",
     drinkCount: "",
     otherDrugs: "",
@@ -43,6 +44,9 @@ const ImageGallery = () => {
     const [clickZoomOut, setClickZoomOut] = useState(false);
     const carouselRef = useRef(null);
     const fileInputRef = useRef(null);
+    const [isDoctor, setIsDoctor] = useState(false);
+
+    const { data: session } = useSession();
 
     useEffect(() => {
         if (id !== '') {
@@ -54,7 +58,6 @@ const ImageGallery = () => {
                     return response.json();
                 })
                 .then(data => {
-                    console.log('Fetched patient data:', data);
                     setPatientFiles(data.files);
                 })
                 .catch(error => {
@@ -100,7 +103,6 @@ const ImageGallery = () => {
                             tempPhotos.push(data);
                         }
                     }
-                    console.log('Fetched photos:', tempPhotos);
                     setPhotos(tempPhotos);
                 }
             } catch (error) {
@@ -142,7 +144,6 @@ const ImageGallery = () => {
                 formData.append('file', new Blob([convertedFile]), `${fileHashes[index]}.webp`);
             });
 
-            console.log('Uploading files:', formData);
 
             const response = await fetch('/api/patient/photos', {
                 method: 'POST',
@@ -155,7 +156,6 @@ const ImageGallery = () => {
             }
 
             const result = await response.json();
-            console.log('Upload result:', result);
 
             encryptedImages = convertedFiles.map((file, index) => ({ hash: fileHashes[index] }));
         } catch (err) {
@@ -189,7 +189,6 @@ const ImageGallery = () => {
             }
 
             const updatedPatient = await patchResponse.json();
-            console.log('Updated patient:', updatedPatient);
 
             setPatientFiles((prev) => [...prev, ...encryptedImages]);
 
@@ -204,10 +203,16 @@ const ImageGallery = () => {
         }
     };
 
+    useEffect(() => {
+        if (!session) return;
+        if (session.user.accountType === 'Doctor') {
+            setIsDoctor(true);
+        }
+    }, [session]);
+
     return (
         <>
             <div className="w-full max-w-4xl mx-auto pb-16">
-                <PatientSubmenu />
                 <div className="border border-gray-300 p-8 my-2 bg-white shadow rounded-lg">
                     <div style={{ minWidth: '75%' }}>
                         {isLoading ? (
@@ -300,20 +305,22 @@ const ImageGallery = () => {
                     </div>
                 </div>
 
-                <div>
-                    <h1 className="text-2xl font-bold mb-4 mt-4">Upload Files</h1>
-                    <form onSubmit={handleFormSubmit} className='flex flex-col'>
-                    <input
-                            type="file"
-                            multiple
-                            onChange={handleFileChange}
-                            ref={fileInputRef}
-                        />
-                        <Button type="submit" variant="contained" color="primary" style={{ width: '110px', marginTop: '5px' }}>
-                            Submit
-                        </Button>
-                    </form>
-                </div>
+                {isDoctor && (
+                    <div>
+                        <h1 className="text-2xl font-bold mb-4 mt-4">Upload Files</h1>
+                        <form onSubmit={handleFormSubmit} className='flex flex-col'>
+                        <input
+                                type="file"
+                                multiple
+                                onChange={handleFileChange}
+                                ref={fileInputRef}
+                            />
+                            <Button type="submit" variant="contained" color="primary" style={{ width: '110px', marginTop: '5px' }}>
+                                Submit
+                            </Button>
+                        </form>
+                    </div>
+                )}
                 </div>
         </>
     );

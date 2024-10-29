@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from 'react';
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
@@ -26,6 +26,8 @@ import './dashboard.css';
 import TableCellWithTooltip from '@/components/TableCellWithTooltip';
 import * as Toast from '@radix-ui/react-toast';
 
+import NotesCell from '@/components/NotesCell';
+
 
 import {
   DropdownMenu,
@@ -39,18 +41,16 @@ import {
 import { PRIORITIES, STATUS } from '@/data/data';
 import { DoctorSpecialties as DOCTOR_SPECIALTIES } from '@/data/doctorSpecialty.enum';
 import Link from 'next/link';
-import TriageModalView from "../../../components/TriageDashboard/TriageModalView";
 
 export default function PatientTriage() {
   const { data: session, status } = useSession();
+  const [allData, setAllData] = useState([]);
   const [rows, setRows] = React.useState([]);
   const [userSession, setUserSession] = useState(null);
   const [priorityFilter, setPriorityFilter] = React.useState("all");
   const [statusFilter, setStatusFilter] = React.useState("all");
   const [specialtyFilter, setSpecialtyFilter] = React.useState("all");
-  const [triageNotes, setTriageNotes] = useState({});
 
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -71,21 +71,8 @@ export default function PatientTriage() {
         countries: session.user.countries,
       };
       setUserSession(userSessionData);
-      console.log('Full user session object:', userSessionData);
     }
   }, [session, status]);
-
-
-  useEffect(() => {
-    // Fetch rows from API
-    const fetchPatients = async () => {
-      const response = await fetch('/api/patient');
-      const data = await response.json();
-      setRows(data);
-    };
-
-    fetchPatients();
-  }, []);
 
 
   const [open, setOpen] = useState(false);
@@ -110,71 +97,69 @@ export default function PatientTriage() {
     ].filter(Boolean).length >= 2);
   }, [priorityFilter, statusFilter, specialtyFilter]);
 
-  const sortAndFilterRows = useCallback(
-    (rows, priorityFilter, statusFilter, specialtyFilter) => {
-      if (!session) return [];
-      let filteredRows = rows;
-
-      if (priorityFilter !== "all") {
-        filteredRows = filteredRows.filter(
-          (row) => row.priority === priorityFilter
-        );
-      }
-
-      if (statusFilter !== "all") {
-        filteredRows = filteredRows.filter(
-          (row) => row.status === statusFilter
-        );
-      }
-
-      if (specialtyFilter !== "all") {
-        filteredRows = filteredRows.filter(
-          (row) => row.specialty === specialtyFilter
-        );
-      }
-
-      if (session?.user?.accountType === "Doctor") {
-        filteredRows = filteredRows.filter(
-          (row) =>
-            row.triagedBy &&
-            Object.keys(row.triagedBy).length !== 0 &&
-            session.user.languages.includes(row?.language) &&
-            session.user.doctorSpecialty === row.specialty
-        );
-      }
-
-      if (statusFilter !== "Archived") {
-        filteredRows = filteredRows.filter(
-          (row) => row.status !== "Archived"
-        );
-      }
-
-      // Sorting by createdAt (or ID in descending order)
-      return filteredRows.sort((a, b) => b._id.localeCompare(a._id));
-    },
-    [session]
-  );
-
   useEffect(() => {
     const fetchAndSortRows = async () => {
       try {
-        const response = await fetch("/api/patient/");
+        const response = await fetch("/api/patient?status!=Archived"); // Exclude Archived patients
         const data = await response.json();
 
-        const sortedAndFilteredData = sortAndFilterRows(
-          data,
-          priorityFilter,
-          statusFilter,
-          specialtyFilter
-        );
-        setRows(sortedAndFilteredData);
+        // Update the rows with filtered and sorted data
+        setAllData(data);
       } catch (error) {
         console.log(error);
       }
     };
 
     fetchAndSortRows();
-  }, [priorityFilter, statusFilter, specialtyFilter, session, sortAndFilterRows]);
+  }, []); // Only fetch data on mount
+
+
+  // Memoize the filtered and sorted rows
+  const sortedAndFilteredRows = useMemo(() => {
+    if (!session || allData.length === 0) return [];
+
+    let filteredRows = [...allData];
+
+    // Apply filters
+    if (priorityFilter !== "all") {
+      filteredRows = filteredRows.filter(
+        (row) => row.priority === priorityFilter
+      );
+    }
+
+    if (statusFilter !== "all") {
+      filteredRows = filteredRows.filter(
+        (row) => row.status === statusFilter
+      );
+    }
+
+    if (specialtyFilter !== "all") {
+      filteredRows = filteredRows.filter(
+        (row) => row.specialty === specialtyFilter
+      );
+    }
+
+    if (session?.user?.accountType === "Doctor") {
+      filteredRows = filteredRows.filter(
+        (row) =>
+          row.triagedBy &&
+          Object.keys(row.triagedBy).length !== 0 &&
+          session.user.languages.includes(row.language) &&
+          session.user.doctorSpecialty === row.specialty
+      );
+    }
+
+    if (statusFilter !== "Archived") {
+      filteredRows = filteredRows.filter((row) => row.status !== "Archived");
+    }
+
+    return filteredRows.sort((a, b) => b._id.localeCompare(a._id));
+  }, [allData, priorityFilter, statusFilter, specialtyFilter, session]);
+
+  // Update state whenever sorted and filtered rows change
+  useEffect(() => {
+    setRows(sortedAndFilteredRows);
+  }, [sortedAndFilteredRows]);
 
   const handleStatusChange = async (value, row, index) => {
     let triagedBy = row.triagedBy ?? {};
@@ -261,28 +246,60 @@ export default function PatientTriage() {
     }
   }
 
-  const handleArchive = async (index) => {
+  const submitForm = async (form) => {
     try {
-      await fetch('/api/patient/', {
+      const pmhxString = Array.isArray(form.pmhx) ? form.pmhx.join(", ") : form.pmhx || "";
+      const pshxString = Array.isArray(form.pshx) ? form.pshx.join(", ") : form.pshx || "";
+
+      const payload = {
+        ...form,
+        pmhx: pmhxString,
+        pshx: pshxString,
+      };
+
+      const response = await fetch('/api/patient/', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          _id: rows[index]["_id"],
-          status: "Archived",
-        }),
+        body: JSON.stringify(payload),
       });
-      const updatedRows = [...rows];
-      updatedRows[index].status = "Archived";
-      setRows(updatedRows);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      console.log("Patient data saved successfully!");
+
     } catch (error) {
-      console.log(error);
+      console.error('Error saving patient data:', error);
     }
+  };
+
+
+// Your handleArchive function
+const handleArchive = async (index) => {
+  try {
+    const patientData = {
+      _id: rows[index]["_id"],
+      status: "Archived",
+      pmhx: rows[index].pmhx || [], // Ensure PMHx is passed as an array
+      pshx: rows[index].pshx || [], // Ensure PSHx is passed as an array
+      phone: {
+        countryCode: "+963",
+        phoneNumber: "1233214321"
+      }
+    };
+
+    // Call submitForm and pass the patient data
+    await submitForm(patientData);
+
+    const updatedRows = rows.filter((_, rowIndex) => rowIndex !== index);
+    setRows(updatedRows);
+  } catch (error) {
+    console.log(error);
   }
-
-
-
+};
 
   useEffect(() => {
     // This ensures the component has mounted before using the router
@@ -298,6 +315,7 @@ export default function PatientTriage() {
     <>
       <div className="w-full relative dashboard-page">
         <div className="flex justify-between items-center py-3">
+          {/* New Button to Archived Patients */}
           <Link
             href="/create-patient"
             className="flex items-center justify-center no-underline"
@@ -307,6 +325,11 @@ export default function PatientTriage() {
               <span className="absolute left-full ml-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap bg-white px-2 py-1 rounded shadow-lg">
                 Add New Patient
               </span>
+            </div>
+          </Link>
+          <Link href="/patient-info/archived-patients" className="flex items-center justify-center no-underline">
+            <div className="relative group ml-4 bg-darkBlue p-2">
+              <span className="text-white">View Archived Patients</span>
             </div>
           </Link>
           <h2
@@ -396,7 +419,6 @@ export default function PatientTriage() {
                     </Tooltip>
                   </div>
                 </TableCell>
-
                 <TableCell align="center">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -460,12 +482,24 @@ export default function PatientTriage() {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
-                <TableCell align="center"><span>TRIAGE NOTE</span>
-                </TableCell>
+                <TableCell
+                    align="left">
+                    <span>Additional</span>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      whiteSpace: 'nowrap',
+                    }}>
+                      <span>Notes</span>
+                      <Tooltip tooltipText={`Hover description icon to see full text.\nClick pencil icon to edit.`} showTooltip={true}>
+                        <InfoIcon className="ml-2" style={{ height: '1rem', width: '1rem' }}/>
+                      </Tooltip>
+                    </div>
+                  </TableCell>
                 <TableCell align="center">Triaged By</TableCell>
                 <TableCell align="center">Dr. Pref</TableCell>
                 <TableCell align="center">Doctor</TableCell>
-                <TableCell align="center">Created At</TableCell> {/* Header for Created At */}
+                <TableCell align="center">Created At</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -486,7 +520,7 @@ export default function PatientTriage() {
                   <TableCell align="center">{row.age || ''}</TableCell>
                   <TableCell align="center" style={{ minWidth: '150px' }}>{formatLocation(row.city, row.country)}</TableCell>
                   <TableCell align="center">{row.language}</TableCell>
-                  <TableCellWithTooltip tooltipText={row.chiefComplaint} maxWidth='200px'>
+                  <TableCellWithTooltip tooltipText={row.chiefComplaint} maxWidth='175px'>
                     <div className="block overflow-hidden text-ellipsis text-sm">
                       {row.chiefComplaint}
                     </div>
@@ -499,7 +533,7 @@ export default function PatientTriage() {
                       <DropdownMenuContent className="w-46">
                         <DropdownMenuSeparator />
                         <DropdownMenuRadioGroup value={row.status} onValueChange={(value) => handleStatusChange(value, row, index)}>
-                          {STATUS.map((status) => (
+                          {STATUS.map((status) => status !== 'Archived' && (
                             <DropdownMenuRadioItem key={status} value={status}>{status}</DropdownMenuRadioItem>
                           ))}
                         </DropdownMenuRadioGroup>
@@ -515,7 +549,7 @@ export default function PatientTriage() {
                         <DropdownMenuSeparator />
                         <DropdownMenuRadioGroup value={row.priority} onValueChange={async (value) => {
                           try {
-                            await fetch('/api/patient/assign', {
+                            await fetch('/api/patient/', {
                               method: 'PATCH',
                               headers: {
                                 'Content-Type': 'application/json',
@@ -524,7 +558,6 @@ export default function PatientTriage() {
                                 _id: rows[index]["_id"],
                                 status: "In-Progress",
                                 priority: value, // New priority value
-                                doctor: doctor
                               }),
                             });
                             const updatedRows = [...rows];
@@ -552,12 +585,13 @@ export default function PatientTriage() {
                             value={row.specialty}
                             onValueChange={async (value) => {
                               try {
-                                await fetch(`/api/patient/${rows[index]._id}/specialty`, {
+                                await fetch(`/api/patient/`, {
                                   method: "PATCH",
                                   headers: {
                                     "Content-Type": "application/json",
                                   },
                                   body: JSON.stringify({
+                                    _id: rows[index]._id,
                                     specialty: value,
                                   }),
                                 });
@@ -578,27 +612,38 @@ export default function PatientTriage() {
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
-                  <TableCell align="center">
-                    <TableCell align="center">
-                      <TriageModalView
-                          userEmail={session.user.email}
-                          userId={session.user._id}
-                          userFirstName={session.user.firstName}
-                          note={triageNotes[row._id] || ""}
-                          patientId={row._id}
-                          patientName={`${row.firstName} ${row.lastName}`}
-                          currentStatus={row.status}
-                          currentPriority={row.priority}
-                          currentSpecialty={row.specialty}
-                      />
-                    </TableCell>
-                  </TableCell>
+                  <NotesCell
+                    notes={row.dashboardNotes}
+                    onUpdate={async (newNotes) => {
+                      try {
+                        await fetch("/api/patient/", {
+                          method: 'PATCH',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
+                          body: JSON.stringify({
+                            _id: rows[index]["_id"],
+                            dashboardNotes: newNotes,
+                          }),
+                        });
+                        const updatedRows = [...rows];
+                        updatedRows[index].dashboardNotes = newNotes;
+                        setRows(updatedRows);
+                      } catch (error) {
+                        console.log(error);
+                      }
+                    }}
+                  />
                   <TableCell align="center">
                     {getInitials(row.triagedBy?.firstName, row.triagedBy?.lastName)}
                   </TableCell>
                   <TableCell align="center">
-                    {row.genderPreference === 'Male' ? '♂' : row.genderPreference === 'Female' ? '♀' : 'N/A'}
-                      </TableCell>
+                      {row.genderPreference === 'Male' ? (
+                        <span style={{ fontSize: '1.5em'}}>♂</span>
+                        ) : row.genderPreference === 'Female' ? (
+                          <span style={{ fontSize: '1.5em'}}>♀</span>
+                        ) : 'N/A'}
+                  </TableCell>
                       <TableCell align="center">
                         {
                           row.status === 'Not Started'
@@ -632,7 +677,7 @@ export default function PatientTriage() {
                   </TableCell>
                   <TableCell align="center">
                     {row.createdAt ? new Date(row.createdAt).toLocaleString() : 'N/A'}
-                  </TableCell> {/* Data for Created At */}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -640,6 +685,7 @@ export default function PatientTriage() {
         </TableContainer>
         {rows.length === 0 && (
           <div className="text-center text-gray-500 my-6">
+
             <p>No patient data found matching your expertise.</p>
           </div>
         )}
@@ -658,3 +704,4 @@ export default function PatientTriage() {
     </>
   );
 }
+

@@ -17,7 +17,10 @@ interface PatientInfo {
     age: string;
     gender: string;
     dob: Date;
-    phoneNumber: string;
+    phone: {
+        countryCode: string;
+        phoneNumber: string;
+    };
     patientID: string;
 }
 
@@ -41,7 +44,9 @@ interface PatientContext {
     activeTab: string;
     setActiveTab: (tab: string) => void;
     patientInfo: PatientInfo | null;
+    setPatientInfo: (patientInfo: PatientInfo | null) => void;
     notes: INote[];
+    draftNotes: INote[];
     loadingPatientInfo: boolean;
     loadingNotes: boolean;
     fetchPatientData: () => Promise<void>;
@@ -76,6 +81,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
     const [activeTab, setActiveTab] = useState('patient-info');
     const [patientInfo, setPatientInfo] = useState<PatientInfo | null>(null);
     const [notes, setNotes] = useState<INote[]>([]);
+    const [draftNotes, setDraftNotes] = useState<INote[]>([]);
     const [loadingPatientInfo, setLoadingPatientInfo] = useState(false);
     const [loadingNotes, setLoadingNotes] = useState(false);
     const [patientViewModel, setPatientViewModel] = useState<PatientInfoViewModel | null>(null);
@@ -125,7 +131,10 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             city: patientData.city || '',
             gender: patientData.genderPreference || '',
             dob: new Date(patientData.dob || Date.now()),
-            phoneNumber: patientData.phone || '',
+            phone: {
+                countryCode: patientData.phone?.countryCode || '',
+                phoneNumber: patientData.phone?.phoneNumber || '',
+            },
             patientID: patientData._id || '',
         });
         setPatientViewModel(new PatientInfoViewModel(patientData));
@@ -135,6 +144,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
 
     const formatPreviousNotes = useCallback((notesData: INote[]) => {
         if (Array.isArray(notesData)) {
+            // Convert the Mongoose documents to plain objects while preserving the type
             const formattedNotes = notesData.map((note) => {
                 const plainNote = note.toObject ? note.toObject() : note;
                 return {
@@ -144,8 +154,11 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 } as INote;
             });
             setNotes(formattedNotes);
+            setNotes(formattedNotes.filter((note) => note.draft === false));
+            setDraftNotes(formattedNotes.filter((note) => note.draft === true));
         } else {
             setNotes([]);
+            setDraftNotes([]);
         }
     }, [memoizedPatientInfo?.patientName]);
 
@@ -174,7 +187,6 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-
             const data = await response.json() as IPatient;
             formatPatientInfo(data);
             if (data.notes) {
@@ -275,6 +287,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 setActiveTab,
                 patientInfo: memoizedPatientInfo,
                 notes,
+                draftNotes,
                 loadingPatientInfo,
                 loadingNotes,
                 fetchPatientData,
@@ -299,5 +312,6 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
 };
 
 export default function Component() {
+    // This is a placeholder component to satisfy the React Component code block requirements
     return null;
 }

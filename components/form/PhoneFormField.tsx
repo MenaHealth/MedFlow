@@ -8,13 +8,17 @@ export function PhoneFormField({
     form,
     fieldName,
     fieldLabel,
+    defaultValue,
+    classNames
 }: {
     form: any;
     fieldName: string;
     fieldLabel: string;
+    defaultValue?: { countryCode: string; phoneNumber: string };
+    classNames?: string;
 }) {
-    const [countryCode, setCountryCode] = useState<CountryCodes | undefined>(undefined); // Default to undefined
-    const [phoneNumber, setPhoneNumber] = useState('');
+    const [countryCode, setCountryCode] = useState<CountryCodes | undefined>(defaultValue?.countryCode as CountryCodes); // Default to undefined or the initial value
+    const [phoneNumber, setPhoneNumber] = useState(defaultValue?.phoneNumber || '');
     const [countryCodeError, setCountryCodeError] = useState<string | null>(null); // To track the error state
 
     const handleCountryCodeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -32,8 +36,7 @@ export function PhoneFormField({
         setPhoneNumber(rawValue);
 
         if (countryCode) {
-            const fullPhoneNumber = `${countryCode}${rawValue}`;
-            form.setValue(fieldName, fullPhoneNumber, { shouldValidate: true }); // Save the full phone number (country code + number)
+            form.setValue(fieldName, { countryCode, phoneNumber: rawValue }, { shouldValidate: true }); 
         }
     };
 
@@ -50,53 +53,56 @@ export function PhoneFormField({
     useEffect(() => {
         const initialValue = form.getValues(fieldName);
         if (initialValue) {
-            const code = initialValue.slice(0, initialValue.indexOf(' ') + 1);
-            const number = initialValue.slice(initialValue.indexOf(' ') + 1);
-            setCountryCode(code as CountryCodes || undefined);
-            setPhoneNumber(number || '');
+            setCountryCode(initialValue.countryCode || undefined);
+            setPhoneNumber(initialValue.phoneNumber || '');
         }
     }, [form, fieldName]);
 
     return (
-        <FormField
-            control={form.control}
-            name={fieldName}
-            render={({ field }) => (
-                <FormItem>
-                    <FormLabel>{fieldLabel}</FormLabel>
-                    <div className="flex items-center">
-                        {/* Country Code Dropdown */}
-                        <select
-                            value={countryCode || ''}
-                            onChange={handleCountryCodeChange}
-                            onBlur={handleValidation} // Validate onBlur
-                            className={`p-2 border rounded-l-md ${countryCodeError ? 'border-red-500' : ''}`}
-                        >
-                            <option value="" disabled>
-                                
-                            </option>
-                            {CountryCodesList.map((code) => (
-                                <option key={code} value={code}>
-                                    {code}
+        <div className={classNames}>
+            <FormField
+                control={form.control}
+                name={fieldName}
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>{fieldLabel}</FormLabel>
+                        <div className="flex items-center">
+                            {/* Country Code Dropdown */}
+                            <select
+                                value={countryCode || ''}
+                                onChange={handleCountryCodeChange}
+                                onBlur={handleValidation} // Validate onBlur
+                                className={`p-2 border rounded-l-md ${countryCodeError ? 'border-red-500' : ''}`}
+                            >
+                                <option value="" disabled>
+                                    
                                 </option>
-                            ))}
-                        </select>
+                                {CountryCodesList.map((code) => (
+                                    <option key={code} value={code}>
+                                        {code}
+                                    </option>
+                                ))}
+                            </select>
 
-                        {/* Phone Number Input */}
-                        <input
-                            {...field}
-                            type="tel"
-                            value={phoneNumber}
-                            onChange={handlePhoneNumberChange}
-                            className="w-full p-2 border rounded-r-md"
-                            placeholder="1234567890"
-                        />
-                    </div>
-                    {/* Show error message if country code is not selected */}
-                    {countryCodeError && <p className="text-red-500 text-sm">{countryCodeError}</p>}
-                    <FormMessage />
-                </FormItem>
-            )}
-        />
+                            {/* Phone Number Input */}
+                            <input
+                                {...field}
+                                type="tel"
+                                value={phoneNumber} // Bind to phoneNumber state
+                                onChange={(e) => {
+                                    field.onChange(e); // Call form field's onChange
+                                    handlePhoneNumberChange(e); // Also call your custom handler
+                                }}
+                                className="w-full p-2 border rounded-r-md"
+                                placeholder="1234567890"
+                            />
+                        </div>
+                        {/* Show error message if country code is not selected */}
+                        {countryCodeError && <p className="text-red-500 text-sm">{countryCodeError}</p>}
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
+        </div>
     );
 }

@@ -1,3 +1,4 @@
+// components/PatientViewModels/Medications/rx/RxOrderDrawer.tsx
 "use client";
 
 import React, { useRef } from "react";
@@ -19,14 +20,12 @@ export default function RxOrderDrawer({ isOpen, onClose, rxOrder }: RxOrderDrawe
     const { patientInfo } = usePatientDashboard();
     const drawerRef = useRef(null);
 
-    // Logging to confirm data availability
     console.log("Patient Info:", patientInfo);
     console.log("Rx Order:", rxOrder);
 
-    // Wait until both patientInfo and rxOrder are defined
     if (!rxOrder || !patientInfo) return null;
 
-    const onDownload = async () => {
+    const onDownloadPDF = async () => {
         if (drawerRef.current) {
             const canvas = await html2canvas(drawerRef.current, {
                 scale: 2,
@@ -73,6 +72,55 @@ export default function RxOrderDrawer({ isOpen, onClose, rxOrder }: RxOrderDrawe
         }
     };
 
+    const onDownloadJPG = async () => {
+        if (drawerRef.current) {
+            const canvas = await html2canvas(drawerRef.current, {
+                scale: 2,
+                width: 1080,
+                windowWidth: 1080,
+                useCORS: true,
+                scrollX: 0,
+                scrollY: 0,
+            });
+
+            const logo = new Image();
+            logo.src = "/assets/images/mena_health_logo.jpeg";
+            logo.crossOrigin = "anonymous";
+
+            logo.onload = () => {
+                const newCanvas = document.createElement('canvas');
+                newCanvas.width = canvas.width;
+                newCanvas.height = canvas.height + 200; // Extra space for logo
+
+                const ctx = newCanvas.getContext('2d');
+                if (!ctx) {
+                    console.error("Could not get canvas context");
+                    return;
+                }
+
+                // Draw logo
+                const logoWidth = 300;
+                const logoHeight = 120;
+                const xPosition = (newCanvas.width - logoWidth) / 2;
+                const yPosition = 10;
+                ctx.drawImage(logo, xPosition, yPosition, logoWidth, logoHeight);
+
+                // Draw original canvas content
+                ctx.drawImage(canvas, 0, logoHeight + 20);
+
+                const imgData = newCanvas.toDataURL("image/jpeg", 1);
+
+                const link = document.createElement('a');
+                link.href = imgData;
+                const patientName = patientInfo.patientName.replace(/\s+/g, "_");
+                const doctorName = rxOrder.prescribingDr.replace(/\s+/g, "_");
+                const prescribedDate = new Date(rxOrder.prescribedDate).toLocaleDateString().replace(/\//g, "-");
+                link.download = `Prescription_${patientName}_${prescribedDate}_Dr_${doctorName}.jpg`;
+                link.click();
+            };
+        }
+    };
+
     const sendTextMessage = () => {
         const phoneNumber = `${patientInfo.phone?.countryCode || ''}${patientInfo.phone?.phoneNumber || ''}`;
         const patientName = patientInfo.patientName;
@@ -87,22 +135,28 @@ export default function RxOrderDrawer({ isOpen, onClose, rxOrder }: RxOrderDrawe
         <Drawer open={isOpen} onOpenChange={onClose}>
             <DrawerContent direction="bottom" size="75%" title="Export Rx">
                 <DrawerHeader className="border-b border-orange-200 z-50 mb-4">
-                    <div className="absolute right-20 top-4 flex space-x-2">
-                        <div className="rounded-full p-3 bg-orange-100 hover:bg-orange-200 transition-colors">
-                            <button onClick={sendTextMessage} className="flex items-center justify-center text-orange-900 hover:text-orange-500 transition-colors">
+                    <div className="flex justify-center space-x-4 mt-4">
+                        <button onClick={sendTextMessage} className="flex flex-col items-center justify-center text-orange-900 hover:text-orange-500 transition-colors">
+                            <div className="rounded-full p-3 bg-orange-100 hover:bg-orange-200 transition-colors">
                                 <MessageSquareShare className="h-5 w-5" />
-                                <span className="sr-only">Share via Message</span>
-                            </button>
-                        </div>
-                        <div className="rounded-full p-3 bg-orange-100 hover:bg-orange-200 transition-colors">
-                            <button onClick={onDownload} className="flex items-center justify-center text-orange-900 hover:text-orange-500 transition-colors">
+                            </div>
+                            <span className="mt-1 text-xs">Share SMS</span>
+                        </button>
+                        <button onClick={onDownloadPDF} className="flex flex-col items-center justify-center text-orange-900 hover:text-orange-500 transition-colors">
+                            <div className="rounded-full p-3 bg-orange-100 hover:bg-orange-200 transition-colors">
                                 <Download className="h-5 w-5" />
-                                <span className="sr-only">Download Locally</span>
-                            </button>
-                        </div>
+                            </div>
+                            <span className="mt-1 text-xs">PDF</span>
+                        </button>
+                        <button onClick={onDownloadJPG} className="flex flex-col items-center justify-center text-orange-900 hover:text-orange-500 transition-colors">
+                            <div className="rounded-full p-3 bg-orange-100 hover:bg-orange-200 transition-colors">
+                                <Download className="h-5 w-5" />
+                            </div>
+                            <span className="mt-1 text-xs">JPG</span>
+                        </button>
                     </div>
                 </DrawerHeader>
-                <ScrollArea className="flex-grow">
+                <ScrollArea className="flex-grow mt-16">
                     <div ref={drawerRef} className="p-6 space-y-6 bg-orange-950">
                         <div className="bg-orange-50 p-4 rounded-lg">
                             <h3 className="font-semibold text-lg mb-4 text-center text-orange-900 border-b border-orange-200 pb-2">Patient Information</h3>

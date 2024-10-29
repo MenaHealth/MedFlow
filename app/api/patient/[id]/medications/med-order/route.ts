@@ -1,17 +1,17 @@
 // app/api/patient/[id]/medications/med-order/route.ts
 
+
 import { NextResponse } from 'next/server';
 import MedOrder from '../../../../../../models/medOrder';
 import Patient from '../../../../../../models/patient';
 import dbConnect from '../../../../../../utils/database';
 import { Types } from 'mongoose';
-import { v4 as uuidv4 } from 'uuid';
 
 export const POST = async (request: Request, { params }: { params: { id: string } }) => {
     try {
         await dbConnect();
 
-        const patientId = params.id; // Extract patient ID from the route parameter
+        const patientId = params.id;
         const requestData = await request.json();
 
         console.log('Received med order data:', requestData);
@@ -51,7 +51,7 @@ export const POST = async (request: Request, { params }: { params: { id: string 
             return new NextResponse("Invalid med order data", { status: 400 });
         }
 
-        // Create the new Med Order document with UUIDs for order and medications
+        // Create the new Med Order document
         const newMedOrder = new MedOrder({
             doctorSpecialization,
             prescribingDr,
@@ -64,7 +64,6 @@ export const POST = async (request: Request, { params }: { params: { id: string 
             orderDate: orderDate || new Date(),
             validated: validated || false,
             medications: medications.map(med => ({
-                uuid: uuidv4(),
                 diagnosis: med.diagnosis,
                 medication: med.medication,
                 dosage: med.dosage,

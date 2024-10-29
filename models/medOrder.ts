@@ -2,10 +2,8 @@
 
 import { Schema, Document, Model, model, models, Types } from 'mongoose';
 import { DoctorSpecialtyList } from './../data/doctorSpecialty.enum';
-import { v4 as uuidv4 } from 'uuid';
 
 export interface IMedOrder extends Document {
-    uuid: string;
     doctorSpecialization: string;
     prescribingDr: string;
     drEmail: string;
@@ -17,7 +15,6 @@ export interface IMedOrder extends Document {
     patientId: Types.ObjectId;
     validated: boolean;
     medications: Array<{
-        uuid: string;
         diagnosis: string;
         medication: string;
         dosage: string;
@@ -27,7 +24,6 @@ export interface IMedOrder extends Document {
 }
 
 export const medOrderSchema = new Schema<IMedOrder>({
-    uuid: { type: String, default: uuidv4 },
     doctorSpecialization: { type: String, enum: Object.values(DoctorSpecialtyList), required: true },
     prescribingDr: { type: String, required: true },
     drEmail: { type: String, required: true },
@@ -39,7 +35,6 @@ export const medOrderSchema = new Schema<IMedOrder>({
     patientId: { type: Schema.Types.ObjectId, ref: 'Patient', required: true },
     validated: { type: Boolean, default: false },
     medications: [{
-        uuid: { type: String, default: uuidv4 },
         diagnosis: { type: String, required: true },
         medication: { type: String, required: true },
         dosage: { type: String, required: true },

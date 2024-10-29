@@ -3,7 +3,7 @@ import { usePatientDashboard } from '../../PatientViewModelContext';
 import { INote } from './../../../../models/note';
 
 export function usePreviousNotesViewModel() {
-    const { notes, loadingNotes: loading } = usePatientDashboard();
+    const { notes, loadingNotes: loading, draftNotes } = usePatientDashboard();
 
     const handleDownload = (note: INote) => {
         const blob = new Blob([JSON.stringify(note)], { type: 'application/json' });
@@ -21,5 +21,6 @@ export function usePreviousNotesViewModel() {
         notes,
         loading,
         handleDownload,
+        draftNotes
     };
 }

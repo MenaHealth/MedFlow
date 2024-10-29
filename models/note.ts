@@ -4,21 +4,23 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 // Define the base Note interface with a flexible content field
 export interface INote extends Document {
     email: string;
-    noteType: 'physician' | 'procedure' | 'subjective' | 'triage';
+    noteType: 'physician' | 'procedure' | 'subjective';
     date: Date;
     authorName?: string;
     authorID?: string;
     content?: Record<string, any>; // Flexible field for content
+    draft: boolean;
 }
 
 // Define the base schema for the Note
 export const noteSchema = new Schema<INote>({
     email: { type: String, required: true },
-    noteType: { type: String, enum: ['physician', 'procedure', 'subjective', 'triage'], required: true },
+    noteType: { type: String, enum: ['physician', 'procedure', 'subjective'], required: true },
     date: { type: Date, default: Date.now },
     authorName: { type: String },
     authorID: { type: String },
     content: { type: Schema.Types.Mixed },
+    draft: { type: Boolean, default: true },
 });
 
 // Define the base Note model

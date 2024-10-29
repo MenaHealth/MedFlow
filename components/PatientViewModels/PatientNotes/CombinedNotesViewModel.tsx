@@ -1,6 +1,7 @@
 // components/PatientViewModels/PatientNotes/CombinedNotesViewModel.tsx
 import { useState, useCallback } from 'react';
 import { usePatientDashboard } from "../PatientViewModelContext";
+import { INote } from "@/models/note";
 
 // Define the PhysicianNote interface
 export interface PhysicianNote {
@@ -47,6 +48,7 @@ export function CombinedNotesViewModel(patientId: string) {
     const { notes, authorName, authorID, refreshPatientNotes, userSession } = usePatientDashboard();
     const [templateType, setTemplateType] = useState<'physician' | 'procedure' | 'subjective'>('physician');
     const [isLoading, setIsLoading] = useState(false);
+    const [noteId, setNoteId] = useState<string | null>(null);
 
     // Initialize state for each type of note
     const [physicianNote, setPhysicianNote] = useState<PhysicianNote>({
@@ -104,7 +106,48 @@ export function CombinedNotesViewModel(patientId: string) {
         }
     }, []);
 
-    const createNote = useCallback(async () => {
+    const populateNote = useCallback((note: INote) => {
+        const noteType = note.noteType;
+        // setTemplateType(noteType);
+        if (note._id) {
+            setNoteId(note._id.toString());
+        }
+        switch (noteType) {
+            case 'physician':
+                setNoteField('physician', 'attendingPhysician', note.content?.attendingPhysician);
+                setNoteField('physician', 'hpi', note.content?.hpi);
+                setNoteField('physician', 'rosConstitutional', note.content?.rosConstitutional);
+                setNoteField('physician', 'rosCardiovascular', note.content?.rosCardiovascular);
+                setNoteField('physician', 'rosRespiratory', note.content?.rosRespiratory);
+                setNoteField('physician', 'rosGastrointestinal', note.content?.rosGastrointestinal);
+                setNoteField('physician', 'rosGenitourinary', note.content?.rosGenitourinary);
+                setNoteField('physician', 'rosMusculoskeletal', note.content?.rosMusculoskeletal);
+                setNoteField('physician', 'rosNeurological', note.content?.rosNeurological);
+                setNoteField('physician', 'rosPsychiatric', note.content?.rosPsychiatric);
+                setNoteField('physician', 'mdm', note.content?.mdm);
+                setNoteField('physician', 'planAndFollowUp', note.content?.planAndFollowUp);
+                setNoteField('physician', 'diagnosis', note.content?.diagnosis);
+                setNoteField('physician', 'signature', note.content?.signature);
+                break;
+            case 'procedure':
+                setNoteField('procedure', 'procedureName', note.content?.procedureName);
+                setNoteField('procedure', 'attendingPhysician', note.content?.attendingPhysician);
+                setNoteField('procedure', 'diagnosis', note.content?.diagnosis);
+                setNoteField('procedure', 'notes', note.content?.notes);
+                setNoteField('procedure', 'plan', note.content?.plan);
+                break;
+            case 'subjective':
+                setNoteField('subjective', 'subjective', note.content?.subjective);
+                setNoteField('subjective', 'objective', note.content?.objective);
+                setNoteField('subjective', 'assessment', note.content?.assessment);
+                setNoteField('subjective', 'plan', note.content?.plan);
+                break;
+            default:
+                console.error('Invalid note type');
+        }
+    }, [setNoteField]);
+
+    const createNote = useCallback(async (draft: boolean) => {
 
         if (!authorID || !patientId) {
             console.error('Missing authorID or patientId');
@@ -120,6 +163,8 @@ export function CombinedNotesViewModel(patientId: string) {
                     email: userSession?.email,
                     authorName,
                     authorID,
+                    draft,
+                    noteId
                 };
                 break;
             case 'procedure':
@@ -129,6 +174,8 @@ export function CombinedNotesViewModel(patientId: string) {
                     email: userSession?.email,
                     authorName,
                     authorID,
+                    draft,
+                    noteId
                 };
                 break;
             case 'subjective':
@@ -138,6 +185,8 @@ export function CombinedNotesViewModel(patientId: string) {
                     email: userSession?.email,
                     authorName,
                     authorID,
+                    draft,
+                    noteId
                 };
                 break;
         }
@@ -145,7 +194,7 @@ export function CombinedNotesViewModel(patientId: string) {
         try {
             setIsLoading(true);
             const response = await fetch(`/api/patient/${patientId}/notes/doctor-notes`, {
-                method: 'POST',
+                method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -155,7 +204,6 @@ export function CombinedNotesViewModel(patientId: string) {
                 throw new Error(`Failed to create note: ${response.status}`);
             }
 
-            const newNote = await response.json();
             await refreshPatientNotes(); // Refresh the notes
 
             // Reset the form fields after successful note creation
@@ -167,6 +215,26 @@ export function CombinedNotesViewModel(patientId: string) {
             setIsLoading(false);
         }
     }, [templateType, physicianNote, procedureNote, subjectiveNote, patientId, authorID, authorName, userSession, refreshPatientNotes]);
+
+    const deleteNote = async (noteId: string) => {
+        try {
+            const response = await fetch(`/api/patient/${patientId}/notes/doctor-notes/`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ noteId }),
+            });
+            if (!response.ok) {
+                throw new Error(`Failed to delete note: ${response.status}`);
+            }
+
+            await refreshPatientNotes(); // Refresh the notes
+
+        } catch (error) {
+            console.error('Error deleting note:', error);
+        }
+    };
 
     // Helper function to reset form fields
     const resetNoteFields = () => {
@@ -217,6 +285,8 @@ export function CombinedNotesViewModel(patientId: string) {
         physicianNote,
         procedureNote,
         subjectiveNote,
+        populateNote,
+        deleteNote,
         setNoteField, // Include setNoteField in the return object
         createNote,
         isLoading,

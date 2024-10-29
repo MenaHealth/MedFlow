@@ -34,7 +34,7 @@ const RadioCardItem = React.forwardRef<
             {...props}
         >
             {children}
-            <RadioGroupPrimitive.Indicator className="absolute inset-0 border-2 border-[#FF5722] rounded-lg" />
+            <RadioGroupPrimitive.Indicator className="absolute inset-0 border-2 border-darkBlue rounded-lg" />
         </RadioGroupPrimitive.Item>
     )
 })

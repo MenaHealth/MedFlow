@@ -493,3 +493,14 @@ button:disabled {
   background-color: white;
   opacity: 8%;
 }
+
+/* In your global CSS or the specific component styles */
+.text-container {
+  white-space: pre-wrap; /* Preserve line breaks, wrap long text */
+  overflow-wrap: break-word; /* Break words if too long */
+}
+
+.scrollable-text {
+  max-height: 100px; /* Set a maximum height for long content */
+  overflow-y: auto; /* Enable vertical scrolling for overflow */
+}

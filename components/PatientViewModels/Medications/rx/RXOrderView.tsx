@@ -47,7 +47,7 @@ export default function RXOrderView({ patientId, user, patientInfo }: RXOrderVie
 
 
     return (
-        <div className="space-y-6 max-w-2xl mx-auto bg-orange-950">
+        <div className="space-y-6 max-w-2xl mx-auto bg-orange-950 p-4">
             <fieldset className="border rounded-lg bg-white shadow-sm">
                 <legend className="text-lg font-semibold px-2 bg-orange-950 text-white rounded-lg">Prescriber and
                     Patient Details

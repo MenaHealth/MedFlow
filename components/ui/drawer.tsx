@@ -9,21 +9,30 @@ import { ScrollArea } from "./../../components/form/ScrollArea";
 
 type DrawerDirection = 'left' | 'right' | 'top' | 'bottom';
 
-interface DrawerProps extends React.ComponentProps<typeof DrawerPrimitive.Root> {
+interface DrawerProps extends Omit<React.ComponentProps<typeof DrawerPrimitive.Root>, 'ref'> {
     direction?: DrawerDirection;
+    shouldScaleBackground?: boolean;
 }
 
-const Drawer = ({
-                    shouldScaleBackground = true,
-                    direction = 'bottom',
-                    ...props
-                }: DrawerProps) => (
-    <DrawerPrimitive.Root
-        shouldScaleBackground={shouldScaleBackground}
-        {...props}
-    />
-)
-Drawer.displayName = "Drawer"
+const Drawer = React.forwardRef<
+    HTMLDivElement,
+    DrawerProps & { ref?: React.ForwardedRef<HTMLDivElement> }
+>(({ shouldScaleBackground = true, direction = 'bottom', ...props }, ref) => {
+    const compatibleProps = { ...props } as Omit<
+        DrawerProps,
+        'fadeFromIndex' | 'ref' | 'shouldScaleBackground'
+    >;
+
+    return (
+        <div ref={ref}>
+            <DrawerPrimitive.Root
+                {...compatibleProps}
+                shouldScaleBackground={shouldScaleBackground}
+            />
+        </div>
+    );
+});
+Drawer.displayName = "Drawer";
 
 const DrawerTrigger = DrawerPrimitive.Trigger
 

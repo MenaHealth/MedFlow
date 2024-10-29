@@ -2,17 +2,18 @@
 
 import React, { useState } from 'react';
 import { useForm, FormProvider } from "react-hook-form";
-import { Card, CardContent, CardHeader } from './../../../components/ui/card';
-import { RadioCard } from './../../../components/ui/radio-card';
-import { ScrollArea } from './../../../components/form/ScrollArea';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { RadioCard } from '@/components/ui/radio-card';
+import { ScrollArea } from '@/components/form/ScrollArea';
 import RXOrderView from './rx/RXOrderView';
-import MedOrderView from './../../../components/PatientViewModels/Medications/med/MedOrderView';
+import MedOrderView from '@/components/PatientViewModels/Medications/med/MedOrderView';
 import PreviousMedicationsView from './previous/PreviousMedicationsView';
-import { Resizable } from './../../../components/ui/Resizable';
-import { useRXOrderViewModel } from './../../../components/PatientViewModels/Medications/rx/RXOrderViewModel';
-import { useMedOrderViewModel } from './../../../components/PatientViewModels/Medications/med/MedOrderViewModel';
-import { usePatientDashboard } from './../../../components/PatientViewModels/PatientViewModelContext';
+import { Resizable } from '@/components/ui/Resizable';
+import { useRXOrderViewModel } from '@/components/PatientViewModels/Medications/rx/RXOrderViewModel';
+import { useMedOrderViewModel } from '@/components/PatientViewModels/Medications/med/MedOrderViewModel';
+import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewModelContext';
 import { BarLoader } from "react-spinners";
+import { DoctorSpecialtyList } from "@/data/doctorSpecialty.enum";
 
 interface MedicationsViewProps {
     patientId: string;
@@ -27,14 +28,23 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
         patientInfo,
     } = usePatientDashboard();
 
-    const { submitRxOrder, isLoading: rxLoading } = useRXOrderViewModel(patientId);
-    const { submitMedOrder, isLoading: medLoading } = useMedOrderViewModel(patientId);
-
     const [templateType, setTemplateType] = useState<'rxOrder' | 'medOrder'>('rxOrder');
 
     const methods = useForm({
         defaultValues: templateType === 'rxOrder' ? { rxOrder: rxOrders } : { medOrder: medOrders },
     });
+
+    const { submitRxOrder, isLoading: rxLoading } = useRXOrderViewModel(
+        patientId,
+        () => {}, // Placeholder for onNewRxOrderSaved
+        patientInfo?.city || ''
+    );
+
+    const { submitMedOrder, isLoading: medLoading } = useMedOrderViewModel(
+        patientId,
+        patientInfo?.patientName || '',
+        patientInfo?.city || ''
+    );
 
     const handleCreateMedication = async () => {
         if (templateType === 'rxOrder') {
@@ -44,7 +54,6 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
         }
     };
 
-    // Check if data is still loading
     if (loadingMedications) {
         return (
             <div className="flex items-center justify-center h-[100vh] text-white bg-orange-950">
@@ -71,11 +80,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                     </h3>
                                 </CardHeader>
                                 <CardContent className="h-full p-0">
-                                    <PreviousMedicationsView
-                                        rxOrders={rxOrders}
-                                        medOrders={medOrders}
-                                        loadingMedications={loadingMedications}
-                                    />
+                                    <PreviousMedicationsView />
                                 </CardContent>
                             </ScrollArea>
                         </Card>
@@ -104,7 +109,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                             user={{
                                                 firstName: userSession?.firstName || '',
                                                 lastName: userSession?.lastName || '',
-                                                doctorSpecialty: userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList || 'NOT_SELECTED',
+                                                doctorSpecialty: (userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList) || 'NOT_SELECTED',
                                             }}
                                             patientId={patientId}
                                             patientInfo={patientInfo || { patientName: '', phoneNumber: '', age: '', city: '' }}
@@ -116,7 +121,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                             user={{
                                                 firstName: userSession?.firstName || '',
                                                 lastName: userSession?.lastName || '',
-                                                doctorSpecialty: userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList || 'NOT_SELECTED',
+                                                doctorSpecialty: (userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList) || 'NOT_SELECTED',
                                             }}
                                         />
                                     )}

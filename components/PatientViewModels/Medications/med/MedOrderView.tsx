@@ -7,7 +7,7 @@ import { TextFormField } from '@/components/ui/TextFormField';
 import { Button } from '@/components/ui/button';
 import { Plus, Minus } from 'lucide-react';
 import { useMedOrderViewModel } from './MedOrderViewModel';
-import {DoctorSpecialtyList} from "@/data/doctorSpecialty.enum";
+import { DoctorSpecialtyList } from "@/data/doctorSpecialty.enum";
 
 interface User {
     firstName: string;
@@ -31,11 +31,11 @@ export default function MedOrderView({ patientId, user }: MedOrderViewProps) {
     } = useMedOrderViewModel(patientId, user.firstName, user.doctorSpecialty);
 
     return (
-        <div className="space-y-6 max-w-2xl mx-auto bg-orange-950">
+        <div className="space-y-6 max-w-2xl mx-auto bg-orange-950 p-4">
             <fieldset className="border rounded-lg bg-white shadow-sm">
                 <legend className="text-lg font-semibold px-2 bg-orange-950 text-white rounded-lg">Doctor and Patient Details</legend>
                 <div className="space-y-4 p-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <TextFormField
                             fieldName="doctorName"
                             fieldLabel="Dr."
@@ -45,7 +45,7 @@ export default function MedOrderView({ patientId, user }: MedOrderViewProps) {
                         <TextFormField
                             fieldName="doctorSpecialty"
                             fieldLabel="Specialization"
-                            value={DoctorSpecialtyList[medOrder.doctorSpecialty]}
+                            value={medOrder.doctorSpecialty}
                             readOnly={true}
                         />
                     </div>
@@ -55,7 +55,7 @@ export default function MedOrderView({ patientId, user }: MedOrderViewProps) {
                         value={medOrder.patientName}
                         readOnly={true}
                     />
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <TextFormField
                             fieldName="patientPhone"
                             fieldLabel="Phone"
@@ -73,7 +73,7 @@ export default function MedOrderView({ patientId, user }: MedOrderViewProps) {
             </fieldset>
 
             {medOrder.medications.map((medication, index) => (
-                <fieldset key={index} className="border rounded-lg p-6 bg-white shadow-sm relative overflow-hidden">
+                <fieldset key={index} className="border rounded-lg p-4 md:p-6 bg-white shadow-sm relative overflow-hidden">
                     <legend className="text-lg font-semibold px-2 flex items-center w-full bg-orange-950 text-white rounded-lg">
                         <span>Medication {index + 1}</span>
                         <div className="ml-auto flex space-x-2">
@@ -116,7 +116,7 @@ export default function MedOrderView({ patientId, user }: MedOrderViewProps) {
                             value={medication.medication}
                             onChange={(e) => handleMedicationChange(index, 'medication', e.target.value)}
                         />
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <TextFormField
                                 fieldName={`dosage-${index}`}
                                 fieldLabel="Dosage"

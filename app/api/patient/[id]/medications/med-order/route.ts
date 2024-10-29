@@ -18,7 +18,7 @@ export const POST = async (request: Request, { params }: { params: { id: string 
             console.log("Fetching detailed med orders for ids:", requestData.medOrderIds);
 
             const medOrderDetails = await MedOrder.find({
-                _id: { $in: requestData.medOrderIds.map(id => new Types.ObjectId(id)) },
+                _id: { $in: requestData.medOrderIds.map((id: string) => new Types.ObjectId(id)) },
             });
 
             return new NextResponse(JSON.stringify(medOrderDetails), { status: 200 });
@@ -45,8 +45,7 @@ export const POST = async (request: Request, { params }: { params: { id: string 
             medications
         } = requestData;
 
-        // Validation logic
-        const hasInvalidMedications = medications.some(med => (
+        const hasInvalidMedications = medications.some((med: { diagnosis: string; medication: string; dosage: string; frequency: string; quantity: string }) => (
             typeof med.diagnosis !== 'string' ||
             typeof med.medication !== 'string' ||
             typeof med.dosage !== 'string' ||

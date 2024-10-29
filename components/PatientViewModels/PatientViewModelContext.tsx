@@ -9,6 +9,7 @@ import { IPatient } from '../../models/patient';
 import { INote } from '../../models/note';
 import { IRxOrder } from '../../models/patient';
 import { IMedOrder } from '../../models/medOrder';
+import {Types} from "mongoose";
 
 interface PatientInfo {
     patientName: string;
@@ -148,7 +149,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
         }
     }, [memoizedPatientInfo?.patientName]);
 
-    const fetchMedOrders = useCallback(async (medOrderIds: string[]) => {
+    const fetchMedOrders = useCallback(async (medOrderIds: string[]): Promise<IMedOrder[]> => {
         try {
             const response = await fetch(`/api/patient/${patientId}/medications/med-order`, {
                 method: 'POST',
@@ -156,7 +157,9 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 body: JSON.stringify({ medOrderIds })
             });
             if (!response.ok) throw new Error("Error fetching detailed med orders data");
-            return await response.json();
+
+            const data = await response.json();
+            return data as IMedOrder[];  // Ensure this is typed correctly to match IMedOrder[]
         } catch (error) {
             console.error('Error fetching med orders:', error);
             return [];
@@ -180,11 +183,29 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 setNotes([]);
             }
 
-            setRxOrders(data.rxOrders || []);
+            // Ensure data.rxOrders has a fallback of an empty array if undefined
+            const formattedRxOrders = (data.rxOrders || []).map((order) =>
+                typeof order === 'string'
+                    ? {
+                        id: order,
+                        doctorSpecialty: 'General',
+                        prescribingDr: 'Unknown',
+                        drEmail: 'unknown@example.com',
+                        drId: 'unknown',
+                        prescribedDate: new Date(),
+                        validTill: new Date(),
+                        city: 'Unknown City',
+                        validated: false,
+                        prescriptions: []
+                    } as IRxOrder
+                    : order
+            );
+            setRxOrders(formattedRxOrders);
 
+            // Handle medOrderIds extraction
             const medOrderIds = data.medOrders?.map(order =>
-                typeof order === 'string' ? order : order.$oid || order._id
-            ).filter(Boolean);
+                order instanceof Types.ObjectId ? order.toString() : (order as any)._id || order
+            ).filter(Boolean) as string[];
 
             if (medOrderIds && medOrderIds.length > 0) {
                 const detailedMedOrders = await fetchMedOrders(medOrderIds);
@@ -219,11 +240,11 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
 
             setRxOrders(data.rxOrders || []);
 
-            const medOrderIds = data.medOrders?.map(order =>
-                typeof order === 'string' ? order : order.$oid || order._id
-            ).filter(Boolean);
+            const medOrderIds = data.medOrders?.map((order: string | { _id: string }) =>
+                typeof order === 'string' ? order : order._id
+            ).filter(Boolean) as string[];
 
-            if (medOrderIds && medOrderIds.length > 0) {
+            if (medOrderIds.length > 0) {
                 const detailedMedOrders = await fetchMedOrders(medOrderIds);
                 setMedOrders(detailedMedOrders);
             } else {

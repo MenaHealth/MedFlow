@@ -14,6 +14,7 @@ import { useMedOrderViewModel } from '@/components/PatientViewModels/Medications
 import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewModelContext';
 import { BarLoader } from "react-spinners";
 import { DoctorSpecialtyList } from "@/data/doctorSpecialty.enum";
+import { ChevronUp, ChevronDown } from 'lucide-react'
 
 interface MedicationsViewProps {
     patientId: string;
@@ -85,7 +86,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
     return (
         <FormProvider {...methods}>
             <form onSubmit={methods.handleSubmit(handleCreateMedication)}>
-                <div className="flex flex-col md:flex-row h-[100vh] overflow-hidden">
+                <div className="flex flex-col md:flex-row h-[100vh] overflow-hidden bg-orange-950">
                     {
                         (isMobile || userSession?.accountType === 'Triage') ? (
                             <Card className="w-full">

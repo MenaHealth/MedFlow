@@ -285,6 +285,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             value={{
                 activeTab,
                 setActiveTab,
+                setPatientInfo,
                 patientInfo: memoizedPatientInfo,
                 notes,
                 draftNotes,

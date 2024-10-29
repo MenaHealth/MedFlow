@@ -43,6 +43,7 @@ interface PatientContext {
     patientInfo: PatientInfo | null;
     setPatientInfo: (patientInfo: PatientInfo | null) => void;
     notes: INote[];
+    draftNotes: INote[];
     loadingPatientInfo: boolean;
     loadingNotes: boolean;
     fetchPatientData: () => Promise<void>;
@@ -75,6 +76,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
     const [activeTab, setActiveTab] = useState('patient-info');
     const [patientInfo, setPatientInfo] = useState<PatientInfo | null>(null);
     const [notes, setNotes] = useState<INote[]>([]);
+    const [draftNotes, setDraftNotes] = useState<INote[]>([]);
     const [loadingPatientInfo, setLoadingPatientInfo] = useState(false);
     const [loadingNotes, setLoadingNotes] = useState(false);
     const [patientViewModel, setPatientViewModel] = useState<PatientInfoViewModel | null>(null);
@@ -143,9 +145,11 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                     patientName: patientInfo?.patientName || '',
                 } as INote;
             });
-            setNotes(formattedNotes);
+            setNotes(formattedNotes.filter((note) => note.draft === false));
+            setDraftNotes(formattedNotes.filter((note) => note.draft === true));
         } else {
             setNotes([]);
+            setDraftNotes([]);
         }
     }, [patientInfo?.patientName]);
 
@@ -192,6 +196,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 patientInfo,
                 setPatientInfo,
                 notes,
+                draftNotes,
                 loadingPatientInfo,
                 loadingNotes,
                 fetchPatientData,

@@ -11,6 +11,8 @@ export const GET = async (request, { params }) => {
         if (!existingUser) {
             return new Response("User not found", { status: 404 });
         }
+        // Remove the password field from the response
+        existingUser.password = undefined;
         return new Response(JSON.stringify(existingUser), { status: 200 });
     } catch (error) {
         return new Response(`Error Getting User ${error}`, { status: 500 });

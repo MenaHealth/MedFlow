@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from 'react';
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
@@ -44,37 +44,14 @@ import { DoctorSpecialties as DOCTOR_SPECIALTIES } from '@/data/doctorSpecialty.
 import Link from 'next/link';
 
 export default function PatientTriage() {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const [allData, setAllData] = useState([]);
   const [rows, setRows] = React.useState([]);
-  const [userSession, setUserSession] = useState(null);
   const [priorityFilter, setPriorityFilter] = React.useState("all");
   const [statusFilter, setStatusFilter] = React.useState("all");
   const [specialtyFilter, setSpecialtyFilter] = React.useState("all");
 
   const router = useRouter();
-
-  useEffect(() => {
-    if (status === 'authenticated' && session?.user) {
-      const userSessionData = {
-        id: session.user._id,
-        email: session.user.email,
-        firstName: session.user.firstName,
-        lastName: session.user.lastName,
-        accountType: session.user.accountType,
-        isAdmin: session.user.isAdmin,
-        image: session.user.image,
-        doctorSpecialty: session.user.doctorSpecialty,
-        languages: session.user.languages,
-        token: session.user.token,
-        gender: session.user.gender,
-        dob: session.user.dob,
-        countries: session.user.countries,
-      };
-      setUserSession(userSessionData);
-    }
-  }, [session, status]);
-
 
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState('');
@@ -144,7 +121,7 @@ export default function PatientTriage() {
           (row) =>
               row.triagedBy &&
               Object.keys(row.triagedBy).length !== 0 &&
-              (session.user.languages || [Languages.ENGLISH]).includes(row.language) &&  // Default to English
+              session.user.languages?.includes(row.language) &&
               session.user.doctorSpecialty === row.specialty
       );
     }
@@ -260,7 +237,7 @@ export default function PatientTriage() {
       });
       const updatedRows = [...rows];
       updatedRows[index].status = "Archived";
-      setRows(updatedRows);
+      setRows(updatedRows.filter((row) => row.status !== "Archived"));
     } catch (error) {
       console.log(error);
     }
@@ -292,11 +269,6 @@ export default function PatientTriage() {
               <span className="absolute left-full ml-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap bg-white px-2 py-1 rounded shadow-lg">
                 Add New Patient
               </span>
-            </div>
-          </Link>
-          <Link href="/patient-info/archived-patients" className="flex items-center justify-center no-underline">
-            <div className="relative group ml-4 bg-darkBlue p-2">
-              <span className="text-white">View Archived Patients</span>
             </div>
           </Link>
           <h2

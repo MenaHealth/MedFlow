@@ -16,6 +16,7 @@ import { useSession } from "next-auth/react";
 import { mapLanguageToEnglish } from "@/utils/mapLanguageToEnglish";
 import { mapCountryToEnglish } from "@/utils/mapCountryToEnglish"
 import {SendHorizonal} from "lucide-react";
+import { RadioGroupField } from "./RadioGroupField";
 
 const newPatientFormSchema = z.object({
     firstName: z.string().min(1, "First name is required"),

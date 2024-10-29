@@ -25,7 +25,7 @@ import Tooltip from '../../../components/form/Tooltip';
 import './dashboard.css';
 import TableCellWithTooltip from '@/components/TableCellWithTooltip';
 import * as Toast from '@radix-ui/react-toast';
-import { Languages } from '@/utils/languages.enum';
+import { Languages } from '@/data/languages.enum';
 
 import NotesCell from '@/components/NotesCell';
 

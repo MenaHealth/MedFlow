@@ -2,7 +2,7 @@
 
 import { NextResponse } from 'next/server';
 import Patient from "./../../../../../../models/patient";
-import { Note } from "./../../../../../../models/note";
+import { Note, INote } from "./../../../../../../models/note";
 import dbConnect from "./../../../../../../utils/database";
 import { Types } from "mongoose";
 
@@ -15,7 +15,7 @@ interface Params {
 
 // POST method to add a new note
 export const POST = async (request: Request, { params }: Params) => {
-    const { noteType, content, email, authorName, authorID } = await request.json();
+    const { noteType, content, email, authorName, authorID, draft } = await request.json();
 
     try {
         await dbConnect();
@@ -33,6 +33,7 @@ export const POST = async (request: Request, { params }: Params) => {
             email,
             authorName,
             authorID,
+            draft
         });
 
         // Find the patient by ID
@@ -61,3 +62,80 @@ export const POST = async (request: Request, { params }: Params) => {
         }
     }
 };
+
+export const PATCH = async (request: Request, { params }: Params) => {
+    const altRequest = request.clone();
+    const { noteId, noteType, content, email, authorName, authorID, draft } = await request.json();
+    try {
+        await dbConnect();
+        // Validate patient ID
+        if (!Types.ObjectId.isValid(params.id)) {
+            return new Response("Invalid ID", { status: 400 });
+        }
+        
+        const patient = await Patient.findById(params.id);
+        if (!patient) {
+            return new Response(`Patient with ID ${params.id} not found`, { status: 404 });
+        }
+        console.log('Patient:', patient);
+        console.log(noteId)
+        console.log(noteType)
+        console.log(content)
+        console.log(email)
+        console.log(authorName)
+        console.log(authorID)
+        console.log(draft)
+        const noteIndex = patient.notes.findIndex((note: INote) => note._id.toString() === noteId);
+        console.log('Note index:', noteIndex);
+        console.log(noteIndex === -1)
+        if (noteIndex === -1) {
+            return await POST(altRequest, { params  });       
+        }
+        console.log('Note index:', noteIndex);
+        patient.notes[noteIndex].noteType = noteType;
+        patient.notes[noteIndex].content = content;
+        patient.notes[noteIndex].email = email;
+        patient.notes[noteIndex].authorName = authorName;
+        patient.notes[noteIndex].authorID = authorID;
+        patient.notes[noteIndex].draft = draft;
+        await patient.save();
+        return new Response(JSON.stringify(patient), { status: 200 });
+    } catch (error) {
+        console.error('Failed to update doctor note:', error);
+        if (error instanceof Error) {
+            return new Response(`Failed to update doctor note: ${error.message}`, { status: 500 });
+        } else {
+            return new Response('Failed to update doctor note due to an unknown error', { status: 500 });
+        }
+    }
+}
+
+export const DELETE = async (request: Request, { params }: Params) => {
+    const { noteId } = await request.json();
+    try {
+        await dbConnect();
+        // Validate patient ID
+        if (!Types.ObjectId.isValid(params.id)) {
+            return new Response("Invalid ID", { status: 400 });
+        }
+        
+        const patient = await Patient.findById(params.id);
+        if (!patient) {
+            return new Response(`Patient with ID ${params.id} not found`, { status: 404 });
+        }
+        const noteIndex = patient.notes.findIndex((note: INote) => note._id.toString() === noteId);
+        if (noteIndex === -1) {
+            return new Response(`Note with ID ${noteId} not found`, { status: 404 });
+        }
+        patient.notes.splice(noteIndex, 1);
+        await patient.save();
+        return new Response(JSON.stringify(patient), { status: 200 });
+    } catch (error) {
+        console.error('Failed to delete doctor note:', error);
+        if (error instanceof Error) {
+            return new Response(`Failed to delete doctor note: ${error.message}`, { status: 500 });
+        } else {
+            return new Response('Failed to delete doctor note due to an unknown error', { status: 500 });
+        }
+    }
+}

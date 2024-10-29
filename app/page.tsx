@@ -1,27 +1,36 @@
+// app/page.tsx
 'use client';
-import { useEffect } from 'react';
+
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Session } from 'next-auth';
+import type { Session } from 'next-auth';
+import type {} from './../types/next-auth'; // This import is just to ensure the module augmentation is loaded
 
-const HomePage = () => {
+export default function Component() {
     const router = useRouter();
     const { data: session, status } = useSession();
+    const [userSession, setUserSession] = useState<Session['user'] | null>(null);
 
     useEffect(() => {
-        if (status === 'authenticated') {
-            const activeSession = session as Session;
-            const userCompletedSignup = activeSession?.user?.accountType === 'Doctor' || activeSession?.user?.accountType === 'Triage';
+        if (status === 'authenticated' && session?.user) {
+            setUserSession(session.user);
+        }
+    }, [session, status]);
 
-            if (!userCompletedSignup) {
+    useEffect(() => {
+        if (userSession) {
+            const userAccountType = userSession.accountType as 'Doctor' | 'Triage' | 'Pending' | undefined;
+
+            if (userAccountType === 'Pending') {
                 router.replace('/complete-signup');
-            } else {
+            } else if (userAccountType === 'Doctor' || userAccountType === 'Triage') {
                 router.replace('/patient-info/dashboard');
+            } else {
+                router.replace('/complete-signup');
             }
         }
-    }, [router, session, status]);
+    }, [router, userSession]);
 
     return null;
-};
-
-export default HomePage;
+}

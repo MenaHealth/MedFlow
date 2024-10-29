@@ -1,32 +1,112 @@
 // models/note.ts
-import { Schema, model, models, Document } from 'mongoose';
+import mongoose, { Schema, Document, Model } from 'mongoose';
 
-interface INote extends Document {
+// Define the base Note interface with a flexible content field
+export interface INote extends Document {
+    email: string;
+    noteType: 'physician' | 'procedure' | 'subjective';
     date: Date;
-    content: string;
-    username: string;
-    patientId: Schema.Types.ObjectId;
-    title: string;
-    procedureName?: string;  
-    physician?: string;
-    diagnosis?: string;
-    notes?: string;
-    plan?: string;
+    authorName?: string;
+    authorID?: string;
+    content?: Record<string, any>; // Flexible field for content
+    draft: boolean;
 }
 
-const noteSchema = new Schema<INote>({
+// Define the base schema for the Note
+export const noteSchema = new Schema<INote>({
+    email: { type: String, required: true },
+    noteType: { type: String, enum: ['physician', 'procedure', 'subjective'], required: true },
     date: { type: Date, default: Date.now },
-    content: { type: String, required: true },  
-    username: { type: String, required: true },
-    patientId: { type: Schema.Types.ObjectId, ref: 'Patient', required: true },
-    title: { type: String, required: true },
-    procedureName: String,
-    physician: String,
-    diagnosis: String,
-    notes: String,
-    plan: String,
+    authorName: { type: String },
+    authorID: { type: String },
+    content: { type: Schema.Types.Mixed },
+    draft: { type: Boolean, default: true },
 });
 
-const Note = models.Note || model<INote>('Note', noteSchema, 'notes');
+// Define the base Note model
+const Note: Model<INote> = mongoose.models.Note || mongoose.model<INote>('Note', noteSchema);
 
-export default Note;
+export interface ITriageNote extends INote {
+    content: {
+        triageDetails: string;
+    };
+}
+
+// Define additional interfaces for the specific note types
+export interface IPhysicianNote extends INote {
+    content: {
+        attendingPhysician: string;
+        hpi: string;
+        rosConstitutional: string;
+        rosCardiovascular: string;
+        rosRespiratory: string;
+        rosGastrointestinal: string;
+        rosGenitourinary: string;
+        rosMusculoskeletal: string;
+        rosNeurological: string;
+        rosPsychiatric: string;
+        mdm: string;
+        planAndFollowUp: string;
+        diagnosis: string;
+        signature: string;
+    };
+}
+
+export interface IProcedureNote extends INote {
+    content: {
+        attendingPhysician: string;
+        procedureName: string;
+        diagnosis: string;
+        notes: string;
+        plan: string;
+    };
+}
+
+export interface ISubjectiveNote extends INote {
+    content: {
+        subjective: string;
+        objective: string;
+        assessment: string;
+        plan: string;
+    };
+}
+
+const PhysicianNote = Note.discriminators?.PhysicianNote || Note.discriminator<IPhysicianNote>('PhysicianNote', new Schema<IPhysicianNote>({
+    content: {
+        attendingPhysician: { type: String, required: true },
+        hpi: { type: String, required: true },
+        rosConstitutional: { type: String, required: true },
+        rosCardiovascular: { type: String, required: true },
+        rosRespiratory: { type: String, required: true },
+        rosGastrointestinal: { type: String, required: true },
+        rosGenitourinary: { type: String, required: true },
+        rosMusculoskeletal: { type: String, required: true },
+        rosNeurological: { type: String, required: true },
+        rosPsychiatric: { type: String, required: true },
+        mdm: { type: String, required: true },
+        planAndFollowUp: { type: String, required: true },
+        diagnosis: { type: String, required: true },
+        signature: { type: String, required: true },
+    },
+}));
+
+const ProcedureNote = Note.discriminators?.ProcedureNote || Note.discriminator<IProcedureNote>('ProcedureNote', new Schema<IProcedureNote>({
+    content: {
+        attendingPhysician: { type: String, required: true },
+        procedureName: { type: String, required: true },
+        diagnosis: { type: String, required: true },
+        notes: { type: String, required: true },
+        plan: { type: String, required: true },
+    },
+}));
+
+const SubjectiveNote = Note.discriminators?.SubjectiveNote || Note.discriminator<ISubjectiveNote>('SubjectiveNote', new Schema<ISubjectiveNote>({
+    content: {
+        subjective: { type: String, required: true },
+        objective: { type: String, required: true },
+        assessment: { type: String, required: true },
+        plan: { type: String, required: true },
+    },
+}));
+
+export { Note, PhysicianNote, ProcedureNote, SubjectiveNote };

@@ -188,18 +188,6 @@ a {
   font-size: 18px;
 }
 
-/* navbar */
-.navbar {
-  background-color: aliceblue;
-  padding: 10px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 40px;
-  min-height: 70px;
-}
-
-
 /* logo  */
 .logo {
   font-size: 30px;
@@ -378,6 +366,25 @@ a {
   color: #FFFFFF;
 }
 
+button:disabled {
+  cursor: not-allowed;
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-in-out;
+}
+
 .gsi-material-button {
   -moz-user-select: none;
   -webkit-user-select: none;
@@ -485,4 +492,15 @@ a {
 .gsi-material-button:not(:disabled):hover .gsi-material-button-state {
   background-color: white;
   opacity: 8%;
+}
+
+/* In your global CSS or the specific component styles */
+.text-container {
+  white-space: pre-wrap; /* Preserve line breaks, wrap long text */
+  overflow-wrap: break-word; /* Break words if too long */
+}
+
+.scrollable-text {
+  max-height: 100px; /* Set a maximum height for long content */
+  overflow-y: auto; /* Enable vertical scrolling for overflow */
 }

@@ -12,7 +12,7 @@ import dbConnect from '@/utils/database';
 
 const handler = NextAuth({
     session: {
-        strategy: 'jwt', 
+        strategy: 'jwt',
     },
     providers: [
         CredentialsProvider({
@@ -25,8 +25,8 @@ const handler = NextAuth({
                 await dbConnect();
                 const { email, password } = credentials;
 
-                // Find the user by email, and explicitly select the "authorized" field
-                const user = await User.findOne({ email }).select('+authorized');
+                // Find the user by email, case-insensitve, and explicitly select the "authorized" field
+                const user = await User.findOne({ email: { $regex: new RegExp(`^${email}$`, 'i') } }).select('+authorized');
 
                 // If no user found, throw an error
                 if (!user) {
@@ -43,32 +43,31 @@ const handler = NextAuth({
                     throw new Error('Your account has not been approved yet.');
                 }
 
-                // Validate the password
                 const isPasswordValid = await bcrypt.compare(password, user.password);
-
-                // Log password validation for debugging
-                console.log('Password validation result:', isPasswordValid);
 
                 if (!isPasswordValid) {
                     console.error('Invalid password for user:', email); // Debugging
                     throw new Error('Invalid password');
                 }
 
-                // Update last login date
                 user.lastLogin = new Date();
                 await user.save();
 
-                // Check if the user is an admin
                 const isAdmin = await Admin.findOne({ userId: user._id });
 
                 const session = {
-                    id: user._id.toString(),
+                    _id: user._id.toString(),
                     email: user.email,
                     firstName: user.firstName,
                     lastName: user.lastName,
                     accountType: user.accountType,
                     image: user.image,
                     isAdmin: !!isAdmin,
+                    dob: user.dob,
+                    gender: user.gender,
+                    countries: user.countries || [],
+                    languages: user.languages || [],
+                    doctorSpecialty: user.doctorSpecialty,
                 };
 
                 if (user.accountType === 'Doctor') {
@@ -101,10 +100,11 @@ const handler = NextAuth({
         },
         // Updated jwt callback to include the accessToken
         async jwt({ token, user, account }) {
-            if (account) {
-                if (account.provider === 'google') {
-                    // Handle Google user
-                    const googleUser = await GoogleUser.findOne({ email: token.email });
+            if (account && user) {
+                token.id = user._id.toString();
+                    if (account.provider === 'google') {
+                        // Handle Google user
+                        const googleUser = await GoogleUser.findOne({ email: token.email });
 
                     if (googleUser) {
                         token.id = googleUser.userID;
@@ -120,37 +120,32 @@ const handler = NextAuth({
                     token.lastName = user.lastName;
                     token.image = user.image;
                     token.isAdmin = user.isAdmin;
+                    token.dob = user.dob;
 
-                    token.accessToken = jwt.sign(
-                        { id: user._id, email: user.email, isAdmin: user.isAdmin },
-                        process.env.JWT_SECRET, 
-                        { expiresIn: '1d' } // Set expiration time for the JWT
-                    );
-
-                    if (user.accountType === 'Doctor') {
-                        token.languages = user.languages;
-                        token.doctorSpecialty = user.doctorSpecialty;
+                        token.accessToken = jwt.sign(
+                            { id: user._id, email: user.email, isAdmin: user.isAdmin },
+                            process.env.JWT_SECRET,
+                            { expiresIn: '2d' }
+                        );
                     }
-                }
             }
-
             return token;
         },
-      
+
         async session({ session, token }) {
             if (token) {
-                session.user.id = token.id;
+                session.user._id = token.id;
                 session.user.accountType = token.accountType;
                 session.user.firstName = token.firstName;
                 session.user.lastName = token.lastName;
                 session.user.image = token.image;
                 session.user.isAdmin = token.isAdmin;
                 session.user.token = token.accessToken;
-
-                if (token.accountType === 'Doctor') {
-                    session.user.languages = token.languages;
-                    session.user.doctorSpecialty = token.doctorSpecialty;
-                }
+                session.user.dob = token.dob;
+                session.user.gender = token.gender;
+                session.user.countries = token.countries;
+                session.user.languages = token.languages;
+                session.user.doctorSpecialty = token.doctorSpecialty;
             }
             return session;
         },

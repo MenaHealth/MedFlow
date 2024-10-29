@@ -23,18 +23,15 @@ export const decryptPhoto = async (encryptedBase64: string, encryptionKey: strin
 
         // Convert decrypted WordArray to ArrayBuffer
         const decryptedArrayBuffer = decryptedData.toString(CryptoJS.enc.Base64url);
-        console.log("Decrypted Array Buffer (Latin1):", decryptedArrayBuffer);
 
         const decryptedUint8Array = new Uint8Array(decryptedArrayBuffer.length);
         for (let i = 0; i < decryptedArrayBuffer.length; i++) {
             decryptedUint8Array[i] = decryptedArrayBuffer.charCodeAt(i);
         }
 
-        console.log("Decrypted Uint8Array:", decryptedUint8Array);
 
         // Create Blob from Uint8Array
         const decryptedBlob = new Blob([decryptedUint8Array], { type: 'image/webp' });
-        console.log("Decrypted Blob:", decryptedBlob);
 
         return decryptedBlob;
     } catch (error) {

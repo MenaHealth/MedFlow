@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Form } from "@/components/ui/form";
-import PasswordField from '@/components/ui/passwordField';
+import PasswordFormField from '@/components/ui/passwordFormField';
 import { useSignupContext } from './SignupContext';
 import EmailField from "@/components/ui/emailField";
 
@@ -72,13 +72,11 @@ const PasswordEmailForm = () => {
                     fieldLabel="Email"
                 />
                 {/* Password Fields */}
-                <PasswordField
-                    form={form}
+                <PasswordFormField
                     fieldName="password"
                     fieldLabel="Password"
                 />
-                <PasswordField
-                    form={form}
+                <PasswordFormField
                     fieldName="confirmPassword"
                     fieldLabel="Confirm Password"
                 />

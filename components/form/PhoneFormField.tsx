@@ -1,67 +1,108 @@
-// components/form/PhoneFormField.tsx
 import React, { useState, useEffect } from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
+import { CountryCodesList } from '@/data/countries.enum'; // Assuming this is a string enum or array
+
+type CountryCodes = typeof CountryCodesList[number]; // Infers the type from the array or enum
 
 export function PhoneFormField({
-                                   form,
-                                   fieldName,
-                                   fieldLabel,
-                               }: {
+    form,
+    fieldName,
+    fieldLabel,
+    defaultValue,
+    classNames
+}: {
     form: any;
     fieldName: string;
     fieldLabel: string;
+    defaultValue?: { countryCode: string; phoneNumber: string };
+    classNames?: string;
 }) {
-    const [inputValue, setInputValue] = useState('');
+    const [countryCode, setCountryCode] = useState<CountryCodes | undefined>(defaultValue?.countryCode as CountryCodes); // Default to undefined or the initial value
+    const [phoneNumber, setPhoneNumber] = useState(defaultValue?.phoneNumber || '');
+    const [countryCodeError, setCountryCodeError] = useState<string | null>(null); // To track the error state
 
-    const formatphone = (value: string) => {
-        // Remove all non-digit characters
-        const phone = value.replace(/\D/g, '');
-        const phoneLength = phone.length;
+    const handleCountryCodeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const selectedCode = e.target.value as CountryCodes;
+        setCountryCode(selectedCode);
 
-        // Format the phone number to the desired format
-        if (phoneLength === 0) return '';
-        if (phoneLength < 4) return `+${phone}`;
-        if (phoneLength < 7)
-            return `+${phone.slice(0, 1)} (${phone.slice(1, 4)}) ${phone.slice(4)}`;
-        if (phoneLength < 11)
-            return `+${phone.slice(0, 1)} (${phone.slice(1, 4)}) ${phone.slice(4, 7)}-${phone.slice(7)}`;
-        return `+${phone.slice(0, 1)} (${phone.slice(1, 4)}) ${phone.slice(4, 7)}-${phone.slice(7, 11)}`;
+        // Clear the error if a country code is selected
+        if (selectedCode) {
+            setCountryCodeError(null);
+        }
     };
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const rawValue = e.target.value.replace(/\D/g, ''); // Strip all non-numeric characters
-        const formattedNumber = formatphone(rawValue);
-        setInputValue(formattedNumber);
-        form.setValue(fieldName, formattedNumber, { shouldValidate: true }); // Save the formatted number
+        setPhoneNumber(rawValue);
+
+        if (countryCode) {
+            form.setValue(fieldName, { countryCode, phoneNumber: rawValue }, { shouldValidate: true }); 
+        }
+    };
+
+    const handleValidation = () => {
+        // Ensure that a country code is selected
+        if (!countryCode) {
+            setCountryCodeError('Country code is required');
+            return false;
+        }
+
+        return true;
     };
 
     useEffect(() => {
         const initialValue = form.getValues(fieldName);
         if (initialValue) {
-            setInputValue(formatphone(initialValue));
+            setCountryCode(initialValue.countryCode || undefined);
+            setPhoneNumber(initialValue.phoneNumber || '');
         }
     }, [form, fieldName]);
 
     return (
-        <FormField
-            control={form.control}
-            name={fieldName}
-            render={({ field }) => (
-                <FormItem>
-                    <FormLabel>{fieldLabel}</FormLabel>
-                    <FormControl>
-                        <input
-                            {...field}
-                            type="tel"
-                            value={inputValue}
-                            onChange={handleInputChange}
-                            className="w-full p-2 border rounded"
-                            placeholder="+1 (234) 567-8910"
-                        />
-                    </FormControl>
-                    <FormMessage />
-                </FormItem>
-            )}
-        />
+        <div className={classNames}>
+            <FormField
+                control={form.control}
+                name={fieldName}
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>{fieldLabel}</FormLabel>
+                        <div className="flex items-center">
+                            {/* Country Code Dropdown */}
+                            <select
+                                value={countryCode || ''}
+                                onChange={handleCountryCodeChange}
+                                onBlur={handleValidation} // Validate onBlur
+                                className={`p-2 border rounded-l-md ${countryCodeError ? 'border-red-500' : ''}`}
+                            >
+                                <option value="" disabled>
+                                    
+                                </option>
+                                {CountryCodesList.map((code) => (
+                                    <option key={code} value={code}>
+                                        {code}
+                                    </option>
+                                ))}
+                            </select>
+
+                            {/* Phone Number Input */}
+                            <input
+                                {...field}
+                                type="tel"
+                                value={phoneNumber} // Bind to phoneNumber state
+                                onChange={(e) => {
+                                    field.onChange(e); // Call form field's onChange
+                                    handlePhoneNumberChange(e); // Also call your custom handler
+                                }}
+                                className="w-full p-2 border rounded-r-md"
+                                placeholder="1234567890"
+                            />
+                        </div>
+                        {/* Show error message if country code is not selected */}
+                        {countryCodeError && <p className="text-red-500 text-sm">{countryCodeError}</p>}
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
+        </div>
     );
 }

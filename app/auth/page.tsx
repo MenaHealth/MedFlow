@@ -2,12 +2,12 @@
 "use client"
 
 import React, { useState } from 'react';
-import LoginForm from '@/components/auth/LoginForm';
-import { RadioCard } from '@/components/ui/radio-card';
-import Flex from "@/components/ui/flex";
-import Text from "@/components/ui/text";
-import { SignupProvider } from "@/components/auth/SignupContext";
-import SignupSection from '@/components/auth/SignupSection';
+import LoginForm from './../../components/auth/LoginForm';
+import { RadioCard } from './../../components/ui/radio-card';
+import Flex from "./../../components/ui/flex";
+import Text from "./../../components/ui/text";
+import { SignupProvider } from "./../../components/auth/SignupContext";
+import SignupSection from './../../components/auth/SignupSection';
 import { ChevronUpIcon, ChevronDownIcon } from 'lucide-react';
 
 export default function AuthPage() {
@@ -29,7 +29,7 @@ export default function AuthPage() {
         // Set pointer-events-none on the entire wrapper, to allow interaction with Nav and Footer
         <div className="absolute inset-0 z-10 pointer-events-none flex items-center justify-center">
             {/* Only this section should be clickable */}
-            <div className="relative w-full md:w-[80vw] h-[80vh] bg-white rounded-lg shadow-md flex flex-col overflow-y-auto z-20 pointer-events-auto">
+            <div className="relative w-full md:w-[70vw] h-[70vh] bg-white rounded-lg shadow-md flex flex-col overflow-y-auto z-20 pointer-events-auto">
                 {/* Header section */}
                 <div
                     className={`transition-all duration-300 ease-in-out ${

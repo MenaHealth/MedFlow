@@ -4,7 +4,7 @@
 import * as React from "react"
 import * as RadioGroupPrimitive from "@radix-ui/react-radio-group"
 
-import { cn } from "@/lib/utils"
+import { cn } from "../../utils/classNames";
 
 const RadioCardRoot = React.forwardRef<
     React.ElementRef<typeof RadioGroupPrimitive.Root>,
@@ -12,7 +12,7 @@ const RadioCardRoot = React.forwardRef<
 >(({ className, ...props }, ref) => {
     return (
         <RadioGroupPrimitive.Root
-            className={cn("grid gap-2", className)}
+            className={cn("flex w-full", className || '')}
             {...props}
             ref={ref}
         />
@@ -28,13 +28,13 @@ const RadioCardItem = React.forwardRef<
         <RadioGroupPrimitive.Item
             ref={ref}
             className={cn(
-                "relative border border-gray-200 rounded-lg p-2 hover:bg-gray-50 focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF5722]",
-                className
+                "flex-1 relative border border-gray-200 rounded-lg p-2 hover:bg-gray-50 focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF5722] text-center",
+                className || ''
             )}
             {...props}
         >
             {children}
-            <RadioGroupPrimitive.Indicator className="absolute top-0 left-0 w-full h-full border-2 border-[#FF5722] rounded-lg" />
+            <RadioGroupPrimitive.Indicator className="absolute inset-0 border-2 border-darkBlue rounded-lg" />
         </RadioGroupPrimitive.Item>
     )
 })

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '../../../../../utils/database';
-import Note from '../../../../../models/note';
+import { Note } from '../../../../../models/note';
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
     await dbConnect();
@@ -14,8 +14,6 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
         const noteContent = `
             Note ID: ${note._id}
-            Content: ${note.content}
-            Created by: ${note.username}
             Date: ${new Date(note.date).toLocaleString()}
         `;
 

@@ -19,24 +19,24 @@ export const GET = async (request, { params }) => {
 
 
 export const PATCH = async (request, { params }) => {
-
-    const { accountType, specialties } = await request.json();
+    const { firstName, lastName, gender, dob, countries, languages } = await request.json();
 
     try {
-        await connectToDB();
+        await dbConnect();
 
-        // Find the existing prompt by ID
         const existingUser = await User.findById(params.id);
 
         if (!existingUser) {
             return new Response("User not found", { status: 404 });
         }
 
-        existingUser.accountType = accountType;
-
-        if (specialties) {
-            existingUser.specialties = specialties;
-        }
+        // Update only the fields that are allowed to be edited
+        if (firstName) existingUser.firstName = firstName;
+        if (lastName) existingUser.lastName = lastName;
+        if (gender) existingUser.gender = gender;
+        if (dob) existingUser.dob = new Date(dob);
+        if (countries) existingUser.countries = countries;
+        if (languages) existingUser.languages = languages;
 
         await existingUser.save();
 

@@ -2,13 +2,13 @@
     import { useForm, FormProvider } from "react-hook-form";
     import { zodResolver } from "@hookform/resolvers/zod";
     import { z } from "zod";
-    import { TextFormField } from "@/components/ui/TextFormField";
-    import { MultiChoiceFormField } from "@/components/form/MultiChoiceFormField";
-    import { SingleChoiceFormField } from "@/components/form/SingleChoiceFormField";
-    import { DatePickerFormField } from "@/components/form/DatePickerFormField";
-    import { DoctorSpecialties } from '@/data/doctorSpecialty.enum';
-    import { LanguagesList } from '@/data/languages.enum';
-    import { CountriesList } from '@/data/countries.enum';
+    import { TextFormField } from "../../components/ui/TextFormField";
+    import { MultiChoiceFormField } from "../../components/form/MultiChoiceFormField";
+    import { SingleChoiceFormField } from "../../components/form/SingleChoiceFormField";
+    import { DatePickerFormField } from "../../components/form/DatePickerFormField";
+    import { DoctorSpecialties } from '../../data/doctorSpecialty.enum';
+    import { LanguagesList } from '../../data/languages.enum';
+    import { CountriesList } from '../../data/countries.enum';
     import { useSignupContext } from './SignupContext';
 
     const doctorSignupSchema = z.object({
@@ -46,7 +46,6 @@
 
         useEffect(() => {
             const subscription = methods.watch((data) => {
-                console.log("Form data:", data);
 
                 setFormData((prevData) => ({
                     ...prevData,
@@ -65,13 +64,11 @@
                     data.gender
                 ].filter(Boolean).length;
 
-                console.log("Filled fields count:", filledFields);
 
                 // Adjust the step number from 7 to the correct index
                 updateAnsweredQuestions(3, filledFields); // Correct the step index
 
                 const isFormComplete = filledFields === 7;
-                console.log("Is form complete?", isFormComplete);
 
                 setDoctorSignupFormCompleted(isFormComplete);
             });

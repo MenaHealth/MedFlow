@@ -1,10 +1,11 @@
 // components/auth/admin/DeniedUsers.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import React from 'react';
 import { useSession } from 'next-auth/react';
 import useToast from '@/components/hooks/useToast';
 import { ChevronLeft, ChevronRight, UserRoundPen, UserRoundCheck } from 'lucide-react';
+import { useAdminDashboard } from './AdminDashboardContext';
 
 interface User {
     _id: string;
@@ -17,44 +18,25 @@ interface User {
 }
 
 interface DeniedUsersProps {
-    data: User[] | null;
+    data: User[];
 }
 
 export default function DeniedUsers({ data }: DeniedUsersProps) {
     const { data: session } = useSession();
-    const [users, setUsers] = useState<User[]>([]);
-    const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
     const { setToast } = useToast();
-    const [isSelecting, setIsSelecting] = useState(false);
+    const {
+        deniedUsersData,
+        totalPages,
+        currentPage,
+        setCurrentPage,
+        loadingDeniedUsers,
+        setDeniedUsersData, // Add this to update deniedUsersData in the context
+    } = useAdminDashboard();
 
-    useEffect(() => {
-        const fetchDeniedUsers = async () => {
-            if (session?.user?.isAdmin) {
-                try {
-                    const res = await fetch(`/api/admin/denied-users?page=${currentPage}&limit=20`);
-                    if (!res.ok) throw new Error('Failed to fetch denied users');
-                    const data = await res.json();
-                    setUsers(data.users);
-                    setTotalPages(data.totalPages);
-                } catch (error) {
-                    console.error('Error fetching denied users:', error);
-                    setToast?.({
-                        title: 'Error',
-                        description: 'Failed to fetch denied users.',
-                        variant: 'error',
-                    });
-                }
-            }
-        };
+    const [selectedUsers, setSelectedUsers] = React.useState<string[]>([]);
+    const [isSelecting, setIsSelecting] = React.useState(false);
 
-        if (session?.user?.isAdmin) {
-            fetchDeniedUsers();
-        }
-    }, [session, currentPage, setToast]);
-
-    // Handle the re-approve action
+    // Handle the re-approve-users action
     const handleReApprove = async () => {
         if (!session?.user?.isAdmin) {
             setToast?.({
@@ -66,7 +48,7 @@ export default function DeniedUsers({ data }: DeniedUsersProps) {
         }
 
         try {
-            const response = await fetch('/api/admin/approve', {
+            const response = await fetch('/api/admin/POST/re-approve-users', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -79,14 +61,16 @@ export default function DeniedUsers({ data }: DeniedUsersProps) {
                 throw new Error('Failed to re-approve users');
             }
 
+            // Filter out re-approved users from the denied list
+            const updatedDeniedUsers = deniedUsersData.filter(user => !selectedUsers.includes(user._id));
+            setDeniedUsersData(updatedDeniedUsers); // Update context with new denied users list
+
             setToast?.({
                 title: 'Success',
                 description: 'Users re-approved successfully.',
                 variant: 'default',
             });
 
-            // Remove the re-approved users from the current list
-            setUsers((prevUsers) => prevUsers.filter((user) => !selectedUsers.includes(user._id)));
             setSelectedUsers([]);  // Clear selected users after re-approval
             setIsSelecting(false);  // Exit selection mode after successful re-approval
         } catch (error) {
@@ -106,22 +90,26 @@ export default function DeniedUsers({ data }: DeniedUsersProps) {
         );
     };
 
+    if (loadingDeniedUsers) {
+        return <div>Loading...</div>;
+    }
+
     return (
         <div className="container bg mx-auto px-4 py-8 bg-grey-100">
             <div className="flex justify-between items-center mb-4">
                 <button
                     onClick={() => setIsSelecting(!isSelecting)}
                     className={`border-2 font-bold py-2 px-4 rounded mr-2 ${
-                        users.length === 0
+                        (deniedUsersData?.length || 0) === 0
                             ? 'border-gray-400 text-gray-400 cursor-not-allowed'
                             : 'border-grey-800 text-grey-800 hover:bg-grey-800 hover:text-orange-50'
                     }`}
-                    disabled={users.length === 0}
+                    disabled={(deniedUsersData?.length || 0) === 0}
                 >
-                    <UserRoundPen className="w-5 h-5" />
+                    <UserRoundPen className="w-5 h-5"/>
                 </button>
 
-                {/* Re-approve button - visible in selection mode */}
+                {/* Re-approve-users button - visible in selection mode */}
                 {isSelecting && (
                     <button
                         onClick={handleReApprove}
@@ -132,7 +120,7 @@ export default function DeniedUsers({ data }: DeniedUsersProps) {
                         }`}
                         disabled={selectedUsers.length === 0}
                     >
-                        <UserRoundCheck className="w-5 h-5" />
+                        <UserRoundCheck className="w-5 h-5"/>
                     </button>
                 )}
             </div>
@@ -150,8 +138,8 @@ export default function DeniedUsers({ data }: DeniedUsersProps) {
                 </tr>
                 </thead>
                 <tbody>
-                {users.length > 0 ? (
-                    users.map((user) => (
+                {(deniedUsersData || []).length > 0 ? (
+                    deniedUsersData.map((user: User) => (
                         <tr key={user._id}>
                             {isSelecting && (
                                 <td className="py-2 px-4 border-b">
@@ -175,7 +163,7 @@ export default function DeniedUsers({ data }: DeniedUsersProps) {
                     ))
                 ) : (
                     <tr>
-                        <td colSpan={5} className="py-2 px-4 border-b text-center">
+                        <td colSpan={6} className="py-2 px-4 border-b text-center">
                             No denied users.
                         </td>
                     </tr>
@@ -183,24 +171,24 @@ export default function DeniedUsers({ data }: DeniedUsersProps) {
                 </tbody>
             </table>
 
-            {users.length > 0 && totalPages > 1 && (
+            {deniedUsersData.length > 0 && totalPages > 1 && (
                 <div className="mt-4 flex justify-center items-center space-x-2">
                     <button
-                        onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                        onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))}
                         disabled={currentPage === 1}
                         className="p-2 rounded-full bg-gray-100 disabled:opacity-50"
                     >
-                        <ChevronLeft className="h-5 w-5" />
+                        <ChevronLeft className="h-5 w-5"/>
                     </button>
                     <span>
                         Page {currentPage} of {totalPages}
                     </span>
                     <button
-                        onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                        onClick={() => setCurrentPage(Math.min(currentPage + 1, totalPages))}
                         disabled={currentPage === totalPages}
                         className="p-2 rounded-full bg-gray-100 disabled:opacity-50"
                     >
-                        <ChevronRight className="h-5 w-5" />
+                        <ChevronRight className="h-5 w-5"/>
                     </button>
                 </div>
             )}

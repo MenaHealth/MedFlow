@@ -1,6 +1,5 @@
 // components/auth/adminDashboard/AdminDashboardView.tsx
 
-
 import React from 'react';
 import { AdminDashboardProvider, useAdminDashboard } from './AdminDashboardContext';
 import PendingUsers from './PendingUsers';
@@ -16,12 +15,15 @@ const AdminDashboardContent = () => {
         isExistingUsersOpen,
         isDeniedUsersOpen,
         isAddAdminUsersOpen,
+        isMedOrderOpen,              // Added for Med Orders
         loadingPendingApprovals,
         loadingExistingUsers,
         loadingDeniedUsers,
+        loadingMedOrders,             // Added for Med Orders
         pendingApprovalsData,
         existingUsersData,
         deniedUsersData,
+        medOrdersData,                // Added for Med Orders
         toggleSection,
         totalPages,
         currentPage,
@@ -126,6 +128,58 @@ const AdminDashboardContent = () => {
                     <AdminManagement/>
                 </div>
             </div>
+
+
+            {/* Med Orders Section */}
+            <div className="mb-8 bg-darkBlue text-white rounded-lg shadow-md overflow-hidden transition-all duration-300 ease-in-out">
+                <div
+                    className="flex justify-between items-center cursor-pointer p-4 bg-darkBlue"
+                    onClick={() => toggleSection('medOrder')}
+                >
+                    <h2 className="text-2xl font-semibold text-orange-100">Med Orders</h2>
+                </div>
+                <div
+                    className={`overflow-hidden transition-all duration-300 ease-in-out ${isMedOrderOpen ? 'max-h-[1000px]' : 'max-h-0'}`}>
+                    <div className="p-4 overflow-x-auto bg-darkBlue">
+                        {(loadingMedOrders || isRefreshing) ? (
+                            <div className="flex justify-center items-center py-4">
+                                <BarLoader color="var(--orange-500)" />
+                            </div>
+                        ) : (
+                            medOrdersData.length > 0 ? (
+                                <div>
+                                    {medOrdersData.map(order => (
+                                        <div key={order._id}
+                                             className="bg-white text-darkBlue p-4 mb-4 rounded shadow-md">
+                                            <p><strong>Patient:</strong> {order.patientName}</p>
+                                            <p><strong>Doctor:</strong> {order.prescribingDr} ({order.doctorSpecialty})
+                                            </p>
+                                            <p><strong>Medications:</strong></p>
+                                            <ul>
+                                                {order.medications.map((med: {
+                                                    medication: string;
+                                                    dosage: string;
+                                                    frequency: string;
+                                                    quantity: string
+                                                }, index: number) => (
+                                                    <li key={index}>
+                                                        <strong>{med.medication}</strong> - {med.dosage} ({med.frequency}), {med.quantity}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                            <p><strong>Date:</strong> {new Date(order.orderDate).toLocaleDateString()}
+                                            </p>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-center text-white">No Med Orders found.</p>
+                            )
+                        )}
+                    </div>
+                </div>
+            </div>
+
         </div>
     );
 };

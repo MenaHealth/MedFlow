@@ -1,6 +1,5 @@
 // components/auth/adminDashboard/AdminDashboardContext.tsx
 
-
 import React, { createContext, useContext, ReactNode } from 'react';
 import { useAdminDashboardViewModel } from './AdminDashboardViewModel';
 
@@ -9,16 +8,19 @@ interface AdminDashboardContextType {
     isExistingUsersOpen: boolean;
     isDeniedUsersOpen: boolean;
     isAddAdminUsersOpen: boolean;
+    isMedOrderOpen: boolean;                     // Added for Med Orders
     loadingPendingApprovals: boolean;
     loadingExistingUsers: boolean;
     loadingDeniedUsers: boolean;
     loadingAdmins: boolean;
+    loadingMedOrders: boolean;                   // Added for Med Orders
     pendingApprovalsData: any;
     existingUsersData: any;
     deniedUsersData: any[];
+    medOrdersData: any[];                        // Added for Med Orders
     setDeniedUsersData: React.Dispatch<React.SetStateAction<any[]>>;
     adminsData: any;
-    toggleSection: (section: 'pending' | 'existing' | 'denied' | 'addAdmin') => void;
+    toggleSection: (section: 'pending' | 'existing' | 'denied' | 'addAdmin' | 'medOrder') => void;
     totalPages: number;
     currentPage: number;
     setCurrentPage: React.Dispatch<React.SetStateAction<number>>;

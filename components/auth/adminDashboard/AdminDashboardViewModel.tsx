@@ -28,6 +28,11 @@ export function useAdminDashboardViewModel() {
     const [deniedUsersData, setDeniedUsersData] = useState<User[]>([]);
     const [adminsData, setAdminsData] = useState<User[]>([]);
 
+
+    const [isMedOrderOpen, setIsMedOrderOpen] = useState(false);
+    const [loadingMedOrders, setLoadingMedOrders] = useState(false);
+    const [medOrdersData, setMedOrdersData] = useState([]);
+
     const [totalPages, setTotalPages] = useState(1);
     const [currentPage, setCurrentPage] = useState(1);
 
@@ -99,6 +104,21 @@ export function useAdminDashboardViewModel() {
         }
     }, [currentPage]);
 
+    const fetchMedOrders = useCallback(async () => {
+        try {
+            setLoadingMedOrders(true);
+            const res = await fetch(`/api/admin/GET/med-orders?page=${currentPage}&limit=20`);
+            if (!res.ok) throw new Error('Failed to fetch med orders');
+            const data = await res.json();
+            setMedOrdersData(data.orders || []);
+            setTotalPages(data.totalPages || 1);
+        } catch (error) {
+            console.error('Error fetching med orders:', error);
+        } finally {
+            setLoadingMedOrders(false);
+        }
+    }, [currentPage]);
+
     const handleRefresh = useCallback(async () => {
         setIsRefreshing(true);
         await fetchPendingApprovals();
@@ -108,8 +128,9 @@ export function useAdminDashboardViewModel() {
         setIsRefreshing(false);
     }, [fetchPendingApprovals, fetchExistingUsers, fetchDeniedUsers, fetchAdmins]);
 
+
     const toggleSection = useCallback(
-        async (section: 'pending' | 'existing' | 'denied' | 'addAdmin') => {
+        async (section: 'pending' | 'existing' | 'denied' | 'addAdmin' | 'medOrder') => {
             let shouldFetch = false;
 
             if (section === 'pending') {
@@ -149,6 +170,14 @@ export function useAdminDashboardViewModel() {
                     await fetchAdmins();
                 }
             }
+            else if (section === 'medOrder') {
+                setIsMedOrderOpen(prev => {
+                    if (!prev) {
+                        fetchMedOrders();
+                    }
+                    return !prev;
+                });
+            }
         },
         [fetchAdmins, fetchPendingApprovals, fetchExistingUsers, fetchDeniedUsers]
     );
@@ -167,6 +196,9 @@ export function useAdminDashboardViewModel() {
         deniedUsersData,
         setDeniedUsersData,
         adminsData,
+        isMedOrderOpen,
+        loadingMedOrders,
+        medOrdersData,
         toggleSection,
         totalPages,
         currentPage,

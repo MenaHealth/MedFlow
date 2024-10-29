@@ -30,7 +30,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
     const { submitRxOrder, isLoading: rxLoading } = useRXOrderViewModel(patientId);
     const { submitMedOrder, isLoading: medLoading } = useMedOrderViewModel(patientId);
 
-    const [templateType, setTemplateType] = useState<'rxOrder' | 'medicalrequest'>('rxOrder');
+    const [templateType, setTemplateType] = useState<'rxOrder' | 'medOrder'>('rxOrder');
 
     const methods = useForm({
         defaultValues: templateType === 'rxOrder' ? { rxOrder: rxOrders } : { medOrder: medOrders },
@@ -85,13 +85,13 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                         <CardHeader className="px-4 py-2">
                             <RadioCard.Root
                                 defaultValue={templateType}
-                                onValueChange={(value) => setTemplateType(value as 'rxOrder' | 'medicalrequest')}
+                                onValueChange={(value) => setTemplateType(value as 'rxOrder' | 'medOrder')}
                                 className="flex w-full"
                             >
                                 <RadioCard.Item value="rxOrder" className={`flex-1 ${templateType === 'rxOrder' ? 'bg-white' : ''}`}>
                                     Rx Order
                                 </RadioCard.Item>
-                                <RadioCard.Item value="medicalrequest" className={`flex-1 ${templateType === 'medicalrequest' ? 'bg-white' : ''}`}>
+                                <RadioCard.Item value="medOrder" className={`flex-1 ${templateType === 'medOrder' ? 'bg-white' : ''}`}>
                                     Medication Order
                                 </RadioCard.Item>
                             </RadioCard.Root>
@@ -110,7 +110,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                             patientInfo={patientInfo || { patientName: '', phoneNumber: '', age: '', city: '' }}
                                         />
                                     )}
-                                    {templateType === 'medicalrequest' && (
+                                    {templateType === 'medOrder' && (
                                         <MedOrderView
                                             patientId={patientId}
                                             user={{

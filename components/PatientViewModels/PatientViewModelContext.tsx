@@ -1,7 +1,7 @@
 // components/PatientViewModels/PatientViewModelContext.tsx
 "use client"
 
-import React, {createContext, useContext, useState, useCallback, ReactNode, useEffect, useMemo} from 'react';
+import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { PatientInfoViewModel } from "./patient-info/PatientInfoViewModel";
@@ -82,11 +82,9 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
     const [userSession, setUserSession] = useState<UserSession | null>(null);
     const [authorName, setAuthorName] = useState('');
     const [authorID, setAuthorID] = useState('');
-    const [rxOrders, setrxOrders] = useState<IRxOrder[]>([]);
-    const [medOrders, setmedOrders] = useState<IMedOrder[]>([]);
+    const [rxOrders, setRxOrders] = useState<IRxOrder[]>([]);
+    const [medOrders, setMedOrders] = useState<IMedOrder[]>([]);
     const [loadingMedications, setLoadingMedications] = useState(false);
-
-
 
     useEffect(() => {
         if (status === 'authenticated' && session?.user) {
@@ -112,11 +110,8 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
 
             setAuthorName(`${firstName} ${lastName}`.trim());
             setAuthorID(userId);
-
-            console.log('User session:', userSession);
         }
     }, [session, status]);
-
 
     const memoizedUserSession = useMemo(() => userSession, [userSession]);
 
@@ -153,6 +148,21 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
         }
     }, [memoizedPatientInfo?.patientName]);
 
+    const fetchMedOrders = useCallback(async (medOrderIds: string[]) => {
+        try {
+            const response = await fetch(`/api/patient/${patientId}/medications/med-order`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ medOrderIds })
+            });
+            if (!response.ok) throw new Error("Error fetching detailed med orders data");
+            return await response.json();
+        } catch (error) {
+            console.error('Error fetching med orders:', error);
+            return [];
+        }
+    }, [patientId]);
+
     const fetchPatientData = useCallback(async () => {
         setLoadingPatientInfo(true);
         setLoadingMedications(true);
@@ -161,6 +171,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
+
             const data = await response.json() as IPatient;
             formatPatientInfo(data);
             if (data.notes) {
@@ -168,15 +179,27 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             } else {
                 setNotes([]);
             }
-            setrxOrders(data.rxOrders || []);
-            setmedOrders(data.medOrders || []);
+
+            setRxOrders(data.rxOrders || []);
+
+            const medOrderIds = data.medOrders?.map(order =>
+                typeof order === 'string' ? order : order.$oid || order._id
+            ).filter(Boolean);
+
+            if (medOrderIds && medOrderIds.length > 0) {
+                const detailedMedOrders = await fetchMedOrders(medOrderIds);
+                setMedOrders(detailedMedOrders);
+            } else {
+                setMedOrders([]);
+            }
+
         } catch (error) {
             console.error('Error fetching patient data:', error);
         } finally {
             setLoadingPatientInfo(false);
             setLoadingMedications(false);
         }
-    }, [patientId, formatPatientInfo, formatPreviousNotes]);
+    }, [patientId, formatPatientInfo, formatPreviousNotes, fetchMedOrders]);
 
     useEffect(() => {
         if (patientId) {
@@ -191,9 +214,22 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
         try {
             const response = await fetch(`/api/patient/${patientId}/medications`);
             if (!response.ok) throw new Error("Error fetching medications data");
+
             const data = await response.json();
-            setrxOrders(data.rxOrders || []); // Update rxOrders with fresh data
-            setmedOrders(data.medOrders || []); // Update medOrders with fresh data
+
+            setRxOrders(data.rxOrders || []);
+
+            const medOrderIds = data.medOrders?.map(order =>
+                typeof order === 'string' ? order : order.$oid || order._id
+            ).filter(Boolean);
+
+            if (medOrderIds && medOrderIds.length > 0) {
+                const detailedMedOrders = await fetchMedOrders(medOrderIds);
+                setMedOrders(detailedMedOrders);
+            } else {
+                setMedOrders([]);
+            }
+
         } catch (error) {
             console.error('Error refreshing medications:', error);
         } finally {
@@ -202,22 +238,14 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
     };
 
     const addRxOrder = useCallback((newRxOrder: IRxOrder) => {
-        setrxOrders((prevOrders) => {
-            const updatedOrders = [...prevOrders, newRxOrder];
-            console.log("Updated RX Orders:", updatedOrders); // Logging for verification
-            fetchPatientData(); // Ensure all components receive the updated data
-            return updatedOrders;
-        });
+        setRxOrders(prevOrders => [...prevOrders, newRxOrder]);
+        fetchPatientData();
     }, [fetchPatientData]);
 
     const addMedOrder = useCallback((newMedOrder: IMedOrder) => {
-        setmedOrders((prevOrders) => {
-            const updatedMedOrders = [...prevOrders, newMedOrder];
-            console.log("Updated Med Orders:", updatedMedOrders); // Logging for verification
-            return updatedMedOrders;
-        });
-    }, []);
-
+        setMedOrders(prevOrders => [...prevOrders, newMedOrder]);
+        fetchPatientData();
+    }, [fetchPatientData]);
 
     return (
         <PatientViewModelContext.Provider
@@ -250,6 +278,5 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
 };
 
 export default function Component() {
-    // This is a placeholder component to satisfy the React Component code block requirements
     return null;
 }

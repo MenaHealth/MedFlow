@@ -101,7 +101,7 @@ export default function PatientTriage() {
   useEffect(() => {
     const fetchAndSortRows = async () => {
       try {
-        const response = await fetch("/api/patient?status!=Archived"); // Exclude Archived patients
+        const response = await fetch("/api/patient/");
         const data = await response.json();
 
         // Update the rows with filtered and sorted data
@@ -113,7 +113,6 @@ export default function PatientTriage() {
 
     fetchAndSortRows();
   }, []); // Only fetch data on mount
-
 
   // Memoize the filtered and sorted rows
   const sortedAndFilteredRows = useMemo(() => {
@@ -247,60 +246,28 @@ export default function PatientTriage() {
     }
   }
 
-  const submitForm = async (form) => {
+  const handleArchive = async (index) => {
     try {
-      const pmhxString = Array.isArray(form.pmhx) ? form.pmhx.join(", ") : form.pmhx || "";
-      const pshxString = Array.isArray(form.pshx) ? form.pshx.join(", ") : form.pshx || "";
-
-      const payload = {
-        ...form,
-        pmhx: pmhxString,
-        pshx: pshxString,
-      };
-
-      const response = await fetch('/api/patient/', {
+      await fetch('/api/patient/', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          _id: rows[index]["_id"],
+          status: "Archived",
+        }),
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      console.log("Patient data saved successfully!");
-
-    } catch (error) {
-      console.error('Error saving patient data:', error);
-    }
-  };
-
-
-// Your handleArchive function
-  const handleArchive = async (index) => {
-    try {
-      const patientData = {
-        _id: rows[index]["_id"],
-        status: "Archived",
-        pmhx: rows[index].pmhx || [], // Ensure PMHx is passed as an array
-        pshx: rows[index].pshx || [], // Ensure PSHx is passed as an array
-        phone: {
-          countryCode: "+963",
-          phoneNumber: "1233214321"
-        }
-      };
-
-      // Call submitForm and pass the patient data
-      await submitForm(patientData);
-
-      const updatedRows = rows.filter((_, rowIndex) => rowIndex !== index);
+      const updatedRows = [...rows];
+      updatedRows[index].status = "Archived";
       setRows(updatedRows);
     } catch (error) {
       console.log(error);
     }
-  };
+  }
+
+
+
 
   useEffect(() => {
     // This ensures the component has mounted before using the router
@@ -313,178 +280,177 @@ export default function PatientTriage() {
   };
 
   return (
-      <>
-        <div className="w-full relative dashboard-page">
-          <div className="flex justify-between items-center py-3">
-            {/* New Button to Archived Patients */}
-            <Link
-                href="/create-patient"
-                className="flex items-center justify-center no-underline"
-            >
-              <div className="relative group ml-4 bg-darkBlue p-2">
-                <UserRoundPlus color={"white"} bsize={22} />
-                <span className="absolute left-full ml-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap bg-white px-2 py-1 rounded shadow-lg">
+    <>
+      <div className="w-full relative dashboard-page">
+        <div className="flex justify-between items-center py-3">
+          <Link
+            href="/create-patient"
+            className="flex items-center justify-center no-underline"
+          >
+            <div className="relative group ml-4 bg-darkBlue p-2">
+              <UserRoundPlus color={"white"} bsize={22} />
+              <span className="absolute left-full ml-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap bg-white px-2 py-1 rounded shadow-lg">
                 Add New Patient
               </span>
-              </div>
-            </Link>
-            <Link href="/patient-info/archived-patients" className="flex items-center justify-center no-underline">
-              <div className="relative group ml-4 bg-darkBlue p-2">
-                <span className="text-white">View Archived Patients</span>
-              </div>
-            </Link>
-            <h2
-                className="flex-1 text-center font-bold"
-                style={{ fontSize: "24px" }}
-            >
-              <span className="blue_gradient">Patient List</span>
-            </h2>
-            <div style={{ width: 48 }}>
-              {" "}
             </div>
+          </Link>
+          <Link href="/patient-info/archived-patients" className="flex items-center justify-center no-underline">
+            <div className="relative group ml-4 bg-darkBlue p-2">
+              <span className="text-white">View Archived Patients</span>
+            </div>
+          </Link>
+          <h2
+            className="flex-1 text-center font-bold"
+            style={{ fontSize: "24px" }}
+          >
+            <span className="blue_gradient">Patient List</span>
+          </h2>
+          <div style={{ width: 48 }}>
+            {" "}
           </div>
-          <div className="flex flex-wrap gap-2 mb-4">
-            {priorityFilter !== "all" && (
-                <div className="bg-green-100 text-green-800 px-2 py-1 rounded flex items-center">
-                  <EditIcon className="mr-2 cursor-pointer" />
-                  Priority: {priorityFilter}
-                  <RemoveCircleIcon
-                      className="ml-2 cursor-pointer"
-                      onClick={() => setPriorityFilter("all")}
-                  />
-                </div>
-            )}
-            {statusFilter !== "all" && (
-                <div className="bg-purple-100 text-purple-800 px-2 py-1 rounded flex items-center">
-                  <EditIcon className="mr-2 cursor-pointer" />
-                  Status: {statusFilter}
-                  <RemoveCircleIcon
-                      className="ml-2 cursor-pointer"
-                      onClick={() => setStatusFilter("all")}
-                  />
-                </div>
-            )}
-            {specialtyFilter !== "all" && (
-                <div className="bg-blue-100 text-blue-800 px-2 py-1 rounded flex items-center">
-                  <EditIcon className="mr-2 cursor-pointer" />
-                  Specialty: {specialtyFilter}
-                  <RemoveCircleIcon
-                      className="ml-2 cursor-pointer"
-                      onClick={() => setSpecialtyFilter("all")}
-                  />
-                </div>
-            )}
-            {shouldShowClearButton && (
-                <div
-                    className="bg-red-100 text-red-800 px-2 py-1 rounded cursor-pointer"
-                    onClick={() => {
-                      setPriorityFilter("all");
-                      setStatusFilter("all");
-                      setSpecialtyFilter("all");
-                    }}
+        </div>  
+        <div className="flex flex-wrap gap-2 mb-4">
+          {priorityFilter !== "all" && (
+            <div className="bg-green-100 text-green-800 px-2 py-1 rounded flex items-center">
+              <EditIcon className="mr-2 cursor-pointer" />
+              Priority: {priorityFilter}
+              <RemoveCircleIcon
+                className="ml-2 cursor-pointer"
+                onClick={() => setPriorityFilter("all")}
+              />
+            </div>
+          )}
+          {statusFilter !== "all" && (
+            <div className="bg-purple-100 text-purple-800 px-2 py-1 rounded flex items-center">
+              <EditIcon className="mr-2 cursor-pointer" />
+              Status: {statusFilter}
+              <RemoveCircleIcon
+                className="ml-2 cursor-pointer"
+                onClick={() => setStatusFilter("all")}
+              />
+            </div>
+          )}
+          {specialtyFilter !== "all" && (
+            <div className="bg-blue-100 text-blue-800 px-2 py-1 rounded flex items-center">
+              <EditIcon className="mr-2 cursor-pointer" />
+              Specialty: {specialtyFilter}
+              <RemoveCircleIcon
+                className="ml-2 cursor-pointer"
+                onClick={() => setSpecialtyFilter("all")}
+              />
+            </div>
+          )}
+          {shouldShowClearButton && (
+            <div
+              className="bg-red-100 text-red-800 px-2 py-1 rounded cursor-pointer"
+              onClick={() => {
+                setPriorityFilter("all");
+                setStatusFilter("all");
+                setSpecialtyFilter("all");
+              }}
+            >
+              <DeleteSweepIcon className="mr-2" />
+              Clear all filters
+            </div>
+          )}
+        </div>
+        <TableContainer component={Paper} style={{ maxHeight: '80vh', overflowY: 'auto' }}>
+          <Table sx={{ minWidth: 650 }} aria-label="simple table">
+            <TableHead className="MuiTableHead-root">
+              <TableRow>
+                <TableCell
+                  align="left"
+                  className="whitespace-nowrap"
                 >
-                  <DeleteSweepIcon className="mr-2" />
-                  Clear all filters
-                </div>
-            )}
-          </div>
-          <TableContainer component={Paper} style={{ maxHeight: '80vh', overflowY: 'auto' }}>
-            <Table sx={{ minWidth: 650 }} aria-label="simple table">
-              <TableHead className="MuiTableHead-root">
-                <TableRow>
-                  <TableCell
-                      align="left"
-                      className="whitespace-nowrap"
-                  >
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                    }}>
-                      <span>Patient ID</span>
-                      <Tooltip tooltipText="Hover to see full patient ID" showTooltip={true}>
-                        <InfoIcon className="ml-2" style={{ height: '1rem', width: '1rem' }} />
-                      </Tooltip>
-                    </div>
-                  </TableCell>
-                  <TableCell align="center">Last Name</TableCell>
-                  <TableCell align="center">Age</TableCell>
-                  <TableCell align="center">Location</TableCell>
-                  <TableCell align="center">Language Spoken</TableCell>
-                  <TableCell
-                      align="left"
-                      className="whitespace-nowrap">
-                    <div className='flex items-center'>
-                      <span>Chief Complaint</span>
-                      <Tooltip tooltipText="Hover to see full text" showTooltip={true}>
-                        <InfoIcon className="ml-2" style={{ height: '1rem', width: '1rem' }} />
-                      </Tooltip>
-                    </div>
-                  </TableCell>
-                  <TableCell align="center">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                            variant="ghost"
-                            className="h-8 w-full justify-start"
-                            style={{ fontSize: "0.7rem", fontWeight: 500, letterSpacing: "0.05rem" }}>
-                          STATUS
-                          <KeyboardArrowDownIcon className="ml-2 h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuRadioGroup value={statusFilter} onValueChange={setStatusFilter}>
-                          <DropdownMenuRadioItem value="all">All</DropdownMenuRadioItem>
-                          {STATUS.map((status) => (
-                              <DropdownMenuRadioItem key={status} value={status}>{status}</DropdownMenuRadioItem>
-                          ))}
-                        </DropdownMenuRadioGroup>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                  <TableCell align="center">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                            variant="ghost"
-                            className="h-8 w-full justify-start"
-                            style={{ fontSize: "0.7rem", fontWeight: 500, letterSpacing: "0.05rem" }}>
-                          PRIORITY
-                          <KeyboardArrowDownIcon className="ml-2 h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuRadioGroup value={priorityFilter} onValueChange={setPriorityFilter}>
-                          <DropdownMenuRadioItem value="all">All</DropdownMenuRadioItem>
-                          {PRIORITIES.map((priority) => (
-                              <DropdownMenuRadioItem key={priority} value={priority}>{priority}</DropdownMenuRadioItem>
-                          ))}
-                        </DropdownMenuRadioGroup>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                  <TableCell align="center">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                            variant="ghost"
-                            className="h-8 w-full justify-start"
-                            style={{ fontSize: "0.7rem", fontWeight: 500, letterSpacing: "0.05rem" }}>
-                          SPECIALTY
-                          <KeyboardArrowDownIcon className="ml-2 h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" style={{ maxWidth: "20rem", maxHeight: "30rem", overflowY: "auto" }}>
-                        <DropdownMenuRadioGroup value={specialtyFilter} onValueChange={setSpecialtyFilter}>
-                          <DropdownMenuRadioItem value="all">All</DropdownMenuRadioItem>
-                          {DOCTOR_SPECIALTIES.map((specialty) => (
-                              <DropdownMenuRadioItem key={specialty} value={specialty}>{specialty}</DropdownMenuRadioItem>
-                          ))}
-                        </DropdownMenuRadioGroup>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                  <TableCell
-                      align="left">
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}>
+                    <span>Patient ID</span>
+                    <Tooltip tooltipText="Hover to see full patient ID" showTooltip={true}>
+                      <InfoIcon className="ml-2" style={{ height: '1rem', width: '1rem' }} />
+                    </Tooltip>
+                  </div>
+                </TableCell>
+                <TableCell align="center">Last Name</TableCell>
+                <TableCell align="center">Age</TableCell>
+                <TableCell align="center">Location</TableCell>
+                <TableCell align="center">Language Spoken</TableCell>
+                <TableCell
+                  align="left"
+                  className="whitespace-nowrap">
+                  <div className='flex items-center'>
+                    <span>Chief Complaint</span>
+                    <Tooltip tooltipText="Hover to see full text" showTooltip={true}>
+                      <InfoIcon className="ml-2" style={{ height: '1rem', width: '1rem' }} />
+                    </Tooltip>
+                  </div>
+                </TableCell>
+                <TableCell align="center">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="h-8 w-full justify-start"
+                        style={{ fontSize: "0.7rem", fontWeight: 500, letterSpacing: "0.05rem" }}>
+                        STATUS
+                        <KeyboardArrowDownIcon className="ml-2 h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuRadioGroup value={statusFilter} onValueChange={setStatusFilter}>
+                        <DropdownMenuRadioItem value="all">All</DropdownMenuRadioItem>
+                        {STATUS.map((status) => (
+                          <DropdownMenuRadioItem key={status} value={status}>{status}</DropdownMenuRadioItem>
+                        ))}
+                      </DropdownMenuRadioGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+                <TableCell align="center">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="h-8 w-full justify-start"
+                        style={{ fontSize: "0.7rem", fontWeight: 500, letterSpacing: "0.05rem" }}>
+                        PRIORITY
+                        <KeyboardArrowDownIcon className="ml-2 h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuRadioGroup value={priorityFilter} onValueChange={setPriorityFilter}>
+                        <DropdownMenuRadioItem value="all">All</DropdownMenuRadioItem>
+                        {PRIORITIES.map((priority) => (
+                          <DropdownMenuRadioItem key={priority} value={priority}>{priority}</DropdownMenuRadioItem>
+                        ))}
+                      </DropdownMenuRadioGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+                <TableCell align="center">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="h-8 w-full justify-start"
+                        style={{ fontSize: "0.7rem", fontWeight: 500, letterSpacing: "0.05rem" }}>
+                        SPECIALTY
+                        <KeyboardArrowDownIcon className="ml-2 h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" style={{ maxWidth: "20rem", maxHeight: "30rem", overflowY: "auto" }}>
+                      <DropdownMenuRadioGroup value={specialtyFilter} onValueChange={setSpecialtyFilter}>
+                        <DropdownMenuRadioItem value="all">All</DropdownMenuRadioItem>
+                        {DOCTOR_SPECIALTIES.map((specialty) => (
+                          <DropdownMenuRadioItem key={specialty} value={specialty}>{specialty}</DropdownMenuRadioItem>
+                        ))}
+                      </DropdownMenuRadioGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+                <TableCell
+                    align="left">
                     <span>Additional</span>
                     <div style={{
                       display: 'flex',
@@ -648,48 +614,47 @@ export default function PatientTriage() {
                       <TableCell align="center">
                         {
                           row.status === 'Not Started'
-                              ? ''
-                              : row.status === 'In-Progress' || row.status === 'Archived'
-                                  ? getInitials(row.doctor?.firstName, row.doctor?.lastName)
-                                  : row.status === 'Triaged'
-                                      ? session.user.accountType === 'Doctor'
-                                          ?  (
-                                              <Button onClick={() => handleTakeCase(index)}
-                                                      variant="contained"
-                                                      color="primary"
-                                                      style={{
-                                                        backgroundColor: 'black',
-                                                        color: 'white',
-                                                        borderRadius: '4px',
-                                                        padding: '8px 16px',
-                                                        fontSize: '14px',
-                                                        textTransform: 'none',
-                                                        boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)'
-                                                      }}>
-                                                Take Case
-                                              </Button>
-                                          )
-                                          : ''
-                                      : (
-                                          <Button onClick={() => handleArchive(index)}>
-                                            Archive
-                                          </Button>
-                                      )}
-                      </TableCell>
-                      <TableCell align="center">
-                        {row.createdAt ? new Date(row.createdAt).toLocaleString() : 'N/A'}
-                      </TableCell>
-                    </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-          {rows.length === 0 && (
-              <div className="text-center text-gray-500 my-6">
-
-                <p>No patient data found matching your expertise.</p>
-              </div>
-          )}
+                            ? ''
+                            : row.status === 'In-Progress' || row.status === 'Archived'
+                              ? getInitials(row.doctor?.firstName, row.doctor?.lastName)
+                              : row.status === 'Triaged'
+                                ? session.user.accountType === 'Doctor'
+                                  ?  (
+                                        <Button onClick={() => handleTakeCase(index)}
+                                          variant="contained"
+                                          color="primary"
+                                          style={{
+                                            backgroundColor: 'black',
+                                            color: 'white',
+                                            borderRadius: '4px',
+                                            padding: '8px 16px',
+                                            fontSize: '14px',
+                                            textTransform: 'none',
+                                  boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)'
+                                }}>
+                                Take Case
+                              </Button>
+                            )
+                            : ''
+                          : (
+                            <Button onClick={() => handleArchive(index)}>
+                              Archive
+                            </Button>
+                          )}
+                  </TableCell>
+                  <TableCell align="center">
+                    {row.createdAt ? new Date(row.createdAt).toLocaleString() : 'N/A'}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        {rows.length === 0 && (
+          <div className="text-center text-gray-500 my-6">
+            <p>No patient data found matching your expertise.</p>
+          </div>
+        )}
         </div>
         <Toast.Provider>
           <Toast.Root

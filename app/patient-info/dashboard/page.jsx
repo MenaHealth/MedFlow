@@ -99,18 +99,19 @@ export default function PatientTriage() {
   useEffect(() => {
     const fetchAndSortRows = async () => {
       try {
-        const response = await fetch("/api/patient/");
+        const response = await fetch("/api/patient?status!=Archived"); // Exclude Archived patients
         const data = await response.json();
-
+  
         // Update the rows with filtered and sorted data
         setAllData(data);
       } catch (error) {
         console.log(error);
       }
     };
-
+  
     fetchAndSortRows();
   }, []); // Only fetch data on mount
+  
 
   // Memoize the filtered and sorted rows
   const sortedAndFilteredRows = useMemo(() => {
@@ -244,28 +245,60 @@ export default function PatientTriage() {
     }
   }
 
-  const handleArchive = async (index) => {
+  const submitForm = async (form) => {
     try {
-      await fetch('/api/patient/', {
+      const pmhxString = Array.isArray(form.pmhx) ? form.pmhx.join(", ") : form.pmhx || "";
+      const pshxString = Array.isArray(form.pshx) ? form.pshx.join(", ") : form.pshx || "";
+  
+      const payload = {
+        ...form,
+        pmhx: pmhxString, 
+        pshx: pshxString, 
+      };
+  
+      const response = await fetch('/api/patient/', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          _id: rows[index]["_id"],
-          status: "Archived",
-        }),
+        body: JSON.stringify(payload),
       });
-      const updatedRows = [...rows];
-      updatedRows[index].status = "Archived";
-      setRows(updatedRows);
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      console.log("Patient data saved successfully!");
+  
     } catch (error) {
-      console.log(error);
+      console.error('Error saving patient data:', error);
     }
+  };
+  
+
+// Your handleArchive function
+const handleArchive = async (index) => {
+  try {
+    const patientData = {
+      _id: rows[index]["_id"],
+      status: "Archived",
+      pmhx: rows[index].pmhx || [], // Ensure PMHx is passed as an array
+      pshx: rows[index].pshx || [], // Ensure PSHx is passed as an array
+      phone: {
+        countryCode: "+963",
+        phoneNumber: "1233214321"
+      }
+    };
+
+    // Call submitForm and pass the patient data
+    await submitForm(patientData);
+
+    const updatedRows = rows.filter((_, rowIndex) => rowIndex !== index);
+    setRows(updatedRows);
+  } catch (error) {
+    console.log(error);
   }
-
-
-
+};
 
   useEffect(() => {
     // This ensures the component has mounted before using the router
@@ -281,6 +314,7 @@ export default function PatientTriage() {
     <>
       <div className="w-full relative dashboard-page">
         <div className="flex justify-between items-center py-3">
+          {/* New Button to Archived Patients */}
           <Link
             href="/create-patient"
             className="flex items-center justify-center no-underline"
@@ -292,6 +326,11 @@ export default function PatientTriage() {
               </span>
             </div>
           </Link>
+          <Link href="/patient-info/archived-patients" className="flex items-center justify-center no-underline">
+            <div className="relative group ml-4 bg-darkBlue p-2">
+              <span className="text-white">View Archived Patients</span>
+            </div>
+          </Link>
           <h2
             className="flex-1 text-center font-bold"
             style={{ fontSize: "24px" }}
@@ -301,7 +340,7 @@ export default function PatientTriage() {
           <div style={{ width: 48 }}>
             {" "}
           </div>
-        </div>
+        </div>  
         <div className="flex flex-wrap gap-2 mb-4">
           {priorityFilter !== "all" && (
             <div className="bg-green-100 text-green-800 px-2 py-1 rounded flex items-center">
@@ -645,6 +684,7 @@ export default function PatientTriage() {
         </TableContainer>
         {rows.length === 0 && (
           <div className="text-center text-gray-500 my-6">
+            
             <p>No patient data found matching your expertise.</p>
           </div>
         )}
@@ -663,3 +703,4 @@ export default function PatientTriage() {
     </>
   );
 }
+

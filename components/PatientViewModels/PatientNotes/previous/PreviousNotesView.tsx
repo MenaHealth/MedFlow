@@ -6,6 +6,7 @@ import { CombinedNotesViewModel } from '../CombinedNotesViewModel';
 import { ScrollArea } from './../../../../components/form/ScrollArea';
 import { RadioCard } from './../../../../components/ui/radio-card';
 import { INote } from '@/models/note';
+import { useSession } from 'next-auth/react';
 
 interface PreviousNotesViewProps {
     patientId: string;
@@ -20,6 +21,7 @@ export function PreviousNotesView({ patientId, setTemplateType, deleteNote, popu
     const [expandedNotes, setExpandedNotes] = useState<string[]>([]);
     const [expandAll, setExpandAll] = useState(false);
     const [viewingDraftNotes, setViewingDraftNotes] = useState(false);
+    const { data: session } = useSession();
 
     if (loading) return <p>Loading...</p>; // Render loading state
 
@@ -64,23 +66,27 @@ export function PreviousNotesView({ patientId, setTemplateType, deleteNote, popu
                 </button>
             </div>
             <ScrollArea className="h-full w-full">
-                <RadioCard.Root
-                    onValueChange={(value) => setViewingDraftNotes(value === 'true')}
-                    className="flex w-full"
-                >
-                    <RadioCard.Item
-                        value="false"
-                        className={`flex-1 ${!viewingDraftNotes ? 'border-2 border-orange-500' : 'border border-gray-200'}`}
-                    >
-                        Published
-                    </RadioCard.Item>
-                    <RadioCard.Item
-                        value="true"
-                        className={`flex-1 ${viewingDraftNotes ? 'border-2 border-orange-500' : 'border border-gray-200'}`}
-                    >
-                        Drafts
-                    </RadioCard.Item>
-                </RadioCard.Root>
+                {
+                    session?.user.accountType === 'Doctor' && (
+                            <RadioCard.Root
+                                onValueChange={(value) => setViewingDraftNotes(value === 'true')}
+                                className="flex w-full"
+                            >
+                                <RadioCard.Item
+                                    value="false"
+                                    className={`flex-1 ${!viewingDraftNotes ? 'border-2 border-orange-500' : 'border border-gray-200'}`}
+                                >
+                                    Published
+                                </RadioCard.Item>
+                                <RadioCard.Item
+                                    value="true"
+                                    className={`flex-1 ${viewingDraftNotes ? 'border-2 border-orange-500' : 'border border-gray-200'}`}
+                                >
+                                    Drafts
+                                </RadioCard.Item>
+                            </RadioCard.Root>
+                    )
+                }
                 {!viewingDraftNotes 
                     ? notes.length > 0 ? (
                         <ul className="list-none p-0">

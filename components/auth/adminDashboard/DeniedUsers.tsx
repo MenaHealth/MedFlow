@@ -1,4 +1,4 @@
-// components/auth/admin/DeniedUsers.tsx
+// components/auth/adminDashboard/DeniedUsers.tsx
 'use client';
 
 import React from 'react';

@@ -1,4 +1,4 @@
-// app/api/admin/POST/re-approve-users/route.ts
+// app/api/adminDashboard/POST/re-approve-users/route.ts
 import { NextResponse } from 'next/server';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import User from '@/models/user';

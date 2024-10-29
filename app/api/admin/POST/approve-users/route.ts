@@ -1,4 +1,4 @@
-// app/api/admin/POST/approve-users/route.ts
+// app/api/adminDashboard/POST/approve-users/route.ts
 
 import { NextResponse } from 'next/server';
 import jwt, { JwtPayload } from 'jsonwebtoken';
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
         const token = authHeader.split(' ')[1];
         const decoded = jwt.verify(token, SECRET) as JwtPayload;
 
-        // Check if the user is an admin
+        // Check if the user is an adminDashboard
         if (typeof decoded === 'object' && decoded?.isAdmin) {
             const { userIds } = await request.json();
 

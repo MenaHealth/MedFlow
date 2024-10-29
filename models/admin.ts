@@ -1,4 +1,4 @@
-// models/admin.ts
+// models/adminDashboard.ts
 import mongoose from 'mongoose';
 
 const AdminsSchema = new mongoose.Schema({

@@ -19,9 +19,9 @@ export async function middleware(req: any) {
         return NextResponse.next();
     }
 
-    // Check if user is trying to access admin routes
-    if (pathname.startsWith('/admin')) {
-        // Redirect if no token or user is not an admin
+    // Check if user is trying to access adminDashboard routes
+    if (pathname.startsWith('/adminDashboard')) {
+        // Redirect if no token or user is not an adminDashboard
         if (!token || !token.isAdmin) {
             return NextResponse.redirect(new URL('/', req.url));
         }

@@ -1,4 +1,4 @@
-// app/api/admin/management/route.ts
+// app/api/adminDashboard/management/route.ts
 import { NextResponse } from 'next/server';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import Admin from './../../../../models/admin'; // Import the Admin model
@@ -13,7 +13,7 @@ if (!SECRET) {
     throw new Error("JWT_SECRET is not set in environment variables");
 }
 
-// POST: Add a user to the admin collection
+// POST: Add a user to the adminDashboard collection
 
 export async function POST(request: Request) {
     try {
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
 
         const decoded = jwt.verify(token, SECRET) as JwtPayload;
 
-        // Ensure the user making the request is an admin
+        // Ensure the user making the request is an adminDashboard
         if (typeof decoded !== 'object' || !decoded?.isAdmin) {
             console.error('Admin access required');
             return NextResponse.json({ message: 'Admin access required' }, { status: 403 });
@@ -55,14 +55,14 @@ export async function POST(request: Request) {
             return NextResponse.json({ message: `User not found: ${userId}` }, { status: 404 });
         }
 
-        // Check if the user is already an admin
+        // Check if the user is already an adminDashboard
         const existingAdmin = await Admin.findOne({ userId: user._id });
         if (existingAdmin) {
-            console.error('User is already an admin');
-            return NextResponse.json({ message: 'User is already an admin' }, { status: 400 });
+            console.error('User is already an adminDashboard');
+            return NextResponse.json({ message: 'User is already an adminDashboard' }, { status: 400 });
         }
 
-        // Add the user to the admin collection
+        // Add the user to the adminDashboard collection
         const newAdmin = new Admin({
             userId: user._id,
             firstName: user.firstName,
@@ -71,17 +71,17 @@ export async function POST(request: Request) {
         });
 
         await newAdmin.save();
-        console.log('User added as admin successfully');
-        return NextResponse.json({ message: 'User added as admin successfully' }, { status: 200 });
+        console.log('User added as adminDashboard successfully');
+        return NextResponse.json({ message: 'User added as adminDashboard successfully' }, { status: 200 });
 
     } catch (error) {
-        console.error('Error during admin addition:', error);
+        console.error('Error during adminDashboard addition:', error);
 
         // Type guard to check if error is an instance of Error
         if (error instanceof Error) {
             return NextResponse.json({ message: `Failed to add user as admin: ${error.message}` }, { status: 500 });
         } else {
-            return NextResponse.json({ message: 'Failed to add user as admin due to an unknown error' }, { status: 500 });
+            return NextResponse.json({ message: 'Failed to add user as adminDashboard due to an unknown error' }, { status: 500 });
         }
     }
 }
@@ -142,12 +142,12 @@ export async function DELETE(request: Request) {
 
         return NextResponse.json({ message: 'Admin removed successfully' }, { status: 200 });
     } catch (error) {
-        console.error('Error removing admin:', error);
+        console.error('Error removing adminDashboard:', error);
 
         if (error instanceof Error) {
             return NextResponse.json({ message: `Failed to remove admin: ${error.message}` }, { status: 500 });
         } else {
-            return NextResponse.json({ message: 'Failed to remove admin due to an unknown error' }, { status: 500 });
+            return NextResponse.json({ message: 'Failed to remove adminDashboard due to an unknown error' }, { status: 500 });
         }
     }
 }

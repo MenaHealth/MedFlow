@@ -1,9 +1,12 @@
+// components/auth/adminDashboard/AdminDashboardView.tsx
+
+
 import React from 'react';
 import { AdminDashboardProvider, useAdminDashboard } from './AdminDashboardContext';
 import PendingUsers from './PendingUsers';
 import DeniedUsers from './DeniedUsers';
 import ExistingUsers from './ExistingUsers';
-import AdminManagement from "@/components/auth/admin/AdminManagement";
+import AdminManagement from "@/components/auth/adminDashboard/AdminManagement";
 import { BarLoader } from 'react-spinners';
 import { ListRestart } from 'lucide-react';
 
@@ -127,10 +130,10 @@ const AdminDashboardContent = () => {
     );
 };
 
-const AdminDashboard = () => (
+const AdminDashboardView = () => (
     <AdminDashboardProvider>
         <AdminDashboardContent/>
     </AdminDashboardProvider>
 );
 
-export default AdminDashboard;
+export default AdminDashboardView;

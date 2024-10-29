@@ -1,4 +1,4 @@
-// app/api/admin/GET/denied-users/route.ts
+// app/api/adminDashboard/GET/denied-users/route.ts
 
 import { NextResponse } from 'next/server';
 import jwt, { JwtPayload } from 'jsonwebtoken';

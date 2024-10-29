@@ -1,28 +1,6 @@
-// AdminDashboardContext.tsx
-import React, {createContext, useContext, useState, useCallback, ReactNode, useRef} from 'react';
+// components/auth/adminDashboard/AdminDashboardViewModel.tsx
 
-// Define the context structure
-interface AdminDashboardContextType {
-    isPendingApprovalsOpen: boolean;
-    isExistingUsersOpen: boolean;
-    isDeniedUsersOpen: boolean;
-    isAddAdminUsersOpen: boolean;
-    loadingPendingApprovals: boolean;
-    loadingExistingUsers: boolean;
-    loadingDeniedUsers: boolean;
-    loadingAdmins: boolean;
-    pendingApprovalsData: any;
-    existingUsersData: any;
-    deniedUsersData: User[];
-    setDeniedUsersData: React.Dispatch<React.SetStateAction<User[]>>;
-    adminsData: any;
-    toggleSection: (section: 'pending' | 'existing' | 'denied' | 'addAdmin') => void;
-    totalPages: number;
-    currentPage: number;
-    setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
-    handleRefresh: () => void;
-    isRefreshing: boolean;
-}
+import { useState, useCallback, useRef } from 'react';
 
 interface User {
     _id: string;
@@ -34,18 +12,7 @@ interface User {
     denialDate?: string;
 }
 
-
-const AdminDashboardContext = createContext<AdminDashboardContextType | undefined>(undefined);
-
-export const useAdminDashboard = () => {
-    const context = useContext(AdminDashboardContext);
-    if (!context) {
-        throw new Error("useAdminDashboard must be used within AdminDashboardProvider");
-    }
-    return context;
-};
-
-export const AdminDashboardProvider = ({ children }: { children: ReactNode }) => {
+export function useAdminDashboardViewModel() {
     const [isPendingApprovalsOpen, setIsPendingApprovalsOpen] = useState(false);
     const [isExistingUsersOpen, setIsExistingUsersOpen] = useState(false);
     const [isDeniedUsersOpen, setIsDeniedUsersOpen] = useState(false);
@@ -57,16 +24,26 @@ export const AdminDashboardProvider = ({ children }: { children: ReactNode }) =>
     const [loadingAdmins, setLoadingAdmins] = useState(false);
 
     const [pendingApprovalsData, setPendingApprovalsData] = useState<User[]>([]);
-    const [existingUsersData, setExistingUsersData] = useState(null);
+    const [existingUsersData, setExistingUsersData] = useState<User[]>([]);
     const [deniedUsersData, setDeniedUsersData] = useState<User[]>([]);
-    const [adminsData, setAdminsData] = useState(null);
+    const [adminsData, setAdminsData] = useState<User[]>([]);
+
+
+    const [isMedOrderOpen, setIsMedOrderOpen] = useState(false);
+    const [loadingMedOrders, setLoadingMedOrders] = useState(false);
+    const [medOrdersData, setMedOrdersData] = useState([]);
 
     const [totalPages, setTotalPages] = useState(1);
     const [currentPage, setCurrentPage] = useState(1);
 
-    const [refresh, setRefresh] = useState(false);
     const [isRefreshing, setIsRefreshing] = useState(false);
 
+    const fetchedSections = useRef<{ pending: boolean, existing: boolean, denied: boolean, admins: boolean }>({
+        pending: false,
+        existing: false,
+        denied: false,
+        admins: false,
+    });
 
     const fetchPendingApprovals = useCallback(async () => {
         try {
@@ -127,12 +104,20 @@ export const AdminDashboardProvider = ({ children }: { children: ReactNode }) =>
         }
     }, [currentPage]);
 
-    const fetchedSections = useRef<{ pending: boolean, existing: boolean, denied: boolean, admins: boolean }>({
-        pending: false,
-        existing: false,
-        denied: false,
-        admins: false,
-    });
+    const fetchMedOrders = useCallback(async () => {
+        try {
+            setLoadingMedOrders(true);
+            const res = await fetch(`/api/admin/GET/med-orders?page=${currentPage}&limit=20`);
+            if (!res.ok) throw new Error('Failed to fetch med orders');
+            const data = await res.json();
+            setMedOrdersData(data.orders || []);
+            setTotalPages(data.totalPages || 1);
+        } catch (error) {
+            console.error('Error fetching med orders:', error);
+        } finally {
+            setLoadingMedOrders(false);
+        }
+    }, [currentPage]);
 
     const handleRefresh = useCallback(async () => {
         setIsRefreshing(true);
@@ -143,22 +128,12 @@ export const AdminDashboardProvider = ({ children }: { children: ReactNode }) =>
         setIsRefreshing(false);
     }, [fetchPendingApprovals, fetchExistingUsers, fetchDeniedUsers, fetchAdmins]);
 
+
     const toggleSection = useCallback(
-        async (section: 'pending' | 'existing' | 'denied' | 'addAdmin') => {
+        async (section: 'pending' | 'existing' | 'denied' | 'addAdmin' | 'medOrder') => {
             let shouldFetch = false;
 
-            if (refresh) {
-                if (section === 'pending') {
-                    await fetchPendingApprovals();
-                } else if (section === 'existing') {
-                    await fetchExistingUsers();
-                } else if (section === 'denied') {
-                    await fetchDeniedUsers();
-                } else if (section === 'addAdmin') {
-                    await fetchAdmins();
-                }
-                setRefresh(false);
-            } else if (section === 'pending') {
+            if (section === 'pending') {
                 setIsPendingApprovalsOpen(prev => {
                     shouldFetch = !prev && !fetchedSections.current.pending;
                     return !prev;
@@ -195,34 +170,40 @@ export const AdminDashboardProvider = ({ children }: { children: ReactNode }) =>
                     await fetchAdmins();
                 }
             }
+            else if (section === 'medOrder') {
+                setIsMedOrderOpen(prev => {
+                    if (!prev) {
+                        fetchMedOrders();
+                    }
+                    return !prev;
+                });
+            }
         },
-        [fetchAdmins, fetchPendingApprovals, fetchExistingUsers, fetchDeniedUsers, refresh]
+        [fetchAdmins, fetchPendingApprovals, fetchExistingUsers, fetchDeniedUsers]
     );
 
-
-    return (
-        <AdminDashboardContext.Provider value={{
-            isPendingApprovalsOpen,
-            isExistingUsersOpen,
-            isDeniedUsersOpen,
-            isAddAdminUsersOpen,
-            loadingPendingApprovals,
-            loadingExistingUsers,
-            loadingDeniedUsers,
-            loadingAdmins,
-            pendingApprovalsData,
-            existingUsersData,
-            setDeniedUsersData,
-            deniedUsersData,
-            adminsData,
-            toggleSection,
-            totalPages,
-            currentPage,
-            setCurrentPage,
-            handleRefresh,
-            isRefreshing
-        }}>
-            {children}
-        </AdminDashboardContext.Provider>
-    );
-};
+    return {
+        isPendingApprovalsOpen,
+        isExistingUsersOpen,
+        isDeniedUsersOpen,
+        isAddAdminUsersOpen,
+        loadingPendingApprovals,
+        loadingExistingUsers,
+        loadingDeniedUsers,
+        loadingAdmins,
+        pendingApprovalsData,
+        existingUsersData,
+        deniedUsersData,
+        setDeniedUsersData,
+        adminsData,
+        isMedOrderOpen,
+        loadingMedOrders,
+        medOrdersData,
+        toggleSection,
+        totalPages,
+        currentPage,
+        setCurrentPage,
+        handleRefresh,
+        isRefreshing
+    };
+}

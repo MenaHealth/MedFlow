@@ -1,4 +1,4 @@
-// app/api/admin/POST/deny-existing-users/route.ts
+// app/api/adminDashboard/POST/deny-existing-users/route.ts
 
 import { NextResponse } from 'next/server';
 import jwt, { JwtPayload } from 'jsonwebtoken';

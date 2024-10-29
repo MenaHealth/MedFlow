@@ -1,4 +1,4 @@
-// components/auth/admin/ExistingUsers.tsx
+// components/auth/adminDashboard/ExistingUsers.tsx
 'use client';
 
 import React from 'react';

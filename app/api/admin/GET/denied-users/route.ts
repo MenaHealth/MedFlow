@@ -1,4 +1,4 @@
-// app/api/admin/denied-users/route.ts
+// app/api/adminDashboard/denied-users/route.ts
 
 import { NextResponse } from 'next/server';
 import dbConnect from './../../../../../utils/database';

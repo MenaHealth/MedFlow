@@ -1,5 +1,5 @@
-// components/auth/admin/AdminManagement.tsx
-// components/auth/admin/AdminManagement.tsx
+// components/auth/adminDashboard/AdminManagement.tsx
+// components/auth/adminDashboard/AdminManagement.tsx
 'use client';
 
 import React, { useState, useCallback } from 'react';
@@ -8,7 +8,7 @@ import useToast from '@/components/hooks/useToast';
 import { ChevronLeft, ChevronRight, Minus, Plus, Search, UserRoundCheck } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useAdminDashboard } from '@/components/auth/admin/AdminDashboardContext'; // Import the context
+import { useAdminDashboard } from '@/components/auth/adminDashboard/AdminDashboardContext'; // Import the context
 
 interface User {
     _id: string;
@@ -38,7 +38,7 @@ export default function AdminManagement() {
         if (!selectedUser) {
             setToast?.({
                 title: 'Error',
-                description: 'Please select a user to add as admin.',
+                description: 'Please select a user to add as adminDashboard.',
                 variant: 'destructive',
             });
             return;
@@ -54,21 +54,21 @@ export default function AdminManagement() {
                 body: JSON.stringify({ userId: selectedUser }),
             });
 
-            if (!response.ok) throw new Error('Failed to add admin');
+            if (!response.ok) throw new Error('Failed to add adminDashboard');
 
             setToast?.({
                 title: 'Success',
-                description: 'User successfully added as admin.',
+                description: 'User successfully added as adminDashboard.',
                 variant: 'default',
             });
 
             setSelectedUser(null);
-            toggleSection('addAdmin'); // Refetch data after adding admin
+            toggleSection('addAdmin'); // Refetch data after adding adminDashboard
         } catch (error) {
-            console.error('Error adding admin:', error);
+            console.error('Error adding adminDashboard:', error);
             setToast?.({
                 title: 'Error',
-                description: 'Failed to add admin.',
+                description: 'Failed to add adminDashboard.',
                 variant: 'destructive',
             });
         }
@@ -78,7 +78,7 @@ export default function AdminManagement() {
         if (adminsData.length <= 1) {
             setToast?.({
                 title: 'Error',
-                description: 'There must be at least one admin.',
+                description: 'There must be at least one adminDashboard.',
                 variant: 'destructive',
             });
             return;
@@ -94,7 +94,7 @@ export default function AdminManagement() {
                 body: JSON.stringify({ adminId }),
             });
 
-            if (!response.ok) throw new Error('Failed to remove admin');
+            if (!response.ok) throw new Error('Failed to remove adminDashboard');
 
             setToast?.({
                 title: 'Success',
@@ -102,12 +102,12 @@ export default function AdminManagement() {
                 variant: 'default',
             });
 
-            toggleSection('addAdmin'); // Refetch data after removing admin
+            toggleSection('addAdmin'); // Refetch data after removing adminDashboard
         } catch (error) {
-            console.error('Error removing admin:', error);
+            console.error('Error removing adminDashboard:', error);
             setToast?.({
                 title: 'Error',
-                description: 'Failed to remove admin.',
+                description: 'Failed to remove adminDashboard.',
                 variant: 'destructive',
             });
         }

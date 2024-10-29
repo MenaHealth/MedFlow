@@ -1,11 +1,11 @@
-// components/auth/admin/PendingApprovals.tsx
+// components/auth/adminDashboard/PendingApprovals.tsx
 
 'use client';
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import useToast from '@/components/hooks/useToast';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
-import { useAdminDashboard } from '@/components/auth/admin/AdminDashboardContext';
+import { useAdminDashboard } from '@/components/auth/adminDashboard/AdminDashboardContext';
 
 interface User {
     _id: string;

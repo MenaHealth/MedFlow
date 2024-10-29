@@ -2,95 +2,68 @@
 
 import { NextResponse } from 'next/server';
 import Patient from '../../../../../../models/patient';
-import RxOrders from '../../../../../../models/rxOrders';
 import dbConnect from '../../../../../../utils/database';
-import { Types } from 'mongoose';
 
-interface Params {
-    params: {
-        id: string;
-    };
-}
-
-export const POST = async (request: Request, { params }: Params) => {
-    console.log('Received request for creating RX order');
-
+export const POST = async (request: Request, { params }: { params: { id: string } }) => {
     try {
-        const requestData = await request.json();
+        await dbConnect();
 
-        // Destructure fields from the request body
+        const patientId = params.id;
+        const requestData = await request.json();
         const {
-            email,
-            date,
-            authorName,
-            authorID,
-            content: {
-                patientName,
-                phoneNumber,
-                age,
-                address,
-                referringDr,
-                prescribingDr,
-                diagnosis,
-                pharmacyOrClinic,
-                medication,
-                dosage,
-                frequency,
-            }
+            doctorSpecialty,
+            prescribingDr,
+            drEmail,
+            drId,
+            validTill,
+            city,
+            validated,
+            prescriptions
         } = requestData;
 
-        await dbConnect();
-        console.log('Database connected');
-
-        // Validate patient ID
-        if (!Types.ObjectId.isValid(params.id)) {
-            console.error('Invalid patient ID:', params.id);
-            return new NextResponse("Invalid ID", { status: 400 });
+        // Validate required fields
+        if (!doctorSpecialty || !prescriptions || prescriptions.length === 0) {
+            return new NextResponse("Missing required fields", { status: 400 });
         }
 
-        // Find the patient by ID
-        const patient = await Patient.findById(params.id);
-        if (!patient) {
-            console.error(`Patient with ID ${params.id} not found`);
-            return new NextResponse(`Patient with ID ${params.id} not found`, { status: 404 });
+        // Map each prescription entry to match the schema
+        const formattedPrescriptions = prescriptions.map((p: any) => ({
+            diagnosis: p.diagnosis,
+            medication: p.medication,
+            dosage: p.dosage,
+            frequency: p.frequency,
+        }));
+
+        // Create a new RX order object
+        const newRxOrder = {
+            doctorSpecialty,
+            prescribingDr,
+            drEmail,
+            drId,
+            prescribedDate: new Date(),
+            validTill: new Date(validTill),
+            city,
+            validated,
+            prescriptions: formattedPrescriptions,
+        };
+
+        console.log("New RX Order:", newRxOrder);
+
+        // Add the new RX order to the patient's rxOrders array
+        const updatedPatient = await Patient.findByIdAndUpdate(
+            patientId,
+            { $push: { rxOrders: newRxOrder } },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedPatient) {
+            return new NextResponse('Failed to update patient record', { status: 500 });
         }
 
-        // Create new RX order
-        const newRXOrder = new RxOrders({
-            email,
-            date: date || new Date(), // Default to the current date if not provided
-            authorName,
-            authorID,
-            content: {
-                patientName,
-                phoneNumber,
-                age,
-                address,
-                referringDr,
-                prescribingDr,
-                diagnosis,
-                pharmacyOrClinic,
-                medication,
-                dosage,
-                frequency
-            }
-        });
-
-        // Log the new RX order before saving
-
-        // Add the RX order to the patient's rxOrders array
-        patient.rxOrders.push(newRXOrder);
-        await patient.save();
-        console.log('RX order saved successfully');
-
-        // Return the new RX order as the response
-        return new NextResponse(JSON.stringify(newRXOrder), { status: 201 });
+        console.log("Updated Patient after adding RX Order:", updatedPatient);
+        return new NextResponse(JSON.stringify(updatedPatient), { status: 201 });
     } catch (error) {
-        console.error('Failed to add RX order:', error);
-        if (error instanceof Error) {
-            return new NextResponse(`Failed to add RX order: ${error.message}`, { status: 500 });
-        } else {
-            return new NextResponse('Failed to add RX order due to an unknown error', { status: 500 });
-        }
+        console.error('Failed to add rx order:', error);
+        return new NextResponse('Failed to add rx order', { status: 500 });
     }
 };

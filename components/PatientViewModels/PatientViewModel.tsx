@@ -75,8 +75,8 @@ const PatientDashboardContent: React.FC = () => {
             id: 'medications',
             icon: PillBottle,
             label: 'Medications',
-            color: 'bg-orange-900',
-            textColor: 'text-orange-50'
+            color: 'bg-orange-950',
+            textColor: 'text-white'
         },
         {
             id: 'images',

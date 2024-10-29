@@ -99,7 +99,7 @@ export function CombinedNotesView({ patientId }: NotesViewProps) {
                                 >
                                     <h3 className="text-lg font-semibold">Previous Notes</h3>
                                     {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-                                </CardHeader>    
+                                </CardHeader>
                             )
                         }
                         <div className={`overflow-hidden transition-all duration-300 ${isExpanded ? 'max-h-[50vh]' : 'max-h-0'}`}>

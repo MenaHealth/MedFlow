@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { SelectFormField } from "./SelectFormField";
 import { LanguagesList, Languages, LanguagesListArabic, LanguagesListFarsi, LanguagesListPashto } from "@/data/languages.enum";
 import { CountriesList, Countries, CountriesListArabic, CountriesListFarsi, CountriesListPashto } from "@/data/countries.enum";
-import { RadioGroupField } from "@/components/form/RadioGroupField";
 import { useSession } from "next-auth/react";
 import { mapLanguageToEnglish } from "@/utils/mapLanguageToEnglish";
 import { mapCountryToEnglish } from "@/utils/mapCountryToEnglish";
@@ -207,7 +206,7 @@ export function NewPatientForm({ handleSubmit, submitting, language }: NewPatien
                 </div>
 
                 <TextAreaFormField form={form} fieldName="chiefComplaint" fieldLabel={fieldLabels.chiefComplaint[language]} />
-                
+
                 <div className="flex justify-center">
                     <Button type="submit" disabled={submitting} style={{ backgroundColor: !session ? 'rgb(71, 140, 143)' : '' }}>
                         <SendHorizonal className="mr-2 h-4 w-4" />

@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from 'react';
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
@@ -25,6 +25,7 @@ import Tooltip from '../../../components/form/Tooltip';
 import './dashboard.css';
 import TableCellWithTooltip from '@/components/TableCellWithTooltip';
 import * as Toast from '@radix-ui/react-toast';
+
 import NotesCell from '@/components/NotesCell';
 
 
@@ -101,17 +102,17 @@ export default function PatientTriage() {
       try {
         const response = await fetch("/api/patient?status!=Archived"); // Exclude Archived patients
         const data = await response.json();
-  
+
         // Update the rows with filtered and sorted data
         setAllData(data);
       } catch (error) {
         console.log(error);
       }
     };
-  
+
     fetchAndSortRows();
   }, []); // Only fetch data on mount
-  
+
 
   // Memoize the filtered and sorted rows
   const sortedAndFilteredRows = useMemo(() => {
@@ -249,13 +250,13 @@ export default function PatientTriage() {
     try {
       const pmhxString = Array.isArray(form.pmhx) ? form.pmhx.join(", ") : form.pmhx || "";
       const pshxString = Array.isArray(form.pshx) ? form.pshx.join(", ") : form.pshx || "";
-  
+
       const payload = {
         ...form,
-        pmhx: pmhxString, 
-        pshx: pshxString, 
+        pmhx: pmhxString,
+        pshx: pshxString,
       };
-  
+
       const response = await fetch('/api/patient/', {
         method: 'PATCH',
         headers: {
@@ -263,18 +264,18 @@ export default function PatientTriage() {
         },
         body: JSON.stringify(payload),
       });
-  
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-  
+
       console.log("Patient data saved successfully!");
-  
+
     } catch (error) {
       console.error('Error saving patient data:', error);
     }
   };
-  
+
 
 // Your handleArchive function
 const handleArchive = async (index) => {
@@ -340,7 +341,7 @@ const handleArchive = async (index) => {
           <div style={{ width: 48 }}>
             {" "}
           </div>
-        </div>  
+        </div>
         <div className="flex flex-wrap gap-2 mb-4">
           {priorityFilter !== "all" && (
             <div className="bg-green-100 text-green-800 px-2 py-1 rounded flex items-center">
@@ -684,7 +685,7 @@ const handleArchive = async (index) => {
         </TableContainer>
         {rows.length === 0 && (
           <div className="text-center text-gray-500 my-6">
-            
+
             <p>No patient data found matching your expertise.</p>
           </div>
         )}

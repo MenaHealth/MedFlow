@@ -23,7 +23,7 @@ const patientFormSchema = z.object({
     dob: z.date(),
     bmi: z.string().optional(),
     country: z.string().optional(),
-    city: z.string().optional(),
+    city: z.string().default(''),
     phone: z.object({
         countryCode: z.string(),
         phoneNumber: z.string(),
@@ -38,6 +38,7 @@ const patientFormSchema = z.object({
     otherDrugs: z.string().optional(),
     currentMeds: z.string().optional(),
     prevMeds: z.string().optional(),
+    gender: z.string().optional(),
 });
 
 type PatientFormValues = z.infer<typeof patientFormSchema> & {
@@ -63,6 +64,7 @@ type PatientFormValues = z.infer<typeof patientFormSchema> & {
     otherDrugs?: string;
     currentMeds?: string;
     prevMeds?: string;
+    gender?: string,
 };
 
 const PatientInfoView: React.FC<{ isExpanded: boolean }> = ({ isExpanded }) => {
@@ -87,17 +89,24 @@ const PatientInfoView: React.FC<{ isExpanded: boolean }> = ({ isExpanded }) => {
     const toggleEditMode = () => {
         if (isEditing) {
             const data = form.getValues();
+
+            const patientData = {
+                ...data,
+                city: data.city || '',
+                gender: data.gender || 'Not specified', // Provide a default value for `gender`
+            };
+
             // Send the updated data to your backend using PATCH request
             fetch(`/api/patient/${expandedDetails?.patientID}`, {
                 method: "PATCH",
-                body: JSON.stringify(data),
+                body: JSON.stringify(patientData),
                 headers: {
                     "Content-Type": "application/json",
                 },
             }).then((response) => {
                 if (response.ok) {
                     console.log("Patient updated successfully");
-                    setPatientInfo(data);
+                    setPatientInfo(patientData);
                 } else {
                     console.error("Error updating patient:", response.statusText);
                     alert("Error: " + response.statusText);
@@ -140,7 +149,7 @@ const PatientInfoView: React.FC<{ isExpanded: boolean }> = ({ isExpanded }) => {
                                 : <ReadOnlyField fieldName="age" fieldLabel="Age" value={expandedDetails?.age || 'N/A'}/>
                             }
                             {isEditing
-                                ? <DatePickerFormField name="dob" label="Date of Birth" type='past' classNames="mt-4 mb-6 p-2"/>
+                                ? <DatePickerFormField name="dob" label="Date of Birth" type='past'/>
                                 : <ReadOnlyField
                                     fieldName="dob"
                                     fieldLabel="Date of Birth"
@@ -197,7 +206,7 @@ const PatientInfoView: React.FC<{ isExpanded: boolean }> = ({ isExpanded }) => {
                             {isEditing
                                 ? <TextFormField form={form} fieldName='famhx' fieldLabel="Family Hx" defaultValue={expandedDetails?.famhx || ''} classNames='p-2'/>
                                 : <ReadOnlyField fieldName="famhx" fieldLabel="Family Hx" value={expandedDetails?.famhx || 'N/A'}/>
-                            }  
+                            }
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {isEditing

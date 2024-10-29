@@ -106,25 +106,21 @@ const handler = NextAuth({
                         // Handle Google user
                         const googleUser = await GoogleUser.findOne({ email: token.email });
 
-                        if (googleUser) {
-                            token.id = googleUser.userID;
-                            token.accountType = googleUser.accountType;
-                            token.firstName = googleUser.firstName;
-                        } else {
-                            token.accountType = 'Pending';
-                        }
-                    } else if (user) {
-                        token.id = user._id.toString();
-                        token.accountType = user.accountType;
-                        token.firstName = user.firstName;
-                        token.lastName = user.lastName;
-                        token.image = user.image;
-                        token.isAdmin = user.isAdmin;
-                        token.dob = user.dob;
-                        token.gender = user.gender;
-                        token.countries = user.countries;
-                        token.languages = user.languages;
-                        token.doctorSpecialty = user.doctorSpecialty;
+                    if (googleUser) {
+                        token.id = googleUser.userID;
+                        token.accountType = googleUser.accountType;
+                        token.firstName = googleUser.firstName;
+                    } else {
+                        token.accountType = 'Pending';
+                    }
+                } else if (user) {
+                    token.id = user._id;
+                    token.accountType = user.accountType;
+                    token.firstName = user.firstName;
+                    token.lastName = user.lastName;
+                    token.image = user.image;
+                    token.isAdmin = user.isAdmin;
+                    token.dob = user.dob;
 
                         token.accessToken = jwt.sign(
                             { id: user._id, email: user.email, isAdmin: user.isAdmin },

@@ -21,7 +21,7 @@ export const GET = async (request, { params }) => {
 
 
 export const PATCH = async (request, { params }) => {
-    const { firstName, lastName, gender, dob, countries, languages } = await request.json();
+    const { firstName, lastName, gender, dob, countries, languages, doctorSpecialty } = await request.json();
 
     try {
         await dbConnect();
@@ -39,10 +39,24 @@ export const PATCH = async (request, { params }) => {
         if (dob) existingUser.dob = new Date(dob);
         if (countries) existingUser.countries = countries;
         if (languages) existingUser.languages = languages;
+        if (doctorSpecialty) existingUser.doctorSpecialty = doctorSpecialty;
 
         await existingUser.save();
 
-        return new Response("Successfully updated the User", { status: 200 });
+        return new Response(JSON.stringify({
+            _id: existingUser._id,
+            firstName: existingUser.firstName,
+            lastName: existingUser.lastName,
+            gender: existingUser.gender,
+            dob: existingUser.dob,
+            countries: existingUser.countries,
+            languages: existingUser.languages,
+            doctorSpecialty: existingUser.doctorSpecialty,
+            accountType: existingUser.accountType
+        }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+        });
     } catch (error) {
         return new Response(`Error Updating User: ${error}`, { status: 500 });
     }

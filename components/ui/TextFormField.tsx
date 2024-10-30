@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
 import { Input } from './../../components/ui/input';
 
@@ -41,13 +41,19 @@ const TextFormField: React.FC<Props> = ({
                                         }) => {
     const [isFocused, setIsFocused] = useState(false);
     const [hasValue, setHasValue] = useState(!!value);
+    const textareaRef = useRef<HTMLTextAreaElement | null>(null);
     const formContext = useFormContext();
-
     const id = `${fieldName}-input`;
 
     useEffect(() => {
         setHasValue(!!value);
-    }, [value]);
+
+        // Adjust textarea height automatically based on content
+        if (multiline && textareaRef.current) {
+            textareaRef.current.style.height = 'auto'; // Reset height to auto
+            textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`; // Set height to match content
+        }
+    }, [value, multiline]);
 
     const handleFocus = () => {
         if (!readOnly) {
@@ -59,9 +65,7 @@ const TextFormField: React.FC<Props> = ({
     const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         if (!readOnly) {
             setIsFocused(false);
-            if (e?.target) {
-                setHasValue(!!e.target.value);
-            }
+            setHasValue(!!e.target.value);
             if (onBlur) onBlur(e);
         }
     };
@@ -69,6 +73,10 @@ const TextFormField: React.FC<Props> = ({
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         if (!readOnly) {
             setHasValue(!!e.target.value);
+            if (multiline && textareaRef.current) {
+                textareaRef.current.style.height = 'auto'; // Reset height to auto
+                textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`; // Set height to match content
+            }
             if (onChange) onChange(e);
         }
     };
@@ -85,6 +93,7 @@ const TextFormField: React.FC<Props> = ({
                 {multiline ? (
                     <textarea
                         {...field}
+                        ref={textareaRef}
                         onFocus={handleFocus}
                         onBlur={(e) => {
                             field.onBlur();
@@ -98,9 +107,10 @@ const TextFormField: React.FC<Props> = ({
                         id={id}
                         name={fieldName}
                         autoComplete={autoComplete}
-                        className={inputClassName}
-                        rows={rows || 2}
+                        className={`${inputClassName} resize-none`} // Disable manual resizing; auto-resizes based on content
+                        rows={rows || 1}
                         readOnly={readOnly}
+                        style={{ overflow: 'hidden' }} // Prevent scroll bars
                     />
                 ) : (
                     <Input

@@ -6,6 +6,7 @@ import { ScrollArea } from '../../../form/ScrollArea';
 import RxOrderDrawerView from '../rx/RxOrderDrawerView';
 import { IRxOrder } from '../../../../models/patient';
 import { IMedOrder } from '../../../../models/medOrder';
+import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewModelContext';
 
 interface PreviousMedicationsViewProps {
     rxOrders: IRxOrder[];
@@ -14,6 +15,7 @@ interface PreviousMedicationsViewProps {
 }
 
 const PreviousMedicationsView: React.FC<PreviousMedicationsViewProps> = ({ rxOrders, medOrders, loadingMedications }) => {
+    const { patientInfo } = usePatientDashboard();
     const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [selectedRxOrder, setSelectedRxOrder] = useState<IRxOrder | null>(null);
@@ -118,6 +120,7 @@ const PreviousMedicationsView: React.FC<PreviousMedicationsViewProps> = ({ rxOrd
                 isOpen={isDrawerOpen}
                 onClose={() => setIsDrawerOpen(false)}
                 rxOrder={selectedRxOrder}
+                patientId={patientInfo?.patientID || ""}
             />
         </div>
     );

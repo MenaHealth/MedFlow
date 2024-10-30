@@ -13,23 +13,26 @@ interface RxOrderDrawerViewProps {
     isOpen: boolean;
     onClose: () => void;
     patientId: string;
-    initialRxOrder?: IRxOrder | null;
+    rxOrder: IRxOrder | null; // Add rxOrder prop here
 }
 
-export default function RxOrderDrawerView({ isOpen, onClose, patientId, initialRxOrder }: RxOrderDrawerViewProps) {
+export default function RxOrderDrawerView({ isOpen, onClose, patientId, rxOrder }: RxOrderDrawerViewProps) {
     const { patientInfo } = usePatientDashboard();
     const drawerRef = useRef<HTMLDivElement>(null);
 
     const {
-        rxOrder,
+        rxOrder: viewModelRxOrder,
+        handleInputChange,
         handlePrescriptionChange,
+        addPrescription,
+        removePrescription,
         onDownloadPDF,
         onDownloadJPG,
         sendTextMessage,
-    } = useRxOrderDrawerViewModel(patientId, onClose, initialRxOrder);
+    } = useRxOrderDrawerViewModel(patientId, onClose, rxOrder); // Pass rxOrder here
 
-    if (!patientInfo) {
-        return null;
+    if (!patientInfo || !rxOrder) {
+        return null; // Render nothing if patientInfo or rxOrder is null
     }
 
     return (

@@ -1,25 +1,39 @@
-import React, { useState } from "react";
-import { Session } from 'next-auth';
+import React, { useState, useEffect, Dispatch, SetStateAction } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from './../../components/ui/card';
 import { Avatar } from './../../components/ui/avatar';
 import { Label } from './../../components/ui/label';
 import { Button } from './../../components/ui/button';
 import { Input } from './../../components/ui/input';
 import { Pencil, X, Copy, Check } from 'lucide-react';
-import { Countries, CountriesList } from '@/data/countries.enum';
-import { Languages, LanguagesList } from '@/data/languages.enum';
+import { CountriesList } from '@/data/countries.enum';
+import { LanguagesList } from '@/data/languages.enum';
+import { DoctorSpecialties } from "@/data/doctorSpecialty.enum";
 import { MultiChoiceFormField } from "./../../components/form/MultiChoiceFormField";
 import { SingleChoiceFormField } from "./../../components/form/SingleChoiceFormField";
 import { DatePickerFormField } from "./../../components/form/DatePickerFormField";
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm, FormProvider, useFormContext } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 interface UserProfileProps {
-    user: Session["user"];
+    user: {
+        _id: string;
+        firstName: string;
+        lastName: string;
+        dob: Date;
+        languages: string[];
+        countries: string[];
+        gender: 'male' | 'female';
+        image?: string;
+        email?: string;
+        accountType?: 'Doctor' | 'Triage';
+        doctorSpecialty?: string;
+    },
+    setMyProfile: Dispatch<SetStateAction<{ _id: string; firstName: string; lastName: string; isAdmin: boolean; dob: Date; languages: never[]; countries: never[]; gender: "male" | "female"; image: string; accountType: "Doctor" | "Triage"; doctorSpecialty: string; }>>
 }
 
 const userProfileSchema = z.object({
+    _id: z.string(),
     firstName: z.string().min(1, "First name is required"),
     lastName: z.string().min(1, "Last name is required"),
     dob: z.string().refine((value) => {
@@ -31,26 +45,53 @@ const userProfileSchema = z.object({
     languages: z.array(z.string()).min(1, "At least one language is required"),
     countries: z.array(z.string()).min(1, "At least one country is required"),
     gender: z.enum(['male', 'female'], { errorMap: () => ({ message: "Gender is required" }) }),
+    image: z.string().optional(),
+    email: z.string().optional(),
+    accountType: z.enum(['Doctor', 'Triage'], { errorMap: () => ({ message: "Account type is required" }) }),
+    doctorSpecialty: z.string().optional(),
 });
 
 type UserProfileFormValues = z.infer<typeof userProfileSchema>;
 
-export function UserProfile({ user }: UserProfileProps) {
+export function UserProfile({ user, setMyProfile }: UserProfileProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isCopied, setIsCopied] = useState(false);
-
+    
     const methods = useForm<UserProfileFormValues>({
         resolver: zodResolver(userProfileSchema),
         defaultValues: {
+            _id: user._id || '',
             firstName: user.firstName || '',
             lastName: user.lastName || '',
             dob: user.dob instanceof Date ? user.dob.toISOString().split('T')[0] : user.dob || '', // Format the Date
             languages: user.languages || [],
             countries: user.countries || [],
             gender: user.gender || undefined,
-        },
+            image: user.image || undefined,
+            email: user.email || undefined,
+            accountType: user.accountType || undefined,
+            doctorSpecialty: user.doctorSpecialty || undefined,
+    },
     });
+
+    useEffect(() => {
+        if (user && !isEditing) { // reset only if not editing
+            methods.reset({
+                _id: user._id || '',
+                firstName: user.firstName || '',
+                lastName: user.lastName || '',
+                dob: user.dob instanceof Date ? user.dob.toISOString().split('T')[0] : user.dob || '',
+                languages: user.languages || [],
+                countries: user.countries || [],
+                gender: user.gender || undefined,
+                image: user.image || undefined,
+                email: user.email || undefined,
+                accountType: user.accountType || undefined,
+                doctorSpecialty: user.doctorSpecialty || undefined,
+            });
+        }
+    }, [user, isEditing, methods.reset]);
 
     if (!user) {
         return <div>Profile not found. Try refreshing the page.</div>;
@@ -69,6 +110,7 @@ export function UserProfile({ user }: UserProfileProps) {
 
     const handleSubmit = async (data: UserProfileFormValues) => {
         setIsLoading(true);
+    
         try {
             const response = await fetch(`/api/user/${user._id}`, {
                 method: 'PATCH',
@@ -77,16 +119,19 @@ export function UserProfile({ user }: UserProfileProps) {
                 },
                 body: JSON.stringify(data),
             });
-
+    
             if (response.ok) {
-                setIsEditing(false); // Save and exit editing mode
+                const updatedUser = await response.json();
+                setMyProfile(updatedUser); // Update profile data in parent component
             } else {
                 console.error('Failed to update user');
             }
         } catch (error) {
             console.error('Error updating user:', error);
         }
+    
         setIsLoading(false);
+        setIsEditing(false);
     };
 
     const copyToClipboard = () => {
@@ -104,6 +149,7 @@ export function UserProfile({ user }: UserProfileProps) {
                         <CardTitle className="text-center">My Profile</CardTitle>
                         {!isEditing ? (
                             <Button
+                                type="button"
                                 variant="ghost"
                                 size="icon"
                                 className="absolute top-2 right-2"
@@ -113,6 +159,7 @@ export function UserProfile({ user }: UserProfileProps) {
                             </Button>
                         ) : (
                             <Button
+                                type="button"
                                 variant="ghost"
                                 size="icon"
                                 className="absolute top-2 right-2"
@@ -162,7 +209,15 @@ export function UserProfile({ user }: UserProfileProps) {
                             <ProfileField label="Account Type" value={user.accountType} isEditing={false} />
                             {user.accountType === 'Doctor' && (
                                 <>
-                                    <ProfileField label="Specialty" value={user.doctorSpecialty} isEditing={false} />
+                                    {isEditing ? (
+                                        <SingleChoiceFormField
+                                            fieldName="doctorSpecialty"
+                                            fieldLabel="Specialty"
+                                            choices={DoctorSpecialties}
+                                        />
+                                    ) : (
+                                        <ProfileField label="Specialty" value={user.doctorSpecialty} isEditing={isEditing} />
+                                    )}
                                     <div className="col-span-2">
                                         {isEditing ? (
                                             <MultiChoiceFormField
@@ -232,7 +287,7 @@ interface ProfileFieldProps {
 }
 
 function ProfileField({ label, value, isEditing, fieldName }: ProfileFieldProps) {
-    const { register } = useForm();
+    const { register } = useFormContext(); // Use useFormContext instead of a local useForm
 
     if (!isEditing) {
         return (

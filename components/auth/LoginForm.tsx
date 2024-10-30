@@ -93,7 +93,7 @@ export function LoginForm() {
                             id="email"
                             type="email"
                             {...form.register("email")}
-                            className="mt-1 block w-full px-3 py-2 pr-16 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            className="mt-1 block w-full px-3 py-2 pr-16 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
                         />
                     </div>
                     <div className="relative">
@@ -104,7 +104,7 @@ export function LoginForm() {
                             id="password"
                             type={showPassword ? "text" : "password"}
                             {...form.register("password")}
-                            className="mt-1 block w-full px-3 py-2 pr-16 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            className="mt-1 block w-full px-3 py-2 pr-16 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
                         />
                         <button
                             type="button"

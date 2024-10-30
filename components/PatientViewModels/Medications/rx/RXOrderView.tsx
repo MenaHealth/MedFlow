@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { TextFormField } from '@/components/ui/TextFormField';
 import { Button } from '@/components/ui/button';
+import { ClipLoader } from 'react-spinners'
 import { useRXOrderViewModel } from '@/components/PatientViewModels/Medications/rx/RXOrderViewModel';
 import { DoctorSpecialtyList } from '@/data/doctorSpecialty.enum';
 import { Plus, Minus } from 'lucide-react';
 import { DatePickerFormField } from "@/components/form/DatePickerFormField";
-import RxOrderDrawer from './RxOrderDrawer';
+import RxOrderDrawerView from './RxOrderDrawerView';
 import { IRxOrder } from "@/models/patient";
 
 interface User {
@@ -45,6 +46,7 @@ export default function RXOrderView({ patientId, user, patientInfo }: RXOrderVie
         removePrescription,
     } = useRXOrderViewModel(patientId, onNewRxOrderSaved, patientInfo.city);
 
+    const orange300 = "#ffa270";
 
     return (
         <div className="space-y-6 max-w-2xl mx-auto bg-orange-950 p-4">
@@ -160,13 +162,25 @@ export default function RXOrderView({ patientId, user, patientInfo }: RXOrderVie
             ))}
 
             <div className="space-y-6 max-w-2xl mx-auto bg-orange-950">
-                {/* RX Order Form Fields */}
-                <Button onClick={submitRxOrder} disabled={isLoading} className="w-full" variant="submit">
-                    {isLoading ? 'Loading…' : 'Submit Rx'}
+                <Button
+                    onClick={submitRxOrder}
+                    disabled={isLoading}
+                    className="w-full flex justify-center items-center"
+                    variant="submit"
+                >
+                    {isLoading ? (
+                        <ClipLoader size={24} color={orange300} loading={isLoading} />
+                    ) : (
+                        'Submit Rx'
+                    )}
                 </Button>
 
-                {/* Drawer */}
-                <RxOrderDrawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} rxOrder={selectedRxOrder}/>
+                <RxOrderDrawerView
+                    isOpen={isDrawerOpen}
+                    onClose={() => setIsDrawerOpen(false)}
+                    rxOrder={selectedRxOrder}
+                    patientId={patientId}
+                />
             </div>
         </div>
     );

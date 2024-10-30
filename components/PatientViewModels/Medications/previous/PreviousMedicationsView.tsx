@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp, Share } from 'lucide-react';
 import { ScrollArea } from '../../../form/ScrollArea';
-import RxOrderDrawer from './../rx/RxOrderDrawer';
+import RxOrderDrawerView from '../rx/RxOrderDrawerView';
 import { IRxOrder } from '../../../../models/patient';
 import { IMedOrder } from '../../../../models/medOrder';
 
@@ -114,7 +114,7 @@ const PreviousMedicationsView: React.FC<PreviousMedicationsViewProps> = ({ rxOrd
                 )}
             </ScrollArea>
 
-            <RxOrderDrawer
+            <RxOrderDrawerView
                 isOpen={isDrawerOpen}
                 onClose={() => setIsDrawerOpen(false)}
                 rxOrder={selectedRxOrder}

@@ -5,7 +5,7 @@ import { useRXOrderViewModel } from '@/components/PatientViewModels/Medications/
 import { DoctorSpecialtyList } from '@/data/doctorSpecialty.enum';
 import { Plus, Minus } from 'lucide-react';
 import { DatePickerFormField } from "@/components/form/DatePickerFormField";
-import RxOrderDrawer from './RxOrderDrawer';
+import RxOrderDrawerView from './RxOrderDrawerView';
 import { IRxOrder } from "@/models/patient";
 
 interface User {
@@ -166,7 +166,7 @@ export default function RXOrderView({ patientId, user, patientInfo }: RXOrderVie
                 </Button>
 
                 {/* Drawer */}
-                <RxOrderDrawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} rxOrder={selectedRxOrder}/>
+                <RxOrderDrawerView isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} rxOrder={selectedRxOrder}/>
             </div>
         </div>
     );

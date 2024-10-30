@@ -73,12 +73,15 @@ export function useRXOrderViewModel(
                 body: JSON.stringify(rxOrder),
             });
 
-            if (!response.ok) throw new Error('Failed to save RX order');
+            if (!response.ok) {
+                const errorText = await response.text(); // Retrieve additional error info
+                throw new Error(`Failed to save RX order: ${errorText}`);
+            }
 
             const savedRxOrder = await response.json();
             addRxOrder(savedRxOrder);
             await refreshMedications();
-            onNewRxOrderSaved(savedRxOrder);  // Trigger drawer opening here
+            onNewRxOrderSaved(savedRxOrder);
 
             // Reset form after saving
             setRxOrder({

@@ -6,7 +6,7 @@ import { UserProfileSkeleton } from './../../components/user-profile/userProfile
 import { image } from 'html2canvas/dist/types/css/types/image';
 
 export default function MyProfilePage() {
-    const { data: session, status } = useSession()
+    const { data: session, status } = useSession();
     const [myProfile, setMyProfile] = useState({
         _id: '',
         firstName: '',
@@ -23,21 +23,19 @@ export default function MyProfilePage() {
 
     useEffect(() => {
         if (status === 'authenticated' && session?.user) {
-            fetch(`/api/user/${session.user?._id}`).then(res => res.json()).then(data => setMyProfile(data))
+            fetch(`/api/user/${session.user?._id}`)
+                .then(res => res.json())
+                .then(data => setMyProfile(data));
         }
-    }, [status, session?.user])
+    }, [status, session?.user]);
 
-
-    // Display a loading indicator while the session status is loading
     if (status === 'loading' || Object.keys(myProfile).length === 0) {
-        return <UserProfileSkeleton />
+        return <UserProfileSkeleton />;
     }
 
-    // Check if the session is authenticated
     if (status === 'unauthenticated' || !session?.user) {
-        return <div>Access Denied</div>
+        return <div>Access Denied</div>;
     }
 
-    // Pass the session user directly to UserProfile
-    return <UserProfile user={myProfile} />;
+    return <UserProfile user={myProfile} setMyProfile={setMyProfile} />;
 }

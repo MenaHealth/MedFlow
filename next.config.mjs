@@ -3,15 +3,29 @@ const nextConfig = {
     reactStrictMode: true,
     swcMinify: true,
     images: {
-        domains: ['lh3.googleusercontent.com', 'localhost'], // Your allowed image domains
+        domains: ['lh3.googleusercontent.com', 'localhost'],
         remotePatterns: [
             {
                 protocol: 'https',
-                hostname: 'medflow-mena-health.vercel.app', // Your production domain
-                port: '', // Leave this empty for default ports (80 for HTTP, 443 for HTTPS)
-                pathname: '/**', // This allows all image paths on the domain
+                hostname: 'medflow-mena-health.vercel.app',
+                port: '',
+                pathname: '/**',
             },
         ],
+    },
+    async headers() {
+        return [
+            {
+                // Add custom header for the specific image
+                source: '/assets/images/mena_health_logo.jpeg',
+                headers: [
+                    {
+                        key: 'Access-Control-Allow-Origin',
+                        value: '*',
+                    },
+                ],
+            },
+        ];
     },
     webpack(config) {
         config.experiments = {

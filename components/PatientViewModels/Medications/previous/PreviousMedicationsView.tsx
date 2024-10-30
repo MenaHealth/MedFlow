@@ -3,9 +3,10 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp, Share } from 'lucide-react';
 import { ScrollArea } from '../../../form/ScrollArea';
-import RxOrderDrawer from './../rx/RxOrderDrawer';
+import RxOrderDrawerView from '../rx/RxOrderDrawerView';
 import { IRxOrder } from '../../../../models/patient';
 import { IMedOrder } from '../../../../models/medOrder';
+import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewModelContext';
 
 interface PreviousMedicationsViewProps {
     rxOrders: IRxOrder[];
@@ -14,6 +15,7 @@ interface PreviousMedicationsViewProps {
 }
 
 const PreviousMedicationsView: React.FC<PreviousMedicationsViewProps> = ({ rxOrders, medOrders, loadingMedications }) => {
+    const { patientInfo } = usePatientDashboard();
     const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [selectedRxOrder, setSelectedRxOrder] = useState<IRxOrder | null>(null);
@@ -114,10 +116,11 @@ const PreviousMedicationsView: React.FC<PreviousMedicationsViewProps> = ({ rxOrd
                 )}
             </ScrollArea>
 
-            <RxOrderDrawer
+            <RxOrderDrawerView
                 isOpen={isDrawerOpen}
                 onClose={() => setIsDrawerOpen(false)}
                 rxOrder={selectedRxOrder}
+                patientId={patientInfo?.patientID || ""}
             />
         </div>
     );

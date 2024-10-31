@@ -4,7 +4,7 @@ import { useFormContext } from "react-hook-form";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/form/ScrollArea";
+import { ScrollArea } from "@/components/ui/ScrollArea";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "../../utils/classNames";
 import { Send } from "lucide-react";

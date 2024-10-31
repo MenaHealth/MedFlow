@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm, FormProvider } from "react-hook-form";
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { RadioCard } from '@/components/ui/radio-card';
-import { ScrollArea } from '@/components/form/ScrollArea';
+import { ScrollArea } from '@/components/ui/ScrollArea';
 import RXOrderView from './rx/RXOrderView';
 import MedOrderView from '@/components/PatientViewModels/Medications/med/MedOrderView';
 import PreviousMedicationsView from './previous/PreviousMedicationsView';

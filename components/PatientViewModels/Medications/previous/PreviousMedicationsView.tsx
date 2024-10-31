@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp, Share } from 'lucide-react';
-import { ScrollArea } from '../../../form/ScrollArea';
+import { ScrollArea } from '../../../ui/ScrollArea';
 import RxOrderDrawerView from '../rx/RxOrderDrawerView';
 import { IRxOrder } from '../../../../models/patient';
 import { IMedOrder } from '../../../../models/medOrder';

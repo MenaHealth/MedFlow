@@ -24,7 +24,7 @@
     interface PendingApprovalsProps {
         data: User[] | null;
     }
-    export default function PendingUsers({ data }: PendingUsersProps) {
+    export default function NewSignups({ data }: PendingUsersProps) {
         const { data: session } = useSession();
         const {
             pendingApprovalsData,
@@ -162,7 +162,7 @@
                     ) : (
                         <tr>
                             <td colSpan={5} className="py-2 px-4 border-b text-center">
-                                No pending approvals.
+                                No new signups.
                             </td>
                         </tr>
                     )}

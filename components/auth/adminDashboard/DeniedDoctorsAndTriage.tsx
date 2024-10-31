@@ -1,4 +1,4 @@
-// components/auth/adminDashboard/DeniedUsers.tsx
+// components/auth/adminDashboard/DeniedDoctorsAndTriage.tsx
 'use client';
 
 import React from 'react';
@@ -21,7 +21,7 @@ interface DeniedUsersProps {
     data: User[];
 }
 
-export default function DeniedUsers({ data }: DeniedUsersProps) {
+export default function DeniedDoctorsAndTriage({ data }: DeniedUsersProps) {
     const { data: session } = useSession();
     const { setToast } = useToast();
     const {
@@ -95,7 +95,7 @@ export default function DeniedUsers({ data }: DeniedUsersProps) {
     }
 
     return (
-        <div className="container bg mx-auto px-4 py-8 bg-grey-100">
+        <div className="container bg mx-auto px-4 py-8">
             <div className="flex justify-between items-center mb-4">
                 <button
                     onClick={() => setIsSelecting(!isSelecting)}

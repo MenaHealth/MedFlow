@@ -3,7 +3,7 @@ import React, { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import { ChevronDown, ChevronsDown, ChevronsUp, ChevronUp, Trash2Icon } from 'lucide-react'; // Importing the Chevron icons
 import { usePreviousNotesViewModel } from './PreviousNotesViewModel';
 import { CombinedNotesViewModel } from '../CombinedNotesViewModel';
-import { ScrollArea } from './../../../../components/form/ScrollArea';
+import { ScrollArea } from '../../../ui/ScrollArea';
 import { RadioCard } from './../../../../components/ui/radio-card';
 import { INote } from '@/models/note';
 import { useSession } from 'next-auth/react';

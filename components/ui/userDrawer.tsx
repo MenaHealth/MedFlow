@@ -3,7 +3,7 @@ import { signOut } from "next-auth/react"
 import { LogOut, Settings, ClipboardList, X, Grid3X3 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
-import { ScrollArea } from './../../components/form/ScrollArea';
+import { ScrollArea } from './ScrollArea';
 
 import {
     Drawer,

@@ -162,7 +162,7 @@
                     ) : (
                         <tr>
                             <td colSpan={5} className="py-2 px-4 border-b text-center">
-                                No pending approvals.
+                                No new signups.
                             </td>
                         </tr>
                     )}

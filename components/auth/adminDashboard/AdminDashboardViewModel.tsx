@@ -134,54 +134,44 @@ export function useAdminDashboardViewModel() {
             let shouldFetch = false;
 
             if (section === 'pending') {
-                setIsPendingApprovalsOpen(prev => {
-                    shouldFetch = !prev && !fetchedSections.current.pending;
+                setIsPendingApprovalsOpen((prev) => {
+                    shouldFetch = !prev;
+                    fetchedSections.current.pending = shouldFetch;
                     return !prev;
                 });
-                if (shouldFetch) {
-                    fetchedSections.current.pending = true;
-                    await fetchPendingApprovals();
-                }
+                if (shouldFetch) await fetchPendingApprovals();
             } else if (section === 'existing') {
-                setIsExistingUsersOpen(prev => {
-                    shouldFetch = !prev && !fetchedSections.current.existing;
+                setIsExistingUsersOpen((prev) => {
+                    shouldFetch = !prev;
+                    fetchedSections.current.existing = shouldFetch;
                     return !prev;
                 });
-                if (shouldFetch) {
-                    fetchedSections.current.existing = true;
-                    await fetchExistingUsers();
-                }
+                if (shouldFetch) await fetchExistingUsers();
             } else if (section === 'denied') {
-                setIsDeniedUsersOpen(prev => {
-                    shouldFetch = !prev && !fetchedSections.current.denied;
+                setIsDeniedUsersOpen((prev) => {
+                    shouldFetch = !prev;
+                    fetchedSections.current.denied = shouldFetch;
                     return !prev;
                 });
-                if (shouldFetch) {
-                    fetchedSections.current.denied = true;
-                    await fetchDeniedUsers();
-                }
+                if (shouldFetch) await fetchDeniedUsers();
             } else if (section === 'addAdmin') {
-                setIsAddAdminUsersOpen(prev => {
-                    shouldFetch = !prev && !fetchedSections.current.admins;
+                setIsAddAdminUsersOpen((prev) => {
+                    shouldFetch = !prev;
+                    fetchedSections.current.admins = shouldFetch;
                     return !prev;
                 });
-                if (shouldFetch) {
-                    fetchedSections.current.admins = true;
-                    await fetchAdmins();
-                }
-            }
-            else if (section === 'medOrder') {
-                setIsMedOrderOpen(prev => {
-                    if (!prev) {
-                        fetchMedOrders();
-                    }
+                if (shouldFetch) await fetchAdmins();
+            } else if (section === 'medOrder') {
+                setIsMedOrderOpen((prev) => {
+                    shouldFetch = !prev;
+                    fetchedSections.current.admins = shouldFetch;
                     return !prev;
                 });
+                if (shouldFetch) await fetchMedOrders();
             }
         },
-        [fetchAdmins, fetchPendingApprovals, fetchExistingUsers, fetchDeniedUsers]
+        [fetchAdmins, fetchPendingApprovals, fetchExistingUsers, fetchDeniedUsers, fetchMedOrders]
     );
-
     return {
         isPendingApprovalsOpen,
         isExistingUsersOpen,

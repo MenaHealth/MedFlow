@@ -23,7 +23,7 @@ interface ExistingUsersProps {
     setCurrentPage: (page: number) => void;
 }
 
-export default function ExistingUsers({ data, totalPages, currentPage, setCurrentPage }: ExistingUsersProps) {
+export default function ExistingDoctorsAndTriage({ data, totalPages, currentPage, setCurrentPage }: ExistingUsersProps) {
     const { data: session } = useSession();
     const { setToast } = useToast();
 

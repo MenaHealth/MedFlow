@@ -8,7 +8,7 @@ import { PreviousNotesView } from "./previous/PreviousNotesView";
 import { Card, CardContent, CardHeader } from "../../ui/card";
 import { RadioCard } from "../../ui/radio-card";
 import { Button } from "../../ui/button";
-import { ScrollArea } from '../../form/ScrollArea';
+import { ScrollArea } from '../../ui/ScrollArea';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import ReadOnlyField from "../../form/ReadOnlyField";
 import { Resizable } from './../../ui/Resizable';

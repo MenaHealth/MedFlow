@@ -3,7 +3,7 @@
 import React, { useRef } from "react";
 import { MessageSquareShare, Mail, Calendar, Phone, MapPin, User, Activity, Clock9, Clock, Aperture, Download, Hourglass, Tablets, PillBottle, BadgeAlert } from "lucide-react";
 import { Drawer, DrawerContent, DrawerHeader } from "@/components/ui/drawer";
-import { ScrollArea } from "@/components/form/ScrollArea";
+import { ScrollArea } from "@/components/ui/ScrollArea";
 import { usePatientDashboard } from "@/components/PatientViewModels/PatientViewModelContext";
 import { IRxOrder } from "@/models/patient";
 import { TextFormField } from "@/components/ui/TextFormField";

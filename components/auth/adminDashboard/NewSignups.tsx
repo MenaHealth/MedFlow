@@ -24,7 +24,7 @@
     interface PendingApprovalsProps {
         data: User[] | null;
     }
-    export default function PendingUsers({ data }: PendingUsersProps) {
+    export default function NewSignups({ data }: PendingUsersProps) {
         const { data: session } = useSession();
         const {
             pendingApprovalsData,

@@ -5,7 +5,7 @@ import { Drawer as DrawerPrimitive } from "vaul"
 import { X } from "lucide-react"
 
 import { cn } from "../../utils/classNames";
-import { ScrollArea } from "./../../components/form/ScrollArea";
+import { ScrollArea } from "./ScrollArea";
 
 type DrawerDirection = 'left' | 'right' | 'top' | 'bottom';
 

@@ -21,14 +21,11 @@
         data: User[];
     }
 
-    interface PendingApprovalsProps {
-        data: User[] | null;
-    }
     export default function NewSignups({ data }: newSignupsProps) {
         const { data: session } = useSession();
         const {
             newSignupsData,
-            loadingPendingApprovals,
+            loadingNewSignups,
             totalPages,
             currentPage,
             setCurrentPage,
@@ -71,9 +68,8 @@
                     variant: 'default',
                 });
 
-                // Update the pending approvals data by removing approved/denied users
                 setSelectedUsers([]);
-                toggleSection('pending'); // Refresh pending approvals after action
+                toggleSection('newSignups');
             } catch (error) {
                 console.error(`Error in bulk ${actionType}:`, error);
                 const errorMessage = error instanceof Error ? error.message : `An error occurred while trying to ${actionType} the users.`;
@@ -100,7 +96,7 @@
             ));
         };
 
-        if (loadingPendingApprovals) {
+        if (loadingNewSignups) {
             return <div>Loading...</div>;
         }
 

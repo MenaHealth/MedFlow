@@ -37,6 +37,8 @@ const AdminDashboardContent = () => {
         deniedUsersData,
         medOrdersData,
         toggleSection,
+        hasMore,
+        next,
         totalPages,
         currentPage,
         setCurrentPage,
@@ -94,7 +96,14 @@ const AdminDashboardContent = () => {
                     setCurrentPage={setCurrentPage}
                 />
             ),
-            denied: <DeniedDoctorsAndTriage data={deniedUsersData} />,
+            denied: (
+                <DeniedDoctorsAndTriage
+                    data={deniedUsersData}
+                    hasMore={hasMore}
+                    loading={loadingDeniedUsers} // Use the specific loading state
+                    next={next}
+                />
+            ),
             addAdmin: <AdminManagement />,
             medOrder: (
                 <MedOrders
@@ -128,7 +137,11 @@ const AdminDashboardContent = () => {
                 </div>
                 <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-[2000px]' : 'max-h-0'}`}>
                     <div className={`p-4 ${section.color}`}>
-                        {loading || isRefreshing ? (
+                        {(loadingNewSignups && section.id === 'newSignups') ||
+                        (loadingExistingUsers && section.id === 'existing') ||
+                        (loadingDeniedUsers && section.id === 'denied') ||
+                        (loadingMedOrders && section.id === 'medOrder') ||
+                        isRefreshing ? (
                             <div className="flex justify-center items-center py-4">
                                 <Loader2 className="h-8 w-8 animate-spin"/>
                             </div>

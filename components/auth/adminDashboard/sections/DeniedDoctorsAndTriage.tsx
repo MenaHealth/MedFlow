@@ -1,11 +1,11 @@
 // components/auth/adminDashboard/sections/DeniedDoctorsAndTriage.tsx
+
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import useToast from '@/components/hooks/useToast';
 import InfiniteScroll from '@/components/ui/infiniteScroll';
-import { useAdminDashboard } from '../AdminDashboardContext';
 
 interface User {
     _id: string;
@@ -17,18 +17,24 @@ interface User {
     denialDate?: string;
 }
 
-export default function DeniedDoctorsAndTriage() {
+interface DeniedDoctorsAndTriageProps {
+    data: User[];
+    hasMore: boolean;
+    loading: boolean;
+    next: () => void;
+}
+
+export default function DeniedDoctorsAndTriage({
+                                                   data,
+                                                   hasMore,
+                                                   loading,
+                                                   next,
+                                               }: DeniedDoctorsAndTriageProps) {
     const { data: session } = useSession();
     const { setToast } = useToast();
-    const {
-        deniedUsers,
-        hasMore,
-        loading,
-        next,  // Infinite scroll function to load more data
-    } = useAdminDashboard();
 
-    const [selectedUsers, setSelectedUsers] = React.useState<string[]>([]);
-    const [isSelecting, setIsSelecting] = React.useState(false);
+    const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+    const [isSelecting, setIsSelecting] = useState(false);
 
     // Handle the re-approve-users action
     const handleReApprove = async () => {
@@ -55,8 +61,6 @@ export default function DeniedDoctorsAndTriage() {
                 throw new Error('Failed to re-approve users');
             }
 
-            // Filter out re-approved users from the denied list
-            const updatedDeniedUsers = deniedUsers.filter(user => !selectedUsers.includes(user._id));
             setToast?.({
                 title: 'Success',
                 description: 'Users re-approved successfully.',
@@ -88,9 +92,9 @@ export default function DeniedDoctorsAndTriage() {
                 <button
                     onClick={() => setIsSelecting(!isSelecting)}
                     className={`border-2 font-bold py-2 px-4 rounded mr-2 ${
-                        deniedUsers.length === 0 ? 'border-gray-400 text-gray-400 cursor-not-allowed' : 'border-grey-800 text-grey-800 hover:bg-grey-800 hover:text-orange-50'
+                        data.length === 0 ? 'border-gray-400 text-gray-400 cursor-not-allowed' : 'border-grey-800 text-grey-800 hover:bg-grey-800 hover:text-orange-50'
                     }`}
-                    disabled={deniedUsers.length === 0}
+                    disabled={data.length === 0}
                 >
                     Select Users
                 </button>
@@ -123,8 +127,8 @@ export default function DeniedDoctorsAndTriage() {
                     </tr>
                     </thead>
                     <tbody>
-                    {deniedUsers.length > 0 ? (
-                        deniedUsers.map((user) => (
+                    {data.length > 0 ? (
+                        data.map((user) => (
                             <tr key={user._id}>
                                 {isSelecting && (
                                     <td className="py-2 px-4 border-b">

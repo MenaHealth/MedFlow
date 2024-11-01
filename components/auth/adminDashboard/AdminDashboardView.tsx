@@ -34,7 +34,7 @@ const AdminDashboardContent = () => {
         loadingMedOrders,
         newSignupsData,
         existingUsersData,
-        deniedUsersData,
+        deniedUsers,
         medOrdersData,
         toggleSection,
         hasMore,
@@ -86,6 +86,14 @@ const AdminDashboardContent = () => {
             medOrder: isMedOrderOpen,
         }[section.id as 'newSignups' | 'existing' | 'denied' | 'addAdmin' | 'medOrder'];
 
+        const loading = {
+            newSignups: loadingNewSignups,
+            existing: loadingExistingUsers,
+            denied: loadingDeniedUsers,
+            addAdmin: false,
+            medOrder: loadingMedOrders,
+        }[section.id as 'newSignups' | 'existing' | 'denied' | 'addAdmin' | 'medOrder'];
+
         const content = {
             newSignups: <NewSignups data={newSignupsData} />,
             existing: (
@@ -98,9 +106,9 @@ const AdminDashboardContent = () => {
             ),
             denied: (
                 <DeniedDoctorsAndTriage
-                    data={deniedUsersData}
+                    data={deniedUsers} // use the accumulated deniedUsers state here
                     hasMore={hasMore}
-                    loading={loadingDeniedUsers} // Use the specific loading state
+                    loading={loading}
                     next={next}
                 />
             ),
@@ -112,14 +120,6 @@ const AdminDashboardContent = () => {
                     medOrdersData={medOrdersData}
                 />
             ),
-        }[section.id as 'newSignups' | 'existing' | 'denied' | 'addAdmin' | 'medOrder'];
-
-        const loading = {
-            newSignups: loadingNewSignups,
-            existing: loadingExistingUsers,
-            denied: loadingDeniedUsers,
-            addAdmin: false,
-            medOrder: loadingMedOrders,
         }[section.id as 'newSignups' | 'existing' | 'denied' | 'addAdmin' | 'medOrder'];
 
         return (
@@ -137,11 +137,7 @@ const AdminDashboardContent = () => {
                 </div>
                 <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-[2000px]' : 'max-h-0'}`}>
                     <div className={`p-4 ${section.color}`}>
-                        {(loadingNewSignups && section.id === 'newSignups') ||
-                        (loadingExistingUsers && section.id === 'existing') ||
-                        (loadingDeniedUsers && section.id === 'denied') ||
-                        (loadingMedOrders && section.id === 'medOrder') ||
-                        isRefreshing ? (
+                        {loading || isRefreshing ? (
                             <div className="flex justify-center items-center py-4">
                                 <Loader2 className="h-8 w-8 animate-spin"/>
                             </div>

@@ -7,7 +7,8 @@ interface InfiniteScrollProps {
     hasMore: boolean;
     isLoading: boolean;
     next: () => void;
-    threshold?: number; // Optional threshold for triggering the next function
+    dataLength: number;
+    threshold?: number;
 }
 
 const InfiniteScroll: React.FC<InfiniteScrollProps> = ({

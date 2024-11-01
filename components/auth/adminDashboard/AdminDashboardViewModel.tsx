@@ -22,41 +22,38 @@ export function useAdminDashboardViewModel() {
     const [isMedOrderOpen, setIsMedOrderOpen] = useState(false);
     const [isRefreshing, setIsRefreshing] = useState(false);
 
-
-    const [page, setPage] = useState(0);
-    const [totalPages, setTotalPages] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
-    const [loading, setLoading] = useState(false);
-    const [deniedUsers, setDeniedUsers] = useState<User[]>([]);
-
-    const next = async () => {
-        if (loading || !hasMore) return; // Prevent duplicate fetches
-
-        setLoading(true);
-        try {
-            const data = await fetchDeniedUsers(page);
-            setDeniedUsers((prev) => [...prev, ...data.users]);
-            setPage((prev) => prev + 1);
-            setHasMore(data.users.length === 20); // Set `hasMore` based on page size
-            setTotalPages(data.totalPages);
-        } catch (error) {
-            console.error('Error fetching denied users:', error);
-            setHasMore(false); // Stop further attempts if there's an error
-        } finally {
-            setLoading(false);
-        }
-    };
-
     const fetchDeniedUsers = async (page: number) => {
         const res = await fetch(`/api/admin/GET/denied-users?page=${page}&limit=20`);
         if (!res.ok) throw new Error('Failed to fetch denied users');
         return res.json();
     };
+
+// Maintain accumulated denied users
+    const [deniedUsers, setDeniedUsers] = useState<User[]>([]);
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const [loading, setLoading] = useState(false);
+
     const deniedUsersQuery = useQuery(
-        ['deniedUsers', currentPage],
-        () => fetchDeniedUsers(currentPage),
-        { enabled: isDeniedUsersOpen }
+        ['deniedUsers', page],
+        () => fetchDeniedUsers(page),
+        {
+            enabled: isDeniedUsersOpen,
+            keepPreviousData: true,
+            onSuccess: (data) => {
+                setDeniedUsers((prev) => [...prev, ...data.users]); // Accumulate data properly
+                setHasMore(data.users.length === 20); // Only set to false if fewer than 20 results
+                setLoading(false);
+            },
+            onError: () => setLoading(false),
+        }
     );
+
+    const next = useCallback(() => {
+        if (loading || !hasMore) return;
+        setLoading(true);
+        setPage(prev => prev + 1); // Increment page to fetch next batch
+    }, [loading, hasMore]);
 
     const fetchNewSignups = async (page: number) => {
         const res = await fetch(`/api/admin/GET/new-users?page=${page}&limit=20`);
@@ -109,9 +106,9 @@ export function useAdminDashboardViewModel() {
     const loadingAdmins = adminsQuery.isLoading;
 
     const handleRefresh = useCallback(() => {
-        setDeniedUsers([]); // Reset data
-        setPage(0);          // Reset page
-        setHasMore(true);    // Reset hasMore
+        setDeniedUsers([]);
+        setPage(1);
+        setHasMore(true);
         queryClient.invalidateQueries(['deniedUsers']);
     }, [queryClient]);
 

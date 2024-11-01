@@ -3,9 +3,11 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useSession } from 'next-auth/react';
+import { useSession } from "next-auth/react";
 import useToast from '@/components/hooks/useToast';
 import InfiniteScroll from '@/components/ui/infiniteScroll';
+import { Loader2 } from "lucide-react"
+import {ScrollArea} from "@/components/ui/ScrollArea";
 
 interface User {
     _id: string;
@@ -87,7 +89,7 @@ export default function DeniedDoctorsAndTriage({
     };
 
     return (
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-8 overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
                 <button
                     onClick={() => setIsSelecting(!isSelecting)}
@@ -99,7 +101,6 @@ export default function DeniedDoctorsAndTriage({
                     Select Users
                 </button>
 
-                {/* Re-approve-users button - visible in selection mode */}
                 {isSelecting && (
                     <button
                         onClick={handleReApprove}
@@ -112,9 +113,13 @@ export default function DeniedDoctorsAndTriage({
                     </button>
                 )}
             </div>
-
-            {/* Infinite Scroll Table */}
-            <InfiniteScroll hasMore={hasMore} isLoading={loading} next={next}>
+            <ScrollArea className="overflow-y-auto max-h-[80vh]">
+                <InfiniteScroll
+                    dataLength={data.length} // should reflect total length
+                    next={next}
+                    hasMore={hasMore}
+                    isLoading={loading}
+                >
                 <table className="min-w-full">
                     <thead>
                     <tr>
@@ -160,6 +165,15 @@ export default function DeniedDoctorsAndTriage({
                     </tbody>
                 </table>
             </InfiniteScroll>
+            </ScrollArea>
+            {loading && (
+                <div className="flex justify-center items-center py-4">
+                    <Loader2 className="h-8 w-8 animate-spin"/>
+                </div>
+            )}
+            {!hasMore && data.length > 0 && (
+                <p className="text-center py-4">No more denied users to load.</p>
+            )}
         </div>
     );
 }

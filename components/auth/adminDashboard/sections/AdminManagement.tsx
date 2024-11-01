@@ -8,7 +8,8 @@ import useToast from '@/components/hooks/useToast';
 import { ChevronLeft, ChevronRight, Minus, Plus, Search, UserRoundCheck } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useAdminDashboard } from '@/components/auth/adminDashboard/AdminDashboardContext'; // Import the context
+import { useAdminDashboard } from '@/components/auth/adminDashboard/AdminDashboardContext';
+import {BarLoader} from "react-spinners"; // Import the context
 
 interface User {
     _id: string;
@@ -132,7 +133,7 @@ export default function AdminManagement() {
     }, [searchQuery, setToast]);
 
     if (loadingAdmins) {
-        return <div className="text-center py-4">Loading...</div>;
+        return <div className="text-center py-4"><BarLoader color="#ffffff"></BarLoader></div>;
     }
 
     return (

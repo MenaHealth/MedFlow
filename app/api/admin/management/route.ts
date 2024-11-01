@@ -1,12 +1,9 @@
-// app/api/adminDashboard/management/route.ts
+// app/api/admin/management/route.ts
 import { NextResponse } from 'next/server';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import Admin from './../../../../models/admin'; // Import the Admin model
 import dbConnect from './../../../../utils/database';
 import User from './../../../../models/user';
-
-// import dbConnect from './../../../../../utils/database';
-// import User from "./../../../../../models/user";
 
 const SECRET = process.env.JWT_SECRET as string;
 if (!SECRET) {
@@ -14,55 +11,49 @@ if (!SECRET) {
 }
 
 // POST: Add a user to the adminDashboard collection
-
 export async function POST(request: Request) {
+    console.log('POST request received at /api/admin/management');
     try {
-        console.log('API request received. Connecting to database...');
-        await dbConnect(); // Ensure connection to the database
+        console.log('Connecting to database...');
+        await dbConnect();
 
-        // Authorization header check
         const authHeader = request.headers.get('authorization');
+        console.log('Authorization header:', authHeader);
+
         if (!authHeader) {
             console.error('Authorization header missing');
             return NextResponse.json({ message: 'Authorization header missing' }, { status: 401 });
         }
 
         const token = authHeader.split(' ')[1];
-        if (!token) {
-            console.error('Token missing');
-            return NextResponse.json({ message: 'Token missing' }, { status: 401 });
-        }
+        console.log('Token:', token);
 
         const decoded = jwt.verify(token, SECRET) as JwtPayload;
+        console.log('Decoded token:', decoded);
 
-        // Ensure the user making the request is an adminDashboard
         if (typeof decoded !== 'object' || !decoded?.isAdmin) {
             console.error('Admin access required');
             return NextResponse.json({ message: 'Admin access required' }, { status: 403 });
         }
 
         const body = await request.json();
-        const { userId } = body;
+        console.log('POST request body:', body);
 
+        const { userId } = body;
         if (!userId) {
             console.error('User ID is missing in the request body');
             return NextResponse.json({ message: 'User ID is required' }, { status: 400 });
         }
 
         const user = await User.findById(userId);
-        if (!user) {
-            console.error(`User not found for ID: ${userId}`);
-            return NextResponse.json({ message: `User not found: ${userId}` }, { status: 404 });
-        }
+        console.log('User found for provided userId:', user);
 
-        // Check if the user is already an adminDashboard
         const existingAdmin = await Admin.findOne({ userId: user._id });
         if (existingAdmin) {
-            console.error('User is already an adminDashboard');
-            return NextResponse.json({ message: 'User is already an adminDashboard' }, { status: 400 });
+            console.error('User is already an admin');
+            return NextResponse.json({ message: 'User is already an admin' }, { status: 400 });
         }
 
-        // Add the user to the adminDashboard collection
         const newAdmin = new Admin({
             userId: user._id,
             firstName: user.firstName,
@@ -71,83 +62,72 @@ export async function POST(request: Request) {
         });
 
         await newAdmin.save();
-        console.log('User added as adminDashboard successfully');
-        return NextResponse.json({ message: 'User added as adminDashboard successfully' }, { status: 200 });
+        console.log('User successfully added as admin');
+        return NextResponse.json({ message: 'User added as admin successfully' }, { status: 200 });
 
     } catch (error) {
-        console.error('Error during adminDashboard addition:', error);
-
-        // Type guard to check if error is an instance of Error
-        if (error instanceof Error) {
-            return NextResponse.json({ message: `Failed to add user as admin: ${error.message}` }, { status: 500 });
-        } else {
-            return NextResponse.json({ message: 'Failed to add user as adminDashboard due to an unknown error' }, { status: 500 });
-        }
+        console.error('Error in POST request:', error);
+        return NextResponse.json({ message: 'Failed to add user as admin' }, { status: 500 });
     }
 }
 
 // GET: Fetch all admins
 export async function GET() {
+    console.log('GET request received at /api/admin/management');
     try {
-        console.log('Fetching admins...');
         await dbConnect();
+        console.log('Database connected successfully');
 
         const admins = await Admin.find().populate('userId', 'firstName lastName email');
+        console.log('Admins fetched:', admins);
+
         return NextResponse.json({ admins }, { status: 200 });
     } catch (error) {
-        console.error('Error fetching admins:', error);
-
-        if (error instanceof Error) {
-            return NextResponse.json({ message: `Failed to fetch admins: ${error.message}` }, { status: 500 });
-        } else {
-            return NextResponse.json({ message: 'Failed to fetch admins due to an unknown error' }, { status: 500 });
-        }
+        console.error('Error in GET request:', error);
+        return NextResponse.json({ message: 'Failed to fetch admins' }, { status: 500 });
     }
 }
 
 export async function DELETE(request: Request) {
+    console.log('DELETE request received at /api/admin/management');
     try {
-        console.log('API request received. Connecting to database...');
         await dbConnect();
+        console.log('Database connected successfully');
 
         const authHeader = request.headers.get('authorization');
+        console.log('Authorization header:', authHeader);
+
         if (!authHeader) {
             return NextResponse.json({ message: 'Authorization header missing' }, { status: 401 });
         }
 
         const token = authHeader.split(' ')[1];
-        if (!token) {
-            return NextResponse.json({ message: 'Token missing' }, { status: 401 });
-        }
+        console.log('Token:', token);
 
-        const decoded = jwt.verify(token, SECRET) as string | JwtPayload;
+        const decoded = jwt.verify(token, SECRET) as JwtPayload;
+        console.log('Decoded token:', decoded);
 
         if (typeof decoded !== 'object' || !decoded?.isAdmin) {
             return NextResponse.json({ message: 'Admin access required' }, { status: 403 });
         }
 
         const body = await request.json();
-        const { adminId } = body;
+        console.log('DELETE request body:', body);
 
+        const { adminId } = body;
         if (!adminId) {
             return NextResponse.json({ message: 'Admin ID is required' }, { status: 400 });
         }
 
         const admin = await Admin.findById(adminId);
-        if (!admin) {
-            return NextResponse.json({ message: `Admin not found: ${adminId}` }, { status: 404 });
-        }
+        console.log('Admin found for provided adminId:', admin);
 
         await Admin.deleteOne({ _id: adminId });
+        console.log('Admin removed successfully');
 
         return NextResponse.json({ message: 'Admin removed successfully' }, { status: 200 });
     } catch (error) {
-        console.error('Error removing adminDashboard:', error);
-
-        if (error instanceof Error) {
-            return NextResponse.json({ message: `Failed to remove admin: ${error.message}` }, { status: 500 });
-        } else {
-            return NextResponse.json({ message: 'Failed to remove adminDashboard due to an unknown error' }, { status: 500 });
-        }
+        console.error('Error in DELETE request:', error);
+        return NextResponse.json({ message: 'Failed to remove admin' }, { status: 500 });
     }
 }

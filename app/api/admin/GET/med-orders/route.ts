@@ -1,4 +1,4 @@
-// app/api/adminDashboard/GET/med-orders/route.ts
+// app/api/admin/GET/med-orders/route.ts
 
 import { NextResponse } from 'next/server';
 import dbConnect from './../../../../../utils/database';

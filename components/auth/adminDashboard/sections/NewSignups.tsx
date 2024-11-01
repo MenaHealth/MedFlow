@@ -1,11 +1,11 @@
-    // components/auth/adminDashboard/PendingUsers.tsx
+    // components/auth/adminDashboard/sections/NewSignups.tsx
     'use client';
 
     import { useState, useEffect } from 'react';
     import { useSession } from 'next-auth/react';
     import useToast from '@/components/hooks/useToast';
     import {ChevronLeftIcon, ChevronRightIcon, UserRoundCheck, UserRoundMinus} from 'lucide-react';
-    import { useAdminDashboard } from './AdminDashboardContext';
+    import { useAdminDashboard } from '../AdminDashboardContext';
 
 
     interface User {
@@ -17,17 +17,17 @@
         countries?: string[];
     }
 
-    interface PendingUsersProps {
+    interface newSignupsProps {
         data: User[];
     }
 
     interface PendingApprovalsProps {
         data: User[] | null;
     }
-    export default function NewSignups({ data }: PendingUsersProps) {
+    export default function NewSignups({ data }: newSignupsProps) {
         const { data: session } = useSession();
         const {
-            pendingApprovalsData,
+            newSignupsData,
             loadingPendingApprovals,
             totalPages,
             currentPage,
@@ -39,7 +39,7 @@
         const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
 
         // Handle approve-users or deny-users action
-// components/auth/adminDashboard/PendingUsers.tsx
+// components/auth/adminDashboard/newSignups.tsx
         async function handleBulkAction(actionType: 'approve-users' | 'deny-users') {
             if (!session?.user?.token || selectedUsers.length === 0) {
                 setToast?.({
@@ -94,9 +94,9 @@
 
         const handleSelectAll = () => {
             setSelectedUsers((prev) => (
-                prev.length === pendingApprovalsData.length
+                prev.length === newSignupsData.length
                     ? []
-                    : pendingApprovalsData.map((user: User) => user._id)
+                    : newSignupsData.map((user: User) => user._id)
             ));
         };
 
@@ -131,7 +131,11 @@
                             <input
                                 type="checkbox"
                                 onChange={handleSelectAll}
-                                checked={selectedUsers.length === pendingApprovalsData.length && pendingApprovalsData.length > 0}
+                                checked={
+                                    selectedUsers.length > 0 &&
+                                    newSignupsData?.length > 0 &&
+                                    selectedUsers.length === newSignupsData.length
+                                }
                             />
                         </th>
                         <th className="py-2 px-4 border-b text-orange-800">Name</th>
@@ -141,8 +145,8 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {pendingApprovalsData.length > 0 ? (
-                        pendingApprovalsData.map((user: User) => (
+                    {newSignupsData.length > 0 ? (
+                        newSignupsData.map((user: User) => (
                             <tr key={user._id}>
                                 <td className="py-2 px-4 border-b">
                                     <input
@@ -170,7 +174,7 @@
                 </table>
 
                 {/* Pagination Controls */}
-                {pendingApprovalsData.length > 0 && totalPages > 1 && (
+                {newSignupsData.length > 0 && totalPages > 1 && (
                     <div className="mt-4 flex justify-center items-center space-x-2">
                         <button
                             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}

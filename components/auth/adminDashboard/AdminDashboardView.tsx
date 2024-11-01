@@ -2,36 +2,37 @@
 
 'use client'
 
-import React, { useRef, useEffect, useState } from 'react'
-import { AdminDashboardProvider, useAdminDashboard } from './AdminDashboardContext'
-import NewSignups from './NewSignups'
-import DeniedDoctorsAndTriage from './DeniedDoctorsAndTriage'
-import ExistingDoctorsAndTriage from './ExistingDoctorsAndTriage'
-import MedOrders from './MedOrders'
-import AdminManagement from "@/components/auth/adminDashboard/AdminManagement"
-import { Loader2, RefreshCw, Users, UserCheck, UserX, Pill, ShieldCheck } from 'lucide-react'
-import { Button } from "@/components/ui/button"
+import React, { useRef, useEffect, useState } from 'react';
+import { AdminDashboardProvider, useAdminDashboard } from './AdminDashboardContext';
+import NewSignups from './sections/NewSignups';
+import DeniedDoctorsAndTriage from './sections/DeniedDoctorsAndTriage';
+import ExistingDoctorsAndTriage from './sections/ExistingDoctorsAndTriage';
+import MedOrders from './sections/MedOrders';
+import AdminManagement from "@/components/auth/adminDashboard/sections/AdminManagement";
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { Loader2, RefreshCw, Users, UserCheck, UserX, Pill, ShieldCheck } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 
 const sections = [
-    { id: 'pending', title: 'New Signups', icon: Users, color: 'bg-orange-50 text-orange-800' },
+    { id: 'newSignups', title: 'New Signups', icon: Users, color: 'bg-orange-50 text-orange-800' },
     { id: 'existing', title: 'Existing Doctors and Triage', icon: UserCheck, color: 'bg-orange-100 text-orange-500' },
     { id: 'denied', title: 'Denied Doctors and Triage', icon: UserX, color: 'bg-gray-100 text-gray-800' },
     { id: 'addAdmin', title: 'Admin Management', icon: ShieldCheck, color: 'bg-darkBlue text-orange-100' },
     { id: 'medOrder', title: 'Medical Orders', icon: Pill, color: 'bg-darkBlue text-orange-100' },
-]
+];
 
 const AdminDashboardContent = () => {
     const {
-        isPendingApprovalsOpen,
+        isNewSignupsOpen,
         isExistingUsersOpen,
         isDeniedUsersOpen,
         isAddAdminUsersOpen,
         isMedOrderOpen,
-        loadingPendingApprovals,
+        loadingNewSignups,
         loadingExistingUsers,
         loadingDeniedUsers,
         loadingMedOrders,
-        pendingApprovalsData,
+        newSignupsData,
         existingUsersData,
         deniedUsersData,
         medOrdersData,
@@ -40,51 +41,51 @@ const AdminDashboardContent = () => {
         currentPage,
         setCurrentPage,
         handleRefresh,
-        isRefreshing
-    } = useAdminDashboard()
+        isRefreshing,
+    } = useAdminDashboard();
 
-    const [activeSection, setActiveSection] = useState('pending')
+    const [activeSection, setActiveSection] = useState('newSignups');
 
-    const sectionRefs = useRef<React.RefObject<HTMLDivElement>[]>(sections.map(() => React.createRef<HTMLDivElement>()))
+    const sectionRefs = useRef<React.RefObject<HTMLDivElement>[]>(sections.map(() => React.createRef<HTMLDivElement>()));
 
     useEffect(() => {
         const observer = new IntersectionObserver(
             (entries) => {
                 entries.forEach((entry) => {
                     if (entry.isIntersecting) {
-                        setActiveSection(entry.target.id)
+                        setActiveSection(entry.target.id);
                     }
-                })
+                });
             },
             { threshold: 0.5 }
-        )
+        );
 
         sectionRefs.current.forEach((ref) => {
             if (ref.current instanceof HTMLDivElement) {
-                observer.observe(ref.current)
+                observer.observe(ref.current);
             }
-        })
+        });
 
         return () => {
             sectionRefs.current.forEach((ref) => {
                 if (ref.current instanceof HTMLDivElement) {
-                    observer.unobserve(ref.current)
+                    observer.unobserve(ref.current);
                 }
-            })
-        }
-    }, [])
+            });
+        };
+    }, []);
 
     const renderSection = (section: typeof sections[number], index: number) => {
         const isOpen = {
-            pending: isPendingApprovalsOpen,
+            newSignups: isNewSignupsOpen,
             existing: isExistingUsersOpen,
             denied: isDeniedUsersOpen,
             addAdmin: isAddAdminUsersOpen,
             medOrder: isMedOrderOpen,
-        }[section.id as 'pending' | 'existing' | 'denied' | 'addAdmin' | 'medOrder']
+        }[section.id as 'newSignups' | 'existing' | 'denied' | 'addAdmin' | 'medOrder'];
 
         const content = {
-            pending: <NewSignups data={pendingApprovalsData} />,
+            newSignups: <NewSignups data={newSignupsData} />,
             existing: (
                 <ExistingDoctorsAndTriage
                     data={existingUsersData}
@@ -102,26 +103,24 @@ const AdminDashboardContent = () => {
                     medOrdersData={medOrdersData}
                 />
             ),
-        }[section.id as 'pending' | 'existing' | 'denied' | 'addAdmin' | 'medOrder']
+        }[section.id as 'newSignups' | 'existing' | 'denied' | 'addAdmin' | 'medOrder'];
 
         const loading = {
-            pending: loadingPendingApprovals,
+            newSignups: loadingNewSignups,
             existing: loadingExistingUsers,
             denied: loadingDeniedUsers,
             addAdmin: false,
             medOrder: loadingMedOrders,
-        }[section.id as 'pending' | 'existing' | 'denied' | 'addAdmin' | 'medOrder']
+        }[section.id as 'newSignups' | 'existing' | 'denied' | 'addAdmin' | 'medOrder'];
 
         return (
             <div key={section.id} id={section.id} ref={sectionRefs.current[index]} className="mb-6">
                 <div className={`sticky top-0 z-10 ${section.color}`}>
                     <button
                         className="w-full p-4 text-left flex items-center justify-between"
-                        onClick={() => toggleSection(section.id as 'pending' | 'existing' | 'denied' | 'addAdmin' | 'medOrder')}
+                        onClick={() => toggleSection(section.id as 'newSignups' | 'existing' | 'denied' | 'addAdmin' | 'medOrder')}
                     >
                         <div className="flex items-center">
-                            {/* Apply conditional background color only when section is active */}
-                            {/*<section.icon className={`mr-2 ${activeSection === section.id ? section.color : ''}`}/>*/}
                             <h2 className="text-xl">{section.title}</h2>
                         </div>
                         <span className={`transform transition-transform ${isOpen ? 'rotate-180' : ''}`}> ▼ </span>
@@ -139,8 +138,8 @@ const AdminDashboardContent = () => {
                     </div>
                 </div>
             </div>
-        )
-    }
+        );
+    };
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -163,13 +162,19 @@ const AdminDashboardContent = () => {
 
             {sections.map((section, index) => renderSection(section, index))}
         </div>
-    )
-}
+    );
+};
 
-const AdminDashboardView = () => (
-    <AdminDashboardProvider>
-        <AdminDashboardContent/>
-    </AdminDashboardProvider>
-)
+const AdminDashboardView = () => {
+    const queryClient = new QueryClient();
 
-export default AdminDashboardView
+    return (
+        <QueryClientProvider client={queryClient}>
+            <AdminDashboardProvider>
+                <AdminDashboardContent />
+            </AdminDashboardProvider>
+        </QueryClientProvider>
+    );
+};
+
+export default AdminDashboardView;

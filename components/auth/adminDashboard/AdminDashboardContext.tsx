@@ -3,29 +3,36 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 import { useAdminDashboardViewModel } from './AdminDashboardViewModel';
 
+// components/auth/adminDashboard/AdminDashboardContext.tsx
+
 interface AdminDashboardContextType {
-    isPendingApprovalsOpen: boolean;
+    isNewSignupsOpen: boolean;
     isExistingUsersOpen: boolean;
     isDeniedUsersOpen: boolean;
     isAddAdminUsersOpen: boolean;
-    isMedOrderOpen: boolean;                     // Added for Med Orders
-    loadingPendingApprovals: boolean;
+    isMedOrderOpen: boolean;
+    loadingNewSignups: boolean;
     loadingExistingUsers: boolean;
     loadingDeniedUsers: boolean;
     loadingAdmins: boolean;
-    loadingMedOrders: boolean;                   // Added for Med Orders
-    pendingApprovalsData: any;
+    loadingMedOrders: boolean;
+    newSignupsData: any;
     existingUsersData: any;
     deniedUsersData: any[];
-    medOrdersData: any[];                        // Added for Med Orders
-    setDeniedUsersData: React.Dispatch<React.SetStateAction<any[]>>;
+    medOrdersData: any[];
     adminsData: any;
-    toggleSection: (section: 'pending' | 'existing' | 'denied' | 'addAdmin' | 'medOrder') => void;
+    toggleSection: (section: 'newSignups' | 'existing' | 'denied' | 'addAdmin' | 'medOrder') => void;
     totalPages: number;
     currentPage: number;
     setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
     handleRefresh: () => void;
     isRefreshing: boolean;
+
+    // Infinite scroll properties
+    deniedUsers: any[];   // Replace `any` with the actual `User` type if defined
+    hasMore: boolean;
+    loading: boolean;
+    next: () => void;
 }
 
 const AdminDashboardContext = createContext<AdminDashboardContextType | undefined>(undefined);

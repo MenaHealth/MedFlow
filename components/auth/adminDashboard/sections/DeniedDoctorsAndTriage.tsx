@@ -7,7 +7,9 @@ import { useSession } from "next-auth/react";
 import useToast from '@/components/hooks/useToast';
 import InfiniteScroll from '@/components/ui/infiniteScroll';
 import { Loader2 } from "lucide-react"
-import {ScrollArea} from "@/components/ui/ScrollArea";
+import { ScrollArea, ScrollBar } from "@/components/ui/ScrollArea";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface User {
     _id: string;
@@ -27,24 +29,23 @@ interface DeniedDoctorsAndTriageProps {
 }
 
 export default function DeniedDoctorsAndTriage({
-                                                   data,
-                                                   hasMore,
-                                                   loading,
-                                                   next,
+                                                   data = [],
+                                                   hasMore = false,
+                                                   loading = false,
+                                                   next = () => {},
                                                }: DeniedDoctorsAndTriageProps) {
+    const [isCountryVisible, setIsCountryVisible] = useState(false);
     const { data: session } = useSession();
     const { setToast } = useToast();
-
     const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
     const [isSelecting, setIsSelecting] = useState(false);
 
-    // Handle the re-approve-users action
     const handleReApprove = async () => {
         if (!session?.user?.isAdmin) {
             setToast?.({
                 title: 'Error',
                 description: 'You do not have permission to perform this action.',
-                variant: 'error',
+                variant: 'destructive',
             });
             return;
         }
@@ -66,22 +67,20 @@ export default function DeniedDoctorsAndTriage({
             setToast?.({
                 title: 'Success',
                 description: 'Users re-approved successfully.',
-                variant: 'default',
             });
 
-            setSelectedUsers([]);  // Clear selected users after re-approval
-            setIsSelecting(false);  // Exit selection mode after successful re-approval
+            setSelectedUsers([]);
+            setIsSelecting(false);
         } catch (error) {
             console.error('Error re-approving users:', error);
             setToast?.({
                 title: 'Error',
                 description: 'Failed to re-approve users.',
-                variant: 'error',
+                variant: 'destructive',
             });
         }
     };
 
-    // Handle checkbox selection
     const handleCheckboxChange = (userId: string) => {
         setSelectedUsers((prev) =>
             prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
@@ -89,83 +88,97 @@ export default function DeniedDoctorsAndTriage({
     };
 
     return (
-        <div className="container mx-auto px-4 py-8 overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
-                <button
+        <div className="container mx-auto px-4 py-8">
+            <div className="flex flex-wrap justify-between items-center mb-4 gap-2">
+                <Button
                     onClick={() => setIsSelecting(!isSelecting)}
-                    className={`border-2 font-bold py-2 px-4 rounded mr-2 ${
-                        data.length === 0 ? 'border-gray-400 text-gray-400 cursor-not-allowed' : 'border-grey-800 text-grey-800 hover:bg-grey-800 hover:text-orange-50'
-                    }`}
+                    variant="outline"
                     disabled={data.length === 0}
                 >
-                    Select Users
-                </button>
+                    {isSelecting ? 'Cancel Selection' : 'Select Users'}
+                </Button>
+
+                <Button
+                    onClick={() => setIsCountryVisible(!isCountryVisible)}
+                    variant="outline"
+                >
+                    {isCountryVisible ? 'Hide Country' : 'Show Country'}
+                </Button>
 
                 {isSelecting && (
-                    <button
+                    <Button
                         onClick={handleReApprove}
-                        className={`border-2 font-bold py-2 px-4 rounded ${
-                            selectedUsers.length === 0 ? 'border-gray-400 text-gray-400 cursor-not-allowed' : 'border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-green-50'
-                        }`}
+                        variant="default"
                         disabled={selectedUsers.length === 0}
                     >
                         Re-approve Users
-                    </button>
+                    </Button>
                 )}
             </div>
-            <ScrollArea className="overflow-y-auto max-h-[80vh]">
-                <InfiniteScroll
-                    dataLength={data.length} // should reflect total length
-                    next={next}
-                    hasMore={hasMore}
-                    isLoading={loading}
-                >
-                <table className="min-w-full">
-                    <thead>
-                    <tr>
-                        {isSelecting && <th className="py-2 px-4 border-b text-grey-800">Select</th>}
-                        <th className="py-2 px-4 border-b text-grey-800">Name</th>
-                        <th className="py-2 px-4 border-b text-grey-800">Email</th>
-                        <th className="py-2 px-4 border-b text-grey-800">User Type</th>
-                        <th className="py-2 px-4 border-b text-grey-800">Country</th>
-                        <th className="py-2 px-4 border-b text-grey-800">Denial Date</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {data.length > 0 ? (
-                        data.map((user) => (
-                            <tr key={user._id}>
-                                {isSelecting && (
-                                    <td className="py-2 px-4 border-b">
-                                        <input
-                                            type="checkbox"
-                                            onChange={() => handleCheckboxChange(user._id)}
-                                            checked={selectedUsers.includes(user._id)}
-                                        />
-                                    </td>
+
+            <ScrollArea className="w-full rounded-md border">
+                <div className="w-max min-w-full">
+                    <InfiniteScroll dataLength={data.length} next={next} hasMore={hasMore} isLoading={loading}>
+                        <table className="w-full border-collapse">
+                            <thead>
+                            <tr className="bg-muted">
+                                {isSelecting && <th className="p-2 text-left font-medium">Select</th>}
+                                <th className="p-2 text-left font-medium">Name</th>
+                                <th className="p-2 text-left font-medium">Email</th>
+                                <th className="p-2 text-left font-medium">User Type</th>
+                                {isCountryVisible && (
+                                    <th className="p-2 text-left font-medium">Country</th>
                                 )}
-                                <td className="py-2 px-4 border-b">
-                                    {user.firstName} {user.lastName}
-                                </td>
-                                <td className="py-2 px-4 border-b">{user.email}</td>
-                                <td className="py-2 px-4 border-b">{user.accountType}</td>
-                                <td className="py-2 px-4 border-b">{user.countries?.join(', ') || 'N/A'}</td>
-                                <td className="py-2 px-4 border-b">
-                                    {user.denialDate ? new Date(user.denialDate).toLocaleDateString() : 'N/A'}
-                                </td>
+                                <th className="p-2 text-left font-medium">Denial Date</th>
                             </tr>
-                        ))
-                    ) : (
-                        <tr>
-                            <td colSpan={6} className="py-2 px-4 border-b text-center">
-                                No denied users.
-                            </td>
-                        </tr>
-                    )}
-                    </tbody>
-                </table>
-            </InfiniteScroll>
+                            </thead>
+                            <tbody>
+                            {data.length > 0 ? (
+                                [...data]
+                                    .sort((a, b) => {
+                                        const dateA = new Date(a.denialDate || 0).getTime();
+                                        const dateB = new Date(b.denialDate || 0).getTime();
+                                        return dateB - dateA;
+                                    })
+                                    .map((user) => (
+                                        <tr key={user._id} className="border-t">
+                                            {isSelecting && (
+                                                <td className="p-2">
+                                                    <Checkbox
+                                                        checked={selectedUsers.includes(user._id)}
+                                                        onCheckedChange={() => handleCheckboxChange(user._id)}
+                                                    />
+                                                </td>
+                                            )}
+                                            <td className="p-2">
+                                                {user.firstName} {user.lastName}
+                                            </td>
+                                            <td className="p-2">{user.email}</td>
+                                            <td className="p-2">{user.accountType}</td>
+                                            {isCountryVisible && (
+                                                <td className="p-2">
+                                                    {user.countries?.join(', ') || 'N/A'}
+                                                </td>
+                                            )}
+                                            <td className="p-2">
+                                                {user.denialDate ? new Date(user.denialDate).toLocaleDateString() : 'N/A'}
+                                            </td>
+                                        </tr>
+                                    ))
+                            ) : (
+                                <tr>
+                                    <td colSpan={6} className="p-2 text-center">
+                                        No denied users.
+                                    </td>
+                                </tr>
+                            )}
+                            </tbody>
+                        </table>
+                    </InfiniteScroll>
+                </div>
+                <ScrollBar orientation="horizontal" />
             </ScrollArea>
+
             {loading && (
                 <div className="flex justify-center items-center py-4">
                     <Loader2 className="h-8 w-8 animate-spin"/>

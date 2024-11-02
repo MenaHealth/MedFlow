@@ -5,6 +5,7 @@
   import { Countries } from '../data/countries.enum';
   import { Languages } from '../data/languages.enum';
   import { DoctorSpecialties, DoctorSpecialtyList } from '../data/doctorSpecialty.enum';
+  import type { IUser as User } from '@/models/user';
 
   interface IUser extends Document {
     lastLogin: Date;

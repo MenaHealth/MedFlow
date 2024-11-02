@@ -1,10 +1,9 @@
 // components/auth/adminDashboard/sections/DeniedDoctorsAndTriageViewModel.tsx
 
 import { useState } from 'react';
-import { useQuery, useInfiniteQuery } from 'react-query';
+import { useQuery, useInfiniteQuery, useMutation } from 'react-query';
 
 export function useDeniedDoctorsAndTriageViewModel() {
-    const [isCountryVisible, setIsCountryVisible] = useState(false);
     const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
     const [isSelecting, setIsSelecting] = useState(false);
 
@@ -33,14 +32,35 @@ export function useDeniedDoctorsAndTriageViewModel() {
 
     const deniedUsers = data?.pages.flatMap((page) => page.users) || [];
 
+    // Re-approve users mutation
+    const reApproveMutation = useMutation(async (userIds: string[]) => {
+        const token = localStorage.getItem('authToken'); // Replace this with your token retrieval method
+        const res = await fetch('/api/admin/POST/re-approve-users', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ userIds }),
+        });
+        if (!res.ok) throw new Error('Failed to re-approve users');
+        return res.json();
+    });
+
+    const handleReApproveUsers = () => {
+        reApproveMutation.mutate(selectedUsers, {
+            onSuccess: () => {
+                setSelectedUsers([]);
+                // Optionally refetch denied users if necessary
+                nextDeniedUsers();
+            },
+        });
+    };
+
     const handleCheckboxChange = (userId: string) => {
         setSelectedUsers((prev) =>
             prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
         );
-    };
-
-    const toggleCountryVisibility = () => {
-        setIsCountryVisible((prev) => !prev);
     };
 
     const toggleSelecting = () => {
@@ -52,11 +72,10 @@ export function useDeniedDoctorsAndTriageViewModel() {
         loadingDeniedUsers,
         hasMoreDeniedUsers,
         nextDeniedUsers,
-        isCountryVisible,
-        toggleCountryVisibility,
         isSelecting,
         toggleSelecting,
         selectedUsers,
         handleCheckboxChange,
+        handleReApproveUsers, // Expose re-approve function
     };
 }

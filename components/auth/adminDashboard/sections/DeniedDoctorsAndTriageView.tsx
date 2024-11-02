@@ -4,10 +4,11 @@
 
 import React, { useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, CheckSquare, UserRoundPlus } from "lucide-react";
 import InfiniteScroll from '@/components/ui/infiniteScroll';
 import { Table, TableColumn } from "@/components/ui/table";
 import { useDeniedDoctorsAndTriageViewModel } from './DeniedDoctorsAndTriageViewModel';
+import type { IUser as User } from '@/models/user';
 
 export default function DeniedDoctorsAndTriageView() {
     const {
@@ -15,36 +16,55 @@ export default function DeniedDoctorsAndTriageView() {
         loadingDeniedUsers,
         hasMoreDeniedUsers,
         nextDeniedUsers,
-        isCountryVisible,
-        toggleCountryVisibility,
         isSelecting,
         toggleSelecting,
         selectedUsers,
         handleCheckboxChange,
+        handleReApproveUsers, // For bulk re-approve action
     } = useDeniedDoctorsAndTriageViewModel();
 
     useEffect(() => {
         console.log("Denied Users Data:", deniedUsers);
-        console.log("Loading Denied Users:", loadingDeniedUsers);
-    }, [deniedUsers, loadingDeniedUsers]);
+    }, [deniedUsers]);
+
+    const toggleSelectUser = (userId: string) => {
+        handleCheckboxChange(userId);
+    };
 
     const columns: TableColumn<User>[] = [
+        {
+            key: 'select',
+            header: '',
+            render: (_: any, user: User) => (
+                <input
+                    type="checkbox"
+                    checked={selectedUsers.includes(user._id)}
+                    onChange={() => toggleSelectUser(user._id)}
+                />
+            ),
+        },
         { key: 'firstName', header: 'First Name', width: 'w-1/4' },
         { key: 'lastName', header: 'Last Name', width: 'w-1/4' },
         { key: 'email', header: 'Email', width: 'w-1/4' },
         { key: 'accountType', header: 'User Type', width: 'w-1/4' },
         {
-            key: 'countries',
-            header: 'Country',
-            width: 'w-1/4',
-            render: (value: string[]) => (value ? value.join(', ') : 'N/A'),
-            hidden: !isCountryVisible,
-        },
-        {
             key: 'denialDate',
             header: 'Denial Date',
             width: 'w-1/4',
             render: (value: string) => (value ? new Date(value).toLocaleDateString() : 'N/A')
+        },
+        {
+            key: 'actions',
+            header: 'Actions',
+            render: (_: any, user: User) => (
+                <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleReApproveUsers([user._id])}
+                >
+                    <UserRoundPlus className="w-5 h-5" />
+                </Button>
+            ),
         },
     ];
 
@@ -59,12 +79,14 @@ export default function DeniedDoctorsAndTriageView() {
                     {isSelecting ? 'Cancel Selection' : 'Select Users'}
                 </Button>
 
-                <Button
-                    onClick={toggleCountryVisibility}
-                    variant="outline"
-                >
-                    {isCountryVisible ? 'Hide Country' : 'Show Country'}
-                </Button>
+                {selectedUsers.length > 0 && (
+                    <Button
+                        onClick={() => handleReApproveUsers(selectedUsers)}
+                        variant="success"
+                    >
+                        <CheckSquare className="w-5 h-5 mr-2" /> Re-Approve Selected
+                    </Button>
+                )}
             </div>
 
             <InfiniteScroll

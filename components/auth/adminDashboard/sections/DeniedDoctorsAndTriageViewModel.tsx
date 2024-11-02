@@ -1,11 +1,12 @@
 // components/auth/adminDashboard/sections/DeniedDoctorsAndTriageViewModel.tsx
 
 import { useState } from 'react';
-import { useQuery, useInfiniteQuery, useMutation } from 'react-query';
+import { useQueryClient, useInfiniteQuery, useMutation } from 'react-query';
 
 export function useDeniedDoctorsAndTriageViewModel() {
     const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
     const [isSelecting, setIsSelecting] = useState(false);
+    const queryClient = useQueryClient();
 
     // Fetch denied users with pagination
     const {
@@ -33,28 +34,31 @@ export function useDeniedDoctorsAndTriageViewModel() {
     const deniedUsers = data?.pages.flatMap((page) => page.users) || [];
 
     // Re-approve users mutation
-    const reApproveMutation = useMutation(async (userIds: string[]) => {
-        const token = localStorage.getItem('authToken'); // Replace this with your token retrieval method
-        const res = await fetch('/api/admin/POST/re-approve-users', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`,
+    const reApproveMutation = useMutation(
+        async (userIds: string[]) => {
+            const token = localStorage.getItem('authToken'); // Replace this with your token retrieval method
+            const res = await fetch('/api/admin/POST/re-approve-users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ userIds }),
+            });
+            if (!res.ok) throw new Error('Failed to re-approve users');
+            return res.json();
+        },
+        {
+            onSuccess: () => {
+                // Clear the selection and refresh denied users data
+                setSelectedUsers([]);
+                queryClient.invalidateQueries('deniedUsers'); // Re-fetch denied users
             },
-            body: JSON.stringify({ userIds }),
-        });
-        if (!res.ok) throw new Error('Failed to re-approve users');
-        return res.json();
-    });
+        }
+    );
 
     const handleReApproveUsers = () => {
-        reApproveMutation.mutate(selectedUsers, {
-            onSuccess: () => {
-                setSelectedUsers([]);
-                // Optionally refetch denied users if necessary
-                nextDeniedUsers();
-            },
-        });
+        reApproveMutation.mutate(selectedUsers);
     };
 
     const handleCheckboxChange = (userId: string) => {

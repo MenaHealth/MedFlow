@@ -1,38 +1,32 @@
-// components/auth/adminDashboard/sections/DeniedDoctorsAndTriage.tsx
+// components/auth/adminDashboard/sections/DeniedDoctorsAndTriageView.tsx
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useSession } from "next-auth/react";
-import useToast from '@/components/hooks/useToast';
-import InfiniteScroll from '@/components/ui/infiniteScroll';
-import { Loader2 } from "lucide-react"
+import React, { useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Loader2 } from "lucide-react";
+import InfiniteScroll from '@/components/ui/infiniteScroll';
 import { Table, TableColumn } from "@/components/ui/table";
-import { useAdminDashboard } from './../AdminDashboardContext';
-import { User } from './../AdminDashboardContext';
+import { useDeniedDoctorsAndTriageViewModel } from './DeniedDoctorsAndTriageViewModel';
 
-export default function DeniedDoctorsAndTriage() {
-    const [isCountryVisible, setIsCountryVisible] = useState(false);
-    const { data: session } = useSession();
-    const { setToast } = useToast();
-    const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-    const [isSelecting, setIsSelecting] = useState(false);
-
+export default function DeniedDoctorsAndTriageView() {
     const {
         deniedUsers,
         loadingDeniedUsers,
         hasMoreDeniedUsers,
         nextDeniedUsers,
-        isDeniedUsersOpen
-    } = useAdminDashboard();
+        isCountryVisible,
+        toggleCountryVisibility,
+        isSelecting,
+        toggleSelecting,
+        selectedUsers,
+        handleCheckboxChange,
+    } = useDeniedDoctorsAndTriageViewModel();
 
     useEffect(() => {
-        if (isDeniedUsersOpen && deniedUsers.length === 0 && !loadingDeniedUsers) {
-            nextDeniedUsers();
-        }
-    }, [isDeniedUsersOpen, deniedUsers.length, loadingDeniedUsers, nextDeniedUsers]);
+        console.log("Denied Users Data:", deniedUsers);
+        console.log("Loading Denied Users:", loadingDeniedUsers);
+    }, [deniedUsers, loadingDeniedUsers]);
 
     const columns: TableColumn<User>[] = [
         { key: 'firstName', header: 'First Name', width: 'w-1/4' },
@@ -54,17 +48,11 @@ export default function DeniedDoctorsAndTriage() {
         },
     ];
 
-    const handleCheckboxChange = (userId: string) => {
-        setSelectedUsers((prev) =>
-            prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
-        );
-    };
-
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="flex flex-wrap justify-between items-center mb-4 gap-2">
                 <Button
-                    onClick={() => setIsSelecting(!isSelecting)}
+                    onClick={toggleSelecting}
                     variant="outline"
                     disabled={deniedUsers.length === 0}
                 >
@@ -72,7 +60,7 @@ export default function DeniedDoctorsAndTriage() {
                 </Button>
 
                 <Button
-                    onClick={() => setIsCountryVisible(!isCountryVisible)}
+                    onClick={toggleCountryVisibility}
                     variant="outline"
                 >
                     {isCountryVisible ? 'Hide Country' : 'Show Country'}
@@ -89,7 +77,7 @@ export default function DeniedDoctorsAndTriage() {
                     data={deniedUsers}
                     columns={columns}
                     onRowClick={(item) => console.log('Clicked user:', item)}
-                    backgroundColor="bg-white"
+                    backgroundColor="gray-100"
                     textColor="text-black"
                     borderColor="border-gray-200"
                     headerBackgroundColor="bg-gray-100"

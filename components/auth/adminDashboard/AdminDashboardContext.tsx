@@ -15,10 +15,7 @@ export interface User {
 }
 
 export interface AdminDashboardContextType {
-    isNewSignupsOpen: boolean;
-    isExistingUsersOpen: boolean;
-    isDeniedUsersOpen: boolean;
-    isAddAdminUsersOpen: boolean;
+    openSection: string | null;
 
     loadingNewSignups: boolean;
     loadingExistingUsers: boolean;
@@ -50,6 +47,8 @@ export const useAdminDashboard = () => {
     }
     return context;
 };
+
+// components/auth/adminDashboard/AdminDashboardContext.tsx
 
 export const AdminDashboardProvider = ({ children }: { children: ReactNode }) => {
     const viewModel = useAdminDashboardViewModel();

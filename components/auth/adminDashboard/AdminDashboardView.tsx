@@ -6,7 +6,7 @@ import { AdminDashboardProvider } from './AdminDashboardContext';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { useAdminDashboard } from './AdminDashboardContext';
 import NewSignups from './sections/NewSignups';
-import DeniedDoctorsAndTriage from './sections/DeniedDoctorsAndTriage';
+import DeniedDoctorsAndTriage from './sections/DeniedDoctorsAndTriageView';
 import ExistingDoctorsAndTriage from './sections/ExistingDoctorsAndTriage';
 import MedOrdersView from './sections/MedOrdersView';
 import AdminManagement from "@/components/auth/adminDashboard/sections/AdminManagementView";
@@ -24,10 +24,7 @@ const sections = [
 
 const AdminDashboardContent = () => {
     const {
-        isNewSignupsOpen,
-        isExistingUsersOpen,
-        isDeniedUsersOpen,
-        isAddAdminUsersOpen,
+        openSection,
         loadingNewSignups,
         loadingExistingUsers,
         loadingDeniedUsers,
@@ -40,8 +37,6 @@ const AdminDashboardContent = () => {
         loadingMedOrders,
         refetchMedOrders
     } = useMedOrdersViewModel();
-
-    const [isMedOrderOpen, setIsMedOrderOpen] = React.useState(false);
 
     const sectionRefs = React.useRef<React.RefObject<HTMLDivElement>[]>(sections.map(() => React.createRef<HTMLDivElement>()));
 
@@ -74,11 +69,7 @@ const AdminDashboardContent = () => {
     }, []);
 
     const handleToggleSection = (sectionId: typeof sections[number]['id']) => {
-        if (sectionId === 'medOrder') {
-            setIsMedOrderOpen(prev => !prev);
-        } else {
-            toggleSection(sectionId);
-        }
+        toggleSection(sectionId);
     };
 
     const handleRefreshAll = () => {
@@ -87,13 +78,7 @@ const AdminDashboardContent = () => {
     };
 
     const renderSection = (section: typeof sections[number], index: number) => {
-        const isOpen =
-            section.id === 'newSignups' ? isNewSignupsOpen :
-                section.id === 'existing' ? isExistingUsersOpen :
-                    section.id === 'denied' ? isDeniedUsersOpen :
-                        section.id === 'addAdmin' ? isAddAdminUsersOpen :
-                            section.id === 'medOrder' ? isMedOrderOpen :
-                                false;
+        const isOpen = openSection === section.id;
 
         const loading =
             section.id === 'newSignups' ? loadingNewSignups :

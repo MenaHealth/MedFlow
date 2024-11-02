@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDown, Minus, Search, UserRoundCheck, UserMinus } from 'lucide-react';
+import { ChevronDown, Search, UserRoundCheck, UserMinus } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table } from "@/components/ui/table";
@@ -31,11 +31,10 @@ export default function AdminManagementView() {
 
     const [selectedAdmins, setSelectedAdmins] = useState<Set<string>>(new Set());
 
-    const firstAdminId = adminsData[0]?._id; // Get the first admin's ID
+    const firstAdminId = adminsData[0]?._id;
 
-    // Toggle selection of an admin for bulk delete, excluding the first admin
     const toggleSelectAdmin = (adminId: string) => {
-        if (adminId === firstAdminId) return; // Prevent selecting the first admin
+        if (adminId === firstAdminId) return;
         setSelectedAdmins((prev) => {
             const newSelected = new Set(prev);
             newSelected.has(adminId) ? newSelected.delete(adminId) : newSelected.add(adminId);
@@ -43,12 +42,17 @@ export default function AdminManagementView() {
         });
     };
 
-    // Table columns with checkbox and delete icon, disabling for the first admin
+// Transform adminsData to ensure each entry has adminStartDate
+    const transformedAdminsData = (adminsData as Admin[]).map((admin) => ({
+        ...admin,
+        adminStartDate: admin.adminStartDate || new Date().toISOString(), // Use current date as a default
+    }));
+
     const columns = [
         {
             key: 'select',
             header: '',
-            render: (_, admin: Admin) => (
+            render: (_: any, admin: Admin) => (
                 <input
                     type="checkbox"
                     checked={selectedAdmins.has(admin._id)}
@@ -63,17 +67,17 @@ export default function AdminManagementView() {
         {
             key: 'adminStartDate',
             header: 'Start Date',
-            render: (value) => new Date(value).toLocaleDateString(),
+            render: (value: string) => new Date(value).toLocaleDateString(),
         },
         {
             key: 'actions',
             header: 'Actions',
-            render: (_, admin: Admin) => (
+            render: (_: any, admin: Admin) => (
                 <Button
-                    variant="ghost"
+                    variant="default"
                     size="icon"
                     onClick={() => handleRemoveAdmin(admin._id)}
-                    disabled={admin._id === firstAdminId} // Disable delete button for first admin
+                    disabled={admin._id === firstAdminId}
                 >
                     <UserMinus className="w-5 h-5" />
                 </Button>
@@ -98,7 +102,6 @@ export default function AdminManagementView() {
                     </Button>
                 </div>
 
-                {/* Dropdown for selecting a new admin */}
                 {Array.isArray(selectedUser) && (
                     <select
                         onChange={(e) => setSelectedUser(e.target.value)}
@@ -119,7 +122,15 @@ export default function AdminManagementView() {
             </div>
 
             {/* Table for displaying current admins */}
-            <Table data={adminsData} columns={columns} />
+            <Table
+                data={transformedAdminsData}
+                columns={columns}
+                backgroundColor="darkBlue"
+                textColor="orange-50"
+                stickyHeader={true}
+                headerBackgroundColor="orange-50"
+                headerTextColor="darkBlue"
+            />
 
             {/* Multi-Select Delete Button */}
             {selectedAdmins.size > 0 && (

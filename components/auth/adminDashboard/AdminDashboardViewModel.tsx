@@ -1,3 +1,5 @@
+// components/auth/adminDashboard/AdminDashboardViewModel.ts
+
 import { useQuery, useQueryClient } from 'react-query';
 import { useState, useCallback } from 'react';
 
@@ -19,11 +21,27 @@ export function useAdminDashboardViewModel() {
     const queryClient = useQueryClient();
     const [isRefreshing, setIsRefreshing] = useState(false);
 
+    const [openSection, setOpenSection] = useState<string | null>(null);
+
     // Section visibility states
     const [isnewSignupsOpen, setIsnewSignupsOpen] = useState(false);
     const [isExistingUsersOpen, setIsExistingUsersOpen] = useState(false);
     const [isAddAdminUsersOpen, setIsAddAdminUsersOpen] = useState(false);
     const [isMedOrderOpen, setIsMedOrderOpen] = useState(false); // Added isMedOrderOpen state
+
+    // Country visibility and selection for other sections
+    const [isCountryVisible, setIsCountryVisible] = useState(false);
+    const [isSelecting, setIsSelecting] = useState(false);
+    const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+
+    const toggleCountryVisibility = () => setIsCountryVisible((prev) => !prev);
+    const toggleSelecting = () => setIsSelecting((prev) => !prev);
+
+    const handleCheckboxChange = (userId: string) => {
+        setSelectedUsers((prev) =>
+            prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
+        );
+    };
 
     // Generic fetch function
     const fetchData = async (endpoint: string, page: number, limit: number) => {
@@ -86,42 +104,6 @@ export function useAdminDashboardViewModel() {
         setExistingUsersPage(prev => prev + 1);
     }, [loadingExistingUsers, hasMoreExistingUsers]);
 
-    // Denied Users
-    const [deniedUsers, setDeniedUsers] = useState<User[]>([]);
-    const [deniedUsersPage, setDeniedUsersPage] = useState(1);
-    const [hasMoreDeniedUsers, setHasMoreDeniedUsers] = useState(true);
-    const [loadingDeniedUsers, setLoadingDeniedUsers] = useState(false);
-    const [isDeniedUsersOpen, setIsDeniedUsersOpen] = useState(false);
-
-    const fetchDeniedUsers = async (page: number) => {
-        const response = await fetch(`/api/admin/GET/denied-users?page=${page}&limit=20`);
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    };
-
-    const deniedUsersQuery = useQuery(
-        ['deniedUsers', deniedUsersPage],
-        () => fetchDeniedUsers(deniedUsersPage),
-        {
-            enabled: isDeniedUsersOpen,
-            keepPreviousData: true,
-            onSuccess: (data) => {
-                setDeniedUsers((prev) => [...prev, ...data.users]);
-                setHasMoreDeniedUsers(data.users.length === 20);
-                setLoadingDeniedUsers(false);
-            },
-            onError: () => setLoadingDeniedUsers(false),
-        }
-    );
-
-    const nextDeniedUsers = useCallback(() => {
-        if (loadingDeniedUsers || !hasMoreDeniedUsers) return;
-        setLoadingDeniedUsers(true);
-        setDeniedUsersPage((prev) => prev + 1);
-    }, [loadingDeniedUsers, hasMoreDeniedUsers]);
-
     // Admin Users
     const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
     const [adminUsersPage, setAdminUsersPage] = useState(1);
@@ -160,39 +142,19 @@ export function useAdminDashboardViewModel() {
         setNewSignupsPage(1);
         setExistingUsers([]);
         setExistingUsersPage(1);
-        setDeniedUsers([]);
-        setDeniedUsersPage(1);
         setAdminUsers([]);
         setAdminUsersPage(1);
-        queryClient.invalidateQueries(['newSignups', 'existingUsers', 'deniedUsers', 'admins']);
+        queryClient.invalidateQueries(['newSignups', 'existingUsers', 'admins']);
         setIsRefreshing(false);
     }, [queryClient]);
 
-    const toggleSection = useCallback((section: 'newSignups' | 'existing' | 'denied' | 'addAdmin' | 'medOrder') => { // Updated toggleSection function
-        if (section === 'newSignups') setIsnewSignupsOpen((prev) => !prev);
-        else if (section === 'existing') setIsExistingUsersOpen((prev) => !prev);
-        else if (section === 'denied') {
-            setIsDeniedUsersOpen((prev) => {
-                if (!prev) {
-                    setDeniedUsers([]);
-                    setDeniedUsersPage(1);
-                    setHasMoreDeniedUsers(true);
-                    queryClient.invalidateQueries(['deniedUsers']);
-                }
-                return !prev;
-            });
-        }
-        else if (section === 'addAdmin') setIsAddAdminUsersOpen((prev) => !prev);
-        else if (section === 'medOrder') setIsMedOrderOpen((prev) => !prev); // Added medOrder case
-    }, [queryClient]);
+    const toggleSection = useCallback((section: 'newSignups' | 'existing' | 'denied' | 'addAdmin' | 'medOrder') => {
+        setOpenSection(prev => prev === section ? null : section);
+    }, []);
 
     return {
         // Section visibility
-        isNewSignupsOpen: isnewSignupsOpen,
-        isExistingUsersOpen,
-        isDeniedUsersOpen,
-        isAddAdminUsersOpen,
-        isMedOrderOpen, // Added isMedOrderOpen to returned object
+        openSection,
 
         // New Signups
         newSignups,
@@ -206,17 +168,19 @@ export function useAdminDashboardViewModel() {
         hasMoreExistingUsers,
         nextExistingUsers,
 
-        // Denied Users
-        deniedUsers,
-        loadingDeniedUsers,
-        hasMoreDeniedUsers,
-        nextDeniedUsers,
-
         // Admin Users
         adminUsers,
         loadingAdminUsers,
         hasMoreAdminUsers,
         nextAdminUsers,
+
+        // Additional features
+        isCountryVisible,
+        toggleCountryVisibility,
+        isSelecting,
+        toggleSelecting,
+        selectedUsers,
+        handleCheckboxChange,
 
         // Common functions
         toggleSection,

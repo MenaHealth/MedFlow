@@ -33,14 +33,14 @@ interface MedOrdersResponse {
 
 export function useMedOrdersViewModel() {
     const fetchMedOrders = async ({ pageParam = 1 }): Promise<MedOrdersResponse> => {
-        console.log(`Fetching Med Orders from page ${pageParam}`);
+        // console.log(`Fetching Med Orders from page ${pageParam}`);
         const res = await fetch(`/api/admin/GET/med-orders?page=${pageParam}&limit=20`);
         if (!res.ok) {
-            console.error('Failed to fetch med orders');
+            // console.error('Failed to fetch med orders');
             throw new Error('Failed to fetch med orders');
         }
         const data = await res.json();
-        console.log('Fetched Med Orders Data:', data);
+        // console.log('Fetched Med Orders Data:', data);
         return data;
     };
 

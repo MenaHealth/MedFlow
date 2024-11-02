@@ -13,6 +13,7 @@ export interface IMedOrder extends Document {
     patientName: string;
     patientPhone: string;
     patientCity: string;
+    patientCountry: string;
     patientId: Types.ObjectId;
     validated: boolean;
     medications: Array<{
@@ -34,6 +35,7 @@ export const medOrderSchema = new Schema<IMedOrder>({
     patientName: { type: String, required: true },
     patientPhone: { type: String, required: true },
     patientCity: { type: String, required: true },
+    patientCountry: { type: String, required: true },
     patientId: { type: Schema.Types.ObjectId, ref: 'Patient', required: true },
     validated: { type: Boolean, default: false },
     medications: [{

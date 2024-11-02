@@ -13,10 +13,16 @@ export async function GET(request: Request) {
     const skip = (page - 1) * limit;
 
     try {
+        console.log(`Fetching med orders for page: ${page}, limit: ${limit}, skip: ${skip}`);
+
         const totalOrders = await MedOrder.countDocuments();
+        console.log(`Total Med Orders: ${totalOrders}`);
+
         const medOrders = await MedOrder.find()
             .skip(skip)
             .limit(limit);
+
+        console.log(`Fetched Med Orders:`, medOrders);
 
         return NextResponse.json({
             orders: medOrders,

@@ -18,10 +18,15 @@ export async function GET(request: Request) {
     const skip = (page - 1) * limit;
 
     try {
-        const totalUsers = await User.countDocuments({ denialDate: { $exists: true } });
+        // Use a filter for authorized false and denialDate exists
+        const filter = { authorized: false, denialDate: { $exists: true } };
+
+        // Get total count of denied users for pagination
+        const totalUsers = await User.countDocuments(filter);
         console.log("Total denied users found:", totalUsers);
 
-        const deniedUsers = await User.find({ authorized: false })
+        // Fetch denied users with specified filter and pagination
+        const deniedUsers = await User.find(filter)
             .select('firstName lastName email accountType countries denialDate')
             .skip(skip)
             .limit(limit);

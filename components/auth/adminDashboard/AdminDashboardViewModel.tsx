@@ -135,8 +135,13 @@ export function useAdminDashboardViewModel() {
             enabled: isAddAdminUsersOpen,
             keepPreviousData: true,
             onSuccess: (data) => {
-                setAdminUsers((prev) => [...prev, ...data.admins]);
-                setHasMoreAdminUsers(data.admins.length === 20);
+                if (data?.admins && Array.isArray(data.admins)) {
+                    setAdminUsers((prev) => [...prev, ...data.admins]);
+                    setHasMoreAdminUsers(data.admins.length === 20);
+                } else {
+                    console.warn("Expected 'admins' to be an array but got:", data.admins);
+                    setHasMoreAdminUsers(false);
+                }
                 setLoadingAdminUsers(false);
             },
             onError: () => setLoadingAdminUsers(false),

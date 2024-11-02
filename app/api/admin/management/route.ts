@@ -75,13 +75,29 @@ export async function POST(request: Request) {
 export async function GET() {
     console.log('GET request received at /api/admin/management');
     try {
+        // Step 1: Connect to the database
         await dbConnect();
         console.log('Database connected successfully');
 
+        // Step 2: Fetch all admins, populating user fields
         const admins = await Admin.find().populate('userId', 'firstName lastName email');
-        console.log('Admins fetched:', admins);
+        console.log('Raw Admin Data:', admins);
 
+        if (!admins || admins.length === 0) {
+            console.warn('No admins found in the database');
+            return NextResponse.json({ message: 'No admins found' }, { status: 404 });
+        }
+
+        // Check each admin document for structure and populated fields
+        admins.forEach((admin, index) => {
+            console.log(`Admin ${index + 1}:`, admin);
+            console.log(`Admin ${index + 1} userId populated fields:`, admin.userId);
+        });
+
+        // Step 3: Return the admins
+        console.log('Returning admins data');
         return NextResponse.json({ admins }, { status: 200 });
+
     } catch (error) {
         console.error('Error in GET request:', error);
         return NextResponse.json({ message: 'Failed to fetch admins' }, { status: 500 });

@@ -22,7 +22,7 @@ export async function GET(request: Request) {
             .skip(skip)
             .limit(limit);
 
-        console.log(`Fetched Med Orders:`, medOrders);
+        // console.log(`Fetched Med Orders:`, medOrders);
 
         return NextResponse.json({
             orders: medOrders,

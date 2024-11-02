@@ -1,5 +1,3 @@
-// app/api/patient/[id]/medications/med-order/route.ts
-
 import { NextResponse } from 'next/server';
 import MedOrder from '../../../../../../models/medOrder';
 import Patient from '../../../../../../models/patient';
@@ -40,6 +38,7 @@ export const POST = async (request: Request, { params }: { params: { id: string 
             patientName,
             patientPhone,
             patientCity,
+            patientCountry,  // Add patientCountry here
             orderDate,
             validated,
             medications
@@ -62,6 +61,7 @@ export const POST = async (request: Request, { params }: { params: { id: string 
             typeof patientName !== 'string' ||
             typeof patientPhone !== 'string' ||
             typeof patientCity !== 'string' ||
+            typeof patientCountry !== 'string' ||  // Ensure patientCountry is validated
             !Array.isArray(medications) ||
             hasInvalidMedications
         ) {
@@ -76,6 +76,7 @@ export const POST = async (request: Request, { params }: { params: { id: string 
             patientName,
             patientPhone,
             patientCity,
+            patientCountry,  // Add patientCountry here
             patientId: new Types.ObjectId(patientId),
             orderDate: orderDate || new Date(),
             validated: validated || false,

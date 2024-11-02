@@ -13,7 +13,7 @@ export interface IMedOrder {
     patientName: string;
     patientId: string;
     patientCity: string;
-    PatientCountry: string;
+    patientCountry: string;
     medications: Medication[];
     orderDate: string;
     prescribingDr: string;

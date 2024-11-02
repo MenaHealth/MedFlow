@@ -27,7 +27,8 @@ export default function MedOrdersView() {
         {
             key: 'orderDate',
             id: 'orderDate',
-            header: 'Date Order Placed',
+            header: 'D&T' +
+                '',
             width: 'w-32',
             render: (value) => new Date(value as Date).toLocaleString('en-US', {
                 hour: '2-digit',
@@ -38,10 +39,19 @@ export default function MedOrdersView() {
             })
         },
         {
+            key: 'patientId',
+            id: 'patientId',
+            header: 'P. ID',
+            width: 'w-40',
+            resizable: true,
+            hidden: !visibleGroups.patient
+        },
+        {
             key: 'patientName',
             id: 'patientName',
-            header: 'Patient Name',
+            header: 'Patient',
             width: 'w-40',
+            resizable: true,
             hidden: !visibleGroups.patient
         },
         {
@@ -49,6 +59,7 @@ export default function MedOrdersView() {
             id: 'patientCity',
             header: 'City',
             width: 'w-32',
+            resizable: true,
             hidden: !visibleGroups.patient
         },
         {
@@ -56,27 +67,39 @@ export default function MedOrdersView() {
             id: 'patientCountry',
             header: 'Country',
             width: 'w-32',
+            resizable: true,
             hidden: !visibleGroups.patient
         },
         {
             key: 'patientPhone',
             id: 'patientPhone',
-            header: 'Patient Phone',
+            header: 'P. Phone',
             width: 'w-40',
+            resizable: true,
             hidden: !visibleGroups.patient
+        },
+        {
+            key: 'drId',
+            id: 'drId',
+            header: 'Dr. ID',
+            width: 'w-40',
+            resizable: true,
+            hidden: !visibleGroups.doctor
         },
         {
             key: 'prescribingDr',
             id: 'prescribingDr',
-            header: 'Dr Name',
+            header: 'Dr',
             width: 'w-40',
+            resizable: true,
             hidden: !visibleGroups.doctor
         },
         {
             key: 'doctorSpecialty',
             id: 'doctorSpecialty',
-            header: 'Dr Specialty',
+            header: 'Specialty',
             width: 'w-32',
+            resizable: true,
             hidden: !visibleGroups.doctor
         },
         {
@@ -84,6 +107,7 @@ export default function MedOrdersView() {
             id: 'medications-diagnosis',
             header: 'Diagnosis',
             width: 'w-40',
+            resizable: true,
             hidden: !visibleGroups.doctor,
             render: (value, item: IMedOrder) => {
                 if (!item.medications?.length) return null;
@@ -104,6 +128,7 @@ export default function MedOrdersView() {
             id: 'medications-name',
             header: 'Medicine Name',
             width: 'w-40',
+            resizable: true,
             hidden: !visibleGroups.medications,
             render: (value, item: IMedOrder) => {
                 if (!item.medications?.length) return null;
@@ -124,6 +149,7 @@ export default function MedOrdersView() {
             id: 'medications-dosage',
             header: 'Dosage',
             width: 'w-32',
+            resizable: true,
             hidden: !visibleGroups.medications,
             render: (value, item: IMedOrder) => {
                 if (!item.medications?.length) return null;
@@ -144,6 +170,7 @@ export default function MedOrdersView() {
             id: 'medications-frequency',
             header: 'Frequency',
             width: 'w-40',
+            resizable: true,
             hidden: !visibleGroups.medications,
             render: (value, item: IMedOrder) => {
                 if (!item.medications?.length) return null;
@@ -164,6 +191,7 @@ export default function MedOrdersView() {
             id: 'medications-quantity',
             header: 'Quantity',
             width: 'w-24',
+            resizable: true,
             hidden: !visibleGroups.medications,
             render: (value, item: IMedOrder) => {
                 if (!item.medications?.length) return null;
@@ -211,7 +239,7 @@ export default function MedOrdersView() {
             {medOrders && medOrders.length > 0 ? (
                 <div className="rounded-lg overflow-hidden border border-orange-900">
                     <Table
-                        data={medOrders}
+                        data={medOrders as unknown as IMedOrder[]}
                         columns={columns}
                         onRowClick={(item) => console.log('Clicked item:', item)}
                         backgroundColor="bg-orange-950"
@@ -229,12 +257,15 @@ export default function MedOrdersView() {
             )}
 
             {hasMoreMedOrders && (
-                <Button
-                    onClick={nextMedOrders}
-                    className="mt-4 bg-orange-500 text-white hover:bg-orange-600"
-                >
-                    Load More
-                </Button>
+                <div className="flex justify-center mt-4">
+                    <Button
+                        onClick={nextMedOrders}
+                        variant="secondary"
+                        className="flex items-center justify-center text-center py-4"
+                    >
+                        <ChevronDown className="h-4 w-4" />
+                    </Button>
+                </div>
             )}
 
             {loadingMedOrders && medOrders && medOrders.length > 0 && (

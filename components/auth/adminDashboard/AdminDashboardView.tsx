@@ -9,7 +9,7 @@ import NewSignups from './sections/NewSignups';
 import DeniedDoctorsAndTriage from './sections/DeniedDoctorsAndTriage';
 import ExistingDoctorsAndTriage from './sections/ExistingDoctorsAndTriage';
 import MedOrdersView from './sections/MedOrdersView';
-import AdminManagement from "@/components/auth/adminDashboard/sections/AdminManagement";
+import AdminManagement from "@/components/auth/adminDashboard/sections/AdminManagementView";
 import { Loader2, RefreshCw, Users, UserCheck, UserX, Pill, ShieldCheck } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useMedOrdersViewModel } from './sections/MedOrderViewModel';

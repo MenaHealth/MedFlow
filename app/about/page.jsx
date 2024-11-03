@@ -26,6 +26,8 @@ export default function AboutPage() {
                         First Virtual Hospital
                     </h1>
                     <p className="mt-3 max-w-md mx-auto text-base text-darkBlue sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
+                        in the MENA Region </p>
+                    <p className="mt-3 max-w-md mx-auto text-base text-darkBlue sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
                         The mission of MedFlow is to provide a modern electronic medical record (EMR) system to hospitals in the Middle East. The user-types of the app are:
                     </p>
                 </div>

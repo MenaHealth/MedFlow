@@ -5,9 +5,9 @@ import dbConnect from './../../../../../utils/database';
 import User from "./../../../../../models/user";
 
 export async function GET(request: Request) {
-    console.log("Starting denied users fetch...");
+    // console.log("Starting denied users fetch...");
     await dbConnect();
-    console.log("Database connection established");
+    // console.log("Database connection established");
 
     const { searchParams } = new URL(request.url);
     let page = parseInt(searchParams.get('page') || '1', 10);
@@ -23,7 +23,7 @@ export async function GET(request: Request) {
 
         // Get total count of denied users for pagination
         const totalUsers = await User.countDocuments(filter);
-        console.log("Total denied users found:", totalUsers);
+        // console.log("Total denied users found:", totalUsers);
 
         // Fetch denied users with specified filter and pagination
         const deniedUsers = await User.find(filter)
@@ -31,7 +31,7 @@ export async function GET(request: Request) {
             .skip(skip)
             .limit(limit);
 
-        console.log("Denied users fetched:", deniedUsers);
+        // console.log("Denied users fetched:", deniedUsers);
 
         return NextResponse.json({
             users: deniedUsers,

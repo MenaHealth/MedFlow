@@ -9,6 +9,7 @@ import InfiniteScroll from '@/components/ui/infiniteScroll';
 import { Table, TableColumn } from "@/components/ui/table";
 import { useDeniedDoctorsAndTriageViewModel } from './DeniedDoctorsAndTriageViewModel';
 import type { IUser as User } from '@/models/user';
+import { useSession } from 'next-auth/react'; // Import useSession from next-auth
 
 export default function DeniedDoctorsAndTriageView() {
     const {
@@ -20,7 +21,7 @@ export default function DeniedDoctorsAndTriageView() {
         toggleSelecting,
         selectedUsers,
         handleCheckboxChange,
-        handleReApproveUsers, // For bulk re-approve action
+        handleReApproveUsers,
     } = useDeniedDoctorsAndTriageViewModel();
 
     useEffect(() => {
@@ -68,27 +69,20 @@ export default function DeniedDoctorsAndTriageView() {
         },
     ];
 
+    // Log the JWT and session data for debugging
+    const { data: session } = useSession(); // Access the session data
+    useEffect(() => {
+        if (session) {
+            console.log("Session Data:", session);
+            console.log("DENIED VIEW !!! JWT Token:", session.user.token); // Assuming the token is in session.user.token
+        } else {
+            console.log("No session data found");
+        }
+    }, [session]);
+
+
     return (
         <div className="container mx-auto px-4 py-8">
-            <div className="flex flex-wrap justify-between items-center mb-4 gap-2">
-                <Button
-                    onClick={toggleSelecting}
-                    variant="outline"
-                    disabled={deniedUsers.length === 0}
-                >
-                    {isSelecting ? 'Cancel Selection' : 'Select Users'}
-                </Button>
-
-                {selectedUsers.length > 0 && (
-                    <Button
-                        onClick={() => handleReApproveUsers(selectedUsers)}
-                        variant="success"
-                    >
-                        <CheckSquare className="w-5 h-5 mr-2" /> Re-Approve Selected
-                    </Button>
-                )}
-            </div>
-
             <InfiniteScroll
                 dataLength={deniedUsers.length}
                 next={nextDeniedUsers}
@@ -121,6 +115,18 @@ export default function DeniedDoctorsAndTriageView() {
 
             {deniedUsers.length === 0 && !loadingDeniedUsers && (
                 <p className="text-center py-4">No Denied Users found.</p>
+            )}
+
+            {/* Centered Re-Approve Button */}
+            {selectedUsers.length > 0 && (
+                <div className="flex justify-center mt-6">
+                    <Button
+                        onClick={() => handleReApproveUsers(selectedUsers)}
+                        variant="submit"
+                    >
+                        <CheckSquare className="w-5 h-5 mr-2" /> Re-Approve Selected
+                    </Button>
+                </div>
             )}
         </div>
     );

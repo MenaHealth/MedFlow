@@ -136,7 +136,7 @@ export default function AdminManagementView() {
             {selectedAdmins.size > 0 && (
                 <div className="flex justify-center mt-4">
                     <Button
-                        variant="destructive"
+                        variant="submit"
                         onClick={() => handleRemoveSelectedAdmins(Array.from(selectedAdmins))}
                         className="flex items-center space-x-2"
                     >

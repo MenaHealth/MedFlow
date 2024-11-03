@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import { useQueryClient, useInfiniteQuery, useMutation } from 'react-query';
+import { useSession } from 'next-auth/react';
 
 export function useDeniedDoctorsAndTriageViewModel() {
+    const { data: session } = useSession(); // Access the session data
     const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
     const [isSelecting, setIsSelecting] = useState(false);
     const queryClient = useQueryClient();
@@ -36,7 +38,12 @@ export function useDeniedDoctorsAndTriageViewModel() {
     // Re-approve users mutation
     const reApproveMutation = useMutation(
         async (userIds: string[]) => {
-            const token = localStorage.getItem('authToken'); // Replace this with your token retrieval method
+            // Use the JWT token from the session
+            const token = session?.user.token;
+            if (!token) {
+                throw new Error('User is not authenticated');
+            }
+
             const res = await fetch('/api/admin/POST/re-approve-users', {
                 method: 'POST',
                 headers: {

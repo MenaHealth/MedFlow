@@ -2,6 +2,7 @@
 
 import { useQuery, useQueryClient } from 'react-query';
 import { useState, useCallback } from 'react';
+import {useSession} from "next-auth/react";
 
 interface User {
     _id: string;
@@ -20,16 +21,14 @@ interface AdminUser extends User {
 export function useAdminDashboardViewModel() {
     const queryClient = useQueryClient();
     const [isRefreshing, setIsRefreshing] = useState(false);
-
     const [openSection, setOpenSection] = useState<string | null>(null);
 
     // Section visibility states
     const [isnewSignupsOpen, setIsnewSignupsOpen] = useState(false);
     const [isExistingUsersOpen, setIsExistingUsersOpen] = useState(false);
     const [isAddAdminUsersOpen, setIsAddAdminUsersOpen] = useState(false);
-    const [isMedOrderOpen, setIsMedOrderOpen] = useState(false); // Added isMedOrderOpen state
+    const [isMedOrderOpen, setIsMedOrderOpen] = useState(false);
 
-    // Country visibility and selection for other sections
     const [isCountryVisible, setIsCountryVisible] = useState(false);
     const [isSelecting, setIsSelecting] = useState(false);
     const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
@@ -43,9 +42,14 @@ export function useAdminDashboardViewModel() {
         );
     };
 
-    // Generic fetch function
+    const { data: session } = useSession();
     const fetchData = async (endpoint: string, page: number, limit: number) => {
-        const res = await fetch(`/api/admin/${endpoint}?page=${page}&limit=${limit}`);
+        const token = session?.user.token; // Get the token from the session
+        const res = await fetch(`/api/admin/${endpoint}?page=${page}&limit=${limit}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,  // Include the JWT token in the headers
+            }
+        });
         if (!res.ok) throw new Error(`Failed to fetch ${endpoint}`);
         return res.json();
     };
@@ -152,36 +156,25 @@ export function useAdminDashboardViewModel() {
     }, []);
 
     return {
-        // Section visibility
         openSection,
-
-        // New Signups
         newSignups,
         loadingNewSignups,
         hasMoreNewSignups,
         nextNewSignups,
-
-        // Existing Users
         existingUsers,
         loadingExistingUsers,
         hasMoreExistingUsers,
         nextExistingUsers,
-
-        // Admin Users
         adminUsers,
         loadingAdminUsers,
         hasMoreAdminUsers,
         nextAdminUsers,
-
-        // Additional features
         isCountryVisible,
         toggleCountryVisibility,
         isSelecting,
         toggleSelecting,
         selectedUsers,
         handleCheckboxChange,
-
-        // Common functions
         toggleSection,
         handleRefresh,
         isRefreshing,

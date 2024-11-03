@@ -1,4 +1,5 @@
 import { useInfiniteQuery } from 'react-query';
+import { useSession } from 'next-auth/react'; // Import useSession to get the token
 
 export interface Medication {
     diagnosis: string;
@@ -22,7 +23,6 @@ export interface IMedOrder {
     patientPhone: string;
     validated: boolean;
     drId: string;
-    // Add any other properties that are part of IMedOrder but not in MedOrder
 }
 
 interface MedOrdersResponse {
@@ -32,15 +32,22 @@ interface MedOrdersResponse {
 }
 
 export function useMedOrdersViewModel() {
+    const { data: session } = useSession(); // Access session data
+    const token = session?.user.token; // Get the token from the session
+
     const fetchMedOrders = async ({ pageParam = 1 }): Promise<MedOrdersResponse> => {
-        // console.log(`Fetching Med Orders from page ${pageParam}`);
-        const res = await fetch(`/api/admin/GET/med-orders?page=${pageParam}&limit=20`);
+        const res = await fetch(`/api/admin/GET/med-orders?page=${pageParam}&limit=20`, {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`, // Add token to headers
+            },
+        });
+
         if (!res.ok) {
-            // console.error('Failed to fetch med orders');
             throw new Error('Failed to fetch med orders');
         }
+
         const data = await res.json();
-        // console.log('Fetched Med Orders Data:', data);
         return data;
     };
 

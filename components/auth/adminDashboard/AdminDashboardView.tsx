@@ -1,9 +1,10 @@
 // components/auth/adminDashboard/AdminDashboardView.tsx
 'use client'
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { AdminDashboardProvider } from './AdminDashboardContext';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { useSession } from 'next-auth/react'; // Import useSession from next-auth
 import { useAdminDashboard } from './AdminDashboardContext';
 import NewSignups from './sections/NewSignups';
 import DeniedDoctorsAndTriage from './sections/DeniedDoctorsAndTriageView';
@@ -37,6 +38,27 @@ const AdminDashboardContent = () => {
         loadingMedOrders,
         refetchMedOrders
     } = useMedOrdersViewModel();
+
+    // Log the JWT and session data for debugging
+    const { data: session } = useSession(); // Access the session data
+    useEffect(() => {
+        if (session) {
+            console.log("Session Data:", session);
+            console.log("DENIED VIEW MODEL!!! JWT Token:", session.user.token); // Assuming the token is in session.user.token
+        } else {
+            console.log("No session data found");
+        }
+    }, [session]);
+
+    useEffect(() => {
+        // Log the JWT and session data for debugging
+        if (session) {
+            console.log("Session Data:", session);
+            console.log("JWT Token:", session.user.token); // Assuming the token is in session.user.token
+        } else {
+            console.log("No session data found");
+        }
+    }, [session]);
 
     const sectionRefs = React.useRef<React.RefObject<HTMLDivElement>[]>(sections.map(() => React.createRef<HTMLDivElement>()));
 

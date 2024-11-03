@@ -1,5 +1,14 @@
 // models/adminDashboard.ts
-import mongoose from 'mongoose';
+import mongoose, {model, Model, models} from 'mongoose';
+import {IMedOrder, medOrderSchema} from "@/models/medOrder";
+
+export interface IAdmin extends Document {
+    userId: mongoose.Types.ObjectId;
+    firstName: string;
+    lastName: string;
+    email: string;
+    adminStartDate: Date;
+}
 
 const AdminsSchema = new mongoose.Schema({
     userId: {
@@ -25,6 +34,6 @@ const AdminsSchema = new mongoose.Schema({
     },
 });
 
-const Admin = mongoose.models.Admin || mongoose.model('Admin', AdminsSchema);
+const Admin: Model<IAdmin> = models.Admin || model<IAdmin>('Admin', AdminsSchema);
 
 export default Admin;

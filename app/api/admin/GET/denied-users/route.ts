@@ -1,23 +1,37 @@
-// app/api/adminDashboard/denied-users/route.ts
+// app/api/admin/GET/denied-users/route.ts
 
 import { NextResponse } from 'next/server';
 import dbConnect from './../../../../../utils/database';
 import User from "./../../../../../models/user";
 
 export async function GET(request: Request) {
+    // console.log("Starting denied users fetch...");
     await dbConnect();
+    // console.log("Database connection established");
 
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1', 10);
+    let page = parseInt(searchParams.get('page') || '1', 10);
     const limit = parseInt(searchParams.get('limit') || '20', 10);
+
+    // Ensure page is at least 1 to avoid negative skip values
+    page = Math.max(1, page);
     const skip = (page - 1) * limit;
 
     try {
-        const totalUsers = await User.countDocuments({ denialDate: { $exists: true } });
-        const deniedUsers = await User.find({ authorized: false })
+        // Use a filter for authorized false and denialDate exists
+        const filter = { authorized: false, denialDate: { $exists: true } };
+
+        // Get total count of denied users for pagination
+        const totalUsers = await User.countDocuments(filter);
+        // console.log("Total denied users found:", totalUsers);
+
+        // Fetch denied users with specified filter and pagination
+        const deniedUsers = await User.find(filter)
             .select('firstName lastName email accountType countries denialDate')
             .skip(skip)
             .limit(limit);
+
+        // console.log("Denied users fetched:", deniedUsers);
 
         return NextResponse.json({
             users: deniedUsers,

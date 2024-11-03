@@ -1,6 +1,8 @@
-// components/auth/adminDashboard/AdminDashboardViewModel.tsx
+// components/auth/adminDashboard/AdminDashboardViewModel.ts
 
-import { useState, useCallback, useRef } from 'react';
+import { useQuery, useQueryClient } from 'react-query';
+import { useState, useCallback } from 'react';
+import {useSession} from "next-auth/react";
 
 interface User {
     _id: string;
@@ -12,188 +14,169 @@ interface User {
     denialDate?: string;
 }
 
+interface AdminUser extends User {
+    // Add any additional fields specific to admin users
+}
+
 export function useAdminDashboardViewModel() {
-    const [isPendingApprovalsOpen, setIsPendingApprovalsOpen] = useState(false);
-    const [isExistingUsersOpen, setIsExistingUsersOpen] = useState(false);
-    const [isDeniedUsersOpen, setIsDeniedUsersOpen] = useState(false);
-    const [isAddAdminUsersOpen, setIsAddAdminUsersOpen] = useState(false);
-
-    const [loadingPendingApprovals, setLoadingPendingApprovals] = useState(false);
-    const [loadingExistingUsers, setLoadingExistingUsers] = useState(false);
-    const [loadingDeniedUsers, setLoadingDeniedUsers] = useState(false);
-    const [loadingAdmins, setLoadingAdmins] = useState(false);
-
-    const [pendingApprovalsData, setPendingApprovalsData] = useState<User[]>([]);
-    const [existingUsersData, setExistingUsersData] = useState<User[]>([]);
-    const [deniedUsersData, setDeniedUsersData] = useState<User[]>([]);
-    const [adminsData, setAdminsData] = useState<User[]>([]);
-
-
-    const [isMedOrderOpen, setIsMedOrderOpen] = useState(false);
-    const [loadingMedOrders, setLoadingMedOrders] = useState(false);
-    const [medOrdersData, setMedOrdersData] = useState([]);
-
-    const [totalPages, setTotalPages] = useState(1);
-    const [currentPage, setCurrentPage] = useState(1);
-
+    const queryClient = useQueryClient();
     const [isRefreshing, setIsRefreshing] = useState(false);
+    const [openSection, setOpenSection] = useState<string | null>(null);
 
-    const fetchedSections = useRef<{ pending: boolean, existing: boolean, denied: boolean, admins: boolean }>({
-        pending: false,
-        existing: false,
-        denied: false,
-        admins: false,
-    });
+    // Section visibility states
+    const [isnewSignupsOpen, setIsnewSignupsOpen] = useState(false);
+    const [isExistingUsersOpen, setIsExistingUsersOpen] = useState(false);
+    const [isAddAdminUsersOpen, setIsAddAdminUsersOpen] = useState(false);
+    const [isMedOrderOpen, setIsMedOrderOpen] = useState(false);
 
-    const fetchPendingApprovals = useCallback(async () => {
-        try {
-            setLoadingPendingApprovals(true);
-            const res = await fetch(`/api/admin/GET/pending-users?page=${currentPage}&limit=20`);
-            if (!res.ok) throw new Error('Failed to fetch pending approvals');
-            const data = await res.json();
-            setPendingApprovalsData(data.users || []);
-            setTotalPages(data.totalPages || 1);
-        } catch (error) {
-            console.error('Error fetching pending users:', error);
-        } finally {
-            setLoadingPendingApprovals(false);
+    const [isCountryVisible, setIsCountryVisible] = useState(false);
+    const [isSelecting, setIsSelecting] = useState(false);
+    const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+
+    const toggleCountryVisibility = () => setIsCountryVisible((prev) => !prev);
+    const toggleSelecting = () => setIsSelecting((prev) => !prev);
+
+    const handleCheckboxChange = (userId: string) => {
+        setSelectedUsers((prev) =>
+            prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
+        );
+    };
+
+    const { data: session } = useSession();
+    const fetchData = async (endpoint: string, page: number, limit: number) => {
+        const token = session?.user.token; // Get the token from the session
+        const res = await fetch(`/api/admin/${endpoint}?page=${page}&limit=${limit}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,  // Include the JWT token in the headers
+            }
+        });
+        if (!res.ok) throw new Error(`Failed to fetch ${endpoint}`);
+        return res.json();
+    };
+
+    // New Signups
+    const [newSignups, setNewSignups] = useState<User[]>([]);
+    const [newSignupsPage, setNewSignupsPage] = useState(1);
+    const [hasMoreNewSignups, setHasMoreNewSignups] = useState(true);
+    const [loadingNewSignups, setLoadingNewSignups] = useState(false);
+
+    const newSignupsQuery = useQuery(
+        ['newSignups', newSignupsPage],
+        () => fetchData('GET/new-users', newSignupsPage, 20),
+        {
+            enabled: isnewSignupsOpen,
+            keepPreviousData: true,
+            onSuccess: (data) => {
+                setNewSignups((prev) => [...prev, ...data.users]);
+                setHasMoreNewSignups(data.users.length === 20);
+                setLoadingNewSignups(false);
+            },
+            onError: () => setLoadingNewSignups(false),
         }
-    }, [currentPage]);
+    );
 
-    const fetchExistingUsers = useCallback(async () => {
-        try {
-            setLoadingExistingUsers(true);
-            const res = await fetch(`/api/admin/GET/existing-users?page=${currentPage}&limit=20`);
-            if (!res.ok) throw new Error('Failed to fetch existing users');
-            const data = await res.json();
-            setExistingUsersData(data.users || []);
-            setTotalPages(data.totalPages || 1);
-        } catch (error) {
-            console.error('Error fetching existing users:', error);
-        } finally {
-            setLoadingExistingUsers(false);
-        }
-    }, [currentPage]);
+    const nextNewSignups = useCallback(() => {
+        if (loadingNewSignups || !hasMoreNewSignups) return;
+        setLoadingNewSignups(true);
+        setNewSignupsPage(prev => prev + 1);
+    }, [loadingNewSignups, hasMoreNewSignups]);
 
-    const fetchDeniedUsers = useCallback(async () => {
-        try {
-            setLoadingDeniedUsers(true);
-            const res = await fetch('/api/admin/GET/denied-users');
-            if (!res.ok) throw new Error('Failed to fetch denied users');
-            const data = await res.json();
-            setDeniedUsersData(data.users || []);
-        } catch (error) {
-            console.error('Error fetching denied users:', error);
-        } finally {
-            setLoadingDeniedUsers(false);
+    // Existing Users
+    const [existingUsers, setExistingUsers] = useState<User[]>([]);
+    const [existingUsersPage, setExistingUsersPage] = useState(1);
+    const [hasMoreExistingUsers, setHasMoreExistingUsers] = useState(true);
+    const [loadingExistingUsers, setLoadingExistingUsers] = useState(false);
+
+    const existingUsersQuery = useQuery(
+        ['existingUsers', existingUsersPage],
+        () => fetchData('GET/existing-users', existingUsersPage, 20),
+        {
+            enabled: isExistingUsersOpen,
+            keepPreviousData: true,
+            onSuccess: (data) => {
+                setExistingUsers((prev) => [...prev, ...data.users]);
+                setHasMoreExistingUsers(data.users.length === 20);
+                setLoadingExistingUsers(false);
+            },
+            onError: () => setLoadingExistingUsers(false),
         }
+    );
+
+    const nextExistingUsers = useCallback(() => {
+        if (loadingExistingUsers || !hasMoreExistingUsers) return;
+        setLoadingExistingUsers(true);
+        setExistingUsersPage(prev => prev + 1);
+    }, [loadingExistingUsers, hasMoreExistingUsers]);
+
+    // Admin Users
+    const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
+    const [adminUsersPage, setAdminUsersPage] = useState(1);
+    const [hasMoreAdminUsers, setHasMoreAdminUsers] = useState(true);
+    const [loadingAdminUsers, setLoadingAdminUsers] = useState(false);
+
+    const adminUsersQuery = useQuery(
+        ['admins', adminUsersPage],
+        () => fetchData('management', adminUsersPage, 20),
+        {
+            enabled: isAddAdminUsersOpen,
+            keepPreviousData: true,
+            onSuccess: (data) => {
+                if (data?.admins && Array.isArray(data.admins)) {
+                    setAdminUsers((prev) => [...prev, ...data.admins]);
+                    setHasMoreAdminUsers(data.admins.length === 20);
+                } else {
+                    setHasMoreAdminUsers(false);
+                }
+                setLoadingAdminUsers(false);
+            },
+            onError: () => setLoadingAdminUsers(false),
+        }
+    );
+
+    const nextAdminUsers = useCallback(() => {
+        if (loadingAdminUsers || !hasMoreAdminUsers) return;
+        setLoadingAdminUsers(true);
+        setAdminUsersPage(prev => prev + 1);
+    }, [loadingAdminUsers, hasMoreAdminUsers]);
+
+    const handleRefresh = useCallback(() => {
+        setIsRefreshing(true);
+        setNewSignups([]);
+        setNewSignupsPage(1);
+        setExistingUsers([]);
+        setExistingUsersPage(1);
+        setAdminUsers([]);
+        setAdminUsersPage(1);
+        queryClient.invalidateQueries(['newSignups', 'existingUsers', 'admins']);
+        setIsRefreshing(false);
+    }, [queryClient]);
+
+    const toggleSection = useCallback((section: 'newSignups' | 'existing' | 'denied' | 'addAdmin' | 'medOrder') => {
+        setOpenSection(prev => prev === section ? null : section);
     }, []);
 
-    const fetchAdmins = useCallback(async () => {
-        try {
-            setLoadingAdmins(true);
-            const res = await fetch(`/api/admin/management?page=${currentPage}&limit=20`);
-            if (!res.ok) throw new Error('Failed to fetch admins');
-            const data = await res.json();
-            setAdminsData(data.admins || []);
-            setTotalPages(data.totalPages || 1);
-        } catch (error) {
-            console.error('Error fetching admins:', error);
-        } finally {
-            setLoadingAdmins(false);
-        }
-    }, [currentPage]);
-
-    const fetchMedOrders = useCallback(async () => {
-        try {
-            setLoadingMedOrders(true);
-            const res = await fetch(`/api/admin/GET/med-orders?page=${currentPage}&limit=20`);
-            if (!res.ok) throw new Error('Failed to fetch med orders');
-            const data = await res.json();
-            setMedOrdersData(data.orders || []);
-            setTotalPages(data.totalPages || 1);
-        } catch (error) {
-            console.error('Error fetching med orders:', error);
-        } finally {
-            setLoadingMedOrders(false);
-        }
-    }, [currentPage]);
-
-    const handleRefresh = useCallback(async () => {
-        setIsRefreshing(true);
-        await fetchPendingApprovals();
-        await fetchExistingUsers();
-        await fetchDeniedUsers();
-        await fetchAdmins();
-        setIsRefreshing(false);
-    }, [fetchPendingApprovals, fetchExistingUsers, fetchDeniedUsers, fetchAdmins]);
-
-
-    const toggleSection = useCallback(
-        async (section: 'pending' | 'existing' | 'denied' | 'addAdmin' | 'medOrder') => {
-            let shouldFetch = false;
-
-            if (section === 'pending') {
-                setIsPendingApprovalsOpen((prev) => {
-                    shouldFetch = !prev;
-                    fetchedSections.current.pending = shouldFetch;
-                    return !prev;
-                });
-                if (shouldFetch) await fetchPendingApprovals();
-            } else if (section === 'existing') {
-                setIsExistingUsersOpen((prev) => {
-                    shouldFetch = !prev;
-                    fetchedSections.current.existing = shouldFetch;
-                    return !prev;
-                });
-                if (shouldFetch) await fetchExistingUsers();
-            } else if (section === 'denied') {
-                setIsDeniedUsersOpen((prev) => {
-                    shouldFetch = !prev;
-                    fetchedSections.current.denied = shouldFetch;
-                    return !prev;
-                });
-                if (shouldFetch) await fetchDeniedUsers();
-            } else if (section === 'addAdmin') {
-                setIsAddAdminUsersOpen((prev) => {
-                    shouldFetch = !prev;
-                    fetchedSections.current.admins = shouldFetch;
-                    return !prev;
-                });
-                if (shouldFetch) await fetchAdmins();
-            } else if (section === 'medOrder') {
-                setIsMedOrderOpen((prev) => {
-                    shouldFetch = !prev;
-                    fetchedSections.current.admins = shouldFetch;
-                    return !prev;
-                });
-                if (shouldFetch) await fetchMedOrders();
-            }
-        },
-        [fetchAdmins, fetchPendingApprovals, fetchExistingUsers, fetchDeniedUsers, fetchMedOrders]
-    );
     return {
-        isPendingApprovalsOpen,
-        isExistingUsersOpen,
-        isDeniedUsersOpen,
-        isAddAdminUsersOpen,
-        loadingPendingApprovals,
+        openSection,
+        newSignups,
+        loadingNewSignups,
+        hasMoreNewSignups,
+        nextNewSignups,
+        existingUsers,
         loadingExistingUsers,
-        loadingDeniedUsers,
-        loadingAdmins,
-        pendingApprovalsData,
-        existingUsersData,
-        deniedUsersData,
-        setDeniedUsersData,
-        adminsData,
-        isMedOrderOpen,
-        loadingMedOrders,
-        medOrdersData,
+        hasMoreExistingUsers,
+        nextExistingUsers,
+        adminUsers,
+        loadingAdminUsers,
+        hasMoreAdminUsers,
+        nextAdminUsers,
+        isCountryVisible,
+        toggleCountryVisibility,
+        isSelecting,
+        toggleSelecting,
+        selectedUsers,
+        handleCheckboxChange,
         toggleSection,
-        totalPages,
-        currentPage,
-        setCurrentPage,
         handleRefresh,
-        isRefreshing
+        isRefreshing,
     };
 }

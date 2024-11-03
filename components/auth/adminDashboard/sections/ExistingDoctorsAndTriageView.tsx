@@ -1,82 +1,29 @@
-// components/auth/adminDashboard/sections/ExistingDoctorsAndTriage.tsx
+// components/auth/adminDashboard/sections/ExistingDoctorsAndTriageView.tsx
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Minus, Loader2 } from 'lucide-react';
-import { useSession } from 'next-auth/react';
-import useToast from '@/components/hooks/useToast';
-import { useAdminDashboard } from '../AdminDashboardContext';
 import InfiniteScroll from '@/components/ui/infiniteScroll';
 import { ScrollArea, ScrollBar } from "@/components/ui/ScrollArea";
 import { Button } from "@/components/ui/button";
+import { useExistingDoctorsAndTriageViewModel, User } from './ExistingDoctorsAndTriageViewModel';
 
-interface User {
-    _id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    accountType: 'Doctor' | 'Triage';
-    countries?: string[];
-    approvalDate?: string;
-}
-
-export default function ExistingDoctorsAndTriage() {
-    const { data: session } = useSession();
-    const { setToast } = useToast();
+export default function ExistingDoctorsAndTriageView() {
     const {
         existingUsers,
         loadingExistingUsers,
         hasMoreExistingUsers,
         nextExistingUsers,
-    } = useAdminDashboard();
-
-    const [isCountryVisible, setIsCountryVisible] = useState(true);
-
-    const handleMoveToDenied = async (userId: string) => {
-        if (!session?.user?.isAdmin) {
-            setToast?.({
-                title: 'Error',
-                description: 'You do not have permission to perform this action.',
-                variant: 'destructive',
-            });
-            return;
-        }
-
-        try {
-            const response = await fetch('/api/admin/POST/deny-existing-users', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${session.user.token}`,
-                },
-                body: JSON.stringify({ userIds: [userId] }),
-            });
-
-            if (!response.ok) throw new Error('Failed to move user to denied status');
-
-            setToast?.({
-                title: 'Success',
-                description: 'User moved to denied status successfully.',
-                variant: 'default',
-            });
-
-            // Optionally, refresh data or remove the user from the UI after success
-            // This would depend on how you want to handle the UI update
-        } catch (error) {
-            console.error('Error moving user to denied status:', error);
-            setToast?.({
-                title: 'Error',
-                description: 'Failed to move user to denied status.',
-                variant: 'destructive',
-            });
-        }
-    };
+        isCountryVisible,
+        toggleCountryVisibility,
+        handleMoveToDenied,
+    } = useExistingDoctorsAndTriageViewModel();
 
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="flex justify-end mb-4">
                 <Button
-                    onClick={() => setIsCountryVisible(!isCountryVisible)}
+                    onClick={toggleCountryVisibility}
                     variant="outline"
                 >
                     {isCountryVisible ? 'Hide Country' : 'Show Country'}
@@ -88,7 +35,7 @@ export default function ExistingDoctorsAndTriage() {
                     <InfiniteScroll
                         dataLength={existingUsers.length}
                         next={nextExistingUsers}
-                        hasMore={hasMoreExistingUsers}
+                        hasMore={!!hasMoreExistingUsers}
                         isLoading={loadingExistingUsers}
                     >
                         <table className="w-full border-collapse">

@@ -3,12 +3,13 @@
 import { useState } from 'react';
 import { useQueryClient, useInfiniteQuery, useMutation } from 'react-query';
 import { useSession } from 'next-auth/react';
+import useToast from '@/components/hooks/useToast';
 
 export function useDeniedDoctorsAndTriageViewModel() {
     const { data: session } = useSession(); // Access the session data
     const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-    const [isSelecting, setIsSelecting] = useState(false);
     const queryClient = useQueryClient();
+    const { setToast } = useToast(); // Initialize toast hook
 
     // Fetch denied users with pagination
     const {
@@ -38,7 +39,6 @@ export function useDeniedDoctorsAndTriageViewModel() {
     // Re-approve users mutation
     const reApproveMutation = useMutation(
         async (userIds: string[]) => {
-            // Use the JWT token from the session
             const token = session?.user.token;
             if (!token) {
                 throw new Error('User is not authenticated');
@@ -57,15 +57,30 @@ export function useDeniedDoctorsAndTriageViewModel() {
         },
         {
             onSuccess: () => {
+                // Show success toast
+                setToast({
+                    title: 'Users Re-Approved',
+                    description: 'Selected users have been successfully re-approved.',
+                    variant: 'success',
+                });
+
                 // Clear the selection and refresh denied users data
                 setSelectedUsers([]);
                 queryClient.invalidateQueries('deniedUsers'); // Re-fetch denied users
             },
+            onError: (error: any) => {
+                // Show error toast
+                setToast({
+                    title: 'Error',
+                    description: error.message || 'Failed to re-approve users.',
+                    variant: 'error',
+                });
+            },
         }
     );
 
-    const handleReApproveUsers = () => {
-        reApproveMutation.mutate(selectedUsers);
+    const handleReApproveUsers = (userIds: string[] = selectedUsers) => {
+        reApproveMutation.mutate(userIds);
     };
 
     const handleCheckboxChange = (userId: string) => {
@@ -74,19 +89,13 @@ export function useDeniedDoctorsAndTriageViewModel() {
         );
     };
 
-    const toggleSelecting = () => {
-        setIsSelecting((prev) => !prev);
-    };
-
     return {
         deniedUsers,
         loadingDeniedUsers,
         hasMoreDeniedUsers,
         nextDeniedUsers,
-        isSelecting,
-        toggleSelecting,
         selectedUsers,
         handleCheckboxChange,
-        handleReApproveUsers, // Expose re-approve function
+        handleReApproveUsers,
     };
 }

@@ -1,96 +1,27 @@
-// components/auth/adminDashboard/sections/NewSignups.tsx
+// components/auth/adminDashboard/sections/NewSignupsView.tsx
 'use client';
 
-import React, { useState } from 'react';
-import { useSession } from 'next-auth/react';
-import useToast from '@/components/hooks/useToast';
+import React from 'react';
 import { UserRoundCheck, UserRoundMinus, Loader2 } from 'lucide-react';
-import { useAdminDashboard } from '../AdminDashboardContext';
 import InfiniteScroll from '@/components/ui/infiniteScroll';
 import { ScrollArea, ScrollBar } from "@/components/ui/ScrollArea";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useNewSignupsViewModel, User } from './NewSignupsViewModel';
 
-interface User {
-    _id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    accountType: 'Doctor' | 'Triage';
-    countries?: string[];
-}
-
-export default function NewSignups() {
-    const { data: session } = useSession();
+export default function NewSignupsView() {
     const {
         newSignups,
         loadingNewSignups,
         hasMoreNewSignups,
         nextNewSignups,
-        toggleSection,
-    } = useAdminDashboard();
-
-    const { setToast } = useToast();
-    const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-    const [isCountryVisible, setIsCountryVisible] = useState(true);
-
-    async function handleBulkAction(actionType: 'approve-users' | 'deny-users') {
-        if (!session?.user?.token || selectedUsers.length === 0) {
-            setToast?.({
-                title: 'Error',
-                description: 'No users selected or no authentication token found.',
-                variant: 'destructive',
-            });
-            return;
-        }
-
-        try {
-            const url = `/api/admin/POST/${actionType}`;
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${session.user.token}`,
-                },
-                body: JSON.stringify({ userIds: selectedUsers }),
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to ${actionType} users`);
-            }
-
-            setToast?.({
-                title: 'Success',
-                description: `Selected users ${actionType === 'approve-users' ? 'approved' : 'denied'} successfully.`,
-                variant: 'default',
-            });
-
-            setSelectedUsers([]);
-            toggleSection('newSignups');
-        } catch (error) {
-            console.error(`Error in bulk ${actionType}:`, error);
-            const errorMessage = error instanceof Error ? error.message : `An error occurred while trying to ${actionType} the users.`;
-            setToast?.({
-                title: 'Error',
-                description: errorMessage,
-                variant: 'destructive',
-            });
-        }
-    }
-
-    const handleCheckboxChange = (userId: string) => {
-        setSelectedUsers((prev) =>
-            prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
-        );
-    };
-
-    const handleSelectAll = () => {
-        setSelectedUsers((prev) => (
-            prev.length === newSignups.length
-                ? []
-                : newSignups.map((user: User) => user._id)
-        ));
-    };
+        selectedUsers,
+        isCountryVisible,
+        handleBulkAction,
+        handleCheckboxChange,
+        handleSelectAll,
+        toggleCountryVisibility,
+    } = useNewSignupsViewModel();
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -114,7 +45,7 @@ export default function NewSignups() {
                 </Button>
 
                 <Button
-                    onClick={() => setIsCountryVisible(!isCountryVisible)}
+                    onClick={toggleCountryVisibility}
                     variant="outline"
                 >
                     {isCountryVisible ? 'Hide Country' : 'Show Country'}
@@ -126,7 +57,7 @@ export default function NewSignups() {
                     <InfiniteScroll
                         dataLength={newSignups.length}
                         next={nextNewSignups}
-                        hasMore={hasMoreNewSignups}
+                        hasMore={!!hasMoreNewSignups}
                         isLoading={loadingNewSignups}
                     >
                         <table className="w-full border-collapse">

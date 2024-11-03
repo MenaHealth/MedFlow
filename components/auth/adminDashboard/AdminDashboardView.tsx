@@ -1,124 +1,46 @@
 // components/auth/adminDashboard/AdminDashboardView.tsx
 'use client'
 
-import React, { useEffect } from 'react';
-import { AdminDashboardProvider } from './AdminDashboardContext';
+import React, { useState } from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { useSession } from 'next-auth/react'; // Import useSession from next-auth
-import { useAdminDashboard } from './AdminDashboardContext';
-import NewSignups from './sections/NewSignups';
+import { useSession } from 'next-auth/react';
+import NewSignupsView from './sections/NewSignupsView';
 import DeniedDoctorsAndTriage from './sections/DeniedDoctorsAndTriageView';
-import ExistingDoctorsAndTriage from './sections/ExistingDoctorsAndTriage';
+import ExistingDoctorsAndTriageView from './sections/ExistingDoctorsAndTriageView';
 import MedOrdersView from './sections/MedOrdersView';
 import AdminManagement from "@/components/auth/adminDashboard/sections/AdminManagementView";
 import { Loader2, RefreshCw, Users, UserCheck, UserX, Pill, ShieldCheck } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { useMedOrdersViewModel } from './sections/MedOrderViewModel';
 
 const sections = [
-    { id: 'newSignups', title: 'New Signups', icon: Users, color: 'bg-orange-50 text-orange-800' },
-    { id: 'existing', title: 'Existing Doctors and Triage', icon: UserCheck, color: 'bg-orange-100 text-orange-500' },
-    { id: 'denied', title: 'Denied Doctors and Triage', icon: UserX, color: 'bg-gray-100 text-gray-800' },
-    { id: 'addAdmin', title: 'Admin Management', icon: ShieldCheck, color: 'bg-darkBlue text-orange-100' },
-    { id: 'medOrder', title: 'Medical Orders', icon: Pill, color: 'bg-orange-950 text-white' },
+    { id: 'newSignups', title: 'New Signups', icon: Users, color: 'bg-orange-50 text-orange-800', component: NewSignupsView },
+    { id: 'existing', title: 'Existing Doctors and Triage', icon: UserCheck, color: 'bg-orange-100 text-orange-500', component: ExistingDoctorsAndTriageView },
+    { id: 'denied', title: 'Denied Doctors and Triage', icon: UserX, color: 'bg-gray-100 text-gray-800', component: DeniedDoctorsAndTriage },
+    { id: 'addAdmin', title: 'Admin Management', icon: ShieldCheck, color: 'bg-darkBlue text-orange-100', component: AdminManagement },
+    { id: 'medOrder', title: 'Medical Orders', icon: Pill, color: 'bg-orange-950 text-white', component: MedOrdersView },
 ] as const;
 
 const AdminDashboardContent = () => {
-    const {
-        openSection,
-        loadingNewSignups,
-        loadingExistingUsers,
-        loadingDeniedUsers,
-        toggleSection,
-        handleRefresh,
-        isRefreshing,
-    } = useAdminDashboard();
-
-    const {
-        loadingMedOrders,
-        refetchMedOrders
-    } = useMedOrdersViewModel();
-
-    // Log the JWT and session data for debugging
-    const { data: session } = useSession(); // Access the session data
-    useEffect(() => {
-        if (session) {
-            console.log("Session Data:", session);
-            console.log("DENIED VIEW MODEL!!! JWT Token:", session.user.token); // Assuming the token is in session.user.token
-        } else {
-            console.log("No session data found");
-        }
-    }, [session]);
-
-    useEffect(() => {
-        // Log the JWT and session data for debugging
-        if (session) {
-            console.log("Session Data:", session);
-            console.log("JWT Token:", session.user.token); // Assuming the token is in session.user.token
-        } else {
-            console.log("No session data found");
-        }
-    }, [session]);
-
-    const sectionRefs = React.useRef<React.RefObject<HTMLDivElement>[]>(sections.map(() => React.createRef<HTMLDivElement>()));
-
-    React.useEffect(() => {
-        const observer = new IntersectionObserver(
-            (entries) => {
-                entries.forEach((entry) => {
-                    if (entry.isIntersecting) {
-                        // You can use setActiveSection here if needed
-                        // setActiveSection(entry.target.id);
-                    }
-                });
-            },
-            { threshold: 0.5 }
-        );
-
-        sectionRefs.current.forEach((ref) => {
-            if (ref.current) {
-                observer.observe(ref.current);
-            }
-        });
-
-        return () => {
-            sectionRefs.current.forEach((ref) => {
-                if (ref.current) {
-                    observer.unobserve(ref.current);
-                }
-            });
-        };
-    }, []);
+    const [openSection, setOpenSection] = useState<string | null>(null);
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const { data: session } = useSession();
 
     const handleToggleSection = (sectionId: typeof sections[number]['id']) => {
-        toggleSection(sectionId);
+        setOpenSection(prev => prev === sectionId ? null : sectionId);
     };
 
     const handleRefreshAll = () => {
-        handleRefresh();
-        refetchMedOrders();
+        setIsRefreshing(true);
+        // Implement refresh logic for all sections
+        setTimeout(() => setIsRefreshing(false), 1000); // Simulated refresh
     };
 
-    const renderSection = (section: typeof sections[number], index: number) => {
+    const renderSection = (section: typeof sections[number]) => {
         const isOpen = openSection === section.id;
-
-        const loading =
-            section.id === 'newSignups' ? loadingNewSignups :
-                section.id === 'existing' ? loadingExistingUsers :
-                    section.id === 'denied' ? loadingDeniedUsers :
-                        section.id === 'medOrder' ? loadingMedOrders :
-                            false;
-
-        const content =
-            section.id === 'newSignups' ? <NewSignups /> :
-                section.id === 'existing' ? <ExistingDoctorsAndTriage /> :
-                    section.id === 'denied' ? <DeniedDoctorsAndTriage /> :
-                        section.id === 'addAdmin' ? <AdminManagement /> :
-                            section.id === 'medOrder' ? <MedOrdersView /> :
-                                null;
+        const SectionComponent = section.component;
 
         return (
-            <div key={section.id} id={section.id} ref={sectionRefs.current[index]} className="mb-6">
+            <div key={section.id} id={section.id} className="mb-6">
                 <div className={`sticky top-0 z-10 ${section.color}`}>
                     <button
                         className="w-full p-4 text-left flex items-center justify-between"
@@ -133,13 +55,7 @@ const AdminDashboardContent = () => {
                 </div>
                 <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-[2000px]' : 'max-h-0'}`}>
                     <div className={`p-4 ${section.color}`}>
-                        {loading ? (
-                            <div className="flex justify-center items-center py-4">
-                                <Loader2 className="h-8 w-8 animate-spin"/>
-                            </div>
-                        ) : (
-                            content
-                        )}
+                        {isOpen && <SectionComponent />}
                     </div>
                 </div>
             </div>
@@ -158,14 +74,14 @@ const AdminDashboardContent = () => {
                     className="text-orange-500 hover:border-orange-500 border-transparent border-2 focus:outline-none focus:border-orange-500"
                 >
                     {isRefreshing ? (
-                        <Loader2  className="h-4 w-4 animate-spin"/>
+                        <Loader2 className="h-4 w-4 animate-spin"/>
                     ) : (
                         <RefreshCw className="h-4 w-4"/>
                     )}
                 </Button>
             </div>
 
-            {sections.map((section, index) => renderSection(section, index))}
+            {sections.map(section => renderSection(section))}
         </div>
     );
 };
@@ -175,9 +91,7 @@ const AdminDashboardView = () => {
 
     return (
         <QueryClientProvider client={queryClient}>
-            <AdminDashboardProvider>
-                <AdminDashboardContent />
-            </AdminDashboardProvider>
+            <AdminDashboardContent />
         </QueryClientProvider>
     );
 };

@@ -17,8 +17,6 @@ export default function DeniedDoctorsAndTriageView() {
         loadingDeniedUsers,
         hasMoreDeniedUsers,
         nextDeniedUsers,
-        isSelecting,
-        toggleSelecting,
         selectedUsers,
         handleCheckboxChange,
         handleReApproveUsers,
@@ -86,7 +84,7 @@ export default function DeniedDoctorsAndTriageView() {
             <InfiniteScroll
                 dataLength={deniedUsers.length}
                 next={nextDeniedUsers}
-                hasMore={hasMoreDeniedUsers}
+                hasMore={!!hasMoreDeniedUsers} // Convert to boolean with `!!`
                 isLoading={loadingDeniedUsers}
             >
                 <Table
@@ -121,7 +119,7 @@ export default function DeniedDoctorsAndTriageView() {
             {selectedUsers.length > 0 && (
                 <div className="flex justify-center mt-6">
                     <Button
-                        onClick={() => handleReApproveUsers(selectedUsers)}
+                        onClick={() => handleReApproveUsers()}
                         variant="submit"
                     >
                         <CheckSquare className="w-5 h-5 mr-2" /> Re-Approve Selected

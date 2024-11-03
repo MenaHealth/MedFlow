@@ -1,127 +1,53 @@
 // components/auth/adminDashboard/AdminDashboardView.tsx
-
 'use client'
 
-import React, { useRef, useEffect, useState } from 'react'
-import { AdminDashboardProvider, useAdminDashboard } from './AdminDashboardContext'
-import NewSignups from './NewSignups'
-import DeniedDoctorsAndTriage from './DeniedDoctorsAndTriage'
-import ExistingDoctorsAndTriage from './ExistingDoctorsAndTriage'
-import MedOrders from './MedOrders'
-import AdminManagement from "@/components/auth/adminDashboard/AdminManagement"
-import { Loader2, RefreshCw, Users, UserCheck, UserX, Pill, ShieldCheck } from 'lucide-react'
-import { Button } from "@/components/ui/button"
+import React, { useState } from 'react';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { useSession } from 'next-auth/react';
+import NewSignupsView from './sections/NewSignupsView';
+import DeniedDoctorsAndTriage from './sections/DeniedDoctorsAndTriageView';
+import ExistingDoctorsAndTriageView from './sections/ExistingDoctorsAndTriageView';
+import MedOrdersView from './sections/MedOrdersView';
+import AdminManagement from "@/components/auth/adminDashboard/sections/AdminManagementView";
+import { Loader2, RefreshCw, Users, UserCheck, UserX, Pill, ShieldCheck } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 
 const sections = [
-    { id: 'pending', title: 'New Signups', icon: Users, color: 'bg-orange-50 text-orange-800' },
-    { id: 'existing', title: 'Existing Doctors and Triage', icon: UserCheck, color: 'bg-orange-100 text-orange-500' },
-    { id: 'denied', title: 'Denied Doctors and Triage', icon: UserX, color: 'bg-gray-100 text-gray-800' },
-    { id: 'addAdmin', title: 'Admin Management', icon: ShieldCheck, color: 'bg-darkBlue text-orange-100' },
-    { id: 'medOrder', title: 'Medical Orders', icon: Pill, color: 'bg-darkBlue text-orange-100' },
-]
+    { id: 'newSignups', title: 'New Signups', icon: Users, color: 'bg-orange-50 text-orange-800', component: NewSignupsView },
+    { id: 'existing', title: 'Existing Doctors and Triage', icon: UserCheck, color: 'bg-orange-100 text-orange-500', component: ExistingDoctorsAndTriageView },
+    { id: 'denied', title: 'Denied Doctors and Triage', icon: UserX, color: 'bg-gray-100 text-gray-800', component: DeniedDoctorsAndTriage },
+    { id: 'addAdmin', title: 'Admin Management', icon: ShieldCheck, color: 'bg-darkBlue text-orange-100', component: AdminManagement },
+    { id: 'medOrder', title: 'Medical Orders', icon: Pill, color: 'bg-orange-950 text-white', component: MedOrdersView },
+] as const;
 
 const AdminDashboardContent = () => {
-    const {
-        isPendingApprovalsOpen,
-        isExistingUsersOpen,
-        isDeniedUsersOpen,
-        isAddAdminUsersOpen,
-        isMedOrderOpen,
-        loadingPendingApprovals,
-        loadingExistingUsers,
-        loadingDeniedUsers,
-        loadingMedOrders,
-        pendingApprovalsData,
-        existingUsersData,
-        deniedUsersData,
-        medOrdersData,
-        toggleSection,
-        totalPages,
-        currentPage,
-        setCurrentPage,
-        handleRefresh,
-        isRefreshing
-    } = useAdminDashboard()
+    const [openSection, setOpenSection] = useState<string | null>(null);
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const { data: session } = useSession();
 
-    const [activeSection, setActiveSection] = useState('pending')
+    const handleToggleSection = (sectionId: typeof sections[number]['id']) => {
+        setOpenSection(prev => prev === sectionId ? null : sectionId);
+    };
 
-    const sectionRefs = useRef<React.RefObject<HTMLDivElement>[]>(sections.map(() => React.createRef<HTMLDivElement>()))
+    const handleRefreshAll = () => {
+        setIsRefreshing(true);
+        // Implement refresh logic for all sections
+        setTimeout(() => setIsRefreshing(false), 1000); // Simulated refresh
+    };
 
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            (entries) => {
-                entries.forEach((entry) => {
-                    if (entry.isIntersecting) {
-                        setActiveSection(entry.target.id)
-                    }
-                })
-            },
-            { threshold: 0.5 }
-        )
-
-        sectionRefs.current.forEach((ref) => {
-            if (ref.current instanceof HTMLDivElement) {
-                observer.observe(ref.current)
-            }
-        })
-
-        return () => {
-            sectionRefs.current.forEach((ref) => {
-                if (ref.current instanceof HTMLDivElement) {
-                    observer.unobserve(ref.current)
-                }
-            })
-        }
-    }, [])
-
-    const renderSection = (section: typeof sections[number], index: number) => {
-        const isOpen = {
-            pending: isPendingApprovalsOpen,
-            existing: isExistingUsersOpen,
-            denied: isDeniedUsersOpen,
-            addAdmin: isAddAdminUsersOpen,
-            medOrder: isMedOrderOpen,
-        }[section.id as 'pending' | 'existing' | 'denied' | 'addAdmin' | 'medOrder']
-
-        const content = {
-            pending: <NewSignups data={pendingApprovalsData} />,
-            existing: (
-                <ExistingDoctorsAndTriage
-                    data={existingUsersData}
-                    totalPages={totalPages}
-                    currentPage={currentPage}
-                    setCurrentPage={setCurrentPage}
-                />
-            ),
-            denied: <DeniedDoctorsAndTriage data={deniedUsersData} />,
-            addAdmin: <AdminManagement />,
-            medOrder: (
-                <MedOrders
-                    loadingMedOrders={loadingMedOrders}
-                    isRefreshing={isRefreshing}
-                    medOrdersData={medOrdersData}
-                />
-            ),
-        }[section.id as 'pending' | 'existing' | 'denied' | 'addAdmin' | 'medOrder']
-
-        const loading = {
-            pending: loadingPendingApprovals,
-            existing: loadingExistingUsers,
-            denied: loadingDeniedUsers,
-            addAdmin: false,
-            medOrder: loadingMedOrders,
-        }[section.id as 'pending' | 'existing' | 'denied' | 'addAdmin' | 'medOrder']
+    const renderSection = (section: typeof sections[number]) => {
+        const isOpen = openSection === section.id;
+        const SectionComponent = section.component;
 
         return (
-            <div key={section.id} id={section.id} ref={sectionRefs.current[index]} className="mb-6">
+            <div key={section.id} id={section.id} className="mb-6">
                 <div className={`sticky top-0 z-10 ${section.color}`}>
                     <button
                         className="w-full p-4 text-left flex items-center justify-between"
-                        onClick={() => toggleSection(section.id as 'pending' | 'existing' | 'denied' | 'addAdmin' | 'medOrder')}
+                        onClick={() => handleToggleSection(section.id)}
                     >
                         <div className="flex items-center">
-                            {/* Apply conditional background color only when section is active */}
-                            {/*<section.icon className={`mr-2 ${activeSection === section.id ? section.color : ''}`}/>*/}
+                            <section.icon className="mr-2 h-5 w-5" />
                             <h2 className="text-xl">{section.title}</h2>
                         </div>
                         <span className={`transform transition-transform ${isOpen ? 'rotate-180' : ''}`}> ▼ </span>
@@ -129,18 +55,12 @@ const AdminDashboardContent = () => {
                 </div>
                 <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-[2000px]' : 'max-h-0'}`}>
                     <div className={`p-4 ${section.color}`}>
-                        {loading || isRefreshing ? (
-                            <div className="flex justify-center items-center py-4">
-                                <Loader2 className="h-8 w-8 animate-spin"/>
-                            </div>
-                        ) : (
-                            content
-                        )}
+                        {isOpen && <SectionComponent />}
                     </div>
                 </div>
             </div>
-        )
-    }
+        );
+    };
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -149,7 +69,7 @@ const AdminDashboardContent = () => {
                 <Button
                     variant="outline"
                     size="icon"
-                    onClick={handleRefresh}
+                    onClick={handleRefreshAll}
                     disabled={isRefreshing}
                     className="text-orange-500 hover:border-orange-500 border-transparent border-2 focus:outline-none focus:border-orange-500"
                 >
@@ -161,15 +81,19 @@ const AdminDashboardContent = () => {
                 </Button>
             </div>
 
-            {sections.map((section, index) => renderSection(section, index))}
+            {sections.map(section => renderSection(section))}
         </div>
-    )
-}
+    );
+};
 
-const AdminDashboardView = () => (
-    <AdminDashboardProvider>
-        <AdminDashboardContent/>
-    </AdminDashboardProvider>
-)
+const AdminDashboardView = () => {
+    const queryClient = new QueryClient();
 
-export default AdminDashboardView
+    return (
+        <QueryClientProvider client={queryClient}>
+            <AdminDashboardContent />
+        </QueryClientProvider>
+    );
+};
+
+export default AdminDashboardView;

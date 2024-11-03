@@ -1,6 +1,3 @@
-AC6cac6ad6000d7f239d9b088671a27b07
-b1846c8d942d1827c06f9283e8b7b5fd
-
 
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 

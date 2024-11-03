@@ -1,4 +1,4 @@
-// app/api/admin/POST/approve-users/route.ts
+// app/api/adminDashboard/POST/approve-users/route.ts
 
 import { NextResponse } from 'next/server';
 import jwt, { JwtPayload } from 'jsonwebtoken';
@@ -14,13 +14,24 @@ if (!SECRET) {
 export async function POST(request: Request) {
     try {
         await dbConnect();
+
         const authHeader = request.headers.get('authorization');
-        if (!authHeader) return NextResponse.json({ message: 'Authorization header missing' }, { status: 401 });
+        if (!authHeader) {
+            return NextResponse.json({ message: 'Authorization header missing' }, { status: 401 });
+        }
 
         const token = authHeader.split(' ')[1];
-        const decoded = jwt.verify(token, SECRET) as JwtPayload;
 
-        // Check if the user is an admin
+        let decoded: JwtPayload | string;
+        try {
+            decoded = jwt.verify(token, SECRET);
+        } catch (error) {
+            if (error instanceof Error) {
+                return NextResponse.json({ message: `JWT verification failed: ${error.message}` }, { status: 403 });
+            }
+            return NextResponse.json({ message: 'JWT verification failed' }, { status: 403 });
+        }
+
         if (typeof decoded === 'object' && decoded?.isAdmin) {
             const { userIds } = await request.json();
 
@@ -30,23 +41,26 @@ export async function POST(request: Request) {
 
             for (const userId of userIds) {
                 const user = await User.findById(userId);
-                if (user) {
-                    user.authorized = true; // Set authorized to true for approval
-                    user.approvalDate = new Date();
-                    await user.save();
 
-                    // Send approval email
-                    await sendApprovalEmail(user.email, user.firstName, user.lastName, user.accountType);
+                if (!user) {
+                    continue;
                 }
+
+                user.authorized = true;
+                user.approvalDate = new Date();
+                await user.save();
+
+                await sendApprovalEmail(user.email, user.firstName, user.lastName, user.accountType);
             }
+
             return NextResponse.json({ message: 'Users approved successfully' }, { status: 200 });
         } else {
             return NextResponse.json({ message: 'Admin access required' }, { status: 403 });
         }
     } catch (error) {
-        console.error('Error during user approval:', error);
         if (error instanceof Error) {
-            return NextResponse.json({message: `Authorization failed: ${error.message}`}, {status: 500});
+            return NextResponse.json({ message: `Authorization failed: ${error.message}` }, { status: 500 });
         }
+        return NextResponse.json({ message: 'Unknown error occurred during authorization' }, { status: 500 });
     }
 }

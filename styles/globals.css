@@ -5,7 +5,7 @@
 
 :root {
   --darkOrange: #59200F;
-  --lightOrange: #F2B763;
+  --lightOrange: #ffa270;
   /* The logo orange and doctor user type color*/
   --orange: #FF5722;
   --lightYellow: #fbf9c1;
@@ -492,4 +492,15 @@ button:disabled {
 .gsi-material-button:not(:disabled):hover .gsi-material-button-state {
   background-color: white;
   opacity: 8%;
+}
+
+/* In your global CSS or the specific component styles */
+.text-container {
+  white-space: pre-wrap; /* Preserve line breaks, wrap long text */
+  overflow-wrap: break-word; /* Break words if too long */
+}
+
+.scrollable-text {
+  max-height: 100px; /* Set a maximum height for long content */
+  overflow-y: auto; /* Enable vertical scrolling for overflow */
 }

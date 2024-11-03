@@ -12,11 +12,11 @@ import { Button } from "@/components/ui/button";
 import { SelectFormField } from "./SelectFormField";
 import { LanguagesList, Languages, LanguagesListArabic, LanguagesListFarsi, LanguagesListPashto } from "@/data/languages.enum";
 import { CountriesList, Countries, CountriesListArabic, CountriesListFarsi, CountriesListPashto } from "@/data/countries.enum";
-import { RadioGroupField } from "@/components/form/RadioGroupField";
 import { useSession } from "next-auth/react";
 import { mapLanguageToEnglish } from "@/utils/mapLanguageToEnglish";
 import { mapCountryToEnglish } from "@/utils/mapCountryToEnglish"
 import {SendHorizonal} from "lucide-react";
+import { RadioGroupField } from "./RadioGroupField";
 
 const newPatientFormSchema = z.object({
     firstName: z.string().min(1, "First name is required"),

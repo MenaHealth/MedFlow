@@ -1,4 +1,4 @@
-// app/api/admin/GET/denied-users/route.ts
+// app/api/adminDashboard/POST/denied-users/route.ts
 
 import { NextResponse } from 'next/server';
 import jwt, { JwtPayload } from 'jsonwebtoken';
@@ -10,9 +10,11 @@ if (!SECRET) {
     throw new Error("JWT_SECRET is not set in environment variables");
 }
 
-export async function GET(request: Request) {
+export async function POST(request: Request) {
     try {
         await dbConnect();
+
+        // Check authorization
         const authHeader = request.headers.get('authorization');
         if (!authHeader) {
             return NextResponse.json({ message: 'Authorization header missing' }, { status: 401 });
@@ -22,21 +24,26 @@ export async function GET(request: Request) {
         const decoded = jwt.verify(token, SECRET) as JwtPayload;
 
         if (typeof decoded === 'object' && decoded?.isAdmin) {
-            // Find all users who are unauthorized and have a denial date
-            const deniedUsers = await User.find({
-                authorized: false,
-                denialDate: { $exists: true, $ne: null },
-            });
+            // Parse the request body to get user IDs
+            const { userIds } = await request.json();
+            if (!Array.isArray(userIds) || userIds.length === 0) {
+                return NextResponse.json({ message: 'Invalid or missing user IDs' }, { status: 400 });
+            }
 
-            return NextResponse.json(deniedUsers);
+            // Delete users with the specified IDs
+            const result = await User.deleteMany({ _id: { $in: userIds } });
+
+            return NextResponse.json({
+                message: 'Users deleted successfully',
+                deletedCount: result.deletedCount,
+            });
         } else {
             return NextResponse.json({ message: 'Admin access required' }, { status: 403 });
         }
     } catch (error) {
-        console.error('Error fetching denied users:', error);
-        return NextResponse.json({ message: 'Failed to fetch denied users' }, { status: 500 });
+        console.error('Error deleting denied users:', error);
+        return NextResponse.json({ message: 'Failed to delete denied users' }, { status: 500 });
     }
 }
 
 export const dynamic = 'force-dynamic';
-// have this line ^^ to stop the Dynamic server usage errors when running `npm run build`

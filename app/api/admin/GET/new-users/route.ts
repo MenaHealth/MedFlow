@@ -1,4 +1,4 @@
-// app/api/admin/GET/existing-users/route.ts
+// app/api/admin/GET/new-users/route.ts
 
 import { NextResponse } from 'next/server';
 import dbConnect from './../../../../../utils/database';
@@ -13,7 +13,6 @@ export async function GET(request: Request) {
     const skip = (page - 1) * limit;
 
     try {
-        // Query for users who haven't been approved or denied yet (authorized is not set)
         const query = {
             authorized: { $exists: false },
         };
@@ -31,6 +30,6 @@ export async function GET(request: Request) {
         });
     } catch (error) {
         console.error('Error fetching pending users:', error);
-        return NextResponse.json({ error: 'Failed to fetch pending users' }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to fetch new users' }, { status: 500 });
     }
 }

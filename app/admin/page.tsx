@@ -1,12 +1,12 @@
-// app/admin/page.tsx
+// app/adminDashboard/page.tsx
 'use client';
 
-import AdminDashboard from '@/components/auth/admin/AdminDashboard';
+import AdminDashboardView from '@/components/auth/adminDashboard/AdminDashboardView';
 
 const AdminPage = () => {
     return (
         <div>
-            <AdminDashboard />
+            <AdminDashboardView />
         </div>
     );
 };

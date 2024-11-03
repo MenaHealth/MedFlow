@@ -1,18 +1,21 @@
 // components/PatientViewModels/PatientViewModelContext.tsx
 "use client"
 
-import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { PatientInfoViewModel } from "./patient-info/PatientInfoViewModel";
 import { IPatient } from '../../models/patient';
 import { INote } from '../../models/note';
-import { IRxOrder } from '../../models/rxOrders';
-import { IMedOrders } from '../../models/medOrders';
+import { IRxOrder } from '../../models/patient';
+import { IMedOrder } from '../../models/medOrder';
+import {Types} from "mongoose";
 
 interface PatientInfo {
     patientName: string;
+    city: string;
     age: string;
+    gender: string;
     dob: Date;
     phone: {
         countryCode: string;
@@ -43,6 +46,7 @@ interface PatientContext {
     patientInfo: PatientInfo | null;
     setPatientInfo: (patientInfo: PatientInfo | null) => void;
     notes: INote[];
+    draftNotes: INote[];
     loadingPatientInfo: boolean;
     loadingNotes: boolean;
     fetchPatientData: () => Promise<void>;
@@ -54,9 +58,11 @@ interface PatientContext {
     authorName: string;
     authorID: string;
     rxOrders: IRxOrder[];
-    medOrders: IMedOrders[];
+    medOrders: IMedOrder[];
     loadingMedications: boolean;
     refreshMedications: () => Promise<void>;
+    addRxOrder: (newRxOrder: IRxOrder) => void;
+    addMedOrder: (newMedOrder: IMedOrder) => void;
 }
 
 const PatientViewModelContext = createContext<PatientContext | undefined>(undefined);
@@ -75,6 +81,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
     const [activeTab, setActiveTab] = useState('patient-info');
     const [patientInfo, setPatientInfo] = useState<PatientInfo | null>(null);
     const [notes, setNotes] = useState<INote[]>([]);
+    const [draftNotes, setDraftNotes] = useState<INote[]>([]);
     const [loadingPatientInfo, setLoadingPatientInfo] = useState(false);
     const [loadingNotes, setLoadingNotes] = useState(false);
     const [patientViewModel, setPatientViewModel] = useState<PatientInfoViewModel | null>(null);
@@ -82,15 +89,15 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
     const [userSession, setUserSession] = useState<UserSession | null>(null);
     const [authorName, setAuthorName] = useState('');
     const [authorID, setAuthorID] = useState('');
-    const [rxOrders, setrxOrders] = useState<IRxOrder[]>([]);
-    const [medOrders, setmedOrders] = useState<IMedOrders[]>([]);
+    const [rxOrders, setRxOrders] = useState<IRxOrder[]>([]);
+    const [medOrders, setMedOrders] = useState<IMedOrder[]>([]);
     const [loadingMedications, setLoadingMedications] = useState(false);
 
     useEffect(() => {
         if (status === 'authenticated' && session?.user) {
             const firstName = session.user.firstName || '';
             const lastName = session.user.lastName || '';
-            const userId = session.user._id || ''; // Check if this field is being populated properly
+            const userId = session.user._id || '';
 
             setUserSession({
                 id: userId,
@@ -113,6 +120,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
         }
     }, [session, status]);
 
+    const memoizedUserSession = useMemo(() => userSession, [userSession]);
 
     const toggleExpand = () => setIsExpanded(prev => !prev);
 
@@ -120,6 +128,8 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
         setPatientInfo({
             patientName: `${patientData.firstName} ${patientData.lastName}`,
             age: patientData.age || '',
+            city: patientData.city || '',
+            gender: patientData.genderPreference || '',
             dob: new Date(patientData.dob || Date.now()),
             phone: {
                 countryCode: patientData.phone?.countryCode || '',
@@ -130,7 +140,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
         setPatientViewModel(new PatientInfoViewModel(patientData));
     }, []);
 
-    // PatientViewModelContext.tsx
+    const memoizedPatientInfo = useMemo(() => patientInfo, [patientInfo]);
 
     const formatPreviousNotes = useCallback((notesData: INote[]) => {
         if (Array.isArray(notesData)) {
@@ -140,14 +150,34 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 return {
                     ...plainNote,
                     title: plainNote.noteType,
-                    patientName: patientInfo?.patientName || '',
+                    patientName: memoizedPatientInfo?.patientName || '',
                 } as INote;
             });
             setNotes(formattedNotes);
+            setNotes(formattedNotes.filter((note) => note.draft === false));
+            setDraftNotes(formattedNotes.filter((note) => note.draft === true));
         } else {
             setNotes([]);
+            setDraftNotes([]);
         }
-    }, [patientInfo?.patientName]);
+    }, [memoizedPatientInfo?.patientName]);
+
+    const fetchMedOrders = useCallback(async (medOrderIds: string[]): Promise<IMedOrder[]> => {
+        try {
+            const response = await fetch(`/api/patient/${patientId}/medications/med-order`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ medOrderIds })
+            });
+            if (!response.ok) throw new Error("Error fetching detailed med orders data");
+
+            const data = await response.json();
+            return data as IMedOrder[];  // Ensure this is typed correctly to match IMedOrder[]
+        } catch (error) {
+            console.error('Error fetching med orders:', error);
+            return [];
+        }
+    }, [patientId]);
 
     const fetchPatientData = useCallback(async () => {
         setLoadingPatientInfo(true);
@@ -164,16 +194,45 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             } else {
                 setNotes([]);
             }
-            // Set rxOrders and medOrders in the state and log them for debugging
-            setrxOrders(data.rxOrders || []);
-            setmedOrders(data.medOrders || []);
+
+            // Ensure data.rxOrders has a fallback of an empty array if undefined
+            const formattedRxOrders = (data.rxOrders || []).map((order) =>
+                typeof order === 'string'
+                    ? {
+                        id: order,
+                        doctorSpecialty: 'General',
+                        prescribingDr: 'Unknown',
+                        drEmail: 'unknown@example.com',
+                        drId: 'unknown',
+                        prescribedDate: new Date(),
+                        validTill: new Date(),
+                        city: 'Unknown City',
+                        validated: false,
+                        prescriptions: []
+                    } as IRxOrder
+                    : order
+            );
+            setRxOrders(formattedRxOrders);
+
+            // Handle medOrderIds extraction
+            const medOrderIds = data.medOrders?.map(order =>
+                order instanceof Types.ObjectId ? order.toString() : (order as any)._id || order
+            ).filter(Boolean) as string[];
+
+            if (medOrderIds && medOrderIds.length > 0) {
+                const detailedMedOrders = await fetchMedOrders(medOrderIds);
+                setMedOrders(detailedMedOrders);
+            } else {
+                setMedOrders([]);
+            }
+
         } catch (error) {
             console.error('Error fetching patient data:', error);
         } finally {
             setLoadingPatientInfo(false);
             setLoadingMedications(false);
         }
-    }, [patientId, formatPatientInfo, formatPreviousNotes]);
+    }, [patientId, formatPatientInfo, formatPreviousNotes, fetchMedOrders]);
 
     useEffect(() => {
         if (patientId) {
@@ -182,16 +241,54 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
     }, [patientId, fetchPatientData]);
 
     const refreshPatientNotes = () => fetchPatientData();
-    const refreshMedications = () => fetchPatientData();
+
+    const refreshMedications = async () => {
+        setLoadingMedications(true);
+        try {
+            const response = await fetch(`/api/patient/${patientId}/medications`);
+            if (!response.ok) throw new Error("Error fetching medications data");
+
+            const data = await response.json();
+
+            setRxOrders(data.rxOrders || []);
+
+            const medOrderIds = data.medOrders?.map((order: string | { _id: string }) =>
+                typeof order === 'string' ? order : order._id
+            ).filter(Boolean) as string[];
+
+            if (medOrderIds.length > 0) {
+                const detailedMedOrders = await fetchMedOrders(medOrderIds);
+                setMedOrders(detailedMedOrders);
+            } else {
+                setMedOrders([]);
+            }
+
+        } catch (error) {
+            console.error('Error refreshing medications:', error);
+        } finally {
+            setLoadingMedications(false);
+        }
+    };
+
+    const addRxOrder = useCallback((newRxOrder: IRxOrder) => {
+        setRxOrders(prevOrders => [...prevOrders, newRxOrder]);
+        fetchPatientData();
+    }, [fetchPatientData]);
+
+    const addMedOrder = useCallback((newMedOrder: IMedOrder) => {
+        setMedOrders(prevOrders => [...prevOrders, newMedOrder]);
+        fetchPatientData();
+    }, [fetchPatientData]);
 
     return (
         <PatientViewModelContext.Provider
             value={{
                 activeTab,
                 setActiveTab,
-                patientInfo,
                 setPatientInfo,
+                patientInfo: memoizedPatientInfo,
                 notes,
+                draftNotes,
                 loadingPatientInfo,
                 loadingNotes,
                 fetchPatientData,
@@ -199,13 +296,15 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 isExpanded,
                 toggleExpand,
                 refreshPatientNotes,
-                userSession,
+                userSession: memoizedUserSession,
                 authorName,
                 authorID,
                 rxOrders,
                 medOrders,
                 loadingMedications,
                 refreshMedications,
+                addRxOrder,
+                addMedOrder,
             }}
         >
             {children}

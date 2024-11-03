@@ -3,7 +3,7 @@
 "use client"
 
 import * as React from "react"
-import { format, startOfYear, endOfYear, eachMonthOfInterval, addYears, subYears } from "date-fns"
+import { format, startOfYear, endOfYear, eachMonthOfInterval } from "date-fns"
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react"
 import { Send } from "lucide-react";
 import { DayPicker } from "react-day-picker"
@@ -14,7 +14,8 @@ import { Button } from "./../ui/button";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "../../components/ui/form"
 import { Popover, PopoverContent, PopoverTrigger } from "../../components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
-import {useMemo, useState} from "react";
+import {useEffect, useMemo, useState} from "react";
+import { addDays } from 'date-fns'
 
 
 interface CalendarProps {
@@ -81,6 +82,8 @@ function Calendar({
         onSelect?.(newDate); // Only update the year visually
     };
 
+    const goToNextMonth = () => setMonth((prev) => (prev + 1) % 12);
+    const goToPreviousMonth = () => setMonth((prev) => (prev - 1 + 12) % 12);
 
 
     return (
@@ -122,8 +125,16 @@ function Calendar({
                 ...classNames,
             }}
             components={{
-                IconLeft: ({ ...props }) => <ChevronLeft className="h-4 w-4" />,
-                IconRight: ({ ...props }) => <ChevronRight className="h-4 w-4" />,
+                IconLeft: ({ ...props }) => (
+                    <Button variant="outline" onClick={goToPreviousMonth}>
+                        <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                ),
+                IconRight: ({ ...props }) => (
+                    <Button variant="outline" onClick={goToNextMonth}>
+                        <ChevronRight className="h-4 w-4" />
+                    </Button>
+                ),
                 Caption: ({ ...captionProps }) => (
                     <div className="flex justify-center space-x-2">
                         <Select
@@ -163,72 +174,99 @@ function Calendar({
     );
 }
 
+
+
+
+
+
 interface DatePickerFormFieldProps {
-    name: string
-    label: string
-    type?: "future" | "past"
-    classNames?: string
+    name: string;
+    label: string;
+    type?: 'future' | 'past';
+    defaultDate?: Date;
+    value?: Date;
+    onChange?: (date: Date) => void;
 }
 
-export function DatePickerFormField({ name, label, type = "future", classNames }: DatePickerFormFieldProps) {
-    const { control, setValue } = useFormContext()
-    const [selectedDate, setSelectedDate] = useState<Date | undefined>()
-    const [isOpen, setIsOpen] = useState(false)
+export function DatePickerFormField({ name, label, type = 'future', defaultDate, value, onChange }: DatePickerFormFieldProps) {
+    const { control, setValue } = useFormContext();
+    const [selectedDate, setSelectedDate] = useState<Date | undefined>(value || defaultDate || (type === 'future' ? addDays(new Date(), 14) : undefined));
+    const [isOpen, setIsOpen] = useState(false);
+
+    const handleDateChange = (date: Date | undefined) => {
+        setSelectedDate(date);
+        if (date && onChange) {
+            onChange(date);
+        }
+    };
 
     const handleSubmit = () => {
         if (selectedDate) {
-            setValue(name, selectedDate.toISOString())
-            setIsOpen(false)
+            setValue(name, selectedDate.toISOString());
+            setIsOpen(false);
         }
-    }
+    };
+
+    useEffect(() => {
+        if (selectedDate) {
+            setValue(name, selectedDate.toISOString());
+        }
+    }, [selectedDate, setValue, name]);
+
+    useEffect(() => {
+        if (value) {
+            setSelectedDate(value);
+        }
+    }, [value]);
 
     return (
-        <div className={classNames}>
-            <FormField
-                control={control}
-                name={name}
-                render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                        <FormLabel>{label}</FormLabel>
-                        <Popover open={isOpen} onOpenChange={setIsOpen}>
-                            <PopoverTrigger asChild>
-                                <FormControl>
-                                    <Button
-                                        variant={"outline"}
-                                        className={cn(
-                                            "w-[240px] pl-3 text-left font-normal",
-                                            !field.value ? "text-muted-foreground" : ""
-                                        )}
-                                    >
-                                        {field.value ? (
-                                            format(new Date(field.value), "PPP")
-                                        ) : (
-                                            <span>Pick a date</span>
-                                        )}
-                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+        <FormField
+            control={control}
+            name={name}
+            render={({ field }) => (
+                <FormItem className="flex flex-col">
+                    <FormLabel>{label}</FormLabel>
+                    <Popover open={isOpen} onOpenChange={setIsOpen}>
+                        <PopoverTrigger asChild>
+                            <FormControl>
+                                <Button
+                                    variant={'outline'}
+                                    className={cn(
+                                        'w-[240px] pl-3 text-left font-normal',
+                                        !field.value ? 'text-muted-foreground' : ''
+                                    )}
+                                    aria-haspopup="dialog"
+                                    aria-expanded={isOpen}
+                                    onClick={() => setIsOpen(!isOpen)}
+                                >
+                                    {field.value ? (
+                                        format(new Date(field.value), 'PPP')
+                                    ) : (
+                                        <span>Pick a date</span>
+                                    )}
+                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                            </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                            <div className="p-3">
+                                <Calendar
+                                    mode="single"
+                                    selected={selectedDate}
+                                    onSelect={handleDateChange}
+                                    type={type}
+                                />
+                                <div className="mt-4">
+                                    <Button className="w-full" onClick={handleSubmit}>
+                                        <Send className="mr-2 h-4 w-4" />
                                     </Button>
-                                </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                                <div className="p-3">
-                                    <Calendar
-                                        mode="single"
-                                        selected={selectedDate}
-                                        onSelect={setSelectedDate}
-                                        type={type}
-                                    />
-                                    <div className="mt-4">
-                                        <Button className="w-full" onClick={handleSubmit}>
-                                            <Send className="mr-2 h-4 w-4" />
-                                        </Button>
-                                    </div>
                                 </div>
-                            </PopoverContent>
-                        </Popover>
-                        <FormMessage />
-                    </FormItem>
-                )}
-            />
-        </div>
-    )
+                            </div>
+                        </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                </FormItem>
+            )}
+        />
+    );
 }

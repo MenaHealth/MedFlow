@@ -25,6 +25,8 @@ import Tooltip from '../../../components/form/Tooltip';
 import './dashboard.css';
 import TableCellWithTooltip from '@/components/TableCellWithTooltip';
 import * as Toast from '@radix-ui/react-toast';
+import { Languages } from '@/data/languages.enum';
+
 import NotesCell from '@/components/NotesCell';
 
 
@@ -42,37 +44,14 @@ import { DoctorSpecialties as DOCTOR_SPECIALTIES } from '@/data/doctorSpecialty.
 import Link from 'next/link';
 
 export default function PatientTriage() {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const [allData, setAllData] = useState([]);
   const [rows, setRows] = React.useState([]);
-  const [userSession, setUserSession] = useState(null);
   const [priorityFilter, setPriorityFilter] = React.useState("all");
   const [statusFilter, setStatusFilter] = React.useState("all");
   const [specialtyFilter, setSpecialtyFilter] = React.useState("all");
 
   const router = useRouter();
-
-  useEffect(() => {
-    if (status === 'authenticated' && session?.user) {
-      const userSessionData = {
-        id: session.user._id,
-        email: session.user.email,
-        firstName: session.user.firstName,
-        lastName: session.user.lastName,
-        accountType: session.user.accountType,
-        isAdmin: session.user.isAdmin,
-        image: session.user.image,
-        doctorSpecialty: session.user.doctorSpecialty,
-        languages: session.user.languages,
-        token: session.user.token,
-        gender: session.user.gender,
-        dob: session.user.dob,
-        countries: session.user.countries,
-      };
-      setUserSession(userSessionData);
-    }
-  }, [session, status]);
-
 
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState('');
@@ -121,29 +100,29 @@ export default function PatientTriage() {
     // Apply filters
     if (priorityFilter !== "all") {
       filteredRows = filteredRows.filter(
-        (row) => row.priority === priorityFilter
+          (row) => row.priority === priorityFilter
       );
     }
 
     if (statusFilter !== "all") {
       filteredRows = filteredRows.filter(
-        (row) => row.status === statusFilter
+          (row) => row.status === statusFilter
       );
     }
 
     if (specialtyFilter !== "all") {
       filteredRows = filteredRows.filter(
-        (row) => row.specialty === specialtyFilter
+          (row) => row.specialty === specialtyFilter
       );
     }
 
     if (session?.user?.accountType === "Doctor") {
       filteredRows = filteredRows.filter(
-        (row) =>
-          row.triagedBy &&
-          Object.keys(row.triagedBy).length !== 0 &&
-          session.user.languages.includes(row.language) &&
-          session.user.doctorSpecialty === row.specialty
+          (row) =>
+              row.triagedBy &&
+              Object.keys(row.triagedBy).length !== 0 &&
+              session.user.languages?.includes(row.language) &&
+              session.user.doctorSpecialty === row.specialty
       );
     }
 
@@ -258,7 +237,7 @@ export default function PatientTriage() {
       });
       const updatedRows = [...rows];
       updatedRows[index].status = "Archived";
-      setRows(updatedRows);
+      setRows(updatedRows.filter((row) => row.status !== "Archived"));
     } catch (error) {
       console.log(error);
     }
@@ -301,7 +280,7 @@ export default function PatientTriage() {
           <div style={{ width: 48 }}>
             {" "}
           </div>
-        </div>
+        </div>  
         <div className="flex flex-wrap gap-2 mb-4">
           {priorityFilter !== "all" && (
             <div className="bg-green-100 text-green-800 px-2 py-1 rounded flex items-center">
@@ -456,154 +435,154 @@ export default function PatientTriage() {
                       </Tooltip>
                     </div>
                   </TableCell>
-                <TableCell align="center">Triaged By</TableCell>
-                <TableCell align="center">Dr. Pref</TableCell>
-                <TableCell align="center">Doctor</TableCell>
-                <TableCell align="center">Created At</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {rows.map((row, index) => (
-                <TableRow
-                  key={index}
-                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                  <TableCellWithTooltip tooltipText={row._id} maxWidth="100px">
-                    <div
-                        onClick={() => handlePatientClick(row._id)}
-                        className="block overflow-hidden text-ellipsis text-sm cursor-pointer"
-                        style={{ maxWidth: '100px', whiteSpace: 'nowrap' }}
-                    >
-                      {row._id}
-                    </div>
-                  </TableCellWithTooltip>
-                  <TableCell align="center" style={{ minWidth: '150px' }}>{row.lastName}</TableCell>
-                  <TableCell align="center">{row.age || ''}</TableCell>
-                  <TableCell align="center" style={{ minWidth: '150px' }}>{formatLocation(row.city, row.country)}</TableCell>
-                  <TableCell align="center">{row.language}</TableCell>
-                  <TableCellWithTooltip tooltipText={row.chiefComplaint} maxWidth='175px'>
-                    <div className="block overflow-hidden text-ellipsis text-sm">
-                      {row.chiefComplaint}
-                    </div>
-                  </TableCellWithTooltip>
-                  <TableCell align="center">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline">{row.status ?? 'Not Started'}</Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className="w-46">
-                        <DropdownMenuSeparator />
-                        <DropdownMenuRadioGroup value={row.status} onValueChange={(value) => handleStatusChange(value, row, index)}>
-                          {STATUS.map((status) => status !== 'Archived' && (
-                            <DropdownMenuRadioItem key={status} value={status}>{status}</DropdownMenuRadioItem>
-                          ))}
-                        </DropdownMenuRadioGroup>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                  <TableCell align="center">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline">{row.priority}</Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className="w-46">
-                        <DropdownMenuSeparator />
-                        <DropdownMenuRadioGroup value={row.priority} onValueChange={async (value) => {
-                          try {
-                            await fetch('/api/patient/', {
-                              method: 'PATCH',
-                              headers: {
-                                'Content-Type': 'application/json',
-                              },
-                              body: JSON.stringify({
-                                _id: rows[index]["_id"],
-                                status: "In-Progress",
-                                priority: value, // New priority value
-                              }),
-                            });
-                            const updatedRows = [...rows];
-                            updatedRows[index].priority = value;
-                            setRows(updatedRows);
-                          } catch (error) {
-                            console.log(error);
-                          }
-                        }}>
-                          {PRIORITIES.map((priority) => (
-                            <DropdownMenuRadioItem key={priority} value={priority}>{priority}</DropdownMenuRadioItem>
-                          ))}
-                        </DropdownMenuRadioGroup>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                  <TableCell align="center">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline">{row.specialty}</Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent style={{ maxWidth: "20rem", maxHeight: "25rem", overflowY: "auto" }}>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuRadioGroup
-                            value={row.specialty}
-                            onValueChange={async (value) => {
+                  <TableCell align="center">Triaged By</TableCell>
+                  <TableCell align="center">Dr. Pref</TableCell>
+                  <TableCell align="center">Doctor</TableCell>
+                  <TableCell align="center">Created At</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {rows.map((row, index) => (
+                    <TableRow
+                        key={index}
+                        sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                      <TableCellWithTooltip tooltipText={row._id} maxWidth="100px">
+                        <div
+                            onClick={() => handlePatientClick(row._id)}
+                            className="block overflow-hidden text-ellipsis text-sm cursor-pointer"
+                            style={{ maxWidth: '100px', whiteSpace: 'nowrap' }}
+                        >
+                          {row._id}
+                        </div>
+                      </TableCellWithTooltip>
+                      <TableCell align="center" style={{ minWidth: '150px' }}>{row.lastName}</TableCell>
+                      <TableCell align="center">{row.age || ''}</TableCell>
+                      <TableCell align="center" style={{ minWidth: '150px' }}>{formatLocation(row.city, row.country)}</TableCell>
+                      <TableCell align="center">{row.language}</TableCell>
+                      <TableCellWithTooltip tooltipText={row.chiefComplaint} maxWidth='175px'>
+                        <div className="block overflow-hidden text-ellipsis text-sm">
+                          {row.chiefComplaint}
+                        </div>
+                      </TableCellWithTooltip>
+                      <TableCell align="center">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline">{row.status ?? 'Not Started'}</Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-46">
+                            <DropdownMenuSeparator />
+                            <DropdownMenuRadioGroup value={row.status} onValueChange={(value) => handleStatusChange(value, row, index)}>
+                              {STATUS.map((status) => status !== 'Archived' && (
+                                  <DropdownMenuRadioItem key={status} value={status}>{status}</DropdownMenuRadioItem>
+                              ))}
+                            </DropdownMenuRadioGroup>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                      <TableCell align="center">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline">{row.priority}</Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-46">
+                            <DropdownMenuSeparator />
+                            <DropdownMenuRadioGroup value={row.priority} onValueChange={async (value) => {
                               try {
-                                await fetch(`/api/patient/`, {
-                                  method: "PATCH",
+                                await fetch('/api/patient/', {
+                                  method: 'PATCH',
                                   headers: {
-                                    "Content-Type": "application/json",
+                                    'Content-Type': 'application/json',
                                   },
                                   body: JSON.stringify({
-                                    _id: rows[index]._id,
-                                    specialty: value,
+                                    _id: rows[index]["_id"],
+                                    status: "In-Progress",
+                                    priority: value, // New priority value
                                   }),
                                 });
                                 const updatedRows = [...rows];
-                                updatedRows[index].specialty = value;
+                                updatedRows[index].priority = value;
                                 setRows(updatedRows);
                               } catch (error) {
                                 console.log(error);
                               }
-                            }}
-                        >
-                          {DOCTOR_SPECIALTIES.map((specialty) => (
-                              <DropdownMenuRadioItem key={specialty} value={specialty}>
-                                {specialty}
-                              </DropdownMenuRadioItem>
-                          ))}
-                        </DropdownMenuRadioGroup>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                  <NotesCell
-                    notes={row.dashboardNotes}
-                    onUpdate={async (newNotes) => {
-                      try {
-                        await fetch("/api/patient/", {
-                          method: 'PATCH',
-                          headers: {
-                            'Content-Type': 'application/json',
-                          },
-                          body: JSON.stringify({
-                            _id: rows[index]["_id"],
-                            dashboardNotes: newNotes,
-                          }),
-                        });
-                        const updatedRows = [...rows];
-                        updatedRows[index].dashboardNotes = newNotes;
-                        setRows(updatedRows);
-                      } catch (error) {
-                        console.log(error);
-                      }
-                    }}
-                  />
-                  <TableCell align="center">
-                    {getInitials(row.triagedBy?.firstName, row.triagedBy?.lastName)}
-                  </TableCell>
-                  <TableCell align="center">
-                      {row.genderPreference === 'Male' ? (
-                        <span style={{ fontSize: '1.5em'}}>♂</span>
+                            }}>
+                              {PRIORITIES.map((priority) => (
+                                  <DropdownMenuRadioItem key={priority} value={priority}>{priority}</DropdownMenuRadioItem>
+                              ))}
+                            </DropdownMenuRadioGroup>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                      <TableCell align="center">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline">{row.specialty}</Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent style={{ maxWidth: "20rem", maxHeight: "25rem", overflowY: "auto" }}>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuRadioGroup
+                                value={row.specialty}
+                                onValueChange={async (value) => {
+                                  try {
+                                    await fetch(`/api/patient/`, {
+                                      method: "PATCH",
+                                      headers: {
+                                        "Content-Type": "application/json",
+                                      },
+                                      body: JSON.stringify({
+                                        _id: rows[index]._id,
+                                        specialty: value,
+                                      }),
+                                    });
+                                    const updatedRows = [...rows];
+                                    updatedRows[index].specialty = value;
+                                    setRows(updatedRows);
+                                  } catch (error) {
+                                    console.log(error);
+                                  }
+                                }}
+                            >
+                              {DOCTOR_SPECIALTIES.map((specialty) => (
+                                  <DropdownMenuRadioItem key={specialty} value={specialty}>
+                                    {specialty}
+                                  </DropdownMenuRadioItem>
+                              ))}
+                            </DropdownMenuRadioGroup>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                      <NotesCell
+                          notes={row.dashboardNotes}
+                          onUpdate={async (newNotes) => {
+                            try {
+                              await fetch("/api/patient/", {
+                                method: 'PATCH',
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                  _id: rows[index]["_id"],
+                                  dashboardNotes: newNotes,
+                                }),
+                              });
+                              const updatedRows = [...rows];
+                              updatedRows[index].dashboardNotes = newNotes;
+                              setRows(updatedRows);
+                            } catch (error) {
+                              console.log(error);
+                            }
+                          }}
+                      />
+                      <TableCell align="center">
+                        {getInitials(row.triagedBy?.firstName, row.triagedBy?.lastName)}
+                      </TableCell>
+                      <TableCell align="center">
+                        {row.genderPreference === 'Male' ? (
+                            <span style={{ fontSize: '1.5em'}}>♂</span>
                         ) : row.genderPreference === 'Female' ? (
-                          <span style={{ fontSize: '1.5em'}}>♀</span>
+                            <span style={{ fontSize: '1.5em'}}>♀</span>
                         ) : 'N/A'}
-                  </TableCell>
+                      </TableCell>
                       <TableCell align="center">
                         {
                           row.status === 'Not Started'
@@ -650,16 +629,16 @@ export default function PatientTriage() {
         )}
         </div>
         <Toast.Provider>
-        <Toast.Root
-          className="bg-black text-white p-3 rounded-lg shadow-lg"
-          open={open}
-          onOpenChange={setOpen}
-          duration={3000}
-        >
-          <Toast.Title>{message}</Toast.Title>
-        </Toast.Root>
-        <Toast.Viewport className="fixed bottom-5 left-1/2 transform -translate-x-1/2" />
-      </Toast.Provider>
-    </>
+          <Toast.Root
+              className="bg-black text-white p-3 rounded-lg shadow-lg"
+              open={open}
+              onOpenChange={setOpen}
+              duration={3000}
+          >
+            <Toast.Title>{message}</Toast.Title>
+          </Toast.Root>
+          <Toast.Viewport className="fixed bottom-5 left-1/2 transform -translate-x-1/2" />
+        </Toast.Provider>
+      </>
   );
 }

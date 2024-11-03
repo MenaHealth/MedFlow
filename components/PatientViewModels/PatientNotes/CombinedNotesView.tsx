@@ -8,7 +8,7 @@ import { PreviousNotesView } from "./previous/PreviousNotesView";
 import { Card, CardContent, CardHeader } from "../../ui/card";
 import { RadioCard } from "../../ui/radio-card";
 import { Button } from "../../ui/button";
-import { ScrollArea } from '../../form/ScrollArea';
+import { ScrollArea } from '../../ui/ScrollArea';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import ReadOnlyField from "../../form/ReadOnlyField";
 import { Resizable } from './../../ui/Resizable';
@@ -41,6 +41,8 @@ export function CombinedNotesView({ patientId }: NotesViewProps) {
     }, []);
 
     const {
+        populateNote,
+        deleteNote,
         templateType,
         setTemplateType,
         physicianNote,
@@ -58,13 +60,13 @@ export function CombinedNotesView({ patientId }: NotesViewProps) {
         };
     }, []);
 
-    const handleCreateNote = async () => {
+    const handleCreateNote = async (draft: boolean) => {
         console.log('Create Note button clicked');
         console.log('Session status:', status);
 
         if (status === "authenticated") {
             try {
-                await createNote();
+                await createNote(draft);
                 console.log('Note created successfully');
             } catch (error) {
                 console.error('Error creating note:', error);
@@ -97,12 +99,12 @@ export function CombinedNotesView({ patientId }: NotesViewProps) {
                                 >
                                     <h3 className="text-lg font-semibold">Previous Notes</h3>
                                     {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-                                </CardHeader>    
+                                </CardHeader>
                             )
                         }
                         <div className={`overflow-hidden transition-all duration-300 ${isExpanded ? 'max-h-[50vh]' : 'max-h-0'}`}>
                             <ScrollArea className="h-[50vh] w-full">
-                                <PreviousNotesView patientId={patientId} />
+                                <PreviousNotesView patientId={patientId}  populateNote={populateNote} deleteNote={deleteNote} setTemplateType={setTemplateType}/>
                             </ScrollArea>
                         </div>
                     </Card>
@@ -119,7 +121,7 @@ export function CombinedNotesView({ patientId }: NotesViewProps) {
                                     <h3 className="text-lg font-semibold">Previous Notes</h3>
                                 </CardHeader>
                                 <CardContent className="h-full p-0">
-                                    <PreviousNotesView patientId={patientId} />
+                                    <PreviousNotesView patientId={patientId} populateNote={populateNote} deleteNote={deleteNote} setTemplateType={setTemplateType}/>
                                 </CardContent>
                             </ScrollArea>
                         </Card>
@@ -133,7 +135,7 @@ export function CombinedNotesView({ patientId }: NotesViewProps) {
                     <Card className="flex-grow h-full md:h-auto overflow-hidden">
                         <CardHeader className="px-4 py-2">
                             <RadioCard.Root
-                                defaultValue="physician"
+                                value={templateType}
                                 onValueChange={(value) => setTemplateType(value as "physician" | "procedure" | "subjective")}
                                 className="flex w-full"
                             >
@@ -191,7 +193,15 @@ export function CombinedNotesView({ patientId }: NotesViewProps) {
                                         )
                                     )}
                                     <Button
-                                        onClick={handleCreateNote}
+                                        onClick={() => handleCreateNote(true)}
+                                        variant="submit"
+                                        className="mt-4 mx-2"
+                                        disabled={status !== "authenticated" || isLoading}
+                                    >
+                                        {isLoading ? 'Saving...' : 'Save Draft'}
+                                    </Button>
+                                    <Button
+                                        onClick={() => handleCreateNote(false)}
                                         variant="submit"
                                         className="mt-4"
                                         disabled={status !== "authenticated" || isLoading}

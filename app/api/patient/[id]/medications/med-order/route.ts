@@ -1,100 +1,109 @@
-// app/api/patient/[id]/medications/med-order/route.ts
 import { NextResponse } from 'next/server';
+import MedOrder from '../../../../../../models/medOrder';
 import Patient from '../../../../../../models/patient';
 import dbConnect from '../../../../../../utils/database';
 import { Types } from 'mongoose';
 
-interface Params {
-    params: {
-        id: string;
-    };
-}
+export const POST = async (request: Request, { params }: { params: { id: string } }) => {
+    await dbConnect();
 
-export const POST = async (request: Request, { params }: Params) => {
-    console.log('Received request for creating med order');
+    const patientId = params.id;
+    const requestData = await request.json();
 
+    // Check if request is for fetching detailed med orders
+    if (requestData.medOrderIds && Array.isArray(requestData.medOrderIds)) {
+        try {
+            console.log("Fetching detailed med orders for ids:", requestData.medOrderIds);
+
+            const medOrderDetails = await MedOrder.find({
+                _id: { $in: requestData.medOrderIds.map((id: string) => new Types.ObjectId(id)) },
+            });
+
+            return new NextResponse(JSON.stringify(medOrderDetails), { status: 200 });
+        } catch (error) {
+            console.error("Failed to fetch detailed med orders:", error);
+            return new NextResponse(`Failed to fetch med orders: ${error instanceof Error ? error.message : 'Unknown error'}`, { status: 500 });
+        }
+    }
+
+    // Handle new med order creation
     try {
-        const requestData = await request.json();
+        console.log('Received med order data:', requestData);
 
         const {
-            email,
-            date,
-            authorName,
-            authorID,
-            content: {
-                doctorSpecialty,
-                patientName,
-                phoneNumber,
-                address,
-                diagnosis,
-                medications,
-                dosage,
-                frequency
-            }
+            doctorSpecialty,
+            prescribingDr,
+            drEmail,
+            drId,
+            patientName,
+            patientPhone,
+            patientCity,
+            patientCountry,  // Add patientCountry here
+            orderDate,
+            validated,
+            medications
         } = requestData;
 
-        // Ensure the content field is an object and contains all required fields
+        const hasInvalidMedications = medications.some((med: { diagnosis: string; medication: string; dosage: string; frequency: string; quantity: string }) => (
+            typeof med.diagnosis !== 'string' ||
+            typeof med.medication !== 'string' ||
+            typeof med.dosage !== 'string' ||
+            typeof med.frequency !== 'string' ||
+            typeof med.quantity !== 'string'
+        ));
+
         if (
+            !Types.ObjectId.isValid(patientId) ||
             typeof doctorSpecialty !== 'string' ||
+            typeof prescribingDr !== 'string' ||
+            typeof drEmail !== 'string' ||
+            typeof drId !== 'string' ||
             typeof patientName !== 'string' ||
-            typeof phoneNumber !== 'string' ||
-            typeof address !== 'string' ||
-            typeof diagnosis !== 'string' ||
-            typeof medications !== 'string' ||
-            typeof dosage !== 'string' ||
-            typeof frequency !== 'string'
+            typeof patientPhone !== 'string' ||
+            typeof patientCity !== 'string' ||
+            typeof patientCountry !== 'string' ||  // Ensure patientCountry is validated
+            !Array.isArray(medications) ||
+            hasInvalidMedications
         ) {
-            return new NextResponse("Invalid content structure", { status: 400 });
+            return new NextResponse("Invalid med order data", { status: 400 });
         }
 
-        await dbConnect();
-        console.log('Database connected');
+        const newMedOrder = new MedOrder({
+            doctorSpecialty,
+            prescribingDr,
+            drEmail,
+            drId,
+            patientName,
+            patientPhone,
+            patientCity,
+            patientCountry,  // Add patientCountry here
+            patientId: new Types.ObjectId(patientId),
+            orderDate: orderDate || new Date(),
+            validated: validated || false,
+            medications: medications.map(med => ({
+                diagnosis: med.diagnosis,
+                medication: med.medication,
+                dosage: med.dosage,
+                frequency: med.frequency,
+                quantity: med.quantity
+            }))
+        });
 
-        // Validate patient ID
-        if (!Types.ObjectId.isValid(params.id)) {
-            console.error('Invalid patient ID:', params.id);
-            return new NextResponse("Invalid ID", { status: 400 });
+        const savedMedOrder = await newMedOrder.save();
+        console.log('Med order saved to MedOrder collection:', savedMedOrder);
+
+        // Reference the new MedOrder in the Patient model
+        const patient = await Patient.findById(patientId);
+        if (!patient) {
+            return new NextResponse("Patient not found", { status: 404 });
         }
 
-        // Create a new med order
-        const newMedOrder = {
-            email,
-            date: date || new Date(), // Default to the current date if not provided
-            authorName,
-            authorID,
-            content: {
-                doctorSpecialty,
-                patientName,
-                phoneNumber,
-                address,
-                diagnosis,
-                medications,
-                dosage,
-                frequency
-            }
-        };
+        patient.medOrders.push(savedMedOrder._id);
+        await patient.save();
 
-        // Update the patient document by adding the new med order to the medOrders array
-        const updateResult = await Patient.updateOne(
-            { _id: params.id },
-            { $push: { medOrders: newMedOrder } }
-        );
-
-        if (updateResult.modifiedCount === 0) {
-            console.error(`Patient with ID ${params.id} not found or med order not added`);
-            return new NextResponse(`Failed to add med order for patient with ID ${params.id}`, { status: 404 });
-        }
-
-        console.log('Med order saved successfully');
-
-        // Return the new med order as the response
-        return new NextResponse(JSON.stringify(newMedOrder), { status: 201 });
+        return new NextResponse(JSON.stringify(savedMedOrder.toObject()), { status: 201 });
     } catch (error) {
         console.error('Failed to add med order:', error);
-        if (error instanceof Error) {
-            return new NextResponse(`Failed to add med order: ${error.message}`, { status: 500 });
-        } else {
-            return new NextResponse('Failed to add med order due to an unknown error', { status: 500 });
-        }
+        return new NextResponse(`Failed to add med order: ${error instanceof Error ? error.message : 'Unknown error'}`, { status: 500 });
     }
 };

@@ -1,84 +1,129 @@
 // components/PatientViewModels/Medications/previous/PreviousMedicationsView.tsx
-import React, { useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
-import { ScrollArea } from '../../../form/ScrollArea';
-import { IMedOrders } from './../../../../models/medOrders'; // Import medOrders interface
-import { IRxOrder } from './../../../../models/rxOrders'; // Import RxOrders interface
 
-// Define props interface for PreviousMedicationsView
+import React, { useState } from 'react';
+import { ChevronDown, ChevronUp, Share } from 'lucide-react';
+import { ScrollArea } from '../../../ui/ScrollArea';
+import RxOrderDrawerView from '../rx/RxOrderDrawerView';
+import { IRxOrder } from '../../../../models/patient';
+import { IMedOrder } from '../../../../models/medOrder';
+import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewModelContext';
+
 interface PreviousMedicationsViewProps {
     rxOrders: IRxOrder[];
-    medOrders: IMedOrders[];
+    medOrders: IMedOrder[];
     loadingMedications: boolean;
 }
 
-export default function PreviousMedicationsView({
-                                                    rxOrders,
-                                                    medOrders,
-                                                    loadingMedications,
-                                                }: PreviousMedicationsViewProps) {
-    const [expandedItems, setExpandedItems] = useState<string[]>([]);
+const PreviousMedicationsView: React.FC<PreviousMedicationsViewProps> = ({ rxOrders, medOrders, loadingMedications }) => {
+    const { patientInfo } = usePatientDashboard();
+    const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const [selectedRxOrder, setSelectedRxOrder] = useState<IRxOrder | null>(null);
 
     if (loadingMedications) return <p>Loading medications...</p>;
 
     const toggleItemExpansion = (itemId: string) => {
-        if (expandedItems.includes(itemId)) {
-            setExpandedItems(expandedItems.filter((id) => id !== itemId));
-        } else {
-            setExpandedItems([...expandedItems, itemId]);
-        }
+        setExpandedItems(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(itemId)) {
+                newSet.delete(itemId);
+            } else {
+                newSet.add(itemId);
+            }
+            return newSet;
+        });
+    };
+
+    const handleOpenDrawer = (rxOrder: IRxOrder) => {
+        setSelectedRxOrder(rxOrder);
+        setIsDrawerOpen(true);
     };
 
     return (
-        <div className="h-full">
+        <div className="h-full bg-orange-950">
             <ScrollArea className="h-full w-full">
                 {rxOrders.length > 0 || medOrders.length > 0 ? (
-                    <ul className="list-none p-0">
+                    <ul className="list-none m-2">
+                        {/* Render RX Orders */}
                         {rxOrders.map((rxOrder) => (
-                            <li key={rxOrder._id} className="p-4 border-b border-gray-200 bg-white">
-                                <div className="flex justify-between items-center">
+                            <li key={rxOrder._id} className="text-white border-white border-t-2 border-l-2 p-4 m-4 rounded-lg">
+                                <div className="flex justify-between">
                                     <div>
-                                        <h3 className="font-bold">RX Form: {rxOrder.content.medication}</h3>
-                                        <p>{new Date(rxOrder.date).toLocaleDateString()}</p>
-                                        <h4 className="font-bold">Prescribed by: {rxOrder.authorName}</h4>
+                                        <button onClick={() => toggleItemExpansion(rxOrder._id ?? '')} className="text-white">
+                                            {expandedItems.has(rxOrder._id ?? '') ? <ChevronUp /> : <ChevronDown />}
+                                        </button>
+                                        <h3 className="border-white border-2 p-2 text-white">Rx Order</h3>
+                                        <p>{new Date(rxOrder.prescribedDate).toLocaleDateString()}</p>
+                                        <h4 className="text-center">Dr. {rxOrder.prescribingDr}</h4>
                                     </div>
-                                    <button onClick={() => toggleItemExpansion(rxOrder._id)} className="text-gray-600">
-                                        {expandedItems.includes(rxOrder._id) ? <ChevronUp /> : <ChevronDown />}
+                                    <button onClick={() => handleOpenDrawer(rxOrder)} className="text-white ml-2">
+                                        <Share />
                                     </button>
                                 </div>
-                                {expandedItems.includes(rxOrder._id) && (
-                                    <div className="mt-2">
-                                        <p><strong>Dosage:</strong> {rxOrder.content.dosage}</p>
-                                        <p><strong>Frequency:</strong> {rxOrder.content.frequency}</p>
+                                {expandedItems.has(rxOrder._id ?? '') && (
+                                    <div className="mt-2 p-2 bg-white text-darkBlue rounded-sm">
+                                        <p><strong>City:</strong> {rxOrder.city}</p>
+                                        <p><strong>Valid Till:</strong> {new Date(rxOrder.validTill).toLocaleDateString()}</p>
+                                        <h4 className="mt-2 font-bold">Prescriptions:</h4>
+                                        {rxOrder.prescriptions.map((prescription, index) => (
+                                            <div key={`${rxOrder._id}-prescription-${index}`} className="mt-2 p-2 bg-gray-100 rounded-sm">
+                                                <p><strong>Diagnosis:</strong> {prescription.diagnosis}</p>
+                                                <p><strong>Medication:</strong> {prescription.medication}</p>
+                                                <p><strong>Dosage:</strong> {prescription.dosage}</p>
+                                                <p><strong>Frequency:</strong> {prescription.frequency}</p>
+                                            </div>
+                                        ))}
                                     </div>
                                 )}
                             </li>
                         ))}
+
+                        {/* Render Medical Orders */}
                         {medOrders.map((medOrder) => (
-                            <li key={medOrder._id} className="p-4 border-b border-gray-200 bg-white">
-                                <div className="flex justify-between items-center">
+                            <li key={medOrder._id} className="text-white border-white border-t-2 border-l-2 p-4 m-4 rounded-lg">
+                                <div className="flex justify-between">
                                     <div>
-                                        <h3 className="font-bold">Medical Order: {medOrder.content.medications}</h3>
-                                        <p>{new Date(medOrder.date).toLocaleDateString()}</p>
-                                        <h4 className="font-bold">Ordered by: {medOrder.authorName}</h4>
+                                        <button onClick={() => toggleItemExpansion(medOrder._id ?? '')} className="text-white">
+                                            {expandedItems.has(medOrder._id ?? '') ? <ChevronUp /> : <ChevronDown />}
+                                        </button>
+                                        <h3 className="border-white border-2 p-2 text-white">Medical Order</h3>
+                                        <p>{new Date(medOrder.orderDate).toLocaleDateString()}</p>
+                                        <h4 className="text-center">Dr. {medOrder.prescribingDr}</h4>
                                     </div>
-                                    <button onClick={() => toggleItemExpansion(medOrder._id)} className="text-gray-600">
-                                        {expandedItems.includes(medOrder._id) ? <ChevronUp /> : <ChevronDown />}
-                                    </button>
                                 </div>
-                                {expandedItems.includes(medOrder._id) && (
-                                    <div className="mt-2">
-                                        <p><strong>Dosage:</strong> {medOrder.content.dosage}</p>
-                                        <p><strong>Frequency:</strong> {medOrder.content.frequency}</p>
+                                {expandedItems.has(medOrder._id ?? '') && (
+                                    <div className="mt-2 p-2 bg-white text-darkBlue rounded-sm">
+                                        <p><strong>City:</strong> {medOrder.patientCity}</p>
+                                        <h4 className="mt-2 font-bold">Medications:</h4>
+                                        {medOrder.medications.map((medication, index) => (
+                                            <div key={`${medOrder._id}-medication-${index}`} className="mt-2 p-2 bg-gray-100 rounded-sm">
+                                                <p><strong>Diagnosis:</strong> {medication.diagnosis}</p>
+                                                <p><strong>Medication:</strong> {medication.medication}</p>
+                                                <p><strong>Dosage:</strong> {medication.dosage}</p>
+                                                <p><strong>Frequency:</strong> {medication.frequency}</p>
+                                                <p><strong>Quantity:</strong> {medication.quantity}</p>
+                                            </div>
+                                        ))}
                                     </div>
                                 )}
                             </li>
                         ))}
                     </ul>
                 ) : (
-                    <p>No previous medications found for this patient.</p>
+                    <div className="mt-2 border-white border-2 text-white rounded-lg m-4 p-4 text-center">
+                        <p><strong>No previous medications found</strong> for this patient.</p>
+                    </div>
                 )}
             </ScrollArea>
+
+            <RxOrderDrawerView
+                isOpen={isDrawerOpen}
+                onClose={() => setIsDrawerOpen(false)}
+                rxOrder={selectedRxOrder}
+                patientId={patientInfo?.patientID || ""}
+            />
         </div>
     );
-}
+};
+
+export default PreviousMedicationsView;

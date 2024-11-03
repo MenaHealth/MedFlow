@@ -29,13 +29,13 @@ export async function POST(request) {
             return NextResponse.json({ message: 'User with this email already exists' }, { status: 400 });
         }
 
-        // Check if an admin has been created already
+        // Check if an adminDashboard has been created already
         let settings = await Settings.findOne();
         if (!settings) {
             settings = new Settings();  // Create the settings document if it doesn't exist
         }
 
-        // If no admin has been created, the first user will be authorized automatically
+        // If no adminDashboard has been created, the first user will be authorized automatically
         const isAuthorized = !settings.isAdminCreated;
 
         // Create the user object
@@ -61,7 +61,7 @@ export async function POST(request) {
         const newUser = new User(newUserData);
         await newUser.save();
 
-        // If this is the first user, create admin and mark admin creation in settings
+        // If this is the first user, create adminDashboard and mark adminDashboard creation in settings
         if (isAuthorized) {
             await Admin.create({
                 userId: newUser._id,
@@ -71,7 +71,7 @@ export async function POST(request) {
                 adminStartDate: new Date(),
             });
 
-            settings.isAdminCreated = true;  // Mark that admin has been created
+            settings.isAdminCreated = true;  // Mark that adminDashboard has been created
             await settings.save();  // Save the settings document
         }
 

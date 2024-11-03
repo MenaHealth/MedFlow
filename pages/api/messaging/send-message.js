@@ -6,13 +6,16 @@ const client = twilio(accountSid, authToken);
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
-        const { to, message } = req.body;
+        let { to, message } = req.body;
+
+        // Ensure `to` is formatted correctly
+        to = to.startsWith('whatsapp:') ? to : `whatsapp:${to}`;
 
         try {
             const twilioMessage = await client.messages.create({
                 body: message,
-                from: 'whatsapp:+14155238886', // Twilio Sandbox number
-                to,
+                from: 'whatsapp:+14155238886', // Your Twilio WhatsApp number
+                to: to, // Updated to use the prefixed number
             });
             res.status(200).json({ success: true, sid: twilioMessage.sid });
         } catch (error) {

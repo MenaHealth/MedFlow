@@ -49,27 +49,36 @@ export default function MedOrderView({ patientId, user }: MedOrderViewProps) {
                             readOnly={true}
                         />
                     </div>
-                    <TextFormField
-                        fieldName="patientName"
-                        fieldLabel="Patient's Full Name"
-                        value={medOrder.patientName}
-                        readOnly={true}
-                    />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <TextFormField
-                            fieldName="patientPhone"
-                            fieldLabel="Phone"
-                            value={medOrder.patientPhone}
+                            fieldName="patientName"
+                            fieldLabel="Patient's Full Name"
+                            value={medOrder.patientName}
                             readOnly={true}
                         />
                         <TextFormField
-                            fieldName="patientCity"
-                            fieldLabel="City"
-                            value={medOrder.patientCity}
+                            fieldName="patientCountry"
+                            fieldLabel="Country"
+                            value={medOrder.patientCountry}
                             readOnly={true}
                         />
+
                     </div>
-                </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <TextFormField
+                                fieldName="patientCity"
+                                fieldLabel="City"
+                                value={medOrder.patientCity}
+                                readOnly={true}
+                            />
+                            <TextFormField
+                                fieldName="patientPhone"
+                                fieldLabel="Phone"
+                                value={medOrder.patientPhone}
+                                readOnly={true}
+                            />
+                        </div>
+                    </div>
             </fieldset>
 
             {medOrder.medications.map((medication, index) => (

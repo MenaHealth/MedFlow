@@ -61,7 +61,7 @@ export const POST = async (request: Request, { params }: { params: { id: string 
             typeof patientName !== 'string' ||
             typeof patientPhone !== 'string' ||
             typeof patientCity !== 'string' ||
-            typeof patientCountry !== 'string' ||  // Ensure patientCountry is validated
+            typeof patientCountry !== 'string' ||
             !Array.isArray(medications) ||
             hasInvalidMedications
         ) {
@@ -76,7 +76,7 @@ export const POST = async (request: Request, { params }: { params: { id: string 
             patientName,
             patientPhone,
             patientCity,
-            patientCountry,  // Add patientCountry here
+            patientCountry,
             patientId: new Types.ObjectId(patientId),
             orderDate: orderDate || new Date(),
             validated: validated || false,

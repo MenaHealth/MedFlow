@@ -22,6 +22,7 @@ interface MedOrder {
     patientName: string;
     patientPhone: string;
     patientCity: string;
+    patientCountry: string;
     patientId: string;
     orderDate: Date;
     validated: boolean;
@@ -39,6 +40,7 @@ export function useMedOrderViewModel(patientId: string, patientName: string, cit
         patientName: patientInfo?.patientName || '',
         patientPhone: `${patientViewModel?.getExpandedDetails()?.phone?.countryCode || ''} ${patientViewModel?.getExpandedDetails()?.phone?.phoneNumber || ''}`,
         patientCity: patientViewModel?.getExpandedDetails()?.city || '',
+        patientCountry: patientViewModel?.getExpandedDetails()?.country || '',
         patientId: patientId,
         orderDate: new Date(),
         validated: false,

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { PatientDashboardProvider, usePatientDashboard } from './PatientViewModelContext';
-import { User, FileText, LoaderPinwheel, PanelTopOpen, PillBottle } from 'lucide-react';
+import { User, FileText, LoaderPinwheel, PanelTopOpen, PillBottle, MessageCircle } from 'lucide-react'; // Added MessageCircle icon for WhatsApp
 import PatientInfoView from './patient-info/PatientInfoView';
 import { CombinedNotesView } from './../../components/PatientViewModels/PatientNotes/CombinedNotesView';
 import { Skeleton } from './../../components/ui/skeleton';
 import MedicationsView from './Medications/MedicationsView';
 import ImageGallery from './image-gallery/ImageGallery';
+import WhatsAppMessages from './../../components/PatientViewModels/whatsapp-messages/messages'; // Import the WhatsAppMessages component
 
 const PatientDashboardContent: React.FC = () => {
     const {
@@ -39,6 +40,7 @@ const PatientDashboardContent: React.FC = () => {
         }
     };
 
+
     const renderSectionContent = (section: string) => {
         if (section === 'patient-info') {
             if (!patientViewModel || loadingPatientInfo) {
@@ -48,13 +50,22 @@ const PatientDashboardContent: React.FC = () => {
         } else if (section === 'notes') {
             return <CombinedNotesView patientId={patientViewModel?.getPrimaryDetails().patientID || ''} />;
         } else if (section === 'medications') {
-            return <MedicationsView
-                patientId={patientViewModel?.getPrimaryDetails().patientID || ''}
-            />
+            return <MedicationsView patientId={patientViewModel?.getPrimaryDetails().patientID || ''} />;
         } else if (section === 'images') {
             return <ImageGallery />;
+        } else if (section === 'whatsapp-messages') {
+            // Get expanded details and construct the phone number
+            const expandedDetails = patientViewModel?.getExpandedDetails();
+            const phoneNumber = expandedDetails?.phone
+                ? `${expandedDetails.phone.countryCode}${expandedDetails.phone.phoneNumber}` // if phone has a countryCode and phoneNumber property
+                : `${expandedDetails?.country || ''}${expandedDetails?.pmhx || ''}`; // fallback to using country and pmhx if needed
+    
+            return <WhatsAppMessages phoneNumber={phoneNumber} />;
         }
     };
+    
+   
+    
 
     const sections = [
         {
@@ -84,6 +95,13 @@ const PatientDashboardContent: React.FC = () => {
             label: 'Images',
             color: 'bg-darkBlue',
             textColor: 'text-orange-50'
+        },
+        {
+            id: 'whatsapp-messages',
+            icon: MessageCircle, // Using MessageCircle as the icon for WhatsApp Messages
+            label: 'WhatsApp Messages',
+            color: 'bg-green-600',
+            textColor: 'text-white'
         }
     ];
 
@@ -107,7 +125,7 @@ const PatientDashboardContent: React.FC = () => {
                                         !patientViewModel || loadingPatientInfo ? (
                                             <Skeleton className="w-32 h-8" />
                                         ) : (
-                                            patientViewModel.getPrimaryDetails().patientName
+                                            patientViewModel.getPrimaryDetails()?.patientName || "Patient Info"
                                         )
                                     ) : (
                                         section.label

@@ -56,6 +56,7 @@ export enum CountryCodes {
     YEMEN = '+967',
     PALESTINE = '+970',
     ISRAEL = '+972',
+    USA = '1',
 }
 
 export const CountryCodesList = Object.values(CountryCodes)

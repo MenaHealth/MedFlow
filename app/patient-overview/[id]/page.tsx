@@ -9,6 +9,7 @@ import CalendarMonth from '@mui/icons-material/CalendarMonth';
 import Notes from '@mui/icons-material/Notes';
 import Collections from '@mui/icons-material/Collections';
 import LocalPharmacy from '@mui/icons-material/LocalPharmacy';
+import WhatsApp from '@mui/icons-material/WhatsApp'; 
 import { useParams } from 'next/navigation';
 import PatientSubmenu from './../../../components/PatientSubmenu';
 import LabVisits from './../../lab-visits/[id]/page';
@@ -180,6 +181,38 @@ const PatientOverview: React.FC = () => {
                                 }}
                             >
                                 Medications
+                            </Button>
+                        </Box>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                flexDirection: { xs: 'row', sm: 'column' },
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                ...(isClient && {
+                                    '&:hover svg': {
+                                        color: theme.palette.success.main,
+                                    },
+                                }),
+                            }}
+                        >
+                            <WhatsApp sx={{ fontSize: 40, mb: { sm: 2 }, mr: { xs: 2, sm: 0 } }} />
+                            <Button
+                                onClick={() => handleNavigation(`/whatsapp-messages/${id}`)}
+                                variant="contained"
+                                fullWidth
+                                sx={{
+                                    p: 2,
+                                    backgroundColor: '#25D366',
+                                    '&:hover': {
+                                        backgroundColor: '#128C7E',
+                                    },
+                                    color: 'white'
+                                }}
+                            >
+                                WhatsApp Messages
                             </Button>
                         </Box>
                     </Grid>

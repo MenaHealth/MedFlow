@@ -21,7 +21,7 @@ interface PatientInfo {
         countryCode: string;
         phoneNumber: string;
     };
-    patientID: string;
+    patientID: string; 
 }
 
 interface UserSession {
@@ -76,7 +76,7 @@ export const usePatientDashboard = () => {
 };
 
 export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const { id: patientId } = useParams() as { id: string };
+    const { id: patientId } = useParams() as { id: string }; // Retrieve `patientId` from useParams
     const { data: session, status } = useSession();
     const [activeTab, setActiveTab] = useState('patient-info');
     const [patientInfo, setPatientInfo] = useState<PatientInfo | null>(null);
@@ -125,7 +125,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
     const toggleExpand = () => setIsExpanded(prev => !prev);
 
     const formatPatientInfo = useCallback((patientData: IPatient) => {
-        setPatientInfo({
+        const patientInfo: PatientInfo = {
             patientName: `${patientData.firstName} ${patientData.lastName}`,
             age: patientData.age || '',
             city: patientData.city || '',
@@ -135,8 +135,9 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 countryCode: patientData.phone?.countryCode || '',
                 phoneNumber: patientData.phone?.phoneNumber || '',
             },
-            patientID: patientData._id || '',
-        });
+            patientID: patientData._id.toString() || '',
+        };
+        setPatientInfo(patientInfo);
         setPatientViewModel(new PatientInfoViewModel(patientData));
     }, []);
 

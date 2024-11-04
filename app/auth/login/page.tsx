@@ -10,7 +10,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } f
 
 export default function LoginPage() {
     const searchParams = useSearchParams();
-    const resetCode = searchParams.get('code');
+    const resetCode = searchParams ? searchParams.get('code') : null;
     const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {

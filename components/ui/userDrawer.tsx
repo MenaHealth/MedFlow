@@ -37,19 +37,15 @@ export function UserDrawer({ isOpen, setIsOpen, user }: UserDrawerProps) {
     }
 
     return (
-        <Drawer>
-            <DrawerContent className="bg-orange-50 text-orange-950" direction="right" size="70%" title="User Menu">
+        <Drawer isOpen={isOpen} onClose={() => setIsOpen(false)}>
+            <DrawerContent className="bg-orange-50 text-orange-950" direction="right" size="70%">
                 <DrawerHeader className="flex justify-between items-start p-4">
                     <div>
-                        <DrawerTitle className="text-2xl font-bold">{(user.firstName, user.lastName)}</DrawerTitle>
+                        <DrawerTitle className="text-2xl font-bold">{`${user.firstName} ${user.lastName}`}</DrawerTitle>
                         <DrawerDescription className="text-darkBlue/70">
                             Manage your account and settings
                         </DrawerDescription>
                     </div>
-                    {/*<DrawerClose className="absolute right-4 top-4 rounded-full p-2 text-orange-950 transition-colors hover:bg-orange-100">*/}
-                    {/*    <X className="h-6 w-6" />*/}
-                    {/*    <span className="sr-only">Close</span>*/}
-                    {/*</DrawerClose>*/}
                 </DrawerHeader>
                 <ScrollArea className="flex-grow">
                     <div className="p-4 space-y-6">

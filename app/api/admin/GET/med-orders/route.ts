@@ -1,5 +1,3 @@
-// app/api/admin/GET/med-orders/route.ts
-
 import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import dbConnect from './../../../../../utils/database';
@@ -13,18 +11,17 @@ export async function GET(request: Request) {
     const authHeader = request.headers.get('authorization');
     const token = authHeader?.split(' ')[1];
 
-    // Decode and verify JWT
     if (!token) {
         return NextResponse.json({ error: 'Authorization token missing' }, { status: 401 });
     }
 
     try {
         const decoded = jwt.verify(token, SECRET);
-        console.log("Decoded Token:", decoded); // Log the decoded token for verification
+        console.log("Decoded Token:", decoded);
 
-        const { searchParams } = new URL(request.url);
-        const page = parseInt(searchParams.get('page') || '1', 10);
-        const limit = parseInt(searchParams.get('limit') || '20', 10);
+        const url = new URL(request.url);
+        const page = parseInt(url.searchParams.get('page') || '1', 10);
+        const limit = parseInt(url.searchParams.get('limit') || '20', 10);
         const skip = (page - 1) * limit;
 
         const totalOrders = await MedOrder.countDocuments();

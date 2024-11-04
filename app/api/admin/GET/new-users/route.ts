@@ -7,9 +7,9 @@ import User from "./../../../../../models/user";
 export async function GET(request: Request) {
     await dbConnect();
 
-    const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1', 10);
-    const limit = parseInt(searchParams.get('limit') || '20', 10);
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '1', 10);
+    const limit = parseInt(url.searchParams.get('limit') || '20', 10);
     const skip = (page - 1) * limit;
 
     try {
@@ -19,7 +19,7 @@ export async function GET(request: Request) {
 
         const totalUsers = await User.countDocuments(query);
         const pendingUsers = await User.find(query)
-            .select('firstName lastName email accountType countries')  // Fetch only required fields
+            .select('firstName lastName email accountType countries')
             .skip(skip)
             .limit(limit);
 

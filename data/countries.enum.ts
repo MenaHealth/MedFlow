@@ -54,6 +54,7 @@ export enum CountryCodes {
     JORDAN = '+962',
     SYRIA = '+963',
     YEMEN = '+967',
+    USA = '+1',
     PALESTINE = '+970',
     ISRAEL = '+972',
 }

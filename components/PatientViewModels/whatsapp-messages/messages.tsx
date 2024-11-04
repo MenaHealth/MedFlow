@@ -21,7 +21,7 @@ const WhatsAppMessages: React.FC<WhatsAppMessagesProps> = ({ phoneNumber }) => {
         setMessage(""); // Clear the input field
 
         try {
-            const res = await fetch('/api/messaging/send-message', { // Add leading slash here
+            const res = await fetch('/api/whatsapp-webhook', { // Add leading slash here
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

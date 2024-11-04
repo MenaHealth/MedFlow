@@ -1,3 +1,5 @@
+// components/ui/passwordFormField.tsx
+
 import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import * as Form from '@/components/ui/form';
@@ -10,7 +12,6 @@ interface PasswordFormFieldProps {
     className?: string;
     onFocus?: () => void;
     onBlur?: () => void;
-    error?: string;
     disabled?: boolean;
 }
 
@@ -20,17 +21,12 @@ const PasswordFormField: React.FC<PasswordFormFieldProps> = ({
                                                                  className,
                                                                  onFocus,
                                                                  onBlur,
-                                                                 error,
                                                                  disabled,
                                                              }) => {
-    const { control, watch } = useFormContext();
+    const { control, formState: { errors } } = useFormContext();
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const [isFocused, setIsFocused] = useState(false);
     const [showTooltip, setShowTooltip] = useState(false);
-
-    const id = `${fieldName}-input`;
-    const value = watch(fieldName);
-    const isValid = /^(?=.*[0-9]).{8,}$/.test(value || '');
 
     const handleFocus = () => {
         setIsFocused(true);
@@ -48,6 +44,13 @@ const PasswordFormField: React.FC<PasswordFormFieldProps> = ({
         <Form.FormField
             control={control}
             name={fieldName}
+            rules={{
+                required: "This field is required",
+                pattern: {
+                    value: /^(?=.*[0-9]).{8,}$/,
+                    message: "Password must be at least 8 characters long and contain at least one number"
+                }
+            }}
             render={({ field }) => (
                 <Form.FormItem className={`mb-6 p-2 ${className}`}>
                     <div className="relative">
@@ -56,15 +59,13 @@ const PasswordFormField: React.FC<PasswordFormFieldProps> = ({
                             type={isPasswordVisible ? 'text' : 'password'}
                             onFocus={handleFocus}
                             onBlur={handleBlur}
-                            id={id}
+                            id={fieldName}
                             disabled={disabled}
                             className={`w-full pt-4 pb-2 pl-2 pr-10 border ${
-                                isValid ? 'border-orange-500' : 'border-gray-300'
-                            } ${isFocused || field.value ? 'bg-white' : ''} ${
-                                !isValid && field.value ? 'text-orange-700' : ''
-                            }`}
+                                isFocused ? 'border-orange-500' : 'border-gray-300'
+                            } ${isFocused || field.value ? 'bg-white' : ''}`}
                         />
-                        <Form.FormLabel htmlFor={id} className={`absolute transition-all ${
+                        <Form.FormLabel htmlFor={fieldName} className={`absolute transition-all ${
                             (isFocused || field.value) ? 'text-xs -top-6' : 'text-sm top-1/2 -translate-y-1/2'
                         } left-2 pointer-events-none`}>
                             {fieldLabel}
@@ -89,7 +90,9 @@ const PasswordFormField: React.FC<PasswordFormFieldProps> = ({
                             </div>
                         )}
                     </div>
-                    {error && <Form.FormMessage>{error}</Form.FormMessage>}
+                    <Form.FormMessage>
+                        {typeof errors[fieldName]?.message === 'string' ? errors[fieldName]?.message : null}
+                    </Form.FormMessage>
                 </Form.FormItem>
             )}
         />

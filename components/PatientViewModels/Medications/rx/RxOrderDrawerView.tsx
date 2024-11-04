@@ -31,7 +31,7 @@ export default function RxOrderDrawerView({ isOpen, onClose, patientId, rxOrder 
     }
 
     return (
-        <Drawer open={isOpen} onOpenChange={onClose}>
+        <Drawer>
             <DrawerContent direction="bottom" size="75%" title="Export Rx">
                 <DrawerHeader className="border-b border-orange-200 z-50 mb-4">
                     <div className="flex justify-center space-x-4 mt-4">

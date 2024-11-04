@@ -1,3 +1,5 @@
+// components/ui/drawer.tsx
+
 "use client"
 
 import * as React from "react"
@@ -9,27 +11,47 @@ import { ScrollArea } from "./ScrollArea";
 
 type DrawerDirection = 'left' | 'right' | 'top' | 'bottom';
 
-interface DrawerProps extends Omit<React.ComponentProps<typeof DrawerPrimitive.Root>, 'ref'> {
+type DrawerPrimitiveRootProps = React.ComponentProps<typeof DrawerPrimitive.Root>;
+
+interface DrawerProps extends Omit<DrawerPrimitiveRootProps, 'open' | 'onOpenChange'> {
     direction?: DrawerDirection;
-    shouldScaleBackground?: boolean;
+    isOpen?: boolean;
+    onClose?: () => void;
 }
 
 const Drawer = React.forwardRef<
     HTMLDivElement,
-    DrawerProps & { ref?: React.ForwardedRef<HTMLDivElement> }
->(({ shouldScaleBackground = true, direction = 'bottom', ...props }, ref) => {
-    const compatibleProps = { ...props } as Omit<
-        DrawerProps,
-        'fadeFromIndex' | 'ref' | 'shouldScaleBackground'
-    >;
+    DrawerProps
+>(({ direction = 'bottom', isOpen = false, onClose = () => {}, shouldScaleBackground = true, ...props }, ref) => {
+    const {
+        children,
+        modal,
+        nested,
+        dismissible,
+        snapPoints,
+        activeSnapPoint,
+        setActiveSnapPoint,
+    } = props;
+
+    const { fadeFromIndex, ...restProps } = props; // Explicitly destructure `fadeFromIndex` to remove it
 
     return (
-        <div ref={ref}>
-            <DrawerPrimitive.Root
-                {...compatibleProps}
-                shouldScaleBackground={shouldScaleBackground}
-            />
-        </div>
+        <DrawerPrimitive.Root
+            open={isOpen}
+            onOpenChange={(open) => {
+                if (!open) onClose();
+            }}
+            modal={modal}
+            nested={nested}
+            dismissible={dismissible}
+            snapPoints={snapPoints}
+            activeSnapPoint={activeSnapPoint}
+            setActiveSnapPoint={setActiveSnapPoint}
+            shouldScaleBackground={shouldScaleBackground}
+            {...restProps}
+        >
+            {children}
+        </DrawerPrimitive.Root>
     );
 });
 Drawer.displayName = "Drawer";
@@ -44,7 +66,7 @@ const DrawerOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <DrawerPrimitive.Overlay
         ref={ref}
-        className={cn("fixed inset-0 z-50 bg-black/80", className || '')}
+        className={cn("fixed inset-0 z-50 bg-black/80", className)}
         {...props}
     />
 ))
@@ -134,7 +156,7 @@ const DrawerHeader = ({
                           ...props
                       }: React.HTMLAttributes<HTMLDivElement>) => (
     <div
-        className={cn("flex flex-col space-y-2 text-center sm:text-left", className || '')}
+        className={cn("flex flex-col space-y-2 text-center sm:text-left", className)}
         {...props}
     />
 )
@@ -157,7 +179,7 @@ const DrawerTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <DrawerPrimitive.Title
         ref={ref}
-        className={cn("text-lg font-semibold text-foreground", className || '')}
+        className={cn("text-lg font-semibold text-foreground", className)}
         {...props}
     />
 ))
@@ -169,7 +191,7 @@ const DrawerDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <DrawerPrimitive.Description
         ref={ref}
-        className={cn("text-sm text-muted-foreground", className || '')}
+        className={cn("text-sm text-muted-foreground", className)}
         {...props}
     />
 ))

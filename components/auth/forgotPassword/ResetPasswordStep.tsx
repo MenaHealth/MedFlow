@@ -68,12 +68,10 @@ export function ResetPasswordStep() {
                 <PasswordFormField
                     fieldName="newPassword"
                     fieldLabel="New Password"
-                    error={formState.errors.newPassword?.message}
                 />
                 <PasswordFormField
                     fieldName="confirmNewPassword"
                     fieldLabel="Confirm New Password"
-                    error={formState.errors.confirmNewPassword?.message}
                 />
                 <Button type="submit" className="w-full" disabled={submitting || !isFormValid}>
                     {submitting ? (

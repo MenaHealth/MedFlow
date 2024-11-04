@@ -6,7 +6,7 @@ const PUBLIC_FILE = /\.(.*)$/;
 
 export async function middleware(req: any) {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-    const { pathname } = req.nextUrl;
+    const { pathname, searchParams } = req.nextUrl;
 
     // Allow requests to public files, API routes, and any route under '/auth'
     if (
@@ -19,9 +19,13 @@ export async function middleware(req: any) {
         return NextResponse.next();
     }
 
+    // Redirect reset-password requests to the login page with the reset code
+    if (pathname === '/reset-password' && searchParams.has('code')) {
+        return NextResponse.redirect(new URL(`/auth/login?code=${searchParams.get('code')}`, req.url));
+    }
+
     // Check if user is trying to access adminDashboard routes
     if (pathname.startsWith('/adminDashboard')) {
-        // Redirect if no token or user is not an adminDashboard
         if (!token || !token.isAdmin) {
             return NextResponse.redirect(new URL('/', req.url));
         }

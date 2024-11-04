@@ -7,7 +7,6 @@ import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import ForgotPasswordForm from "@/components/auth/forgotPassword/ForgotPasswordForm";
 import { useRouter } from "next/navigation";
 import { signIn, getProviders } from "next-auth/react";
 import { BarLoader } from "react-spinners";
@@ -23,7 +22,6 @@ export function LoginForm() {
     const router = useRouter();
     const { setToast } = useToast();
     const [submitting, setSubmitting] = useState(false);
-    const [showForgotPassword, setShowForgotPassword] = useState(false);
     const [providers, setProviders] = useState<any>(null);
     const [showPassword, setShowPassword] = useState(false);
 
@@ -127,19 +125,6 @@ export function LoginForm() {
                     </div>
                 </form>
             </FormProvider>
-            {!showForgotPassword && (
-                <p className="text-sm text-gray-600 mt-4">
-                    <a href="#" onClick={() => setShowForgotPassword(true)}>Forgot password?</a>
-                </p>
-            )}
-            {showForgotPassword && (
-                <div className="forgot-password-card w-full p-8 rounded-lg shadow-lg bg-white bg-opacity-10 backdrop-filter backdrop-blur-md">
-                    <ForgotPasswordForm />
-                    <button className="text-sm text-gray-600 hover:text-gray-800" onClick={() => setShowForgotPassword(false)}>
-                        Back to login
-                    </button>
-                </div>
-            )}
         </div>
     );
 }

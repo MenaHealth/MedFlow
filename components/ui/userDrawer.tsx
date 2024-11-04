@@ -37,7 +37,7 @@ export function UserDrawer({ isOpen, setIsOpen, user }: UserDrawerProps) {
     }
 
     return (
-        <Drawer open={isOpen} onOpenChange={setIsOpen}>
+        <Drawer>
             <DrawerContent className="bg-orange-50 text-orange-950" direction="right" size="70%" title="User Menu">
                 <DrawerHeader className="flex justify-between items-start p-4">
                     <div>

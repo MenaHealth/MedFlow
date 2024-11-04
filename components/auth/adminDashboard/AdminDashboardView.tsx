@@ -8,8 +8,9 @@ import NewSignupsView from './sections/NewSignupsView';
 import DeniedDoctorsAndTriage from './sections/DeniedDoctorsAndTriageView';
 import ExistingDoctorsAndTriageView from './sections/ExistingDoctorsAndTriageView';
 import MedOrdersView from './sections/MedOrdersView';
+import ForgotPasswordView from "@/components/auth/adminDashboard/sections/ForgotPasswordView";
 import AdminManagement from "@/components/auth/adminDashboard/sections/AdminManagementView";
-import { Loader2, RefreshCw, Users, UserCheck, UserX, Pill, ShieldCheck } from 'lucide-react';
+import {Loader2, RefreshCw, Users, UserCheck, UserX, Pill, ShieldCheck, RotateCcw} from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
 const sections = [
@@ -17,6 +18,7 @@ const sections = [
     { id: 'existing', title: 'Existing Doctors and Triage', icon: UserCheck, color: 'bg-orange-100 text-orange-500', component: ExistingDoctorsAndTriageView },
     { id: 'denied', title: 'Denied Doctors and Triage', icon: UserX, color: 'bg-gray-100 text-gray-800', component: DeniedDoctorsAndTriage },
     { id: 'addAdmin', title: 'Admin Management', icon: ShieldCheck, color: 'bg-darkBlue text-orange-100', component: AdminManagement },
+    { id: 'pwReset', title: 'Password Reset', icon: RotateCcw, color: 'bg-orange-800 text-white', component: ForgotPasswordView },
     { id: 'medOrder', title: 'Medical Orders', icon: Pill, color: 'bg-orange-950 text-white', component: MedOrdersView },
 ] as const;
 

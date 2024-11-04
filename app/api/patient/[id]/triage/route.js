@@ -1,4 +1,4 @@
-// app/api/patient/[id]/triage/route.js
+// app/api/patient/[id]/triage/route.ts
 import dbConnect from "@/utils/database";
 import Patient from "@/models/patient";
 import { Note } from "@/models/note";

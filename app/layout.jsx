@@ -3,6 +3,7 @@ import "@/styles/globals.css";
 import Provider from "@/components/Provider";
 import { ToastProvider } from '@/components/ui/toast';
 import LayoutWrapper from "@/components/LayoutWrapper";
+import Head from 'next/head';
 
 export const metadata = {
   title: "MedFlow",
@@ -10,10 +11,12 @@ export const metadata = {
 };
 
 const RootLayout = ({ children }) => {
-  
   return (
-    <html lang='en' className="h-full w-full">
-    <body className="h-full w-full flex flex-col">
+      <html lang='en' className="h-full w-full">
+      <Head>
+        <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+      </Head>
+      <body className="h-full w-full flex flex-col">
       <ToastProvider>
         <Provider>
           {/* Background Gradient */}
@@ -27,7 +30,9 @@ const RootLayout = ({ children }) => {
           </LayoutWrapper>
         </Provider>
       </ToastProvider>
-    </body>
-  </html>
-)};
+      </body>
+      </html>
+  );
+};
+
 export default RootLayout;

@@ -58,7 +58,7 @@ export default function SignupSuccessPage() {
                         <>
                             <h2 className="mt-6 text-3xl font-extrabold text-gray-900">Thanks for signing up!</h2>
                             <p className="mt-2 text-sm text-gray-600">
-                                Please check your email for more information and next steps.
+                                Please check-in with your admin for next steps.
                             </p>
                             <p className="mt-5 text-sm text-gray-500">
                                 If you want to learn more about medFlow, visit our{' '}

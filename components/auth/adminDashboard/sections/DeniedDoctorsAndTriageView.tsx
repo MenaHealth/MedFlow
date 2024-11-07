@@ -7,9 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Loader2, CheckSquare, UserRoundPlus } from "lucide-react";
 import InfiniteScroll from '@/components/ui/infiniteScroll';
 import { Table, TableColumn } from "@/components/ui/table";
-import { useDeniedDoctorsAndTriageViewModel } from './DeniedDoctorsAndTriageViewModel';
-import type { IUser as User } from '@/models/user';
-import { useSession } from 'next-auth/react'; // Import useSession from next-auth
+import { useDeniedDoctorsAndTriageViewModel, User } from './DeniedDoctorsAndTriageViewModel';
+import { useSession } from 'next-auth/react';
 
 export default function DeniedDoctorsAndTriageView() {
     const {
@@ -20,6 +19,10 @@ export default function DeniedDoctorsAndTriageView() {
         selectedUsers,
         handleCheckboxChange,
         handleReApproveUsers,
+        isCountryVisible,
+        isDoctorSpecialtyVisible,
+        toggleCountryVisibility,
+        toggleDoctorSpecialtyVisibility,
     } = useDeniedDoctorsAndTriageViewModel();
 
     useEffect(() => {
@@ -65,26 +68,50 @@ export default function DeniedDoctorsAndTriageView() {
                 </Button>
             ),
         },
+        {
+            key: 'doctorSpecialty',
+            header: 'Doctor Specialty',
+            hidden: !isDoctorSpecialtyVisible,
+            render: (value: string | undefined) => value || 'N/A'
+        },
+        {
+            key: 'countries',
+            header: 'Country',
+            hidden: !isCountryVisible,
+            render: (value: string[] | undefined) => value?.join(', ') || 'N/A'
+        }
     ];
 
-    // Log the JWT and session data for debugging
-    const { data: session } = useSession(); // Access the session data
+    const { data: session } = useSession();
     useEffect(() => {
         if (session) {
             console.log("Session Data:", session);
-            console.log("DENIED VIEW !!! JWT Token:", session.user.token); // Assuming the token is in session.user.token
+            console.log("DENIED VIEW !!! JWT Token:", session.user.token);
         } else {
             console.log("No session data found");
         }
     }, [session]);
 
-
     return (
         <div className="container mx-auto px-4 py-8">
+            <div className="flex justify-end mb-4 space-x-2">
+                <Button
+                    onClick={toggleCountryVisibility}
+                    variant="outline"
+                >
+                    {isCountryVisible ? 'Hide Country' : 'Show Country'}
+                </Button>
+                <Button
+                    onClick={toggleDoctorSpecialtyVisibility}
+                    variant="outline"
+                >
+                    {isDoctorSpecialtyVisible ? 'Hide Doctor Specialty' : 'Show Doctor Specialty'}
+                </Button>
+            </div>
             <InfiniteScroll
                 dataLength={deniedUsers.length}
                 next={nextDeniedUsers}
-                hasMore={!!hasMoreDeniedUsers} // Convert to boolean with `!!`
+                hasMore={!!hasMoreDeniedUsers}
                 isLoading={loadingDeniedUsers}
             >
                 <Table
@@ -96,14 +123,14 @@ export default function DeniedDoctorsAndTriageView() {
                     borderColor="border-gray-200"
                     headerBackgroundColor="bg-gray-100"
                     headerTextColor="text-black"
-                    hoverBackgroundColor="hover:bg-gray-50"
-                    hoverTextColor="hover:text-black"
+                    hoverBackgroundColor="hover:bg-darkBlue"
+                    hoverTextColor="hover:text-orange-500"
                 />
             </InfiniteScroll>
 
             {loadingDeniedUsers && (
                 <div className="flex justify-center items-center py-4">
-                    <Loader2 className="h-8 w-8 animate-spin text-black" />
+                    <Loader2 className="h-8 w-8 animate-spin text-black"/>
                 </div>
             )}
 
@@ -115,14 +142,13 @@ export default function DeniedDoctorsAndTriageView() {
                 <p className="text-center py-4">No Denied Users found.</p>
             )}
 
-            {/* Centered Re-Approve Button */}
             {selectedUsers.length > 0 && (
                 <div className="flex justify-center mt-6">
                     <Button
                         onClick={() => handleReApproveUsers()}
                         variant="submit"
                     >
-                        <CheckSquare className="w-5 h-5 mr-2" /> Re-Approve Selected
+                        <CheckSquare className="w-5 h-5 mr-2"/> Re-Approve Selected
                     </Button>
                 </div>
             )}

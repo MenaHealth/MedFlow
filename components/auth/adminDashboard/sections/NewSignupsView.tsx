@@ -7,6 +7,7 @@ import InfiniteScroll from '@/components/ui/infiniteScroll';
 import { ScrollArea, ScrollBar } from "@/components/ui/ScrollArea";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Table } from "@/components/ui/table";
 import { useNewSignupsViewModel, User } from './NewSignupsViewModel';
 
 export default function NewSignupsView() {
@@ -16,12 +17,44 @@ export default function NewSignupsView() {
         hasMoreNewSignups,
         nextNewSignups,
         selectedUsers,
-        isCountryVisible,
         handleBulkAction,
         handleCheckboxChange,
-        handleSelectAll,
+        isCountryVisible,
+        isDoctorSpecialtyVisible,
         toggleCountryVisibility,
+        toggleDoctorSpecialtyVisibility,
     } = useNewSignupsViewModel();
+
+    const columns = [
+        {
+            key: 'select',
+            header: '',
+            render: (value: any, user: User) => (
+                <Checkbox
+                    checked={selectedUsers.includes(user._id)}
+                    onCheckedChange={() => handleCheckboxChange(user._id)}
+                />
+            ),
+            width: '40px'
+        },
+        {
+            key: 'name',
+            header: 'Name',
+            render: (value: any, user: User) => `${user.firstName} ${user.lastName}`
+        },
+        { key: 'email', header: 'Email' },
+        { key: 'accountType', header: 'User Type' },
+        {
+            key: 'doctorSpecialty',
+            header: 'Doctor Specialty',
+            hidden: !isDoctorSpecialtyVisible
+        },
+        {
+            key: 'countries',
+            header: 'Country',
+            hidden: !isCountryVisible
+        }
+    ];
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -43,74 +76,44 @@ export default function NewSignupsView() {
                     <UserRoundMinus className="w-5 h-5 mr-2" />
                     Deny Selected
                 </Button>
-
-                <Button
-                    onClick={toggleCountryVisibility}
-                    variant="outline"
-                >
-                    {isCountryVisible ? 'Hide Country' : 'Show Country'}
-                </Button>
             </div>
 
-            <ScrollArea className="w-full rounded-md border">
+            <ScrollArea className="w-full rounded-md">
                 <div className="w-max min-w-full">
+                    <div className="flex justify-end mb-4 space-x-2">
+                        <Button
+                            onClick={toggleCountryVisibility}
+                            variant="outline"
+                        >
+                            {isCountryVisible ? 'Hide Country' : 'Show Country'}
+                        </Button>
+                        <Button
+                            onClick={toggleDoctorSpecialtyVisibility}
+                            variant="outline"
+                        >
+                            {isDoctorSpecialtyVisible ? 'Hide Doctor Specialty' : 'Show Doctor Specialty'}
+                        </Button>
+                    </div>
                     <InfiniteScroll
                         dataLength={newSignups.length}
                         next={nextNewSignups}
                         hasMore={!!hasMoreNewSignups}
                         isLoading={loadingNewSignups}
                     >
-                        <table className="w-full border-collapse">
-                            <thead>
-                            <tr className="bg-muted">
-                                <th className="p-2 text-left font-medium">
-                                    <Checkbox
-                                        checked={selectedUsers.length === newSignups.length && newSignups.length > 0}
-                                        onCheckedChange={handleSelectAll}
-                                    />
-                                </th>
-                                <th className="p-2 text-left font-medium">Name</th>
-                                <th className="p-2 text-left font-medium">Email</th>
-                                <th className="p-2 text-left font-medium">User Type</th>
-                                {isCountryVisible && (
-                                    <th className="p-2 text-left font-medium">Country</th>
-                                )}
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {newSignups.length > 0 ? (
-                                newSignups.map((user: User) => (
-                                    <tr key={user._id} className="border-t">
-                                        <td className="p-2">
-                                            <Checkbox
-                                                checked={selectedUsers.includes(user._id)}
-                                                onCheckedChange={() => handleCheckboxChange(user._id)}
-                                            />
-                                        </td>
-                                        <td className="p-2">
-                                            {user.firstName} {user.lastName}
-                                        </td>
-                                        <td className="p-2">{user.email}</td>
-                                        <td className="p-2">{user.accountType}</td>
-                                        {isCountryVisible && (
-                                            <td className="p-2">
-                                                {user.countries?.join(', ') || 'N/A'}
-                                            </td>
-                                        )}
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan={isCountryVisible ? 5 : 4} className="p-2 text-center">
-                                        No new signups.
-                                    </td>
-                                </tr>
-                            )}
-                            </tbody>
-                        </table>
+                        <Table
+                            data={newSignups}
+                            columns={columns}
+                            backgroundColor="bg-white"
+                            textColor="text-orange-800"
+                            borderColor="border-orange-800"
+                            headerBackgroundColor="bg-orange-100"
+                            headerTextColor="text-text-orange-800"
+                            hoverBackgroundColor="hover:bg-orange-300"
+                            hoverTextColor="hover:text-gray-900"
+                        />
                     </InfiniteScroll>
                 </div>
-                <ScrollBar orientation="horizontal" />
+                <ScrollBar orientation="horizontal"/>
             </ScrollArea>
 
             {loadingNewSignups && (

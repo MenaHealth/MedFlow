@@ -19,7 +19,7 @@ export async function GET(request: Request) {
 
         const totalUsers = await User.countDocuments(query);
         const pendingUsers = await User.find(query)
-            .select('firstName lastName email accountType countries')
+            .select('firstName lastName email doctorSpecialty accountType countries')
             .skip(skip)
             .limit(limit);
 

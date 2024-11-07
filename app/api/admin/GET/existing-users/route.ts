@@ -29,7 +29,7 @@ export async function GET(request: Request) {
 
         // Fetch matching users with pagination, explicitly selecting 'authorized' field
         const existingUsers = await User.find(query)
-            .select('+authorized firstName lastName email accountType countries approvalDate')
+            .select('+authorized firstName lastName doctorSpecialty email accountType countries approvalDate')
             .skip(skip)
             .limit(limit);
 

@@ -1,6 +1,4 @@
 // components/auth/adminDashboard/sections/ExistingDoctorsAndTriageViewModel.tsx
-'use client';
-
 import { useState } from 'react';
 import { useQueryClient, useInfiniteQuery, useMutation } from 'react-query';
 import { useSession } from 'next-auth/react';
@@ -12,13 +10,18 @@ export interface User {
     lastName: string;
     email: string;
     accountType: 'Doctor' | 'Triage';
+    doctorSpecialty?: string;
     countries?: string[];
     approvalDate?: string;
+    gender: 'male' | 'female';
+    dob: string;
+    languages: string[];
 }
 
 export function useExistingDoctorsAndTriageViewModel() {
     const { data: session } = useSession();
-    const [isCountryVisible, setIsCountryVisible] = useState(true);
+    const [isCountryVisible, setIsCountryVisible] = useState(false);
+    const [isDoctorSpecialtyVisible, setIsDoctorSpecialtyVisible] = useState(false);
     const queryClient = useQueryClient();
     const { setToast } = useToast();
 
@@ -96,6 +99,51 @@ export function useExistingDoctorsAndTriageViewModel() {
     };
 
     const toggleCountryVisibility = () => setIsCountryVisible((prev) => !prev);
+    const toggleDoctorSpecialtyVisibility = () => setIsDoctorSpecialtyVisible((prev) => !prev);
+
+    const editUserMutation = useMutation(
+        async ({ userId, data }: { userId: string; data: Partial<User> }) => {
+            const res = await fetch(`/api/user/${userId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${session?.user.token}`,
+                },
+                body: JSON.stringify(data),
+            });
+            if (!res.ok) throw new Error('Failed to update user');
+            return res.json();
+        },
+        {
+            onSuccess: () => {
+                setToast({
+                    title: 'Success',
+                    description: 'User updated successfully.',
+                    variant: 'default',
+                });
+                queryClient.invalidateQueries('existingUsers');
+            },
+            onError: (error: any) => {
+                setToast({
+                    title: 'Error',
+                    description: error.message || 'Failed to update user.',
+                    variant: 'destructive',
+                });
+            },
+        }
+    );
+
+    const handleEditUser = async (userId: string, data: Partial<User>) => {
+        if (!session?.user?.isAdmin) {
+            setToast({
+                title: 'Error',
+                description: 'You do not have permission to perform this action.',
+                variant: 'destructive',
+            });
+            return;
+        }
+        editUserMutation.mutate({ userId, data });
+    };
 
     return {
         existingUsers,
@@ -103,7 +151,10 @@ export function useExistingDoctorsAndTriageViewModel() {
         hasMoreExistingUsers,
         nextExistingUsers,
         isCountryVisible,
+        isDoctorSpecialtyVisible,
         toggleCountryVisibility,
+        toggleDoctorSpecialtyVisibility,
         handleMoveToDenied,
+        handleEditUser,
     };
 }

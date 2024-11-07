@@ -13,12 +13,14 @@ export interface User {
     email: string;
     accountType: 'Doctor' | 'Triage';
     countries?: string[];
+    doctorSpecialty?: string;
 }
 
 export function useNewSignupsViewModel() {
     const { data: session } = useSession();
     const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-    const [isCountryVisible, setIsCountryVisible] = useState(true);
+    const [isCountryVisible, setIsCountryVisible] = useState(false);
+    const [isDoctorSpecialtyVisible, setIsDoctorSpecialtyVisible] = useState(false);
     const queryClient = useQueryClient();
     const { setToast } = useToast();
 
@@ -111,6 +113,7 @@ export function useNewSignupsViewModel() {
     };
 
     const toggleCountryVisibility = () => setIsCountryVisible((prev) => !prev);
+    const toggleDoctorSpecialtyVisibility = () => setIsDoctorSpecialtyVisible((prev) => !prev);
 
     return {
         newSignups,
@@ -119,9 +122,11 @@ export function useNewSignupsViewModel() {
         nextNewSignups,
         selectedUsers,
         isCountryVisible,
+        isDoctorSpecialtyVisible,
         handleBulkAction,
         handleCheckboxChange,
         handleSelectAll,
         toggleCountryVisibility,
+        toggleDoctorSpecialtyVisibility,
     };
 }

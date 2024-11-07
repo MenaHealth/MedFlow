@@ -1,17 +1,29 @@
-// components/auth/adminDashboard/sections/DeniedDoctorsAndTriageViewModel.tsx
+'use client';
 
 import { useState } from 'react';
 import { useQueryClient, useInfiniteQuery, useMutation } from 'react-query';
 import { useSession } from 'next-auth/react';
 import useToast from '@/components/hooks/useToast';
 
-export function useDeniedDoctorsAndTriageViewModel() {
-    const { data: session } = useSession(); // Access the session data
-    const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-    const queryClient = useQueryClient();
-    const { setToast } = useToast(); // Initialize toast hook
+export interface User {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    accountType: 'Doctor' | 'Triage';
+    doctorSpecialty?: string;
+    countries?: string[];
+    denialDate?: string;
+}
 
-    // Fetch denied users with pagination
+export function useDeniedDoctorsAndTriageViewModel() {
+    const { data: session } = useSession();
+    const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+    const [isCountryVisible, setIsCountryVisible] = useState(false);
+    const [isDoctorSpecialtyVisible, setIsDoctorSpecialtyVisible] = useState(false);
+    const queryClient = useQueryClient();
+    const { setToast } = useToast();
+
     const {
         data,
         isLoading: loadingDeniedUsers,
@@ -20,7 +32,11 @@ export function useDeniedDoctorsAndTriageViewModel() {
     } = useInfiniteQuery(
         'deniedUsers',
         async ({ pageParam = 1 }) => {
-            const res = await fetch(`/api/admin/GET/denied-users?page=${pageParam}&limit=20`);
+            const res = await fetch(`/api/admin/GET/denied-users?page=${pageParam}&limit=20`, {
+                headers: {
+                    Authorization: `Bearer ${session?.user.token}`,
+                },
+            });
             if (!res.ok) throw new Error('Failed to fetch denied users');
             const result = await res.json();
             return {
@@ -31,24 +47,19 @@ export function useDeniedDoctorsAndTriageViewModel() {
         },
         {
             getNextPageParam: (lastPage) => (lastPage.hasMore ? lastPage.nextPage : undefined),
+            enabled: !!session?.user.token,
         }
     );
 
     const deniedUsers = data?.pages.flatMap((page) => page.users) || [];
 
-    // Re-approve users mutation
     const reApproveMutation = useMutation(
         async (userIds: string[]) => {
-            const token = session?.user.token;
-            if (!token) {
-                throw new Error('User is not authenticated');
-            }
-
             const res = await fetch('/api/admin/POST/re-approve-users', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
+                    Authorization: `Bearer ${session?.user.token}`,
                 },
                 body: JSON.stringify({ userIds }),
             });
@@ -57,30 +68,35 @@ export function useDeniedDoctorsAndTriageViewModel() {
         },
         {
             onSuccess: () => {
-                // Show success toast
                 setToast({
-                    title: 'Users Re-Approved',
-                    description: 'Selected users have been successfully re-approved.',
-                    variant: 'success',
+                    title: 'Success',
+                    description: 'Users re-approved successfully.',
+                    variant: 'default',
                 });
-
-                // Clear the selection and refresh denied users data
                 setSelectedUsers([]);
-                queryClient.invalidateQueries('deniedUsers'); // Re-fetch denied users
+                queryClient.invalidateQueries('deniedUsers');
             },
             onError: (error: any) => {
-                // Show error toast
                 setToast({
                     title: 'Error',
                     description: error.message || 'Failed to re-approve users.',
-                    variant: 'error',
+                    variant: 'destructive',
                 });
             },
         }
     );
 
-    const handleReApproveUsers = (userIds: string[] = selectedUsers) => {
-        reApproveMutation.mutate(userIds);
+    const handleReApproveUsers = (userIds?: string[]) => {
+        const idsToApprove = userIds || selectedUsers;
+        if (idsToApprove.length === 0) {
+            setToast({
+                title: 'Error',
+                description: 'No users selected for re-approval.',
+                variant: 'destructive',
+            });
+            return;
+        }
+        reApproveMutation.mutate(idsToApprove);
     };
 
     const handleCheckboxChange = (userId: string) => {
@@ -89,13 +105,20 @@ export function useDeniedDoctorsAndTriageViewModel() {
         );
     };
 
+    const toggleCountryVisibility = () => setIsCountryVisible((prev) => !prev);
+    const toggleDoctorSpecialtyVisibility = () => setIsDoctorSpecialtyVisible((prev) => !prev);
+
     return {
         deniedUsers,
         loadingDeniedUsers,
         hasMoreDeniedUsers,
         nextDeniedUsers,
         selectedUsers,
+        isCountryVisible,
+        isDoctorSpecialtyVisible,
         handleCheckboxChange,
         handleReApproveUsers,
+        toggleCountryVisibility,
+        toggleDoctorSpecialtyVisibility,
     };
 }

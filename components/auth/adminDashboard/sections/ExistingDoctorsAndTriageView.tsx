@@ -1,12 +1,13 @@
-// components/auth/adminDashboard/sections/ExistingDoctorsAndTriageView.tsx
 'use client';
 
-import React from 'react';
-import { Minus, Loader2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Minus, Loader2, Edit } from 'lucide-react';
 import InfiniteScroll from '@/components/ui/infiniteScroll';
 import { ScrollArea, ScrollBar } from "@/components/ui/ScrollArea";
 import { Button } from "@/components/ui/button";
+import { Table, TableColumn } from "@/components/ui/table";
 import { useExistingDoctorsAndTriageViewModel, User } from './ExistingDoctorsAndTriageViewModel';
+import { EditUserModal } from './EditUserModal';
 
 export default function ExistingDoctorsAndTriageView() {
     const {
@@ -14,19 +15,79 @@ export default function ExistingDoctorsAndTriageView() {
         loadingExistingUsers,
         hasMoreExistingUsers,
         nextExistingUsers,
-        isCountryVisible,
-        toggleCountryVisibility,
         handleMoveToDenied,
+        isCountryVisible,
+        isDoctorSpecialtyVisible,
+        toggleCountryVisibility,
+        toggleDoctorSpecialtyVisibility,
+        handleEditUser,
     } = useExistingDoctorsAndTriageViewModel();
+
+    const [editingUser, setEditingUser] = useState<User | null>(null);
+
+    const columns: TableColumn<User>[] = [
+        {
+            key: 'name',
+            header: 'Name',
+            render: (value: any, user: User) => `${user.firstName} ${user.lastName}`
+        },
+        { key: 'email', header: 'Email' },
+        { key: 'accountType', header: 'User Type' },
+        {
+            key: 'actions',
+            header: 'Actions',
+            render: (value: any, user: User) => (
+                <div className="flex space-x-2">
+                    <Button
+                        onClick={() => handleMoveToDenied(user._id)}
+                        variant="outline"
+                        size="sm"
+                    >
+                        <Minus className="w-4 h-4" />
+                    </Button>
+                    <Button
+                        onClick={() => setEditingUser(user)}
+                        variant="outline"
+                        size="sm"
+                    >
+                        <Edit className="w-4 h-4" />
+                    </Button>
+                </div>
+            )
+        },
+        {
+            key: 'approvalDate',
+            header: 'Approval Date',
+            render: (value: string | undefined) => value ? new Date(value).toLocaleDateString() : 'N/A'
+        },
+        {
+            key: 'doctorSpecialty',
+            header: 'Doctor Specialty',
+            hidden: !isDoctorSpecialtyVisible,
+            render: (value: string | undefined) => value || 'N/A'
+        },
+        {
+            key: 'countries',
+            header: 'Country',
+            hidden: !isCountryVisible,
+            render: (value: string[] | undefined) => value?.join(', ') || 'N/A'
+        }
+    ];
 
     return (
         <div className="container mx-auto px-4 py-8">
-            <div className="flex justify-end mb-4">
+            <div className="flex justify-end mb-4 space-x-2">
                 <Button
                     onClick={toggleCountryVisibility}
-                    variant="outline"
+                    variant="ghost"
                 >
                     {isCountryVisible ? 'Hide Country' : 'Show Country'}
+                </Button>
+                <Button
+                    onClick={toggleDoctorSpecialtyVisibility}
+                    variant="ghost"
+                >
+                    {isDoctorSpecialtyVisible ? 'Hide Doctor Specialty' : 'Show Doctor Specialty'}
                 </Button>
             </div>
 
@@ -38,48 +99,17 @@ export default function ExistingDoctorsAndTriageView() {
                         hasMore={!!hasMoreExistingUsers}
                         isLoading={loadingExistingUsers}
                     >
-                        <table className="w-full border-collapse">
-                            <thead>
-                            <tr className="bg-muted">
-                                <th className="p-2 text-left font-medium">Name</th>
-                                <th className="p-2 text-left font-medium">Email</th>
-                                <th className="p-2 text-left font-medium">User Type</th>
-                                {isCountryVisible && (
-                                    <th className="p-2 text-left font-medium">Country</th>
-                                )}
-                                <th className="p-2 text-left font-medium">Approval Date</th>
-                                <th className="p-2 text-left font-medium">Actions</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {existingUsers.map((user: User, index: number) => (
-                                <tr key={user._id} className="border-t">
-                                    <td className="p-2">{user.firstName} {user.lastName}</td>
-                                    <td className="p-2">{user.email}</td>
-                                    <td className="p-2">{user.accountType}</td>
-                                    {isCountryVisible && (
-                                        <td className="p-2">{user.countries?.join(', ') || 'N/A'}</td>
-                                    )}
-                                    <td className="p-2">
-                                        {user.approvalDate ? new Date(user.approvalDate).toLocaleDateString() : 'N/A'}
-                                    </td>
-                                    <td className="p-2">
-                                        {index !== 0 ? (
-                                            <Button
-                                                onClick={() => handleMoveToDenied(user._id)}
-                                                variant="outline"
-                                                size="sm"
-                                            >
-                                                <Minus className="w-4 h-4" />
-                                            </Button>
-                                        ) : (
-                                            <span className="text-orange-50 bg-orange-500 px-2 py-1 rounded"> Root</span>
-                                        )}
-                                    </td>
-                                </tr>
-                            ))}
-                            </tbody>
-                        </table>
+                        <Table
+                            data={existingUsers}
+                            columns={columns}
+                            backgroundColor="bg-orange-100"
+                            textColor="text-orange-950"
+                            borderColor="border-orange-500"
+                            headerBackgroundColor="bg-orange-200"
+                            headerTextColor="text-orange-950"
+                            hoverBackgroundColor="hover:bg-white"
+                            hoverTextColor="hover:text-darkBlue"
+                        />
                     </InfiniteScroll>
                 </div>
                 <ScrollBar orientation="horizontal" />
@@ -95,6 +125,14 @@ export default function ExistingDoctorsAndTriageView() {
             )}
             {existingUsers.length === 0 && !loadingExistingUsers && (
                 <p className="text-center py-4">No existing users found.</p>
+            )}
+
+            {editingUser && (
+                <EditUserModal
+                    user={editingUser}
+                    onClose={() => setEditingUser(null)}
+                    onSave={handleEditUser}
+                />
             )}
         </div>
     );

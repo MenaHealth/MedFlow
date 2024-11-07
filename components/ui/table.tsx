@@ -1,62 +1,8 @@
 "use client"
 
-import React, { useState, useMemo, useRef, useEffect } from 'react'
+import React, { useState, useMemo, useRef } from 'react'
 import { ChevronUp, ChevronDown, ChevronRight, ChevronLeft } from 'lucide-react'
-import { cn } from "../../utils/classNames"
-
-interface ResizableProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onResize'> {
-    minWidth?: number;
-    maxWidth?: number;
-    defaultWidth?: number;
-    onResize?: (width: number) => void;
-}
-
-const Resizable = React.forwardRef<HTMLDivElement, ResizableProps>(
-    ({ className, children, minWidth = 50, maxWidth = 800, defaultWidth = 200, onResize, ...props }, ref) => {
-        const [width, setWidth] = React.useState(defaultWidth)
-        const isDragging = React.useRef(false)
-        const startX = React.useRef(0)
-        const startWidth = React.useRef(0)
-
-        const handleMouseDown = (e: React.MouseEvent) => {
-            isDragging.current = true
-            startX.current = e.clientX
-            startWidth.current = width
-            document.addEventListener('mousemove', handleMouseMove)
-            document.addEventListener('mouseup', handleMouseUp)
-        }
-
-        const handleMouseMove = (e: MouseEvent) => {
-            if (!isDragging.current) return
-            const newWidth = Math.max(minWidth, Math.min(maxWidth, startWidth.current + e.clientX - startX.current))
-            setWidth(newWidth)
-            onResize?.(newWidth)
-        }
-
-        const handleMouseUp = () => {
-            isDragging.current = false
-            document.removeEventListener('mousemove', handleMouseMove)
-            document.removeEventListener('mouseup', handleMouseUp)
-        }
-
-        return (
-            <div
-                ref={ref}
-                className={cn("relative", className)}
-                style={{ width: `${width}px` }}
-                {...props}
-            >
-                {children}
-                <div
-                    className="absolute top-0 right-0 w-1 h-full cursor-col-resize bg-gray-300 hover:bg-gray-400"
-                    onMouseDown={handleMouseDown}
-                />
-            </div>
-        )
-    }
-)
-
-Resizable.displayName = "Resizable"
+import { Resizable } from './../ui/Resizable'
 
 export interface TableColumn<T> {
     key: keyof T | string

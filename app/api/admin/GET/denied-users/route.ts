@@ -27,7 +27,7 @@ export async function GET(request: Request) {
 
         // Fetch denied users with specified filter and pagination
         const deniedUsers = await User.find(filter)
-            .select('firstName lastName email accountType countries denialDate')
+            .select('firstName lastName doctorSpecialty email accountType countries denialDate')
             .skip(skip)
             .limit(limit);
 

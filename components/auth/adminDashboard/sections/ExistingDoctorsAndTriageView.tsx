@@ -1,13 +1,14 @@
+// components/auth/adminDashboard/sections/ExistingDoctorsAndTriageView.tsx
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Minus, Loader2, Edit } from 'lucide-react';
 import InfiniteScroll from '@/components/ui/infiniteScroll';
 import { ScrollArea, ScrollBar } from "@/components/ui/ScrollArea";
 import { Button } from "@/components/ui/button";
 import { Table, TableColumn } from "@/components/ui/table";
 import { useExistingDoctorsAndTriageViewModel, User } from './ExistingDoctorsAndTriageViewModel';
-import { EditUserModal } from './EditUserModal';
+import { EditUserModal } from './EditUserModalView';
 
 export default function ExistingDoctorsAndTriageView() {
     const {
@@ -24,6 +25,15 @@ export default function ExistingDoctorsAndTriageView() {
     } = useExistingDoctorsAndTriageViewModel();
 
     const [editingUser, setEditingUser] = useState<User | null>(null);
+
+    // Sort users by approval date in descending order
+    const sortedUsers = useMemo(() => {
+        return [...existingUsers].sort((a, b) => {
+            const dateA = a.approvalDate ? new Date(a.approvalDate).getTime() : 0;
+            const dateB = b.approvalDate ? new Date(b.approvalDate).getTime() : 0;
+            return dateB - dateA;
+        });
+    }, [existingUsers]);
 
     const columns: TableColumn<User>[] = [
         {
@@ -94,13 +104,13 @@ export default function ExistingDoctorsAndTriageView() {
             <ScrollArea className="w-full rounded-md border">
                 <div className="w-max min-w-full">
                     <InfiniteScroll
-                        dataLength={existingUsers.length}
+                        dataLength={sortedUsers.length}
                         next={nextExistingUsers}
                         hasMore={!!hasMoreExistingUsers}
                         isLoading={loadingExistingUsers}
                     >
                         <Table
-                            data={existingUsers}
+                            data={sortedUsers}
                             columns={columns}
                             backgroundColor="bg-orange-100"
                             textColor="text-orange-950"
@@ -120,10 +130,10 @@ export default function ExistingDoctorsAndTriageView() {
                     <Loader2 className="h-8 w-8 animate-spin"/>
                 </div>
             )}
-            {!hasMoreExistingUsers && existingUsers.length > 0 && (
+            {!hasMoreExistingUsers && sortedUsers.length > 0 && (
                 <p className="text-center py-4">No more existing users to load.</p>
             )}
-            {existingUsers.length === 0 && !loadingExistingUsers && (
+            {sortedUsers.length === 0 && !loadingExistingUsers && (
                 <p className="text-center py-4">No existing users found.</p>
             )}
 
@@ -131,7 +141,6 @@ export default function ExistingDoctorsAndTriageView() {
                 <EditUserModal
                     user={editingUser}
                     onClose={() => setEditingUser(null)}
-                    onSave={handleEditUser}
                 />
             )}
         </div>

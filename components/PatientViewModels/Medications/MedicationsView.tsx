@@ -36,7 +36,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
     const [showAllMedications, setShowAllMedications] = useState(false);
     const [expandAll, setExpandAll] = useState(false);
     const [showOrderForm, setShowOrderForm] = useState(true);
-    const [isLatestExpanded, setIsLatestExpanded] = useState(false); // Added state for latest medication expansion
+    const [isLatestExpanded, setIsLatestExpanded] = useState(false);
 
     const methods = useForm({
         defaultValues: templateType === 'rxOrder' ? { rxOrder: rxOrders } : { medOrder: medOrders },
@@ -90,6 +90,11 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
         };
     }, []);
 
+    const toggleAllMedications = () => {
+        setShowAllMedications(!showAllMedications);
+        setShowOrderForm(showAllMedications);
+    };
+
     if (loadingMedications) {
         return (
             <div className="flex items-center justify-center h-[100vh] text-white bg-orange-950" aria-live="polite">
@@ -103,11 +108,11 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
         <FormProvider {...methods}>
             <form onSubmit={methods.handleSubmit(handleCreateMedication)}>
                 <div className="flex flex-col h-[100vh] overflow-hidden bg-orange-950">
-                    <div className="flex-grow overflow-auto">
-                        {!showAllMedications && latestMedication && (
-                            <div className="p-4 border-b border-white/10">
-                                <div className="text-white">
-                                    <div className="flex items-center justify-between">
+                    <div className="flex-grow overflow-auto border-t-2 border-white rounded-lg">
+                        {latestMedication && (
+                            <div className="p-4 border-b border-b-2 border-white rounded-lg">
+                                <div className="text-white ">
+                                    <div className="flex items-center justify-between ">
                                         <div>
                                             <div className="inline-block border-2 border-white p-2 rounded mb-2">
                                                 {isRxOrder ? 'Rx Order' : 'Medical Order'}
@@ -121,17 +126,22 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                             onClick={() => setIsLatestExpanded(!isLatestExpanded)}
                                             aria-expanded={isLatestExpanded}
                                         >
-                                            <ChevronDown className="h-6 w-6" />
+                                            <ChevronDown className="h-6 w-6"/>
                                         </Button>
                                     </div>
                                     {isLatestExpanded && (
                                         <div className="mt-2 p-2 bg-white text-darkBlue rounded-sm">
-                                            <p><strong>City:</strong> {isRxOrder ? latestMedication.city : latestMedication.patientCity}</p>
-                                            {isRxOrder && <p><strong>Valid Till:</strong> {new Date(latestMedication.validTill).toLocaleDateString()}</p>}
+                                            <p>
+                                                <strong>City:</strong> {isRxOrder ? latestMedication.city : latestMedication.patientCity}
+                                            </p>
+                                            {isRxOrder && <p><strong>Valid
+                                                Till:</strong> {new Date(latestMedication.validTill).toLocaleDateString()}
+                                            </p>}
                                             <h4 className="mt-2 font-bold">{isRxOrder ? 'Prescriptions:' : 'Medications:'}</h4>
                                             {isRxOrder ? (
                                                 (latestMedication as IRxOrder).prescriptions.map((med, medIndex) => (
-                                                    <div key={`latest-med-${medIndex}`} className="mt-2 p-2 bg-gray-100 rounded-sm">
+                                                    <div key={`latest-med-${medIndex}`}
+                                                         className="mt-2 p-2 bg-gray-100 rounded-sm">
                                                         <p><strong>Diagnosis:</strong> {med.diagnosis}</p>
                                                         <p><strong>Medication:</strong> {med.medication}</p>
                                                         <p><strong>Dosage:</strong> {med.dosage}</p>
@@ -140,7 +150,8 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                                 ))
                                             ) : (
                                                 (latestMedication as IMedOrder).medications.map((med, medIndex) => (
-                                                    <div key={`latest-med-${medIndex}`} className="mt-2 p-2 bg-gray-100 rounded-sm">
+                                                    <div key={`latest-med-${medIndex}`}
+                                                         className="mt-2 p-2 bg-gray-100 rounded-sm">
                                                         <p><strong>Diagnosis:</strong> {med.diagnosis}</p>
                                                         <p><strong>Medication:</strong> {med.medication}</p>
                                                         <p><strong>Dosage:</strong> {med.dosage}</p>
@@ -152,100 +163,84 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                         </div>
                                     )}
                                 </div>
-                                {allMedications.length > 1 && (
-                                    <Button
-                                        variant="ghost"
-                                        className="w-full mt-4 text-white"
-                                        onClick={() => {
-                                            setShowAllMedications(true);
-                                            setShowOrderForm(false);
-                                        }}
-                                    >
-                                        <ChevronDown className="mr-2 h-4 w-4" />
-                                        all previous medications
-                                    </Button>
-                                )}
                             </div>
                         )}
 
-                        {showAllMedications ? (
-                            <div className="h-full">
-                                <Button
-                                    variant="ghost"
-                                    className="mb-4 text-white"
-                                    onClick={() => {
-                                        setShowAllMedications(false);
-                                        setShowOrderForm(true);
-                                    }}
-                                >
-                                    <ChevronLeft className="mr-2 h-4 w-4" />
-                                    back
-                                </Button>
-                                <div className="flex justify-between items-center p-4 border-b border-white/10">
-                                    <h2 className="text-lg font-semibold text-white">Previous Medications</h2>
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => setExpandAll(!expandAll)}
-                                        className="text-white"
-                                    >
-                                        {expandAll ? <ChevronsUp className="h-5 w-5" /> : <ChevronsDown className="h-5 w-5" />}
-                                    </Button>
-                                </div>
-                                <PreviousMedicationsView
-                                    rxOrders={rxOrders}
-                                    medOrders={medOrders}
-                                    loadingMedications={loadingMedications}
-                                    isMobile={isMobile}
-                                    expandAll={expandAll}
-                                />
-                            </div>
-                        ) : (
-                            <>
-                                {showOrderForm && (
-                                    <div className="p-4">
-                                        <RadioCard.Root
-                                            defaultValue={templateType}
-                                            onValueChange={handleValueChange}
-                                            className="flex w-full mb-4"
-                                        >
-                                            <RadioCard.Item value="rxOrder" className={`flex-1 ${templateType === 'rxOrder' ? 'bg-white text-orange-950' : 'text-gray-400'}`}>
-                                                Rx Order
-                                            </RadioCard.Item>
-                                            <RadioCard.Item value="medOrder" className={`flex-1 ${templateType === 'medOrder' ? 'bg-white text-orange-950' : 'text-gray-400'}`}>
-                                                Medication Order
-                                            </RadioCard.Item>
-                                        </RadioCard.Root>
-
-                                        {templateType === 'rxOrder' && (
-                                            <RXOrderView
-                                                user={{
-                                                    firstName: userSession?.firstName || '',
-                                                    lastName: userSession?.lastName || '',
-                                                    doctorSpecialty: (userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList) || 'NOT_SELECTED',
-                                                }}
-                                                patientId={patientId}
-                                                patientInfo={{
-                                                    patientName: patientInfo?.patientName || '',
-                                                    phoneNumber: patientInfo?.phone?.phoneNumber || '',
-                                                    age: patientInfo?.age || '',
-                                                    city: patientInfo?.city || ''
-                                                }}
-                                            />
-                                        )}
-                                        {templateType === 'medOrder' && (
-                                            <MedOrderView
-                                                patientId={patientId}
-                                                user={{
-                                                    firstName: userSession?.firstName || '',
-                                                    lastName: userSession?.lastName || '',
-                                                    doctorSpecialty: (userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList) || 'NOT_SELECTED',
-                                                }}
-                                            />
-                                        )}
-                                    </div>
+                        <div className="sticky bottom-0 w-full p-4 bg-orange-950 border-t border-white/10">
+                            <Button
+                                variant="outline"
+                                className="w-full"
+                                onClick={toggleAllMedications}
+                            >
+                                {showAllMedications ? (
+                                    <>
+                                        <ChevronDown className="mr-2 h-4 w-4"/>
+                                        Hide previous medications
+                                    </>
+                                ) : (
+                                    <>
+                                        <ChevronDown className="mr-2 h-4 w-4"/>
+                                        All previous medications
+                                    </>
                                 )}
-                            </>
+                            </Button>
+                        </div>
+
+                        <div
+                            className={`transition-all duration-300 ${showAllMedications ? 'h-full' : 'h-0 overflow-hidden'}`}>
+                            <PreviousMedicationsView
+                                rxOrders={rxOrders}
+                                medOrders={medOrders}
+                                loadingMedications={loadingMedications}
+                                isMobile={isMobile}
+                                expandAll={expandAll}
+                            />
+                        </div>
+
+                        {!showAllMedications && (
+                            <div className="p-4">
+                                <RadioCard.Root
+                                    defaultValue={templateType}
+                                    onValueChange={handleValueChange}
+                                    className="flex w-full mb-4"
+                                >
+                                    <RadioCard.Item value="rxOrder"
+                                                    className={`flex-1 ${templateType === 'rxOrder' ? 'bg-white text-orange-950' : 'text-gray-400'}`}>
+                                        Rx Order
+                                    </RadioCard.Item>
+                                    <RadioCard.Item value="medOrder"
+                                                    className={`flex-1 ${templateType === 'medOrder' ? 'bg-white text-orange-950' : 'text-gray-400'}`}>
+                                        Medication Order
+                                    </RadioCard.Item>
+                                </RadioCard.Root>
+
+                                {templateType === 'rxOrder' && (
+                                    <RXOrderView
+                                        user={{
+                                            firstName: userSession?.firstName || '',
+                                            lastName: userSession?.lastName || '',
+                                            doctorSpecialty: (userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList) || 'NOT_SELECTED',
+                                        }}
+                                        patientId={patientId}
+                                        patientInfo={{
+                                            patientName: patientInfo?.patientName || '',
+                                            phoneNumber: patientInfo?.phone?.phoneNumber || '',
+                                            age: patientInfo?.age || '',
+                                            city: patientInfo?.city || ''
+                                        }}
+                                    />
+                                )}
+                                {templateType === 'medOrder' && (
+                                    <MedOrderView
+                                        patientId={patientId}
+                                        user={{
+                                            firstName: userSession?.firstName || '',
+                                            lastName: userSession?.lastName || '',
+                                            doctorSpecialty: (userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList) || 'NOT_SELECTED',
+                                        }}
+                                    />
+                                )}
+                            </div>
                         )}
                     </div>
                 </div>

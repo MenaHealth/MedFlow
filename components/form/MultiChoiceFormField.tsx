@@ -1,41 +1,27 @@
-import React, { useState, useCallback } from 'react';
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { useFormContext } from "react-hook-form";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/ScrollArea";
-import { Check, ChevronsUpDown } from "lucide-react";
-import { cn } from "../../utils/classNames";
-import { Send } from "lucide-react";
+"use client"
+
+import React from 'react'
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
+import { useFormContext } from "react-hook-form"
+import { cn } from "@/lib/utils"
+import {
+    MultiSelector,
+    MultiSelectorTrigger,
+    MultiSelectorInput,
+    MultiSelectorContent,
+    MultiSelectorList,
+    MultiSelectorItem,
+} from "./MultiSelector"
+import { ScrollArea } from "./../ui/ScrollArea"
 
 interface MultiChoiceFormFieldProps {
-    fieldName: string;
-    fieldLabel: string;
-    choices: string[];
+    fieldName: string
+    fieldLabel: string
+    choices: string[]
 }
 
 export function MultiChoiceFormField({ fieldName, fieldLabel, choices }: MultiChoiceFormFieldProps) {
-    const form = useFormContext();
-    const [open, setOpen] = useState(false);
-    const [selectedItems, setSelectedItems] = useState<string[]>([]);
-
-    const handleSelect = useCallback((currentValue: string) => {
-        setSelectedItems((prev) => {
-            if (prev.includes(currentValue)) {
-                return prev.filter(item => item !== currentValue);
-            } else {
-                return [...prev, currentValue];
-            }
-        });
-    }, []);
-
-    const handleSubmit = useCallback(() => {
-        form.setValue(fieldName, selectedItems);
-        setOpen(false);
-    }, [fieldName, form, selectedItems]);
-
-    const displayValue = form.watch(fieldName);
+    const form = useFormContext()
 
     return (
         <FormField
@@ -44,60 +30,39 @@ export function MultiChoiceFormField({ fieldName, fieldLabel, choices }: MultiCh
             render={({ field }) => (
                 <FormItem className="flex flex-col">
                     <FormLabel>{fieldLabel}</FormLabel>
-                    <Popover open={open} onOpenChange={setOpen}>
-                        <PopoverTrigger asChild>
-                            <FormControl>
-                                <Button
-                                    variant="outline"
-                                    role="combobox"
-                                    aria-expanded={open}
+                    <FormControl>
+                        <MultiSelector
+                            values={field.value || []}
+                            onValuesChange={(newValues) => {
+                                field.onChange(newValues)
+                                form.trigger(fieldName)
+                            }}
+                        >
+                            <MultiSelectorTrigger className="w-full">
+                                <MultiSelectorInput
+                                    placeholder={`Select ${fieldLabel}`}
                                     className={cn(
-                                        "w-full justify-between",
-                                        typeof displayValue === "string" && !displayValue.length ? "text-muted-foreground" : ""
+                                        "w-full text-left justify-between",
+                                        field.value && field.value.length > 0 ? "" : "text-muted-foreground"
                                     )}
-                                >
-                                    {displayValue && displayValue.length > 0
-                                        ? displayValue.join(", ")
-                                        : `Select ${fieldLabel}`}
-                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                </Button>
-                            </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[300px] p-0">
-                            <Command>
-                                {choices.length >= 7 && (
-                                    <CommandInput placeholder={`Search ${fieldLabel.toLowerCase()}...`} />
-                                )}
-                                <CommandEmpty>No {fieldLabel.toLowerCase()} found.</CommandEmpty>
-                                <CommandGroup>
-                                    <ScrollArea className="h-72">
-                                        {choices.map((choice) => (
-                                            <CommandItem
-                                                key={choice}
-                                                onSelect={() => handleSelect(choice)}
-                                            >
-                                                <Check
-                                                    className={cn(
-                                                        "mr-2 h-4 w-4",
-                                                        selectedItems.includes(choice) ? "opacity-100" : "opacity-0"
-                                                    )}
-                                                />
+                                />
+                            </MultiSelectorTrigger>
+                            <MultiSelectorContent className="w-full sm:w-[350px] md:w-[450px]">
+                                <ScrollArea className="h-[200px] w-full rounded-md border">
+                                    <MultiSelectorList>
+                                        {choices.map((choice, index) => (
+                                            <MultiSelectorItem key={index} value={choice}>
                                                 {choice}
-                                            </CommandItem>
+                                            </MultiSelectorItem>
                                         ))}
-                                    </ScrollArea>
-                                </CommandGroup>
-                            </Command>
-                            <div className="flex items-center justify-center p-2">
-                                <Button className="w-full" onClick={handleSubmit}>
-                                    <Send className="h-5 w-5 text-white" />
-                                </Button>
-                            </div>
-                        </PopoverContent>
-                    </Popover>
+                                    </MultiSelectorList>
+                                </ScrollArea>
+                            </MultiSelectorContent>
+                        </MultiSelector>
+                    </FormControl>
                     <FormMessage />
                 </FormItem>
             )}
         />
-    );
+    )
 }

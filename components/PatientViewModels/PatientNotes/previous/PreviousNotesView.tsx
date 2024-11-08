@@ -1,10 +1,9 @@
 // components/PatientViewModels/PatientNotes/PreviousNotesView.tsx
-import React, { useState, useEffect, Dispatch, SetStateAction } from 'react';
-import { ChevronDown, ChevronsDown, ChevronsUp, ChevronUp, Trash2Icon } from 'lucide-react'; // Importing the Chevron icons
+import React, { useState, Dispatch, SetStateAction } from 'react';
+import { ChevronDown, ChevronsDown, ChevronsUp, ChevronUp, Trash2Icon } from 'lucide-react';
 import { usePreviousNotesViewModel } from './PreviousNotesViewModel';
-import { CombinedNotesViewModel } from '../CombinedNotesViewModel';
 import { ScrollArea } from '../../../ui/ScrollArea';
-import { RadioCard } from './../../../../components/ui/radio-card';
+import { RadioCard } from '@/components/ui/radio-card';
 import { INote } from '@/models/note';
 import { useSession } from 'next-auth/react';
 
@@ -87,7 +86,7 @@ export function PreviousNotesView({ patientId, setTemplateType, deleteNote, popu
                             </RadioCard.Root>
                     )
                 }
-                {!viewingDraftNotes 
+                {!viewingDraftNotes
                     ? notes.length > 0 ? (
                         <ul className="list-none p-0">
                             {notes.map((note) => (
@@ -152,8 +151,8 @@ export function PreviousNotesView({ patientId, setTemplateType, deleteNote, popu
                                 <li
                                     key={note._id}
                                     className={`p-4 border-b border-gray-200 last:border-b-0 transition-all duration-500 ease-out ${getBackgroundColor(note.noteType)} cursor-pointer`}
-                                    onClick={() => { 
-                                        setTemplateType(note.noteType); 
+                                    onClick={() => {
+                                        setTemplateType(note.noteType);
                                         populateNote(note)
                                     }}
                                 >

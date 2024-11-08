@@ -1,26 +1,43 @@
 // components/PatientViewModels/Medications/previous/PreviousMedicationsView.tsx
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, Share } from 'lucide-react';
 import { ScrollArea } from '../../../ui/ScrollArea';
 import RxOrderDrawerView from '../rx/RxOrderDrawerView';
 import { IRxOrder } from '../../../../models/patient';
 import { IMedOrder } from '../../../../models/medOrder';
 import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewModelContext';
+import { Button } from '@/components/ui/button';
 
 interface PreviousMedicationsViewProps {
     rxOrders: IRxOrder[];
     medOrders: IMedOrder[];
     loadingMedications: boolean;
+    isMobile: boolean;
+    expandAll: boolean;
 }
 
-const PreviousMedicationsView: React.FC<PreviousMedicationsViewProps> = ({ rxOrders, medOrders, loadingMedications }) => {
+const PreviousMedicationsView: React.FC<PreviousMedicationsViewProps> = ({
+                                                                             rxOrders,
+                                                                             medOrders,
+                                                                             loadingMedications,
+                                                                             isMobile,
+                                                                             expandAll
+                                                                         }) => {
     const { patientInfo } = usePatientDashboard();
     const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [selectedRxOrder, setSelectedRxOrder] = useState<IRxOrder | null>(null);
 
-    if (loadingMedications) return <p>Loading medications...</p>;
+    useEffect(() => {
+        if (expandAll) {
+            setExpandedItems(new Set(allMedications.map(item => item._id ?? '')));
+        } else {
+            setExpandedItems(new Set());
+        }
+    }, [expandAll]);
+
+    if (loadingMedications) return <p aria-live="polite">Loading medications...</p>;
 
     const toggleItemExpansion = (itemId: string) => {
         setExpandedItems(prev => {
@@ -39,75 +56,81 @@ const PreviousMedicationsView: React.FC<PreviousMedicationsViewProps> = ({ rxOrd
         setIsDrawerOpen(true);
     };
 
+    const renderMedicationItem = (item: IRxOrder | IMedOrder) => {
+        const isRxOrder = 'prescriptions' in item;
+        const itemId = item._id ?? '';
+        const isExpanded = expandedItems.has(itemId);
+
+        return (
+            <li key={itemId} className="text-white border-white border-t-2 border-l-2 p-4 m-4 rounded-lg">
+                <div className="flex justify-between items-center">
+                    <div>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => toggleItemExpansion(itemId)}
+                            aria-expanded={isExpanded}
+                            aria-controls={`medication-details-${itemId}`}
+                        >
+                            {isExpanded ? <ChevronUp className="mr-2" /> : <ChevronDown className="mr-2" />}
+                            <span className="sr-only">{isExpanded ? 'Collapse' : 'Expand'} medication details</span>
+                        </Button>
+                        <h3 className="border-white border-2 p-2 text-white inline-block ml-2">
+                            {isRxOrder ? 'Rx Order' : 'Medical Order'}
+                        </h3>
+                    </div>
+                    {isRxOrder && (
+                        <Button variant="ghost" size="sm" onClick={() => handleOpenDrawer(item as IRxOrder)}>
+                            <Share className="mr-2" />
+                            <span className="sr-only">Share Rx Order</span>
+                        </Button>
+                    )}
+                </div>
+                <p className="mt-2">{new Date(isRxOrder ? item.prescribedDate : item.orderDate).toLocaleDateString()}</p>
+                <h4 className="text-center">Dr. {item.prescribingDr}</h4>
+                {isExpanded && (
+                    <div id={`medication-details-${itemId}`} className="mt-2 p-2 bg-white text-darkBlue rounded-sm">
+                        <p><strong>City:</strong> {isRxOrder ? item.city : item.patientCity}</p>
+                        {isRxOrder && <p><strong>Valid Till:</strong> {new Date(item.validTill).toLocaleDateString()}</p>}
+                        <h4 className="mt-2 font-bold">{isRxOrder ? 'Prescriptions:' : 'Medications:'}</h4>
+                        {isRxOrder ? (
+                            (item as IRxOrder).prescriptions.map((med, medIndex) => (
+                                <div key={`${itemId}-med-${medIndex}`} className="mt-2 p-2 bg-gray-100 rounded-sm">
+                                    <p><strong>Diagnosis:</strong> {med.diagnosis}</p>
+                                    <p><strong>Medication:</strong> {med.medication}</p>
+                                    <p><strong>Dosage:</strong> {med.dosage}</p>
+                                    <p><strong>Frequency:</strong> {med.frequency}</p>
+                                </div>
+                            ))
+                        ) : (
+                            (item as IMedOrder).medications.map((med, medIndex) => (
+                                <div key={`${itemId}-med-${medIndex}`} className="mt-2 p-2 bg-gray-100 rounded-sm">
+                                    <p><strong>Diagnosis:</strong> {med.diagnosis}</p>
+                                    <p><strong>Medication:</strong> {med.medication}</p>
+                                    <p><strong>Dosage:</strong> {med.dosage}</p>
+                                    <p><strong>Frequency:</strong> {med.frequency}</p>
+                                    <p><strong>Quantity:</strong> {med.quantity}</p>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                )}
+            </li>
+        );
+    };
+
+    const allMedications = [...rxOrders, ...medOrders].sort((a, b) => {
+        const dateA = new Date('prescribedDate' in a ? a.prescribedDate : a.orderDate);
+        const dateB = new Date('prescribedDate' in b ? b.prescribedDate : b.orderDate);
+        return dateB.getTime() - dateA.getTime();
+    });
+
     return (
         <div className="h-full bg-orange-950">
             <ScrollArea className="h-full w-full">
-                {rxOrders.length > 0 || medOrders.length > 0 ? (
+                {allMedications.length > 0 ? (
                     <ul className="list-none m-2">
-                        {/* Render RX Orders */}
-                        {rxOrders.map((rxOrder) => (
-                            <li key={rxOrder._id} className="text-white border-white border-t-2 border-l-2 p-4 m-4 rounded-lg">
-                                <div className="flex justify-between">
-                                    <div>
-                                        <button onClick={() => toggleItemExpansion(rxOrder._id ?? '')} className="text-white">
-                                            {expandedItems.has(rxOrder._id ?? '') ? <ChevronUp /> : <ChevronDown />}
-                                        </button>
-                                        <h3 className="border-white border-2 p-2 text-white">Rx Order</h3>
-                                        <p>{new Date(rxOrder.prescribedDate).toLocaleDateString()}</p>
-                                        <h4 className="text-center">Dr. {rxOrder.prescribingDr}</h4>
-                                    </div>
-                                    <button onClick={() => handleOpenDrawer(rxOrder)} className="text-white ml-2">
-                                        <Share />
-                                    </button>
-                                </div>
-                                {expandedItems.has(rxOrder._id ?? '') && (
-                                    <div className="mt-2 p-2 bg-white text-darkBlue rounded-sm">
-                                        <p><strong>City:</strong> {rxOrder.city}</p>
-                                        <p><strong>Valid Till:</strong> {new Date(rxOrder.validTill).toLocaleDateString()}</p>
-                                        <h4 className="mt-2 font-bold">Prescriptions:</h4>
-                                        {rxOrder.prescriptions.map((prescription, index) => (
-                                            <div key={`${rxOrder._id}-prescription-${index}`} className="mt-2 p-2 bg-gray-100 rounded-sm">
-                                                <p><strong>Diagnosis:</strong> {prescription.diagnosis}</p>
-                                                <p><strong>Medication:</strong> {prescription.medication}</p>
-                                                <p><strong>Dosage:</strong> {prescription.dosage}</p>
-                                                <p><strong>Frequency:</strong> {prescription.frequency}</p>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </li>
-                        ))}
-
-                        {/* Render Medical Orders */}
-                        {medOrders.map((medOrder) => (
-                            <li key={medOrder._id} className="text-white border-white border-t-2 border-l-2 p-4 m-4 rounded-lg">
-                                <div className="flex justify-between">
-                                    <div>
-                                        <button onClick={() => toggleItemExpansion(medOrder._id ?? '')} className="text-white">
-                                            {expandedItems.has(medOrder._id ?? '') ? <ChevronUp /> : <ChevronDown />}
-                                        </button>
-                                        <h3 className="border-white border-2 p-2 text-white">Medical Order</h3>
-                                        <p>{new Date(medOrder.orderDate).toLocaleDateString()}</p>
-                                        <h4 className="text-center">Dr. {medOrder.prescribingDr}</h4>
-                                    </div>
-                                </div>
-                                {expandedItems.has(medOrder._id ?? '') && (
-                                    <div className="mt-2 p-2 bg-white text-darkBlue rounded-sm">
-                                        <p><strong>City:</strong> {medOrder.patientCity}</p>
-                                        <h4 className="mt-2 font-bold">Medications:</h4>
-                                        {medOrder.medications.map((medication, index) => (
-                                            <div key={`${medOrder._id}-medication-${index}`} className="mt-2 p-2 bg-gray-100 rounded-sm">
-                                                <p><strong>Diagnosis:</strong> {medication.diagnosis}</p>
-                                                <p><strong>Medication:</strong> {medication.medication}</p>
-                                                <p><strong>Dosage:</strong> {medication.dosage}</p>
-                                                <p><strong>Frequency:</strong> {medication.frequency}</p>
-                                                <p><strong>Quantity:</strong> {medication.quantity}</p>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </li>
-                        ))}
+                        {allMedications.map(renderMedicationItem)}
                     </ul>
                 ) : (
                     <div className="mt-2 border-white border-2 text-white rounded-lg m-4 p-4 text-center">

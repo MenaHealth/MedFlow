@@ -1,3 +1,4 @@
+// components/PatientViewModels/PatientViewModel
 import React, { useState, useEffect } from 'react';
 import { PatientDashboardProvider, usePatientDashboard } from './PatientViewModelContext';
 import { User, FileText, LoaderPinwheel, PanelTopOpen, PillBottle, MessageCircle } from 'lucide-react';
@@ -8,6 +9,10 @@ import MedicationsView from './Medications/MedicationsView';
 import ImageGallery from './image-gallery/ImageGallery';
 import WhatsAppMessages from './../../components/PatientViewModels/whatsapp-messages/messages';
 
+import dynamic from 'next/dynamic';
+
+// Import Agora App Builder Wrapper dynamically
+const AppBuilderWrapper = dynamic(() => import('./../../components/PatientViewModels/videocall/AppBuilderWrapper'), { ssr: false });
 
 
 const PatientDashboardContent: React.FC = () => {
@@ -54,14 +59,23 @@ const PatientDashboardContent: React.FC = () => {
             return <MedicationsView patientId={patientViewModel?.getPrimaryDetails().patientID || ''} />;
         } else if (section === 'images') {
             return <ImageGallery />;
-        } else if (section === 'whatsapp-messages') {
+        } else if (section === 'contact') {
             const expandedDetails = patientViewModel?.getExpandedDetails();
             const phoneNumber = expandedDetails?.phone
                 ? `${expandedDetails.phone.countryCode}${expandedDetails.phone.phoneNumber}`
                 : `${expandedDetails?.country || ''}${expandedDetails?.pmhx || ''}`;
 
-            return <WhatsAppMessages phoneNumber={phoneNumber} />;
-        }
+                return (
+                    <div className="grid grid-cols-3 gap-4 p-4">
+                        <div className="bg-white p-4 flex items-center justify-center col-span-1">
+                            <WhatsAppMessages phoneNumber={phoneNumber} />
+                        </div>
+                        <div className="bg-white p-4 flex items-center justify-center col-span-2">
+                            <AppBuilderWrapper />
+                        </div>
+                    </div>
+                );
+            }
     };
 
     const sections = [
@@ -94,9 +108,9 @@ const PatientDashboardContent: React.FC = () => {
             textColor: 'text-orange-50'
         },
         {
-            id: 'whatsapp-messages',
+            id: 'contact',
             icon: MessageCircle,
-            label: 'WhatsApp Messages',
+            label: 'Contact',
             color: 'bg-green-600',
             textColor: 'text-white'
         }

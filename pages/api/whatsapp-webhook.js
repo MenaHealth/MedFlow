@@ -5,14 +5,16 @@ const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TO
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
+        // Check if the request is an incoming message from Twilio
         if (req.body.Body && req.body.From) {
-            // Handle incoming message from Twilio
+            // Handle incoming message
             const incomingMessage = req.body.Body;
             const fromNumber = req.body.From;
 
-            console.log(`Received message from ${fromNumber}: ${incomingMessage}`);
+            console.log(`Received incoming WhatsApp message from ${fromNumber}: ${incomingMessage}`);
 
             try {
+                // Send an auto-reply to the incoming message
                 await client.messages.create({
                     body: `Thank you for your message: "${incomingMessage}"`,
                     from: 'whatsapp:+14155238886', // Twilio's WhatsApp sandbox number
@@ -24,9 +26,11 @@ export default async function handler(req, res) {
                 console.error("Error sending auto-reply:", error);
                 res.status(500).json({ success: false, error: error.message });
             }
-        } else {
+        } else if (req.body.to && req.body.message) {
             // Handle outgoing message
             const { to, message } = req.body;
+
+            console.log(`Sending outgoing message to ${to}: ${message}`);
 
             try {
                 await client.messages.create({
@@ -36,12 +40,14 @@ export default async function handler(req, res) {
                 });
                 res.status(200).json({ success: true });
             } catch (error) {
+                console.error("Error sending outgoing message:", error);
                 res.status(500).json({ success: false, error: error.message });
             }
+        } else {
+            res.status(400).json({ success: false, error: "Invalid request format" });
         }
     } else {
         res.setHeader('Allow', ['POST']);
         res.status(405).send('Method Not Allowed');
     }
 };
-

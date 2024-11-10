@@ -1,5 +1,5 @@
 // components/auth/adminDashboard/sections/ExistingDoctorsAndTriageViewModel.tsx
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQueryClient, useInfiniteQuery, useMutation } from 'react-query';
 import { useSession } from 'next-auth/react';
 import useToast from '@/components/hooks/useToast';
@@ -22,6 +22,7 @@ export function useExistingDoctorsAndTriageViewModel() {
     const { data: session } = useSession();
     const [isCountryVisible, setIsCountryVisible] = useState(false);
     const [isDoctorSpecialtyVisible, setIsDoctorSpecialtyVisible] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
     const queryClient = useQueryClient();
     const { setToast } = useToast();
 
@@ -53,6 +54,12 @@ export function useExistingDoctorsAndTriageViewModel() {
     );
 
     const existingUsers = data?.pages.flatMap((page) => page.users) || [];
+
+    const filteredUsers = useMemo(() => {
+        return existingUsers.filter(user =>
+            user.email.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [existingUsers, searchTerm]);
 
     const moveToDeniedMutation = useMutation(
         async (userId: string) => {
@@ -146,7 +153,7 @@ export function useExistingDoctorsAndTriageViewModel() {
     };
 
     return {
-        existingUsers,
+        existingUsers: filteredUsers,
         loadingExistingUsers,
         hasMoreExistingUsers,
         nextExistingUsers,
@@ -156,5 +163,7 @@ export function useExistingDoctorsAndTriageViewModel() {
         toggleDoctorSpecialtyVisibility,
         handleMoveToDenied,
         handleEditUser,
+        searchTerm,
+        setSearchTerm,
     };
 }

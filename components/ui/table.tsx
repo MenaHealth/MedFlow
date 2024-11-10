@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useMemo, useRef } from 'react'
+import React, {useState, useMemo, useRef, useEffect} from 'react'
 import { ChevronUp, ChevronDown, ChevronRight, ChevronLeft } from 'lucide-react'
 import { Resizable } from './../ui/Resizable'
 
@@ -47,8 +47,13 @@ export function Table<T>({
     const [expandedColumns, setExpandedColumns] = useState<string[]>([])
     const [columnWidths, setColumnWidths] = useState<{ [key: string]: number }>({})
     const tableRef = useRef<HTMLDivElement>(null)
+    const [isOneColumn, setIsOneColumn] = useState(false)
 
     const hiddenColumns = useMemo(() => columns.filter(col => col.hidden).map(col => col.key.toString()), [columns])
+
+    useEffect(() => {
+        setIsOneColumn(columns.filter(col => !col.hidden).length === 1)
+    }, [columns, expandedColumns])
 
     const handleSort = (column: string) => {
         if (sortColumn === column) {
@@ -169,7 +174,11 @@ export function Table<T>({
     }
 
     return (
-        <div ref={tableRef} className={`relative overflow-x-auto ${backgroundColor} ${stickyHeader ? 'max-h-[500px] overflow-y-auto' : ''}`}>
+        <div
+            ref={tableRef}
+            className={`relative overflow-x-auto ${backgroundColor} ${stickyHeader ? 'max-h-[500px] overflow-y-auto' : ''}`}
+            style={{ paddingBottom: isOneColumn ? '2rem' : '0' }} // Add padding when there's only one column
+        >
             <table className={`w-full border-collapse ${textColor}`}>
                 <thead
                     className={`${headerBackgroundColor} ${headerTextColor} ${stickyHeader ? 'sticky top-0 z-10' : ''}`}>

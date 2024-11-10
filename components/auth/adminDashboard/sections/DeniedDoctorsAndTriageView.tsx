@@ -86,7 +86,6 @@ export default function DeniedDoctorsAndTriageView() {
     useEffect(() => {
         if (session) {
             console.log("Session Data:", session);
-            console.log("DENIED VIEW !!! JWT Token:", session.user.token);
         } else {
             console.log("No session data found");
         }

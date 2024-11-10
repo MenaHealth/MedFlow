@@ -74,7 +74,7 @@ export default function AdminManagementView() {
             header: 'Actions',
             render: (_: any, admin: Admin) => (
                 <Button
-                    variant="default"
+                    className="hover:text-orange-500 hover:border-orange-500 hover:border-2 hover:bg-white transition-colors"
                     size="icon"
                     onClick={() => handleRemoveAdmin(admin._id)}
                     disabled={admin._id === firstAdminId}

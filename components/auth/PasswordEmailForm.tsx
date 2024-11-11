@@ -1,3 +1,5 @@
+// components/auth/PasswordEmailForm.tsx
+
 import React, { useEffect } from 'react';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,7 +10,7 @@ import { useSignupContext } from './SignupContext';
 import EmailField from "@/components/ui/emailField";
 
 const passwordEmailSchema = z.object({
-    email: z.string().email("Invalid email address"),
+    email: z.string().email("Invalid email address").transform(val => val.toLowerCase()),
     password: z.string().min(8, "Password must be at least 8 characters"),
     confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -30,7 +32,7 @@ const PasswordEmailForm = () => {
     const form = useForm<PasswordEmailFormValues>({
         resolver: zodResolver(passwordEmailSchema),
         defaultValues: {
-            email: formData.email || '',
+            email: formData.email ? formData.email.toLowerCase() : '',
             password: formData.password || '',
             confirmPassword: formData.confirmPassword || '',
         },
@@ -53,7 +55,7 @@ const PasswordEmailForm = () => {
 
         setFormData((prevData) => ({
             ...prevData,
-            email,
+            email: email.toLowerCase(), // Ensure email is always stored in lowercase
             password,
             confirmPassword,
         }));
@@ -65,13 +67,11 @@ const PasswordEmailForm = () => {
     return (
         <Form {...form}>
             <form className="h-full flex flex-col justify-between space-y-6 lg:space-y-8 lg:w-1/2 mx-auto py-8">
-                {/* Email Field */}
                 <EmailField
                     form={form}
                     fieldName="email"
                     fieldLabel="Email"
                 />
-                {/* Password Fields */}
                 <PasswordFormField
                     fieldName="password"
                     fieldLabel="Password"

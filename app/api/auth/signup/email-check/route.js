@@ -1,33 +1,31 @@
 // app/api/auth/signup/email-check/route.ts
 export const dynamic = 'force-dynamic';
-// have this line ^^ to stop the Dynamic server usage errors when running `npm run build`
 
-import User from '@/models/user'; // Import your User model
-import dbConnect from '@/utils/database'; // Import your database connection utility
+import User from '@/models/user';
+import dbConnect from '@/utils/database';
 
 export async function GET(request) {
-    // Connect to the database
     await dbConnect();
 
     try {
-        // Extract the email from query parameters
         const { searchParams } = new URL(request.url);
         const email = searchParams.get('email');
 
-        // Check if email is provided
         if (!email) {
             return new Response(JSON.stringify({ error: 'Email is required' }), { status: 400 });
         }
 
-        // Search for an existing user with the provided email
-        const user = await User.findOne({ email });
+        // Convert the email to lowercase for case-insensitive comparison
+        const lowercaseEmail = email.toLowerCase();
 
-        // If a user with the provided email exists, return a response indicating that
+        // Use a case-insensitive regex to search for the email
+        const emailRegex = new RegExp(`^${lowercaseEmail}$`, 'i');
+        const user = await User.findOne({ email: emailRegex });
+
         if (user) {
             return new Response(JSON.stringify({ message: 'Account already exists. Please login.' }), { status: 409 });
         }
 
-        // If no user is found, return a response indicating the email is available
         return new Response(JSON.stringify({ message: 'Email available for signup.' }), { status: 200 });
 
     } catch (error) {

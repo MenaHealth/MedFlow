@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Minus, Loader2, Edit, Search } from 'lucide-react';
+import { Minus, Loader2, Edit, Search, X } from 'lucide-react';
 import InfiniteScroll from '@/components/ui/infiniteScroll';
 import { ScrollArea, ScrollBar } from "@/components/ui/ScrollArea";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,7 @@ export default function ExistingDoctorsAndTriageView() {
     } = useExistingDoctorsAndTriageViewModel();
 
     const [editingUser, setEditingUser] = useState<User | null>(null);
+    const [isSearchFocused, setIsSearchFocused] = useState(false);
 
     // Sort users by approval date in descending order
     const sortedUsers = useMemo(() => {
@@ -49,7 +50,7 @@ export default function ExistingDoctorsAndTriageView() {
             header: 'Email',
             render: (value: string) => (
                 <div className="flex items-center">
-                    <span>{value}</span>
+                    <span className="truncate max-w-[150px] sm:max-w-none">{value}</span>
                     <Button
                         variant="ghost"
                         size="sm"
@@ -105,40 +106,49 @@ export default function ExistingDoctorsAndTriageView() {
 
     return (
         <div className="container mx-auto px-4 py-8">
-            <div className="flex justify-between mb-4">
-                <div className="flex items-center space-x-2">
+            <div className="flex flex-col mb-4 space-y-4 sm:flex-row sm:justify-between sm:space-y-0">
+                <div className="relative w-full sm:w-64">
                     <Input
                         type="text"
                         placeholder="Search by email"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-64 bg-white text-darkBlue"
+                        onFocus={() => setIsSearchFocused(true)}
+                        onBlur={() => setIsSearchFocused(false)}
+                        className={`w-full bg-white text-darkBlue pr-10 ${
+                            isSearchFocused ? 'absolute z-10 left-0 right-0' : ''
+                        }`}
                     />
-                    <Button
-                        onClick={() => setSearchTerm('')}
-                        variant="outline"
-                        size="sm"
-                    >
-                        Clear
-                    </Button>
+                    {searchTerm && (
+                        <Button
+                            onClick={() => setSearchTerm('')}
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-2 top-1/2 transform -translate-y-1/2"
+                        >
+                            <X className="w-4 h-4" />
+                        </Button>
+                    )}
                 </div>
-                <div className="flex space-x-2">
+                <div className="flex flex-wrap gap-2 sm:flex-nowrap">
                     <Button
                         onClick={toggleCountryVisibility}
                         variant="ghost"
+                        className="w-full sm:w-auto"
                     >
                         {isCountryVisible ? 'Hide Country' : 'Show Country'}
                     </Button>
                     <Button
                         onClick={toggleDoctorSpecialtyVisibility}
                         variant="ghost"
+                        className="w-full sm:w-auto"
                     >
                         {isDoctorSpecialtyVisible ? 'Hide Doctor Specialty' : 'Show Doctor Specialty'}
                     </Button>
                 </div>
             </div>
 
-            <ScrollArea className="w-full rounded-md border border-orange-300 ">
+            <ScrollArea className="w-full rounded-md border border-orange-300">
                 <div className="w-max min-w-full">
                     <InfiniteScroll
                         dataLength={sortedUsers.length}

@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { UseFormReturn, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ForgotPasswordFormValues, forgotPasswordSchema, SecurityQuestionData } from './forgotPasswordSchema';
-import useToast, { Toast } from '../../hooks/useToast';
+import { useToast, ToastProps } from '../../hooks/useToast';
 import bcrypt from "bcryptjs";
 
 interface ForgotPasswordContextType {
@@ -16,7 +16,7 @@ interface ForgotPasswordContextType {
     setLoading: (loading: boolean) => void;
     submitting: boolean;
     setSubmitting: (submitting: boolean) => void;
-    setToast: (toast: Toast | null) => void;
+    setToast: (toast: ToastProps | null) => void;
     handleNextStep: () => Promise<void>;
     handleVerificationStep: (tempCode: string) => Promise<void>;
     canSendVerificationCode: () => boolean;

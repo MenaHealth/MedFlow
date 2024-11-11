@@ -1,7 +1,7 @@
 import { useSession } from 'next-auth/react';
 import { useState, useCallback } from 'react';
 import { useQueryClient } from 'react-query';
-import useToast from '@/components/hooks/useToast';
+import { useToast } from '@/components/hooks/useToast';
 
 interface User {
     _id: string;

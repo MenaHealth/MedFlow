@@ -2,7 +2,7 @@
 'use client';
 
 import { useForm, FormProvider } from "react-hook-form";
-import useToast from '../hooks/useToast';
+import { useToast } from '../hooks/useToast';
 import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";

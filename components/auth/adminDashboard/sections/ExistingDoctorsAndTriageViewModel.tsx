@@ -2,7 +2,7 @@
 import { useState, useMemo } from 'react';
 import { useQueryClient, useInfiniteQuery, useMutation } from 'react-query';
 import { useSession } from 'next-auth/react';
-import useToast from '@/components/hooks/useToast';
+import { useToast } from '@/components/hooks/useToast';
 
 export interface User {
     _id: string;

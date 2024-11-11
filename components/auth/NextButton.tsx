@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Send } from "lucide-react";
 import { useSignupContext } from "@/components/auth/SignupContext"
-import useToast from "./../hooks/useToast"
+import { useToast } from "./../hooks/useToast"
 import { Loader2 } from "lucide-react"
 
 export default function NextButton() {

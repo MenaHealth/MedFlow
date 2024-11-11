@@ -4,7 +4,7 @@ import * as ToastPrimitives from "@radix-ui/react-toast"
 import { X } from "lucide-react"
 import { cn } from "@/utils/classNames"
 
-type ToastProps = {
+export type ToastProps = {
     title: string;
     description?: string;
     variant?: 'default' | 'destructive' | 'success' | 'error';

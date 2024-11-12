@@ -46,11 +46,15 @@ export const ToastComponent: React.FC = () => {
             {toast && (
                 <ToastPrimitives.Root
                     className={cn(
-                        "fixed bottom-4 right-4 z-50 flex items-center justify-between space-x-4 rounded-md border p-6 shadow-lg",
-                        toast.variant === 'destructive' && "bg-destructive text-destructive-foreground",
-                        toast.variant === 'error' && "bg-red-600 text-white",
-                        toast.variant === 'success' && "bg-green-600 text-white",
-                        toast.variant === 'default' && "bg-white text-gray-900"
+                        "fixed bottom-4 right-4 z-[9999] flex items-center justify-between space-x-4 rounded-lg border p-6 shadow-2xl transition-transform",
+                        toast.variant === 'destructive' &&
+                        "bg-darkBlue text-white shadow-lg border-t-4 border-l-8 border-t-orange-600 border-l-orange-700 rounded-lg",
+                        toast.variant === 'error' &&
+                        "bg-orange-50 text-orange-950 border-t-4 border-l-8 border-t-orange-600 border-l-orange-700 rounded-xl shadow-md",
+                        toast.variant === 'success' &&
+                        "bg-orange-50 text-orange-600 border-4 border-r-orange-600 border-b-orange-700 shadow-xl rounded-md",
+                        toast.variant === 'default' &&
+                        "bg-orange-50 text-darkBlue border-2 border-orange-400 shadow-lg rounded-lg"
                     )}
                 >
                     <div className="grid gap-1">

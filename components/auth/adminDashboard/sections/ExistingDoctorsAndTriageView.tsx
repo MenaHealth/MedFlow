@@ -30,14 +30,12 @@ export default function ExistingDoctorsAndTriageView() {
     const [editingUser, setEditingUser] = useState<User | null>(null);
     const [isSearchFocused, setIsSearchFocused] = useState(false);
 
-    // Sort users by approval date in descending order
-    const sortedUsers = useMemo(() => {
-        return [...existingUsers].sort((a, b) => {
-            const dateA = a.approvalDate ? new Date(a.approvalDate).getTime() : 0;
-            const dateB = b.approvalDate ? new Date(b.approvalDate).getTime() : 0;
-            return dateB - dateA;
-        });
-    }, [existingUsers]);
+    // Define filteredUsers to filter based on the search term
+    const filteredUsers = useMemo(() => {
+        return existingUsers.filter(user =>
+            user.email.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [existingUsers, searchTerm]);
 
     const columns: TableColumn<User>[] = [
         {
@@ -151,13 +149,13 @@ export default function ExistingDoctorsAndTriageView() {
             <ScrollArea className="w-full rounded-md border border-orange-300">
                 <div className="w-max min-w-full">
                     <InfiniteScroll
-                        dataLength={sortedUsers.length}
+                        dataLength={filteredUsers.length}
                         next={nextExistingUsers}
                         hasMore={!!hasMoreExistingUsers}
                         isLoading={loadingExistingUsers}
                     >
                         <Table
-                            data={sortedUsers}
+                            data={filteredUsers}
                             columns={columns}
                             backgroundColor="bg-orange-100"
                             textColor="text-orange-950"
@@ -177,10 +175,10 @@ export default function ExistingDoctorsAndTriageView() {
                     <Loader2 className="h-8 w-8 animate-spin"/>
                 </div>
             )}
-            {!hasMoreExistingUsers && sortedUsers.length > 0 && (
+            {!hasMoreExistingUsers && filteredUsers.length > 0 && (
                 <p className="text-center py-4">No more existing users to load.</p>
             )}
-            {sortedUsers.length === 0 && !loadingExistingUsers && (
+            {filteredUsers.length === 0 && !loadingExistingUsers && (
                 <p className="text-center py-4">No existing users found.</p>
             )}
 

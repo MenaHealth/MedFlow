@@ -122,7 +122,8 @@ export default function PatientTriage() {
               row.triagedBy &&
               Object.keys(row.triagedBy).length !== 0 &&
               session.user.languages?.includes(row.language) &&
-              session.user.doctorSpecialty === row.specialty
+              session.user.doctorSpecialty === row.specialty &&
+              (row.doctor?.email ? row.doctor?.email === session.user.email : true)
       );
     }
 
@@ -326,7 +327,7 @@ export default function PatientTriage() {
             </div>
           )}
         </div>
-        <TableContainer component={Paper} style={{ maxHeight: '80vh', overflowY: 'auto' }}>
+        <TableContainer component={Paper} style={{ maxHeight: '80vh', overflow: 'visible', zIndex: 1 }}>
           <Table sx={{ minWidth: 650 }} aria-label="simple table">
             <TableHead className="MuiTableHead-root">
               <TableRow>

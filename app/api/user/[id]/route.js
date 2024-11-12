@@ -21,11 +21,12 @@ export const GET = async (request, { params }) => {
 
 
 export const PATCH = async (request, { params }) => {
-    const { firstName, lastName, gender, dob, countries, languages, doctorSpecialty } = await request.json();
+    const { firstName, lastName, gender, dob, countries, languages, doctorSpecialty, accountType } = await request.json();
 
     try {
         await dbConnect();
 
+        console.log(params.id);
         const existingUser = await User.findById(params.id);
 
         if (!existingUser) {
@@ -40,6 +41,7 @@ export const PATCH = async (request, { params }) => {
         if (countries) existingUser.countries = countries;
         if (languages) existingUser.languages = languages;
         if (doctorSpecialty) existingUser.doctorSpecialty = doctorSpecialty;
+        if (accountType) existingUser.accountType = accountType;
 
         await existingUser.save();
 

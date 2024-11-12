@@ -1,3 +1,4 @@
+// components/auth/adminDashboard/sections/MedOrderViewModel.tsx
 import { useInfiniteQuery } from 'react-query';
 import { useSession } from 'next-auth/react';
 import {IMedOrder} from "@/models/medOrder";
@@ -12,7 +13,7 @@ export function useMedOrdersViewModel() {
     const { data: session } = useSession();
     const token = session?.user.token;
 
-    const fetchMedOrders = async ({ pageParam = 1 }): Promise<MedOrdersResponse> => {
+    const fetchAdminMedOrders = async ({ pageParam = 1 }): Promise<MedOrdersResponse> => {
         const res = await fetch(`/api/admin/GET/med-orders?page=${pageParam}&limit=20`, {
             headers: {
                 'Content-Type': 'application/json',
@@ -36,7 +37,7 @@ export function useMedOrdersViewModel() {
         refetch,
     } = useInfiniteQuery<MedOrdersResponse, Error>(
         'medOrders',
-        fetchMedOrders,
+        fetchAdminMedOrders,
         {
             getNextPageParam: (lastPage) => {
                 return lastPage.currentPage < lastPage.totalPages ? lastPage.currentPage + 1 : undefined;

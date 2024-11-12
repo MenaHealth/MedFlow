@@ -2,9 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useForm, FormProvider } from "react-hook-form";
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { RadioCard } from '@/components/ui/radio-card';
-import { ScrollArea } from '@/components/ui/ScrollArea';
 import RXOrderView from './rx/RXOrderView';
 import MedOrderView from '@/components/PatientViewModels/Medications/med/MedOrderView';
 import PreviousMedicationsView from './previous/PreviousMedicationsView';
@@ -13,7 +11,7 @@ import { useMedOrderViewModel } from '@/components/PatientViewModels/Medications
 import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewModelContext';
 import { BarLoader } from "react-spinners";
 import { DoctorSpecialtyList } from "@/data/doctorSpecialty.enum";
-import { ChevronDown, ChevronsDown, ChevronsUp, ChevronLeft } from 'lucide-react'
+import { ChevronDown, ChevronUp } from 'lucide-react'
 import { Button } from '@/components/ui/button';
 import { IRxOrder } from '@/models/patient';
 import { IMedOrder } from '@/models/medOrder';
@@ -34,19 +32,19 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
     const [templateType, setTemplateType] = useState<'rxOrder' | 'medOrder'>('rxOrder');
     const [isMobile, setIsMobile] = useState(false);
     const [showAllMedications, setShowAllMedications] = useState(false);
-    const [expandAll, setExpandAll] = useState(false);
-    const [showOrderForm, setShowOrderForm] = useState(true);
     const [isLatestExpanded, setIsLatestExpanded] = useState(false);
 
     const methods = useForm({
         defaultValues: templateType === 'rxOrder' ? { rxOrder: rxOrders } : { medOrder: medOrders },
     });
 
-    const allMedications = [...rxOrders, ...medOrders].sort((a, b) => {
-        const dateA = new Date('prescribedDate' in a ? a.prescribedDate : a.orderDate);
-        const dateB = new Date('prescribedDate' in b ? b.prescribedDate : b.orderDate);
-        return dateB.getTime() - dateA.getTime();
-    });
+    const allMedications = React.useMemo(() => {
+        return [...rxOrders, ...medOrders].sort((a, b) => {
+            const dateA = new Date('prescribedDate' in a ? a.prescribedDate : a.orderDate);
+            const dateB = new Date('prescribedDate' in b ? b.prescribedDate : b.orderDate);
+            return dateB.getTime() - dateA.getTime();
+        });
+    }, [rxOrders, medOrders]);
 
     const latestMedication = allMedications[0];
     const isRxOrder = latestMedication && 'prescriptions' in latestMedication;
@@ -63,7 +61,8 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
         patientInfo?.city || ''
     );
 
-    const handleCreateMedication = async () => {
+    const handleCreateMedication = async (event: React.FormEvent) => {
+        event.preventDefault();
         if (templateType === 'rxOrder') {
             await submitRxOrder();
         } else {
@@ -90,9 +89,14 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
         };
     }, []);
 
-    const toggleAllMedications = () => {
+    const toggleAllMedications = (event: React.MouseEvent) => {
+        event.preventDefault();
         setShowAllMedications(!showAllMedications);
-        setShowOrderForm(showAllMedications);
+    };
+
+    const toggleLatestExpanded = (event: React.MouseEvent) => {
+        event.preventDefault();
+        setIsLatestExpanded(!isLatestExpanded);
     };
 
     if (loadingMedications) {
@@ -106,7 +110,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
 
     return (
         <FormProvider {...methods}>
-            <form onSubmit={methods.handleSubmit(handleCreateMedication)}>
+            <form onSubmit={handleCreateMedication}>
                 <div className="flex flex-col h-[100vh] overflow-hidden bg-orange-950">
                     <div className="flex-grow overflow-auto border-t-2 border-white rounded-lg">
                         {latestMedication && (
@@ -123,10 +127,11 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                         <Button
                                             variant="ghost"
                                             size="sm"
-                                            onClick={() => setIsLatestExpanded(!isLatestExpanded)}
+                                            onClick={toggleLatestExpanded}
                                             aria-expanded={isLatestExpanded}
+                                            type="button"
                                         >
-                                            <ChevronDown className="h-6 w-6"/>
+                                            {isLatestExpanded ? <ChevronUp className="h-6 w-6"/> : <ChevronDown className="h-6 w-6"/>}
                                         </Button>
                                     </div>
                                     {isLatestExpanded && (
@@ -171,10 +176,11 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                 variant="outline"
                                 className="w-full"
                                 onClick={toggleAllMedications}
+                                type="button"
                             >
                                 {showAllMedications ? (
                                     <>
-                                        <ChevronDown className="mr-2 h-4 w-4"/>
+                                        <ChevronUp className="mr-2 h-4 w-4"/>
                                         Hide previous medications
                                     </>
                                 ) : (
@@ -193,7 +199,6 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                 medOrders={medOrders}
                                 loadingMedications={loadingMedications}
                                 isMobile={isMobile}
-                                expandAll={expandAll}
                             />
                         </div>
 
@@ -205,11 +210,11 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                     className="flex w-full mb-4"
                                 >
                                     <RadioCard.Item value="rxOrder"
-                                                    className={`flex-1 ${templateType === 'rxOrder' ? 'bg-white text-orange-950' : 'text-gray-400'}`}>
+                                                    className={`flex-1 ${templateType === 'rxOrder' ? 'bg-white text-orange-950' : 'text-white hover:bg-orange-800 transition-colors'}`}>
                                         Rx Order
                                     </RadioCard.Item>
                                     <RadioCard.Item value="medOrder"
-                                                    className={`flex-1 ${templateType === 'medOrder' ? 'bg-white text-orange-950' : 'text-gray-400'}`}>
+                                                    className={`flex-1 ${templateType === 'medOrder' ? 'bg-white text-orange-950' : 'text-white hover:bg-orange-800 transition-colors'}`}>
                                         Medication Order
                                     </RadioCard.Item>
                                 </RadioCard.Root>

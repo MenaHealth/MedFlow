@@ -165,15 +165,15 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
 
     const fetchMedOrders = useCallback(async (medOrderIds: string[]): Promise<IMedOrder[]> => {
         try {
-            const response = await fetch(`/api/patient/${patientId}/medications/med-order`, {
-                method: 'POST',
+            const queryString = medOrderIds.join(',');
+            const response = await fetch(`/api/patient/${patientId}/medications/med-order?ids=${queryString}`, {
+                method: 'GET',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ medOrderIds })
             });
             if (!response.ok) throw new Error("Error fetching detailed med orders data");
 
             const data = await response.json();
-            return data as IMedOrder[];  // Ensure this is typed correctly to match IMedOrder[]
+            return data as IMedOrder[];
         } catch (error) {
             console.error('Error fetching med orders:', error);
             return [];
@@ -196,7 +196,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 setNotes([]);
             }
 
-            // Ensure data.rxOrders has a fallback of an empty array if undefined
+            // Handle rxOrders
             const formattedRxOrders = (data.rxOrders || []).map((order) =>
                 typeof order === 'string'
                     ? {
@@ -215,7 +215,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             );
             setRxOrders(formattedRxOrders);
 
-            // Handle medOrderIds extraction
+            // Handle medOrders
             const medOrderIds = data.medOrders?.map(order =>
                 order instanceof Types.ObjectId ? order.toString() : (order as any)._id || order
             ).filter(Boolean) as string[];
@@ -234,12 +234,6 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             setLoadingMedications(false);
         }
     }, [patientId, formatPatientInfo, formatPreviousNotes, fetchMedOrders]);
-
-    useEffect(() => {
-        if (patientId) {
-            fetchPatientData();
-        }
-    }, [patientId, fetchPatientData]);
 
     const refreshPatientNotes = () => fetchPatientData();
 

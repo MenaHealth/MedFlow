@@ -1,29 +1,6 @@
 import { useInfiniteQuery } from 'react-query';
-import { useSession } from 'next-auth/react'; // Import useSession to get the token
-
-export interface Medication {
-    diagnosis: string;
-    medication: string;
-    dosage: string;
-    frequency: string;
-    quantity: string;
-}
-
-export interface IMedOrder {
-    _id: string;
-    patientName: string;
-    patientId: string;
-    patientCity: string;
-    patientCountry: string;
-    medications: Medication[];
-    orderDate: string;
-    prescribingDr: string;
-    doctorSpecialty: string;
-    drEmail: string;
-    patientPhone: string;
-    validated: boolean;
-    drId: string;
-}
+import { useSession } from 'next-auth/react';
+import {IMedOrder} from "@/models/medOrder";
 
 interface MedOrdersResponse {
     orders: IMedOrder[];
@@ -32,8 +9,8 @@ interface MedOrdersResponse {
 }
 
 export function useMedOrdersViewModel() {
-    const { data: session } = useSession(); // Access session data
-    const token = session?.user.token; // Get the token from the session
+    const { data: session } = useSession();
+    const token = session?.user.token;
 
     const fetchMedOrders = async ({ pageParam = 1 }): Promise<MedOrdersResponse> => {
         const res = await fetch(`/api/admin/GET/med-orders?page=${pageParam}&limit=20`, {

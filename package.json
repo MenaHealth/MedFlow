@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@appbuilder/react": "file:./lib/appbuilder-react-3.0.30-1-sKXPPiieWd.tgz",
+    "@appbuilder/react": "file:./lib/appbuilder-react-3.0.30-1-JSi5DUj6J1.tgz",
     "@aws-sdk/client-s3": "^3.600.0",
     "@aws-sdk/lib-storage": "^3.600.0",
     "@emotion/react": "^11.11.4",

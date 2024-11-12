@@ -10,7 +10,8 @@ import ExistingDoctorsAndTriageView from './sections/ExistingDoctorsAndTriageVie
 import MedOrdersView from './sections/MedOrdersView';
 import ForgotPasswordView from "@/components/auth/adminDashboard/sections/ForgotPasswordView";
 import AdminManagement from "@/components/auth/adminDashboard/sections/AdminManagementView";
-import {Loader2, RefreshCw, Users, UserCheck, UserX, Pill, ShieldCheck, RotateCcw} from 'lucide-react';
+import ChangeAccountTypeView from "./sections/ChangeAccountTypeView";
+import {Loader2, RefreshCw, Users, UserCheck, UserX, Pill, ShieldCheck, RotateCcw, ArrowRightLeft } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
 const sections = [
@@ -20,6 +21,7 @@ const sections = [
     { id: 'addAdmin', title: 'Admin Management', icon: ShieldCheck, color: 'bg-darkBlue text-orange-100', component: AdminManagement },
     { id: 'pwReset', title: 'Password Reset', icon: RotateCcw, color: 'bg-orange-800 text-white', component: ForgotPasswordView },
     { id: 'medOrder', title: 'Medical Orders', icon: Pill, color: 'bg-orange-950 text-white', component: MedOrdersView },
+    { id: 'changeAcctType', title: 'Change Account Type', icon: ArrowRightLeft, color: 'bg-orange-100 text-orange-500', component: ChangeAccountTypeView },
 ] as const;
 
 const AdminDashboardContent = () => {

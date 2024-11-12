@@ -96,7 +96,7 @@ const handler = NextAuth({
             return true;
         },
         // Updated jwt callback to include the accessToken
-        async jwt({ token, user, account }) {
+        async jwt({ token, user, account, trigger }) {
             if (account && user) {
                 token.id = user._id.toString();
                     if (account.provider === 'google') {
@@ -127,6 +127,13 @@ const handler = NextAuth({
                             { expiresIn: '2d' }
                         );
                     }
+            }
+            if (trigger === 'update' && token?.isAdmin) {
+                if (token.accountType === 'Doctor') {
+                    token.accountType = 'Triage';
+                } else if (token.accountType === 'Triage') {
+                    token.accountType = 'Doctor';
+                }
             }
             return token;
         },

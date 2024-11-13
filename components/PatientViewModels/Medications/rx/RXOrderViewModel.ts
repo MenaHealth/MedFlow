@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import {useCallback, useState} from 'react';
 import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewModelContext';
 import { IRxOrder } from "@/models/patient";
 
@@ -64,7 +64,8 @@ export function useRXOrderViewModel(
         }));
     };
 
-    const submitRxOrder = async () => {
+    const submitRxOrder = useCallback(async () => {
+
         setIsLoading(true);
         try {
             const response = await fetch(`/api/patient/${patientId}/medications/rx-order`, {
@@ -95,7 +96,7 @@ export function useRXOrderViewModel(
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [rxOrder, patientId, addRxOrder, refreshMedications, onNewRxOrderSaved]);
 
     return {
         rxOrder,

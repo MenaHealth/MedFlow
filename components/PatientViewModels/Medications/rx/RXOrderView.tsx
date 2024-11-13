@@ -48,6 +48,10 @@ export default function RXOrderView({ patientId, user, patientInfo }: RXOrderVie
 
     const orange300 = "#ffa270";
 
+    // Check if all required fields are filled
+    const isFormComplete = rxOrder.city &&
+        rxOrder.prescriptions.every(p => p.diagnosis && p.medication && p.dosage && p.frequency);
+
     return (
         <div className="space-y-6 max-w-2xl mx-auto bg-orange-950 p-4">
             <fieldset className="border rounded-lg bg-white shadow-sm">
@@ -102,7 +106,7 @@ export default function RXOrderView({ patientId, user, patientInfo }: RXOrderVie
                         className="text-lg font-semibold px-2 flex items-center w-full bg-orange-950 text-white rounded-lg">
                         <span>Prescription {index + 1}</span>
                         <div className="ml-auto flex space-x-2">
-                        {index === rxOrder.prescriptions.length - 1 && (
+                            {index === rxOrder.prescriptions.length - 1 && (
                                 <Button
                                     variant="ghost"
                                     size="icon"
@@ -162,14 +166,14 @@ export default function RXOrderView({ patientId, user, patientInfo }: RXOrderVie
             <div className="space-y-6 max-w-2xl mx-auto bg-orange-950">
                 <Button
                     onClick={submitRxOrder}
-                    disabled={isLoading}
+                    disabled={isLoading || !isFormComplete} // Disable button if loading or form is incomplete
                     className="w-full flex justify-center items-center"
                     variant="submit"
                 >
                     {isLoading ? (
                         <ClipLoader size={24} color={orange300} loading={isLoading} />
                     ) : (
-                        'Submit Rx'
+                        'Submit Rx Order'
                     )}
                 </Button>
 

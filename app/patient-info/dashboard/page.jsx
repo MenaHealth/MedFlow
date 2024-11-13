@@ -455,7 +455,7 @@ export default function PatientTriage() {
                   <TableCell align="center">Dr. Pref</TableCell>
                   <TableCell align="center">
                     {
-                      session?.user?.role === 'Triage' ? 'Doctor' : (
+                      session?.user?.accountType === 'Triage' ? 'Doctor' : (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button

@@ -82,10 +82,10 @@ export default function RXOrderView({ patientId, user, patientInfo }: RXOrderVie
                 </div>
                 <hr className="my-6 border-gray-200"/>
                 <div
-                    className="space-y-4 flex flex-col items-center justify-center text-center border-t-4 border-t-orange-950 rounded-lg p-4">
+                    className="space-y-4 flex flex-col items-center justify-center text-center border-4 bg-orange-950 border-white rounded-lg p-4">
                     <DatePickerFormField
                         name="validTill"
-                        label="Valid Till"
+                        label={<span style={{ color: 'white' }}>Valid Till</span>}
                         type="future"
                         value={rxOrder.validTill}
                         onChange={(date) => setRxOrder(prev => ({
@@ -102,7 +102,7 @@ export default function RXOrderView({ patientId, user, patientInfo }: RXOrderVie
                         className="text-lg font-semibold px-2 flex items-center w-full bg-orange-950 text-white rounded-lg">
                         <span>Prescription {index + 1}</span>
                         <div className="ml-auto flex space-x-2">
-                            {index === rxOrder.prescriptions.length - 1 && (
+                        {index === rxOrder.prescriptions.length - 1 && (
                                 <Button
                                     variant="ghost"
                                     size="icon"

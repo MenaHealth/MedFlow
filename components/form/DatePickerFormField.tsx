@@ -181,7 +181,7 @@ function Calendar({
 
 interface DatePickerFormFieldProps {
     name: string;
-    label: string;
+    label: string | React.ReactNode;
     type?: 'future' | 'past';
     defaultDate?: Date;
     value?: Date;

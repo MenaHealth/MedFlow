@@ -1,6 +1,6 @@
 // data/doctorSpecialty.enum.ts
 export enum DoctorSpecialtyList {
-    NOT_SELECTED = 'not selected',
+    NOT_SELECTED = 'Not Selected',
     ALLERGY_IMMUNOLOGY = 'Allergy & Immunology',
     ANESTHESIA_PAIN_MANAGEMENT = 'Anesthesia & Pain Management',
     CARDIOLOGY = 'Cardiology',

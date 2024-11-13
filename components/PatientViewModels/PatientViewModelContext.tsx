@@ -195,6 +195,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 setNotes([]);
             }
 
+            // Handle rxOrders
             const formattedRxOrders = (data.rxOrders || []).map((order) =>
                 typeof order === 'string'
                     ? {
@@ -213,6 +214,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             );
             setRxOrders(formattedRxOrders);
 
+            // Handle medOrders
             const medOrderIds = data.medOrders?.map(order =>
                 order instanceof Types.ObjectId ? order.toString() : (order as any)._id || order
             ).filter(Boolean) as string[];

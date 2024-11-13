@@ -108,6 +108,9 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
         );
     }
 
+    const isDoctor = userSession?.accountType === 'Doctor';
+    const isTriage = userSession?.accountType === 'Triage';
+
     return (
         <FormProvider {...methods}>
             <form onSubmit={handleCreateMedication}>
@@ -204,46 +207,64 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
 
                         {!showAllMedications && (
                             <div className="p-4">
-                                <RadioCard.Root
-                                    defaultValue={templateType}
-                                    onValueChange={handleValueChange}
-                                    className="flex w-full mb-4"
-                                >
-                                    <RadioCard.Item value="rxOrder"
-                                                    className={`flex-1 ${templateType === 'rxOrder' ? 'bg-white text-orange-950' : 'text-white hover:bg-orange-800 transition-colors'}`}>
-                                        Rx Order
-                                    </RadioCard.Item>
-                                    <RadioCard.Item value="medOrder"
-                                                    className={`flex-1 ${templateType === 'medOrder' ? 'bg-white text-orange-950' : 'text-white hover:bg-orange-800 transition-colors'}`}>
-                                        Medication Order
-                                    </RadioCard.Item>
-                                </RadioCard.Root>
+                                {isDoctor && (
+                                    <>
+                                        <RadioCard.Root
+                                            defaultValue={templateType}
+                                            onValueChange={handleValueChange}
+                                            className="flex w-full mb-4"
+                                        >
+                                            <RadioCard.Item value="rxOrder"
+                                                            className={`flex-1 ${templateType === 'rxOrder' ? 'bg-white text-orange-950' : 'text-white hover:bg-orange-800 transition-colors'}`}>
+                                                Rx Order
+                                            </RadioCard.Item>
+                                            <RadioCard.Item value="medOrder"
+                                                            className={`flex-1 ${templateType === 'medOrder' ? 'bg-white text-orange-950' : 'text-white hover:bg-orange-800 transition-colors'}`}>
+                                                Medication Order
+                                            </RadioCard.Item>
+                                        </RadioCard.Root>
 
-                                {templateType === 'rxOrder' && (
-                                    <RXOrderView
-                                        user={{
-                                            firstName: userSession?.firstName || '',
-                                            lastName: userSession?.lastName || '',
-                                            doctorSpecialty: (userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList) || 'NOT_SELECTED',
-                                        }}
-                                        patientId={patientId}
-                                        patientInfo={{
-                                            patientName: patientInfo?.patientName || '',
-                                            phoneNumber: patientInfo?.phone?.phoneNumber || '',
-                                            age: patientInfo?.age || '',
-                                            city: patientInfo?.city || ''
-                                        }}
-                                    />
+                                        {templateType === 'rxOrder' && (
+                                            <RXOrderView
+                                                user={{
+                                                    firstName: userSession?.firstName || '',
+                                                    lastName: userSession?.lastName || '',
+                                                    doctorSpecialty: (userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList) || 'NOT_SELECTED',
+                                                }}
+                                                patientId={patientId}
+                                                patientInfo={{
+                                                    patientName: patientInfo?.patientName || '',
+                                                    phoneNumber: patientInfo?.phone?.phoneNumber || '',
+                                                    age: patientInfo?.age || '',
+                                                    city: patientInfo?.city || ''
+                                                }}
+                                            />
+                                        )}
+                                        {templateType === 'medOrder' && (
+                                            <MedOrderView
+                                                patientId={patientId}
+                                                user={{
+                                                    firstName: userSession?.firstName || '',
+                                                    lastName: userSession?.lastName || '',
+                                                    doctorSpecialty: (userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList) || 'NOT_SELECTED',
+                                                }}
+                                            />
+                                        )}
+                                    </>
                                 )}
-                                {templateType === 'medOrder' && (
-                                    <MedOrderView
-                                        patientId={patientId}
-                                        user={{
-                                            firstName: userSession?.firstName || '',
-                                            lastName: userSession?.lastName || '',
-                                            doctorSpecialty: (userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList) || 'NOT_SELECTED',
-                                        }}
-                                    />
+                                {isTriage && (
+                                    <>
+                                        <p className="text-white mb-4">As a triage user, you can view previous medications but cannot place new med or rx orders.</p>
+                                        <PreviousMedicationsView
+                                            rxOrders={rxOrders}
+                                            medOrders={medOrders}
+                                            loadingMedications={loadingMedications}
+                                            isMobile={isMobile}
+                                        />
+                                    </>
+                                )}
+                                {!isDoctor && !isTriage && (
+                                    <p className="text-white mb-4">You do not have permission to view or place medication orders.</p>
                                 )}
                             </div>
                         )}

@@ -21,7 +21,7 @@ interface PatientInfo {
         countryCode: string;
         phoneNumber: string;
     };
-    patientID: string; 
+    patientID: string;
 }
 
 interface UserSession {
@@ -76,7 +76,7 @@ export const usePatientDashboard = () => {
 };
 
 export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const { id: patientId } = useParams() as { id: string }; // Retrieve `patientId` from useParams
+    const { id: patientId } = useParams() as { id: string };
     const { data: session, status } = useSession();
     const [activeTab, setActiveTab] = useState('patient-info');
     const [patientInfo, setPatientInfo] = useState<PatientInfo | null>(null);
@@ -145,7 +145,6 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
 
     const formatPreviousNotes = useCallback((notesData: INote[]) => {
         if (Array.isArray(notesData)) {
-            // Convert the Mongoose documents to plain objects while preserving the type
             const formattedNotes = notesData.map((note) => {
                 const plainNote = note.toObject ? note.toObject() : note;
                 return {
@@ -196,7 +195,6 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 setNotes([]);
             }
 
-            // Handle rxOrders
             const formattedRxOrders = (data.rxOrders || []).map((order) =>
                 typeof order === 'string'
                     ? {
@@ -215,7 +213,6 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             );
             setRxOrders(formattedRxOrders);
 
-            // Handle medOrders
             const medOrderIds = data.medOrders?.map(order =>
                 order instanceof Types.ObjectId ? order.toString() : (order as any)._id || order
             ).filter(Boolean) as string[];
@@ -308,6 +305,5 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
 };
 
 export default function Component() {
-    // This is a placeholder component to satisfy the React Component code block requirements
     return null;
 }

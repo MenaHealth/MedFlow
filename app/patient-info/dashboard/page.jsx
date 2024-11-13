@@ -132,10 +132,9 @@ export default function PatientTriage() {
 
     if (session?.user?.accountType === "Doctor") {
       filteredRows = filteredRows.filter(
-        (row) => 
-              row.doctor?.email 
+        (row) => row.doctor?.email 
                 ? row.doctor?.email === session.user.email 
-                : row.triagedBy 
+                : row.triagedBy
                   && Object.keys(row.triagedBy).length !== 0 
                   && session.user.languages?.includes(row.language) 
                   && session.user.doctorSpecialty === row.specialty
@@ -328,6 +327,16 @@ export default function PatientTriage() {
               />
             </div>
           )}
+          {doctorFilter !== "all" && (
+            <div className="bg-blue-100 text-blue-800 px-2 py-1 rounded flex items-center">
+              <EditIcon className="mr-2 cursor-pointer" />
+              Doctor View: {doctorFilter === 'my' ? 'My Patients' : 'Unassigned Patients'}
+              <RemoveCircleIcon
+                className="ml-2 cursor-pointer"
+                onClick={() => setDoctorFilter("all")}
+              />
+            </div>
+          )}
           {shouldShowClearButton && (
             <div
               className="bg-red-100 text-red-800 px-2 py-1 rounded cursor-pointer"
@@ -335,6 +344,7 @@ export default function PatientTriage() {
                 setPriorityFilter("all");
                 setStatusFilter("all");
                 setSpecialtyFilter("all");
+                setDoctorFilter("all");
               }}
             >
               <DeleteSweepIcon className="mr-2" />

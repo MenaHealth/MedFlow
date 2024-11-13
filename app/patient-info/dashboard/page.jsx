@@ -25,7 +25,6 @@ import Tooltip from '../../../components/form/Tooltip';
 import './dashboard.css';
 import TableCellWithTooltip from '@/components/TableCellWithTooltip';
 import * as Toast from '@radix-ui/react-toast';
-import { Languages } from '@/data/languages.enum';
 
 import NotesCell from '@/components/NotesCell';
 
@@ -50,6 +49,7 @@ export default function PatientTriage() {
   const [priorityFilter, setPriorityFilter] = React.useState("all");
   const [statusFilter, setStatusFilter] = React.useState("all");
   const [specialtyFilter, setSpecialtyFilter] = React.useState("all");
+  const [doctorFilter, setDoctorFilter] = React.useState("all");
 
   const router = useRouter();
 
@@ -64,16 +64,18 @@ export default function PatientTriage() {
   const [shouldShowClearButton, setShouldShowClearButton] = useState([
     priorityFilter !== "all",
     statusFilter !== "all",
-    specialtyFilter !== "all"
+    specialtyFilter !== "all",
+    doctorFilter !== "all"
   ].filter(Boolean).length >= 2);
 
   useEffect(() => {
     setShouldShowClearButton([
       priorityFilter !== "all",
       statusFilter !== "all",
-      specialtyFilter !== "all"
+      specialtyFilter !== "all",
+      doctorFilter !== "all"
     ].filter(Boolean).length >= 2);
-  }, [priorityFilter, statusFilter, specialtyFilter]);
+  }, [priorityFilter, statusFilter, specialtyFilter, doctorFilter]);
 
   useEffect(() => {
     const fetchAndSortRows = async () => {
@@ -116,14 +118,27 @@ export default function PatientTriage() {
       );
     }
 
+    if (doctorFilter !== "all") {
+      if (doctorFilter === "my") {
+        filteredRows = filteredRows.filter(
+            (row) => row.doctor?.email === session.user.email
+        );
+      } else {
+        filteredRows = filteredRows.filter(
+            (row) => row.doctor ? Object.keys(row.doctor).length === 0 : true
+        );
+      }
+    }
+
     if (session?.user?.accountType === "Doctor") {
       filteredRows = filteredRows.filter(
-          (row) =>
-              row.triagedBy &&
-              Object.keys(row.triagedBy).length !== 0 &&
-              session.user.languages?.includes(row.language) &&
-              session.user.doctorSpecialty === row.specialty &&
-              (row.doctor?.email ? row.doctor?.email === session.user.email : true)
+        (row) => 
+              row.doctor?.email 
+                ? row.doctor?.email === session.user.email 
+                : row.triagedBy 
+                  && Object.keys(row.triagedBy).length !== 0 
+                  && session.user.languages?.includes(row.language) 
+                  && session.user.doctorSpecialty === row.specialty
       );
     }
 
@@ -132,7 +147,7 @@ export default function PatientTriage() {
     }
 
     return filteredRows.sort((a, b) => b._id.localeCompare(a._id));
-  }, [allData, priorityFilter, statusFilter, specialtyFilter, session]);
+  }, [allData, priorityFilter, statusFilter, specialtyFilter, doctorFilter, session]);
 
   // Update state whenever sorted and filtered rows change
   useEffect(() => {
@@ -438,7 +453,30 @@ export default function PatientTriage() {
                   </TableCell>
                   <TableCell align="center">Triaged By</TableCell>
                   <TableCell align="center">Dr. Pref</TableCell>
-                  <TableCell align="center">Doctor</TableCell>
+                  <TableCell align="center">
+                    {
+                      session?.user?.role === 'Triage' ? 'Doctor' : (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              className="h-8 w-full justify-start"
+                              style={{ fontSize: "0.7rem", fontWeight: 500, letterSpacing: "0.05rem" }}>
+                              DOCTOR
+                              <KeyboardArrowDownIcon className="ml-2 h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" style={{ maxWidth: "20rem", maxHeight: "30rem", overflowY: "auto" }}>
+                            <DropdownMenuRadioGroup value={doctorFilter} onValueChange={setDoctorFilter}>
+                              <DropdownMenuRadioItem value="all">All Patients</DropdownMenuRadioItem>
+                              <DropdownMenuRadioItem value="unassigned">Unassigned Patients</DropdownMenuRadioItem>
+                              <DropdownMenuRadioItem value="my">My Patients</DropdownMenuRadioItem>
+                            </DropdownMenuRadioGroup>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )
+                    }
+                  </TableCell>
                   <TableCell align="center">Created At</TableCell>
                 </TableRow>
               </TableHead>

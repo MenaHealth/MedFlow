@@ -100,7 +100,7 @@ const PreviousMedicationsView: React.FC<PreviousMedicationsViewProps> = ({
                     )}
                 </div>
                 <p className="mt-2">{new Date(isRxOrder ? item.prescribedDate : item.orderDate).toLocaleDateString()}</p>
-                <p className="mt-2">Dr. {item.doctorSpecialty}</p>
+                <p className="mt-2">{item.doctorSpecialty}</p>
                 <h4 className="text-center">Dr. {item.prescribingDr}</h4>
                 {isExpanded && (
                     <div id={`medication-details-${itemId}`} className="mt-2 p-2 bg-white text-darkBlue rounded-sm">

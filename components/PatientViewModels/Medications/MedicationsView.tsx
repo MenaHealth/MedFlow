@@ -59,10 +59,25 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
 
     const { submitRxOrder, isLoading: rxLoading } = useRXOrderViewModel(
         patientId,
-        () => {}, //
+        () => {}, // Placeholder for onNewRxOrderSaved
         patientInfo?.city || '',
         patientInfo?.patientName || ''
     );
+
+    const { submitMedOrder, isLoading: medLoading } = useMedOrderViewModel(
+        patientId,
+        patientInfo?.patientName || '',
+        patientInfo?.city || ''
+    );
+
+    const handleCreateMedication = async (event: React.FormEvent) => {
+        event.preventDefault();
+        if (templateType === 'rxOrder') {
+            await submitRxOrder();
+        } else {
+            await submitMedOrder();
+        }
+    };
 
     const handleValueChange = (value: 'rxOrder' | 'medOrder') => {
         if (value !== templateType) {
@@ -107,6 +122,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
 
     return (
         <FormProvider {...methods}>
+            <form onSubmit={handleCreateMedication}>
                 <div className="flex flex-col h-[100vh] overflow-hidden bg-orange-950">
                     <div className="flex-grow overflow-auto border-t-2 border-white rounded-lg">
                         {!isTriage && latestMedication && (
@@ -257,10 +273,6 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                                     lastName: userSession?.lastName || '',
                                                     doctorSpecialty: (userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList) || 'NOT_SELECTED',
                                                 }}
-                                                patientInfo={{
-                                                    patientName: patientInfo?.patientName || '',
-                                                    city: patientInfo?.city || '',
-                                                }}
                                             />
                                         )}
                                     </>
@@ -280,6 +292,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                         )}
                     </div>
                 </div>
+            </form>
             <RxOrderDrawerView
                 isOpen={isShareDrawerOpen}
                 onClose={() => setIsShareDrawerOpen(false)}

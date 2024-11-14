@@ -59,8 +59,9 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
 
     const { submitRxOrder, isLoading: rxLoading } = useRXOrderViewModel(
         patientId,
-        () => {}, // Placeholder for onNewRxOrderSaved
-        patientInfo?.city || ''
+        () => {}, //
+        patientInfo?.city || '',
+        patientInfo?.patientName || ''
     );
 
     const handleValueChange = (value: 'rxOrder' | 'medOrder') => {
@@ -255,6 +256,10 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                                     firstName: userSession?.firstName || '',
                                                     lastName: userSession?.lastName || '',
                                                     doctorSpecialty: (userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList) || 'NOT_SELECTED',
+                                                }}
+                                                patientInfo={{
+                                                    patientName: patientInfo?.patientName || '',
+                                                    city: patientInfo?.city || '',
                                                 }}
                                             />
                                         )}

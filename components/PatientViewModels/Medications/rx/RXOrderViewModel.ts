@@ -1,6 +1,7 @@
 import { useCallback, useState, useMemo } from 'react';
 import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewModelContext';
 import { IRxOrder } from "@/models/patient";
+import { useToast } from '@/components/hooks/useToast';
 
 interface Prescription {
     diagnosis: string;
@@ -12,8 +13,10 @@ interface Prescription {
 export function useRXOrderViewModel(
     patientId: string,
     onNewRxOrderSaved: (rxOrder: IRxOrder) => void,
-    city: string
+    city: string,
+    patientName: string
 ) {
+    const { setToast } = useToast();
     const { userSession, refreshMedications, addRxOrder } = usePatientDashboard();
     const [rxOrder, setRxOrder] = useState<IRxOrder>({
         doctorSpecialty: userSession?.doctorSpecialty || 'Not Selected',
@@ -101,6 +104,25 @@ export function useRXOrderViewModel(
             await refreshMedications();
             onNewRxOrderSaved(savedRxOrder);
 
+            // Create custom message for toast
+            const medicationNames = rxOrder.prescriptions.map(p => p.medication);
+            let toastMessage = '';
+            if (medicationNames.length === 1) {
+                toastMessage = `${medicationNames[0]} submitted for ${patientName}`;
+            } else if (medicationNames.length === 2) {
+                toastMessage = `${medicationNames[0]} and ${medicationNames[1]} submitted for ${patientName}`;
+            } else if (medicationNames.length > 2) {
+                const lastMed = medicationNames.pop();
+                toastMessage = `${medicationNames.join(', ')}, and ${lastMed} submitted for ${patientName}`;
+            }
+
+            // Add this toast notification
+            setToast({
+                title: 'Rx Order Submitted',
+                description: toastMessage,
+                variant: 'success',
+            });
+
             // Reset form after saving
             setRxOrder({
                 ...rxOrder,
@@ -110,10 +132,16 @@ export function useRXOrderViewModel(
             });
         } catch (error) {
             console.error('Failed to save RX order:', error);
+            // Add an error toast
+            setToast({
+                title: 'Error',
+                description: 'Failed to submit Rx Order',
+                variant: 'error',
+            });
         } finally {
             setIsLoading(false);
         }
-    }, [rxOrder, patientId, addRxOrder, refreshMedications, onNewRxOrderSaved, isFormComplete]);
+    }, [rxOrder, patientId, addRxOrder, refreshMedications, onNewRxOrderSaved, isFormComplete, setToast, patientName]);
 
     return {
         rxOrder,

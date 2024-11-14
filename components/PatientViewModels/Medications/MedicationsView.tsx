@@ -227,6 +227,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                 medOrders={medOrders}
                                 loadingMedications={loadingMedications}
                                 isMobile={isMobile}
+                                isDoctor={isDoctor}
                             />
                         </div>
 
@@ -283,6 +284,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                         medOrders={medOrders}
                                         loadingMedications={loadingMedications}
                                         isMobile={isMobile}
+                                        isDoctor={isDoctor}
                                     />
                                 )}
                                 {!isDoctor && !isTriage && (

@@ -14,6 +14,7 @@ interface PreviousMedicationsViewProps {
     medOrders: IMedOrder[];
     loadingMedications: boolean;
     isMobile: boolean;
+    isDoctor: boolean;
 }
 
 const PreviousMedicationsView: React.FC<PreviousMedicationsViewProps> = ({
@@ -21,6 +22,7 @@ const PreviousMedicationsView: React.FC<PreviousMedicationsViewProps> = ({
                                                                              medOrders,
                                                                              loadingMedications,
                                                                              isMobile,
+                                                                             isDoctor,
                                                                          }) => {
     const { patientInfo } = usePatientDashboard();
     const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
@@ -29,12 +31,15 @@ const PreviousMedicationsView: React.FC<PreviousMedicationsViewProps> = ({
     const [expandAll, setExpandAll] = useState(false);
 
     const allMedications = React.useMemo(() => {
-        return [...rxOrders, ...medOrders].sort((a, b) => {
+        const combined = [...rxOrders, ...medOrders].sort((a, b) => {
             const dateA = new Date('prescribedDate' in a ? a.prescribedDate : a.orderDate);
             const dateB = new Date('prescribedDate' in b ? b.prescribedDate : b.orderDate);
             return dateB.getTime() - dateA.getTime();
         });
-    }, [rxOrders, medOrders]);
+
+        // If the user is a doctor, exclude the latest medication
+        return isDoctor ? combined.slice(1) : combined;
+    }, [rxOrders, medOrders, isDoctor]);
 
     const updateExpandedItems = useCallback(() => {
         setExpandedItems(new Set(expandAll ? allMedications.map(item => item._id ?? '') : []));

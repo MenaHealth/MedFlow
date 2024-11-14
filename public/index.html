@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your App</title>
+    <title>Medflow</title>
 
-    <!-- Import Font -->
     <style>
         @font-face {
             font-family: "CustomFont";
@@ -15,24 +14,31 @@
         }
     </style>
 
-    <!-- Set the favicon or icon -->
     <link rel="icon" href="/assets/icons/4654d2832744cc3c1b9f75a433a7d91a.png" type="image/png">
-
-    <!-- Preload .wasm file for faster access if needed by JS -->
-    <link rel="preload" href="/assets/wasm/your-file.wasm" as="fetch" type="application/wasm" crossorigin="anonymous">
+  
+    <link rel="preload" href="public/assets/wasm/agora-virtual-background.wasm" as="fetch" type="application/wasm" crossorigin="anonymous">
+    <link rel="preload" href="public/assets/wasm/denoiser-wasm-simd.wasm" as="fetch" type="application/wasm" crossorigin="anonymous">
+    <link rel="preload" href="public/assets/wasm/denoiser-wasm.wasm" as="fetch" type="application/wasm" crossorigin="anonymous">
 </head>
 <body>
     <div id="root"></div>
 
-    <!-- Script to load the WebAssembly file -->
     <script>
-        fetch("/assets/wasm/your-file.wasm")
-            .then(response => response.arrayBuffer())
-            .then(bytes => WebAssembly.instantiate(bytes))
-            .then(result => {
-                console.log("WebAssembly module loaded:", result.instance);
-            })
-            .catch(console.error);
+        const wasmFiles = [
+            "public/assets/wasm/agora-virtual-background.wasm",
+            "public/assets/wasm/denoiser-wasm-simd.wasm",
+            "public/assets/wasm/denoiser-wasm.wasm"
+        ];
+
+        wasmFiles.forEach(file => {
+            fetch(file)
+                .then(response => response.arrayBuffer())
+                .then(bytes => WebAssembly.instantiate(bytes))
+                .then(result => {
+                    console.log(`WebAssembly module loaded from ${file}:`, result.instance);
+                })
+                .catch(error => console.error(`Error loading ${file}:`, error));
+        });
     </script>
 </body>
 </html>

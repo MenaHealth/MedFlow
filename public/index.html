@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your App</title>
+
+    <!-- Import Font -->
+    <style>
+        @font-face {
+            font-family: "CustomFont";
+            src: url("/assets/icons/44393f83cfe6e236d297.ttf") format("truetype");
+            font-weight: normal;
+            font-style: normal;
+        }
+    </style>
+
+    <!-- Set the favicon or icon -->
+    <link rel="icon" href="/assets/icons/4654d2832744cc3c1b9f75a433a7d91a.png" type="image/png">
+
+    <!-- Preload .wasm file for faster access if needed by JS -->
+    <link rel="preload" href="/assets/wasm/your-file.wasm" as="fetch" type="application/wasm" crossorigin="anonymous">
+</head>
+<body>
+    <div id="root"></div>
+
+    <!-- Script to load the WebAssembly file -->
+    <script>
+        fetch("/assets/wasm/your-file.wasm")
+            .then(response => response.arrayBuffer())
+            .then(bytes => WebAssembly.instantiate(bytes))
+            .then(result => {
+                console.log("WebAssembly module loaded:", result.instance);
+            })
+            .catch(console.error);
+    </script>
+</body>
+</html>

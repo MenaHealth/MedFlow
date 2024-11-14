@@ -16,12 +16,15 @@ import { ChevronDown, ChevronUp, Share } from 'lucide-react'
 import { Button } from '@/components/ui/button';
 import { IRxOrder } from '@/models/patient';
 import { IMedOrder } from '@/models/medOrder';
+import {Types} from "mongoose";
 
 interface MedicationsViewProps {
     patientId: string;
 }
 
 export default function MedicationsView({ patientId }: MedicationsViewProps) {
+    const medOrderPatientId = new Types.ObjectId(patientId);
+
     const {
         userSession,
         rxOrders,
@@ -58,7 +61,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
     const isRxOrder = latestMedication && 'prescriptions' in latestMedication;
 
     const { submitRxOrder, isLoading: rxLoading } = useRXOrderViewModel(
-        patientId,
+        medOrderPatientId,
         () => {}, // Placeholder for onNewRxOrderSaved
         patientInfo?.city || '',
         patientInfo?.patientName || ''

@@ -28,7 +28,7 @@ type MedOrderFormState = {
     }>;
 };
 
-export function useMedOrderViewModel(patientId: Types.ObjectId, patientName: string) {
+export function useMedOrderViewModel(patientId: Types.ObjectId, patientName: string, city: string) {
     const { userSession, patientInfo, patientViewModel, addMedOrder } = usePatientDashboard();
     const { setToast } = useToast();
 

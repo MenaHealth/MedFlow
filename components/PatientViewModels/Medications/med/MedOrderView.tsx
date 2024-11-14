@@ -2,7 +2,7 @@
 
 'use client'
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { TextFormField } from '@/components/ui/TextFormField';
 import { Button } from '@/components/ui/button';
 import { Plus, Minus } from 'lucide-react';
@@ -20,6 +20,7 @@ interface MedOrderViewProps {
     patientId: string;
 }
 
+
 export default function MedOrderView({ patientId, user }: MedOrderViewProps) {
     const {
         medOrder,
@@ -30,14 +31,16 @@ export default function MedOrderView({ patientId, user }: MedOrderViewProps) {
         submitMedOrder,
     } = useMedOrderViewModel(patientId, user.firstName, user.doctorSpecialty);
 
-    // Check if all required fields in the form are filled
-    const isFormComplete = medOrder.medications.every(medication =>
-        medication.diagnosis &&
-        medication.medication &&
-        medication.dosage &&
-        medication.frequency &&
-        medication.quantity
-    );
+    // Optimized isFormComplete logic
+    const isFormComplete = useMemo(() =>
+            medOrder.medications.every(medication =>
+                medication.diagnosis?.trim() &&
+                medication.medication?.trim() &&
+                medication.dosage?.trim() &&
+                medication.frequency?.trim() &&
+                medication.quantity?.trim()
+            ),
+        [medOrder.medications]);
 
     return (
         <div className="space-y-6 max-w-2xl mx-auto bg-orange-950 p-4">
@@ -159,8 +162,7 @@ export default function MedOrderView({ patientId, user }: MedOrderViewProps) {
 
             <Button
                 onClick={submitMedOrder}
-                disabled={isLoading || !isFormComplete} // Disable button if loading or form is incomplete
-                className="w-full"
+                disabled={isLoading || !isFormComplete}
                 variant="submit"
             >
                 {isLoading ? 'Submitting...' : 'Submit Medical Order'}

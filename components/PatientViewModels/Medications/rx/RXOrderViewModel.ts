@@ -1,4 +1,4 @@
-import {useCallback, useState} from 'react';
+import { useCallback, useState, useMemo } from 'react';
 import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewModelContext';
 import { IRxOrder } from "@/models/patient";
 
@@ -27,6 +27,15 @@ export function useRXOrderViewModel(
         prescriptions: [{ diagnosis: '', medication: '', dosage: '', frequency: '' }],
     });
     const [isLoading, setIsLoading] = useState(false);
+
+    const isFormComplete = useMemo(() => {
+        return rxOrder.prescriptions.every(prescription =>
+            prescription.diagnosis &&
+            prescription.medication &&
+            prescription.dosage &&
+            prescription.frequency
+        );
+    }, [rxOrder.prescriptions]);
 
     const handleInputChange = (field: keyof IRxOrder, value: any) => {
         setRxOrder(prevOrder => ({
@@ -65,8 +74,16 @@ export function useRXOrderViewModel(
     };
 
     const submitRxOrder = useCallback(async () => {
+        console.log("Submit button clicked - starting RX order submission");
 
+        if (!isFormComplete) {
+            console.warn("Form incomplete - not submitting RX order.");
+            return;
+        }
+
+        console.log("submitRxOrder is being called with data:", rxOrder);
         setIsLoading(true);
+
         try {
             const response = await fetch(`/api/patient/${patientId}/medications/rx-order`, {
                 method: 'POST',
@@ -75,7 +92,7 @@ export function useRXOrderViewModel(
             });
 
             if (!response.ok) {
-                const errorText = await response.text(); // Retrieve additional error info
+                const errorText = await response.text();
                 throw new Error(`Failed to save RX order: ${errorText}`);
             }
 
@@ -96,13 +113,14 @@ export function useRXOrderViewModel(
         } finally {
             setIsLoading(false);
         }
-    }, [rxOrder, patientId, addRxOrder, refreshMedications, onNewRxOrderSaved]);
+    }, [rxOrder, patientId, addRxOrder, refreshMedications, onNewRxOrderSaved, isFormComplete]);
 
     return {
         rxOrder,
         setRxOrder,
         submitRxOrder,
         isLoading,
+        isFormComplete,
         handleInputChange,
         handlePrescriptionChange,
         addPrescription,

@@ -1,8 +1,10 @@
+'use client'
+
 import React, { useState } from 'react';
 import { TextFormField } from '@/components/ui/TextFormField';
 import { Button } from '@/components/ui/button';
 import { ClipLoader } from 'react-spinners'
-import { useRXOrderViewModel } from '@/components/PatientViewModels/Medications/rx/RXOrderViewModel';
+import { useRXOrderViewModel } from './RXOrderViewModel';
 import { DoctorSpecialtyList } from '@/data/doctorSpecialty.enum';
 import { Plus, Minus } from 'lucide-react';
 import { DatePickerFormField } from "@/components/form/DatePickerFormField";
@@ -26,7 +28,7 @@ interface RXOrderViewProps {
     };
 }
 
-export default function RXOrderView({ patientId, user, patientInfo }: RXOrderViewProps) {
+export default function RXOrderView({ patientId, patientInfo }: RXOrderViewProps) {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [selectedRxOrder, setSelectedRxOrder] = useState<IRxOrder | null>(null);
 
@@ -37,9 +39,9 @@ export default function RXOrderView({ patientId, user, patientInfo }: RXOrderVie
 
     const {
         rxOrder,
-        setRxOrder,
         submitRxOrder,
         isLoading,
+        isFormComplete,
         handleInputChange,
         handlePrescriptionChange,
         addPrescription,
@@ -48,14 +50,12 @@ export default function RXOrderView({ patientId, user, patientInfo }: RXOrderVie
 
     const orange300 = "#ffa270";
 
-    // Check if all required fields are filled
-    const isFormComplete = rxOrder.city &&
-        rxOrder.prescriptions.every(p => p.diagnosis && p.medication && p.dosage && p.frequency);
-
     return (
         <div className="space-y-6 max-w-2xl mx-auto bg-orange-950 p-4">
             <fieldset className="border rounded-lg bg-white shadow-sm">
-                <legend className="text-lg font-semibold px-2 bg-orange-950 text-white rounded-lg">Prescriber and Patient Details</legend>
+                <legend className="text-lg font-semibold px-2 bg-orange-950 text-white rounded-lg">Prescriber and
+                    Patient Details
+                </legend>
                 <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                         <TextFormField
@@ -89,13 +89,10 @@ export default function RXOrderView({ patientId, user, patientInfo }: RXOrderVie
                     className="space-y-4 flex flex-col items-center justify-center text-center border-4 bg-orange-950 border-white rounded-lg p-4">
                     <DatePickerFormField
                         name="validTill"
-                        label={<span style={{ color: 'white' }}>Valid Till</span>}
+                        label={<span style={{color: 'white'}}>Valid Till</span>}
                         type="future"
                         value={rxOrder.validTill}
-                        onChange={(date) => setRxOrder(prev => ({
-                            ...prev,
-                            validTill: date || prev.validTill
-                        }))}
+                        onChange={(date) => handleInputChange('validTill', date)}
                     />
                 </div>
             </fieldset>
@@ -166,12 +163,12 @@ export default function RXOrderView({ patientId, user, patientInfo }: RXOrderVie
             <div className="space-y-6 max-w-2xl mx-auto bg-orange-950">
                 <Button
                     onClick={submitRxOrder}
-                    disabled={isLoading || !isFormComplete} // Disable button if loading or form is incomplete
+                    disabled={isLoading || !isFormComplete}
                     className="w-full flex justify-center items-center"
                     variant="submit"
                 >
                     {isLoading ? (
-                        <ClipLoader size={24} color={orange300} loading={isLoading} />
+                        <ClipLoader size={24} color={orange300} loading={isLoading}/>
                     ) : (
                         'Submit Rx Order'
                     )}

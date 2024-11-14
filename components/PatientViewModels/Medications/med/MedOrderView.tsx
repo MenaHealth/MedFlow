@@ -2,7 +2,7 @@
 
 'use client'
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { TextFormField } from '@/components/ui/TextFormField';
 import { Button } from '@/components/ui/button';
 import { Plus, Minus } from 'lucide-react';
@@ -20,6 +20,7 @@ interface MedOrderViewProps {
     patientId: string;
 }
 
+
 export default function MedOrderView({ patientId, user }: MedOrderViewProps) {
     const {
         medOrder,
@@ -29,6 +30,17 @@ export default function MedOrderView({ patientId, user }: MedOrderViewProps) {
         removeMedication,
         submitMedOrder,
     } = useMedOrderViewModel(patientId, user.firstName, user.doctorSpecialty);
+
+    // Optimized isFormComplete logic
+    const isFormComplete = useMemo(() =>
+            medOrder.medications.every(medication =>
+                medication.diagnosis?.trim() &&
+                medication.medication?.trim() &&
+                medication.dosage?.trim() &&
+                medication.frequency?.trim() &&
+                medication.quantity?.trim()
+            ),
+        [medOrder.medications]);
 
     return (
         <div className="space-y-6 max-w-2xl mx-auto bg-orange-950 p-4">
@@ -62,23 +74,22 @@ export default function MedOrderView({ patientId, user }: MedOrderViewProps) {
                             value={medOrder.patientCountry}
                             readOnly={true}
                         />
-
                     </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <TextFormField
-                                fieldName="patientCity"
-                                fieldLabel="City"
-                                value={medOrder.patientCity}
-                                readOnly={true}
-                            />
-                            <TextFormField
-                                fieldName="patientPhone"
-                                fieldLabel="Phone"
-                                value={medOrder.patientPhone}
-                                readOnly={true}
-                            />
-                        </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <TextFormField
+                            fieldName="patientCity"
+                            fieldLabel="City"
+                            value={medOrder.patientCity}
+                            readOnly={true}
+                        />
+                        <TextFormField
+                            fieldName="patientPhone"
+                            fieldLabel="Phone"
+                            value={medOrder.patientPhone}
+                            readOnly={true}
+                        />
                     </div>
+                </div>
             </fieldset>
 
             {medOrder.medications.map((medication, index) => (
@@ -151,8 +162,7 @@ export default function MedOrderView({ patientId, user }: MedOrderViewProps) {
 
             <Button
                 onClick={submitMedOrder}
-                disabled={isLoading}
-                className="w-full"
+                disabled={isLoading || !isFormComplete}
                 variant="submit"
             >
                 {isLoading ? 'Submitting...' : 'Submit Medical Order'}

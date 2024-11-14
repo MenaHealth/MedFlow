@@ -60,7 +60,8 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
     const { submitRxOrder, isLoading: rxLoading } = useRXOrderViewModel(
         patientId,
         () => {}, // Placeholder for onNewRxOrderSaved
-        patientInfo?.city || ''
+        patientInfo?.city || '',
+        patientInfo?.patientName || ''
     );
 
     const { submitMedOrder, isLoading: medLoading } = useMedOrderViewModel(

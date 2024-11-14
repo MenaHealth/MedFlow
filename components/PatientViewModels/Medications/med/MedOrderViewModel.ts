@@ -2,7 +2,7 @@
 
 'use client'
 
-import { useState } from 'react';
+import { useCallback, useState, useMemo } from 'react';
 import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewModelContext';
 import { DoctorSpecialtyList } from '@/data/doctorSpecialty.enum';
 
@@ -49,7 +49,17 @@ export function useMedOrderViewModel(patientId: string, patientName: string, cit
 
     const [isLoading, setIsLoading] = useState(false);
 
-    // Handle input changes
+    // Optimized isFormComplete logic
+    const isFormComplete = useMemo(() =>
+            medOrder.medications.every(medication =>
+                medication.diagnosis?.trim() &&
+                medication.medication?.trim() &&
+                medication.dosage?.trim() &&
+                medication.frequency?.trim() &&
+                medication.quantity?.trim()
+            ),
+        [medOrder.medications]);
+
     const handleInputChange = (field: keyof MedOrder, value: any) => {
         setMedOrder((prevOrder) => ({
             ...prevOrder,
@@ -57,7 +67,6 @@ export function useMedOrderViewModel(patientId: string, patientName: string, cit
         }));
     };
 
-    // Handle individual medication field changes
     const handleMedicationChange = (index: number, field: keyof Medication, value: string) => {
         setMedOrder((prevOrder) => {
             const newMedications = [...prevOrder.medications];
@@ -69,7 +78,6 @@ export function useMedOrderViewModel(patientId: string, patientName: string, cit
         });
     };
 
-    // Add a new medication entry
     const addMedication = () => {
         setMedOrder((prevOrder) => ({
             ...prevOrder,
@@ -77,7 +85,6 @@ export function useMedOrderViewModel(patientId: string, patientName: string, cit
         }));
     };
 
-    // Remove a medication entry
     const removeMedication = (index: number) => {
         setMedOrder((prevOrder) => ({
             ...prevOrder,
@@ -85,10 +92,17 @@ export function useMedOrderViewModel(patientId: string, patientName: string, cit
         }));
     };
 
-    // Submit the medical order to the API
-    // Inside submitMedOrder function in MedOrderViewModel
-    const submitMedOrder = async () => {
+    const submitMedOrder = useCallback(async () => {
+        console.log("Submit button clicked - starting Med order submission");
+
+        if (!isFormComplete) {
+            console.warn("Form incomplete - not submitting Med order.");
+            return;
+        }
+
+        console.log("submitMedOrder is being called with data:", medOrder);
         setIsLoading(true);
+
         try {
             const response = await fetch(`/api/patient/${patientId}/medications/med-order`, {
                 method: 'POST',
@@ -96,26 +110,31 @@ export function useMedOrderViewModel(patientId: string, patientName: string, cit
                 body: JSON.stringify(medOrder),
             });
 
-            if (!response.ok) throw new Error('Failed to save Med Order');
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Failed to save Med order: ${errorText}`);
+            }
 
-            const newMedOrder = await response.json();
-            addMedOrder(newMedOrder); // Add to context after successful save
+            const savedMedOrder = await response.json();
+            addMedOrder(savedMedOrder);
+            console.log("Med order saved successfully:", savedMedOrder);
+
+            // Optionally reset form here if desired
         } catch (error) {
-            console.error("Failed to save Med Order:", error);
+            console.error("Failed to save Med order:", error);
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [medOrder, patientId, addMedOrder, isFormComplete]);
 
     return {
         medOrder,
         isLoading,
+        isFormComplete,
         handleInputChange,
         handleMedicationChange,
         addMedication,
         removeMedication,
         submitMedOrder,
-        patientInfo,
-        patientViewModel,
     };
 }

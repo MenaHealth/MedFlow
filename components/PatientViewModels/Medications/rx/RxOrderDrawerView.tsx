@@ -16,6 +16,8 @@ interface RxOrderDrawerViewProps {
 }
 
 export default function RxOrderDrawerView({ isOpen, onClose, patientId, rxOrder }: RxOrderDrawerViewProps) {
+    console.log("RxOrderDrawerView rendered with isOpen:", isOpen); // Track render state
+
     const { patientInfo } = usePatientDashboard();
     const drawerRef = useRef<HTMLDivElement>(null);
 

@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Plus, Minus } from 'lucide-react';
 import { useMedOrderViewModel } from './MedOrderViewModel';
 import { DoctorSpecialtyList } from "@/data/doctorSpecialty.enum";
+import { ToastProvider } from '@/components/ui/toast';
+import { ToastComponent } from '@/components/hooks/useToast';
 
 interface User {
     firstName: string;
@@ -43,6 +45,7 @@ export default function MedOrderView({ patientId, user }: MedOrderViewProps) {
         [medOrder.medications]);
 
     return (
+        <ToastProvider>
         <div className="space-y-6 max-w-2xl mx-auto bg-orange-950 p-4">
             <fieldset className="border rounded-lg bg-white shadow-sm">
                 <legend className="text-lg font-semibold px-2 bg-orange-950 text-white rounded-lg">Doctor and Patient Details</legend>
@@ -168,5 +171,7 @@ export default function MedOrderView({ patientId, user }: MedOrderViewProps) {
                 {isLoading ? 'Submitting...' : 'Submit Medical Order'}
             </Button>
         </div>
+            <ToastComponent />
+        </ToastProvider>
     );
 }

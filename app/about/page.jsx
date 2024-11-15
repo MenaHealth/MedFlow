@@ -26,7 +26,7 @@ export default function AboutPage() {
                     First Virtual Hospital
                 </h1>
                 <p className="mt-3 max-w-md mx-auto text-base text-darkBlue sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
-                     the MENA Region </p>
+                     for the MENA Region </p>
                 <p className="mt-3 max-w-md mx-auto text-base text-darkBlue sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
                     MedFlow connects an international network of volunteer doctors to support on the ground healthcare facilities under crisis. 
                     It empowers online triage management, telehealth and prescription management to optimize urgent care, giving displaced civilians 

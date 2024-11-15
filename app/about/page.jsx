@@ -15,6 +15,22 @@ const features = [
     { icon: FileText, title: "Prescription Management", description: "Generate and manage drug prescription paperwork" },
 ]
 
+const teamMembers = [
+    {
+        name: "Team Name",
+        role: "Lead Developer",
+        bio: "Specializes in building impactful healthcare solutions for underserved communities.",
+        photo: "/path/to/john-photo.jpg"
+    },
+    {
+        name: "Team Name",
+        role: "Medical Director",
+        bio: "Oversees medical protocols and ensures quality of care within MedFlow.",
+        photo: "/path/to/jane-photo.jpg"
+    },
+    // Add more team members as needed
+]
+
 const baseURL = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://gaza-meds.vercel.app/';
 
 export default function AboutPage() {
@@ -276,5 +292,43 @@ export default function AboutPage() {
         </div>
     </div>
     )
+         {/* Team Section */}
+         <div className="mt-20">
+         <div className="text-center mb-16">
+             <h2 className="text-4xl font-bold tracking-tight text-black sm:text-5xl md:text-6xl">Our Team</h2>
+             <p className="mt-3 max-w-md mx-auto text-base text-darkBlue sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
+                 The Team
+             </p>
+         </div>
+
+         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 lg:gap-x-8 lg:gap-y-4">
+             {teamMembers.map((member, index) => (
+                 <Card key={index} className="p-6 bg-white bg-opacity-30 card-container">
+                     <div className="card-header mb-4 flex justify-center">
+                         <img 
+                             src={member.photo} 
+                             alt={`${member.name} photo`} 
+                             className="w-24 h-24 rounded-full object-cover"
+                         />
+                     </div>
+                     <h3 className="text-lg font-medium text-black text-center">{member.name}</h3>
+                     <p className="text-sm text-center text-darkBlue">{member.role}</p>
+
+                     {/* Keyboard Typing Animation for Developers */}
+                     {member.role === "Lead Developer" && (
+                         <div className="keyboard mt-4">
+                             {Array.from({ length: 20 }).map((_, index) => (
+                                 <div key={index} className="key"></div>
+                             ))}
+                         </div>
+                     )}
+
+                     <div className="card-content mt-4">
+                         <p className="text-base text-darkBlue text-center">{member.bio}</p>
+                     </div>
+                 </Card>
+             ))}
+         </div>
+     </div>
 }
 

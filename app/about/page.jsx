@@ -28,20 +28,23 @@ export default function AboutPage() {
                 <p className="mt-3 max-w-md mx-auto text-base text-darkBlue sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
                      the MENA Region </p>
                 <p className="mt-3 max-w-md mx-auto text-base text-darkBlue sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
-                    The mission of MedFlow is to provide a modern electronic medical record (EMR) system to hospitals in
-                    the Middle East. The user-types of the app are:
+                    MedFlow connects an international network of volunteer doctors to support on the ground healthcare facilities under crisis. 
+                     </p>
+                <p className="mt-3 max-w-md mx-auto text-base text-darkBlue sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
+                    It empowers online triage management, telehealth and prescription management to optimize urgent care, giving displaced civilians 
+                    control over their medical histories and ensuring physicians have the autonomy to provide informed care — no matter where they are.
+                    </p>
+                <p className="mt-3 max-w-md mx-auto text-base text-darkBlue sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
+                    The user-types of the app are:
                 </p>
-            </div>
             </div>
 
             <div className="mt-20">
-            <div className="text-center mb-16">
-                <p className="mt-3 max-w-md mx-auto text-base text-darkBlue sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
+                <p className="font-bold mt-3 max-w-md mx-auto text-base text-darkBlue sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
                     User Types </p>
                 <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 lg:gap-x-8 lg:gap-y-4">
                     <Card className="p-6 bg-white bg-opacity-30 card-container">
                         {/* Patient card content */}
-                        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 lg:gap-x-8 lg:gap-y-4">
                         <div className="card-header">
                             <div className="flex items-center justify-center w-12 h-12 rounded-md bg-orange text-white">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -49,7 +52,6 @@ export default function AboutPage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                                           d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
                                 </svg>
-                            </div>
                             </div>
                         </div>
                         <h3 className="text-lg font-medium text-black text-center">Patients</h3>

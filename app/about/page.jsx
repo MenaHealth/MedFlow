@@ -19,16 +19,15 @@ const teamMembers = [
     {
         name: "Team Name",
         role: "Lead Developer",
-        bio: "Specializes in building impactful healthcare solutions for underserved communities.",
-        photo: "/path/to/john-photo.jpg"
+        bio: "space.",
+        photo: "/path/to/headshot.jpg"
     },
     {
         name: "Team Name",
-        role: "Medical Director",
-        bio: "Oversees medical protocols and ensures quality of care within MedFlow.",
-        photo: "/path/to/jane-photo.jpg"
-    },
-    // Add more team members as needed
+        role: "Lead Developer",
+        bio: "space.",
+        photo: "/path/to/headshot.jpg"
+    }
 ]
 
 const baseURL = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://gaza-meds.vercel.app/';

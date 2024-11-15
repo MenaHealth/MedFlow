@@ -29,8 +29,9 @@ export default function AboutPage() {
                     for the MENA Region </p>
                 <p className="mt-3 max-w-md mx-auto text-base text-darkBlue sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
                     MedFlow connects an international network of volunteer doctors to support on the ground healthcare facilities under crisis. 
+                    
                     It empowers online triage management, telehealth and prescription management to optimize urgent care, giving displaced civilians 
-                    control over their medical histories and ensuring physicians have the autonomy to provide informed care -- no matter where they are.
+                    control over their medical histories and ensuring physicians have the autonomy to provide informed care —— no matter where they are.
                     
                 </p>
                 <p className="font-bold mt-3 max-w-md mx-auto text-base text-darkBlue sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">

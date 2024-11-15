@@ -94,7 +94,7 @@ export default function RXOrderView({ patientId, patientInfo }: RXOrderViewProps
                         className="space-y-4 flex flex-col items-center justify-center text-center border-4 bg-orange-950 border-white rounded-lg p-4">
                         <DatePickerFormField
                             name="validTill"
-                            label={<span style={{color: 'white'}}>Valid Till</span>}
+                            label="Valid Till"
                             type="future"
                             value={rxOrder.validTill}
                             onChange={(date) => handleInputChange('validTill', date)}

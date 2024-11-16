@@ -120,7 +120,7 @@ export default function TeamPage() {
                         <Card className="p-6 bg-white bg-opacity-30 card-container">
                             <div className="flex flex-col items-center text-center">
                             <div className="flex items-center justify-center w-20 h-20 mb-4">
-                                    <img
+                            <Image
                                         src="assets/images/mn1_hdst.png"
                                         alt="Michelle"
                                         className="rounded-full object-cover w-30 h-20"
@@ -139,7 +139,7 @@ export default function TeamPage() {
                         <Card className="p-6 bg-white bg-opacity-30 card-container">
                             <div className="flex flex-col items-center text-center">
                             <div className="flex items-center justify-center w-20 h-20 mb-4">
-                                    <img
+                            <Image
                                         src="assets/images/ma_hdst.jpeg"
                                         alt="Maya"
                                         className="rounded-full object-cover w-20 h-20"
@@ -159,7 +159,7 @@ export default function TeamPage() {
                         <Card className="p-6 bg-white bg-opacity-30 card-container">
                             <div className="flex flex-col items-center text-center">
                             <div className="flex items-center justify-center w-20 h-20 mb-4">
-                                <img
+                            <Image
                                         src="assets/images/ke_hdst.jpg"
                                         alt="Kyle"
                                         className="rounded-full object-cover w-20 h-20"

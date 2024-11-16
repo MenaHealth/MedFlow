@@ -150,7 +150,7 @@ export default function TeamPage() {
                                 <h3 className="text-xs font-small text-[var(--orange)] italic">Co-Founder Medflow</h3>
                                 <p className="text-xs mt-2 text-base text-darkBlue">
                                     Maya built Medflow with a passion for data mapping, computational health models and predictive analytics. She is currently
-                                    pursuing a Master's Degree in Data Science with a focus on Statistics and is passionate about leveraging Data Science to drive advancements for minority communities in modern medicine.
+                                    pursuing a Master&apos;s Degree in Data Science with a focus on Statistics and is passionate about leveraging Data Science to drive advancements for minority communities in modern medicine.
                                 </p>
                             </div>
                         </Card>
@@ -170,7 +170,7 @@ export default function TeamPage() {
                                 <p className="text-xs mt-2 text-base text-darkBlue">
                                 Kyle built MedFlow drawing on his experience developing applications for organizations such as Sunnova Energy, 
                                 Ford Motor Company, the Girl Scouts of Northeast Texas, and the State of Michigan. He graduated from the University 
-                                of Michigan in 2019 with a Bachelor’s degree in Information Science.
+                                of Michigan in 2019 with a Bachelor&apos;s degree in Information Science.
                                 </p>
                             </div>
                         </Card>

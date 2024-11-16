@@ -16,7 +16,7 @@ type MedOrderFormState = {
     patientPhone: string;
     patientCity: string;
     patientCountry: string;
-    patientId: Types.ObjectId;
+    patientId: Types.ObjectId | undefined | string,
     orderDate: Date;
     validated: boolean;
     medications: Array<{
@@ -28,7 +28,7 @@ type MedOrderFormState = {
     }>;
 };
 
-export function useMedOrderViewModel(patientId: Types.ObjectId, patientName: string, city: string) {
+export function useMedOrderViewModel(patientId: string | Types.ObjectId, patientName: string, city: string) {
     const { userSession, patientInfo, patientViewModel, addMedOrder } = usePatientDashboard();
     const { setToast } = useToast();
 

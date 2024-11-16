@@ -12,6 +12,7 @@ import RxOrderDrawerView from './RxOrderDrawerView';
 import { IRxOrder } from "@/models/patient";
 import { ToastComponent } from '@/components/hooks/useToast';
 import { ToastProvider } from '@/components/ui/toast';
+import {Types} from "mongoose";
 
 
 interface User {
@@ -22,7 +23,7 @@ interface User {
 
 interface RXOrderViewProps {
     user: User;
-    patientId: string;
+    patientId: Types.ObjectId | undefined | string,
     patientInfo: {
         patientName: string;
         phoneNumber: string;

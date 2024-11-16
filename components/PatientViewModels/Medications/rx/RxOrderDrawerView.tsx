@@ -1,6 +1,7 @@
 // components/PatientViewModels/Medications/rx/RxOrderDrawerView.tsx
 
 import React, { useRef } from "react";
+import { Types } from "mongoose";
 import { MessageSquareShare, Mail, Calendar, Phone, MapPin, User, Activity, Clock9, Clock, Aperture, Download, Hourglass, Tablets, PillBottle, BadgeAlert } from "lucide-react";
 import { Drawer, DrawerContent, DrawerHeader } from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/ScrollArea";
@@ -11,7 +12,7 @@ import { useRxOrderDrawerViewModel } from "./RxOrderDrawerViewModel";
 interface RxOrderDrawerViewProps {
     isOpen: boolean;
     onClose: () => void;
-    patientId: string;
+    patientId: Types.ObjectId | undefined | string;
     rxOrder: IRxOrder | null;
 }
 

@@ -8,6 +8,7 @@ import { IRxOrder } from '../../../../models/patient';
 import { IMedOrder } from '../../../../models/medOrder';
 import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewModelContext';
 import { Button } from '@/components/ui/button';
+import { Types } from "mongoose";
 
 interface PreviousMedicationsViewProps {
     rxOrders: IRxOrder[];
@@ -17,13 +18,13 @@ interface PreviousMedicationsViewProps {
     isDoctor: boolean;
 }
 
-const PreviousMedicationsView: React.FC<PreviousMedicationsViewProps> = ({
-                                                                             rxOrders,
-                                                                             medOrders,
-                                                                             loadingMedications,
-                                                                             isMobile,
-                                                                             isDoctor,
-                                                                         }) => {
+export default function PreviousMedicationsView({
+                                                    rxOrders,
+                                                    medOrders,
+                                                    loadingMedications,
+                                                    isMobile,
+                                                    isDoctor,
+                                                }: PreviousMedicationsViewProps) {
     const { patientInfo } = usePatientDashboard();
     const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -37,7 +38,6 @@ const PreviousMedicationsView: React.FC<PreviousMedicationsViewProps> = ({
             return dateB.getTime() - dateA.getTime();
         });
 
-        // If the user is a doctor, exclude the latest medication
         return isDoctor ? combined.slice(1) : combined;
     }, [rxOrders, medOrders, isDoctor]);
 
@@ -76,10 +76,21 @@ const PreviousMedicationsView: React.FC<PreviousMedicationsViewProps> = ({
         setExpandAll(prev => !prev);
     };
 
+    const formatDateTime = (date: Date) => {
+        return new Intl.DateTimeFormat('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+        }).format(date);
+    };
+
     const renderMedicationItem = (item: IRxOrder | IMedOrder) => {
         const isRxOrder = 'prescriptions' in item;
         const itemId = item._id ?? '';
         const isExpanded = expandedItems.has(itemId);
+        const dateTime = new Date(isRxOrder ? item.prescribedDate : item.orderDate);
 
         return (
             <li key={itemId} className="text-white border-white border-t-2 border-l-2 p-4 m-4 rounded-lg">
@@ -104,14 +115,14 @@ const PreviousMedicationsView: React.FC<PreviousMedicationsViewProps> = ({
                         </Button>
                     )}
                 </div>
-                <p className="mt-2">{new Date(isRxOrder ? item.prescribedDate : item.orderDate).toLocaleDateString()}</p>
+                <p className="mt-2">{formatDateTime(dateTime)}</p>
                 <p className="mt-2">{item.doctorSpecialty}</p>
                 <h4 className="text-center">Dr. {item.prescribingDr}</h4>
                 {isExpanded && (
                     <div id={`medication-details-${itemId}`} className="mt-2 p-2 bg-white text-darkBlue rounded-sm">
                         <p><strong>City:</strong> {isRxOrder ? item.city : item.patientCity}</p>
                         {isRxOrder &&
-                            <p><strong>Valid Till:</strong> {new Date(item.validTill).toLocaleDateString()}</p>}
+                            <p><strong>Valid Till:</strong> {formatDateTime(new Date(item.validTill))}</p>}
                         <h4 className="mt-2 font-bold">{isRxOrder ? 'Prescriptions:' : 'Medications:'}</h4>
                         {isRxOrder ? (
                             (item as IRxOrder).prescriptions.map((med, medIndex) => (
@@ -165,10 +176,8 @@ const PreviousMedicationsView: React.FC<PreviousMedicationsViewProps> = ({
                 isOpen={isDrawerOpen}
                 onClose={() => setIsDrawerOpen(false)}
                 rxOrder={selectedRxOrder}
-                patientId={patientInfo?.patientID || ""}
+                patientId={patientInfo?.patientID ? new Types.ObjectId(patientInfo.patientID) : undefined}
             />
         </div>
     );
-};
-
-export default PreviousMedicationsView;
+}

@@ -2,6 +2,7 @@ import { useCallback, useState, useMemo } from 'react';
 import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewModelContext';
 import { IRxOrder } from "@/models/patient";
 import { useToast } from '@/components/hooks/useToast';
+import {Types} from "mongoose";
 
 interface Prescription {
     diagnosis: string;
@@ -11,7 +12,7 @@ interface Prescription {
 }
 
 export function useRXOrderViewModel(
-    patientId: string,
+    patientId: Types.ObjectId | undefined | string,
     onNewRxOrderSaved: (rxOrder: IRxOrder) => void,
     city: string,
     patientName: string

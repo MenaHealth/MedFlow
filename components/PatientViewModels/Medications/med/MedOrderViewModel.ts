@@ -1,21 +1,14 @@
 // components/form/Medications/MedOrderViewModel.ts
 
-'use client'
-
 import { useCallback, useState, useMemo } from 'react';
 import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewModelContext';
-import { DoctorSpecialtyList } from '@/data/doctorSpecialty.enum';
+import { useToast } from '@/components/hooks/useToast';
+import { IMedOrder } from '@/models/medOrder';
+import { Types } from 'mongoose';
 
-interface Medication {
-    diagnosis: string;
-    medication: string;
-    dosage: string;
-    frequency: string;
-    quantity: string;
-}
-
-interface MedOrder {
-    doctorSpecialty: keyof typeof DoctorSpecialtyList;
+// Define a new type that only includes the fields we need for the form state
+type MedOrderFormState = {
+    doctorSpecialty: string;
     prescribingDr: string;
     drEmail: string;
     drId: string;
@@ -23,17 +16,24 @@ interface MedOrder {
     patientPhone: string;
     patientCity: string;
     patientCountry: string;
-    patientId: string;
+    patientId: Types.ObjectId | undefined | string,
     orderDate: Date;
     validated: boolean;
-    medications: Medication[];
-}
+    medications: Array<{
+        diagnosis: string;
+        medication: string;
+        dosage: string;
+        frequency: string;
+        quantity: string;
+    }>;
+};
 
-export function useMedOrderViewModel(patientId: string, patientName: string, city: string) {
+export function useMedOrderViewModel(patientId: string | Types.ObjectId, patientName: string, city: string) {
     const { userSession, patientInfo, patientViewModel, addMedOrder } = usePatientDashboard();
+    const { setToast } = useToast();
 
-    const [medOrder, setMedOrder] = useState<MedOrder>({
-        doctorSpecialty: userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList || DoctorSpecialtyList.NOT_SELECTED,
+    const initialMedOrder: MedOrderFormState = {
+        doctorSpecialty: userSession?.doctorSpecialty || 'Not Selected',
         prescribingDr: `${userSession?.firstName} ${userSession?.lastName}`,
         drEmail: userSession?.email || '',
         drId: userSession?.id || '',
@@ -41,34 +41,35 @@ export function useMedOrderViewModel(patientId: string, patientName: string, cit
         patientPhone: `${patientViewModel?.getExpandedDetails()?.phone?.countryCode || ''} ${patientViewModel?.getExpandedDetails()?.phone?.phoneNumber || ''}`,
         patientCity: patientViewModel?.getExpandedDetails()?.city || '',
         patientCountry: patientViewModel?.getExpandedDetails()?.country || '',
-        patientId: patientId,
+        patientId,
         orderDate: new Date(),
         validated: false,
         medications: [{ diagnosis: '', medication: '', dosage: '', frequency: '', quantity: '' }],
-    });
+    };
 
+    const [medOrder, setMedOrder] = useState<MedOrderFormState>(initialMedOrder);
     const [isLoading, setIsLoading] = useState(false);
 
-    // Optimized isFormComplete logic
     const isFormComplete = useMemo(() =>
             medOrder.medications.every(medication =>
-                medication.diagnosis?.trim() &&
-                medication.medication?.trim() &&
-                medication.dosage?.trim() &&
-                medication.frequency?.trim() &&
-                medication.quantity?.trim()
+                medication.diagnosis &&
+                medication.medication &&
+                medication.dosage &&
+                medication.frequency &&
+                medication.quantity
             ),
-        [medOrder.medications]);
+        [medOrder.medications]
+    );
 
-    const handleInputChange = (field: keyof MedOrder, value: any) => {
-        setMedOrder((prevOrder) => ({
+    const handleInputChange = (field: keyof MedOrderFormState, value: any) => {
+        setMedOrder(prevOrder => ({
             ...prevOrder,
             [field]: value,
         }));
     };
 
-    const handleMedicationChange = (index: number, field: keyof Medication, value: string) => {
-        setMedOrder((prevOrder) => {
+    const handleMedicationChange = (index: number, field: keyof MedOrderFormState['medications'][number], value: string) => {
+        setMedOrder(prevOrder => {
             const newMedications = [...prevOrder.medications];
             newMedications[index] = { ...newMedications[index], [field]: value };
             return {
@@ -79,28 +80,28 @@ export function useMedOrderViewModel(patientId: string, patientName: string, cit
     };
 
     const addMedication = () => {
-        setMedOrder((prevOrder) => ({
+        setMedOrder(prevOrder => ({
             ...prevOrder,
-            medications: [...prevOrder.medications, { diagnosis: '', medication: '', dosage: '', frequency: '', quantity: '' }],
+            medications: [
+                ...prevOrder.medications,
+                { diagnosis: '', medication: '', dosage: '', frequency: '', quantity: '' }
+            ],
         }));
     };
 
     const removeMedication = (index: number) => {
-        setMedOrder((prevOrder) => ({
+        setMedOrder(prevOrder => ({
             ...prevOrder,
             medications: prevOrder.medications.filter((_, idx) => idx !== index),
         }));
     };
 
     const submitMedOrder = useCallback(async () => {
-        console.log("Submit button clicked - starting Med order submission");
-
         if (!isFormComplete) {
             console.warn("Form incomplete - not submitting Med order.");
             return;
         }
 
-        console.log("submitMedOrder is being called with data:", medOrder);
         setIsLoading(true);
 
         try {
@@ -115,17 +116,32 @@ export function useMedOrderViewModel(patientId: string, patientName: string, cit
                 throw new Error(`Failed to save Med order: ${errorText}`);
             }
 
-            const savedMedOrder = await response.json();
+            const savedMedOrder: IMedOrder = await response.json();
             addMedOrder(savedMedOrder);
-            console.log("Med order saved successfully:", savedMedOrder);
 
-            // Optionally reset form here if desired
+            setToast({
+                title: 'Med Order Submitted',
+                description: `${medOrder.medications.map(m => m.medication).join(', ')} submitted for ${patientName}`,
+                variant: 'success',
+            });
+
+            // Reset form
+            setMedOrder({
+                ...initialMedOrder,
+                orderDate: new Date(),
+            });
         } catch (error) {
             console.error("Failed to save Med order:", error);
+
+            setToast({
+                title: 'Error',
+                description: 'Failed to submit Med Order',
+                variant: 'error',
+            });
         } finally {
             setIsLoading(false);
         }
-    }, [medOrder, patientId, addMedOrder, isFormComplete]);
+    }, [medOrder, patientId, addMedOrder, isFormComplete, setToast, patientName]);
 
     return {
         medOrder,

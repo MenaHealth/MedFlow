@@ -1,7 +1,9 @@
+// ADMIN not patient view!!
+// components/auth/adminDashboard/sections/MedOrdersView.tsx
 import React, { useState } from 'react'
 import { Table, TableColumn } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { Loader2, ChevronDown, ChevronRight } from "lucide-react"
+import {Loader2, ChevronDown, ChevronRight, Download} from "lucide-react"
 import { useMedOrdersViewModel } from './MedOrderViewModel'
 import { IMedOrder } from '@/models/medOrder'
 
@@ -229,12 +231,73 @@ export default function MedOrdersView() {
         );
     }
 
+    const exportToCSV = () => {
+        // Include all columns except those with custom render functions
+        const exportableColumns = columns.filter(column => !column.render && !column.hidden);
+        const headers = exportableColumns.map(column => column.header);
+
+        const csvContent = [
+            headers.join(','),
+            ...medOrders.map(order =>
+                exportableColumns.map(column => {
+                    const key = column.key as keyof IMedOrder;
+                    const value = order[key];
+                    if (Array.isArray(value)) {
+                        // For array values, join them with commas
+                        return value.join(', ');
+                    }
+                    if (key === 'orderDate') {
+                        // Format date
+                        return new Date(value as Date).toLocaleString('en-US', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            month: '2-digit',
+                            day: '2-digit',
+                            year: '2-digit'
+                        });
+                    }
+                    return value?.toString() || '';
+                }).join(',')
+            )
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        if (link.download !== undefined) {
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'med_orders.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    };
+
+    if (loadingMedOrders && (!medOrders || medOrders.length === 0)) {
+        return (
+            <div className="flex justify-center items-center py-4">
+                <Loader2 className="h-8 w-8 animate-spin text-white"/>
+            </div>
+        );
+    }
+
     return (
         <div className="container mx-auto px-4 py-8">
-            <div className="mb-4">
+            <div className="mb-4 flex flex-wrap items-center">
                 <GroupToggleButton group="patient" label="Patient Info" />
                 <GroupToggleButton group="doctor" label="Doctor Info" />
                 <GroupToggleButton group="medications" label="Medications" />
+                <Button
+                    onClick={exportToCSV}
+                    variant="outline"
+                    size="sm"
+                    className="ml-auto text-orange-950 border-2 border-white hover:bg-orange-800 hover:text-white transition-colors"
+                    disabled={!medOrders || medOrders.length === 0}
+                >
+                    <Download className="mr-2 h-4 w-4" />
+                    Export CSV
+                </Button>
             </div>
             {medOrders && medOrders.length > 0 ? (
                 <div className="rounded-lg overflow-hidden border border-orange-900">

@@ -5,9 +5,10 @@ import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewM
 import { IRxOrder } from "@/models/patient";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import { Types } from 'mongoose';
 
 export function useRxOrderDrawerViewModel(
-    patientId: string,
+    patientId: Types.ObjectId | undefined | string,
     onClose: () => void,
     initialRxOrder: IRxOrder | null
 ) {

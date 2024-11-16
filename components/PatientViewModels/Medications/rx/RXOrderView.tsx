@@ -12,6 +12,7 @@ import RxOrderDrawerView from './RxOrderDrawerView';
 import { IRxOrder } from "@/models/patient";
 import { ToastComponent } from '@/components/hooks/useToast';
 import { ToastProvider } from '@/components/ui/toast';
+import {Types} from "mongoose";
 
 
 interface User {
@@ -22,7 +23,7 @@ interface User {
 
 interface RXOrderViewProps {
     user: User;
-    patientId: string;
+    patientId: Types.ObjectId | undefined | string,
     patientInfo: {
         patientName: string;
         phoneNumber: string;
@@ -92,9 +93,11 @@ export default function RXOrderView({ patientId, patientInfo }: RXOrderViewProps
                     <hr className="my-6 border-gray-200"/>
                     <div
                         className="space-y-4 flex flex-col items-center justify-center text-center border-4 bg-orange-950 border-white rounded-lg p-4">
+                        <div className="text-white -mb-4">
+                            Valid Till
+                        </div>
                         <DatePickerFormField
                             name="validTill"
-                            label="Valid Till"
                             type="future"
                             value={rxOrder.validTill}
                             onChange={(date) => handleInputChange('validTill', date)}

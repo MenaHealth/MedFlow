@@ -16,12 +16,39 @@ import { ChevronDown, ChevronUp, Share } from 'lucide-react'
 import { Button } from '@/components/ui/button';
 import { IRxOrder } from '@/models/patient';
 import { IMedOrder } from '@/models/medOrder';
+import {Types} from "mongoose";
 
 interface MedicationsViewProps {
-    patientId: string;
+    patientId: string | Types.ObjectId;
+
 }
 
 export default function MedicationsView({ patientId }: MedicationsViewProps) {
+
+
+    const [isValidPatientId, setIsValidPatientId] = useState(false);
+
+    useEffect(() => {
+        if (patientId) {
+            if (typeof patientId === 'string') {
+                if (Types.ObjectId.isValid(patientId)) {
+                    setIsValidPatientId(true);
+                } else {
+                    console.error("Invalid patientId string passed to MedicationsView:", patientId);
+                    setIsValidPatientId(false);
+                }
+            } else if (patientId instanceof Types.ObjectId) {
+                setIsValidPatientId(true);
+            } else {
+                console.error("Invalid patientId type passed to MedicationsView:", typeof patientId);
+                setIsValidPatientId(false);
+            }
+        } else {
+            console.error("No patientId passed to MedicationsView");
+            setIsValidPatientId(false);
+        }
+    }, [patientId]);
+
     const {
         userSession,
         rxOrders,
@@ -55,29 +82,18 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
     }, [rxOrders, medOrders]);
 
     const latestMedication = allMedications[0];
-    const isRxOrder = latestMedication && 'prescriptions' in latestMedication;
-
-    const { submitRxOrder, isLoading: rxLoading } = useRXOrderViewModel(
-        patientId,
-        () => {}, // Placeholder for onNewRxOrderSaved
-        patientInfo?.city || '',
-        patientInfo?.patientName || ''
-    );
-
-    const { submitMedOrder, isLoading: medLoading } = useMedOrderViewModel(
-        patientId,
-        patientInfo?.patientName || '',
-        patientInfo?.city || ''
-    );
-
-    const handleCreateMedication = async (event: React.FormEvent) => {
-        event.preventDefault();
-        if (templateType === 'rxOrder') {
-            await submitRxOrder();
-        } else {
-            await submitMedOrder();
-        }
+    const formatDateTime = (date: Date) => {
+        return new Intl.DateTimeFormat('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+        }).format(date);
     };
+
+
+    const isRxOrder = latestMedication && 'prescriptions' in latestMedication;
 
     const handleValueChange = (value: 'rxOrder' | 'medOrder') => {
         if (value !== templateType) {
@@ -122,7 +138,6 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
 
     return (
         <FormProvider {...methods}>
-            <form onSubmit={handleCreateMedication}>
                 <div className="flex flex-col h-[100vh] overflow-hidden bg-orange-950">
                     <div className="flex-grow overflow-auto border-t-2 border-white rounded-lg">
                         {!isTriage && latestMedication && (
@@ -157,7 +172,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                             </Button>
                                         )}
                                     </div>
-                                    <p>{new Date(isRxOrder ? latestMedication.prescribedDate : latestMedication.orderDate).toLocaleDateString()}</p>
+                                    <p>{formatDateTime(new Date(isRxOrder ? latestMedication.prescribedDate : latestMedication.orderDate))}</p>
                                     <p className="text-center">Dr. {latestMedication.prescribingDr}</p>
 
                                     {isLatestExpanded && (
@@ -227,6 +242,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                 medOrders={medOrders}
                                 loadingMedications={loadingMedications}
                                 isMobile={isMobile}
+                                isDoctor={isDoctor}
                             />
                         </div>
 
@@ -283,6 +299,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                         medOrders={medOrders}
                                         loadingMedications={loadingMedications}
                                         isMobile={isMobile}
+                                        isDoctor={isDoctor}
                                     />
                                 )}
                                 {!isDoctor && !isTriage && (
@@ -292,7 +309,6 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                         )}
                     </div>
                 </div>
-            </form>
             <RxOrderDrawerView
                 isOpen={isShareDrawerOpen}
                 onClose={() => setIsShareDrawerOpen(false)}

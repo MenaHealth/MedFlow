@@ -5,10 +5,10 @@ import React, { createContext, useContext, useState, useCallback, ReactNode, use
 import { useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { PatientInfoViewModel } from "./patient-info/PatientInfoViewModel";
-import { IPatient } from '../../models/patient';
-import { INote } from '../../models/note';
-import { IRxOrder } from '../../models/patient';
-import { IMedOrder } from '../../models/medOrder';
+import { IPatient } from '@/models/patient';
+import { INote } from '@/models/note';
+import { IRxOrder } from '@/models/patient';
+import { IMedOrder } from '@/models/medOrder';
 import {Types} from "mongoose";
 
 interface PatientInfo {
@@ -238,25 +238,30 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
 
     const refreshMedications = async () => {
         setLoadingMedications(true);
+
         try {
-            const response = await fetch(`/api/patient/${patientId}/medications`);
-            if (!response.ok) throw new Error("Error fetching medications data");
+            // Fetch patient data (includes RX orders and med order IDs)
+            const response = await fetch(`/api/patient/${patientId}`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+            });
 
-            const data = await response.json();
-
-            setRxOrders(data.rxOrders || []);
-
-            const medOrderIds = data.medOrders?.map((order: string | { _id: string }) =>
-                typeof order === 'string' ? order : order._id
-            ).filter(Boolean) as string[];
-
-            if (medOrderIds.length > 0) {
-                const detailedMedOrders = await fetchMedOrders(medOrderIds);
-                setMedOrders(detailedMedOrders);
-            } else {
-                setMedOrders([]);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch patient data. Status: ${response.status}`);
             }
 
+            const patientData = await response.json();
+
+            // Set RX orders directly from patient data
+            setRxOrders(patientData.rxOrders || []);
+
+            // Extract med order IDs and use fetchMedOrders to get detailed med orders
+            const medOrderIds = (patientData.medOrders || []).map((order: any) =>
+                typeof order === 'string' ? order : order._id || ''
+            ).filter(Boolean);
+
+            const detailedMedOrders = await fetchMedOrders(medOrderIds);
+            setMedOrders(detailedMedOrders);
         } catch (error) {
             console.error('Error refreshing medications:', error);
         } finally {

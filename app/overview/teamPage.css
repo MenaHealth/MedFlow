@@ -1,0 +1,258 @@
+.card-container {
+    flex-grow: 1; /* Let cards grow naturally */
+    min-height: 300px; /* Provide a minimum height */
+}
+
+  
+  .card-header {
+    height: 10%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  
+  .card-animation {
+    height: 50%;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .card-content {
+    height: 40%;
+    padding: 1rem;
+    justify-content: center;
+    position: relative;
+    z-index: 3;
+  }
+  
+  .heart-rate, .ball, .ball-first {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1;
+  }
+  
+  .fade-in, .fade-out {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+  }
+  
+  .fade-in {
+    right: 0;
+    animation: heartRateIn 2.5s linear infinite;
+    background-color: var(--white);
+  }
+  
+  .fade-out {
+    right: -120%;
+    width: 120%;
+    animation: heartRateOut 2.5s linear infinite;
+    background: linear-gradient(to right, var(--white) 0%, var(--white) 80%, transparent 100%);
+  }
+  
+  @keyframes heartRateIn {
+    0% { width: 100%; }
+    50% { width: 0; }
+    100% { width: 0; }
+  }
+  
+  @keyframes heartRateOut {
+    0% { left: -120%; }
+    30% { left: -120%; }
+    100% { left: 0; }
+  }
+  
+  .ball-first {
+    width: 1.2rem;
+    height: 1.2rem;
+    background-color: var(--darkOrange);
+    border-radius: 50%;
+    animation: move-horizontal-first var(--animation-duration) infinite linear;
+  }
+  
+  .ball1-first { --animation-duration: 14s; --y-offset: 26%; }
+  .ball2-first { --animation-duration: 9s; --y-offset: 42%; }
+  .ball3-first { --animation-duration: 17s; --y-offset: 58%; }
+  .ball4-first { --animation-duration: 12s; --y-offset: 72%; }
+  .ball5-first { --animation-duration: 11.5s; --y-offset: 84%; }
+  
+  @keyframes move-horizontal-first {
+    0% {
+      left: 0%;
+      top: var(--y-offset);
+      opacity: 0;
+    }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% {
+      left: 100%;
+      top: var(--y-offset);
+      opacity: 0;
+      background-color: var(--orange);
+    }
+  }
+  
+  .ball {
+    width: 1.2rem;
+    height: 1.2rem;
+    background-color: var(--darkBlue);
+    border-radius: 50%;
+    animation: meet-and-move var(--animation-duration) infinite ease-in-out;
+  }
+  
+  .ball1 { --animation-duration: 14s; --initial-top: 26%; --final-top: 50%; }
+  .ball2 { --animation-duration: 9s; --initial-top: 42%; --final-top: 50%; }
+  .ball3 { --animation-duration: 17s; --initial-top: 58%; --final-top: 50%; }
+  .ball4 { --animation-duration: 12s; --initial-top: 72%; --final-top: 50%; }
+  .ball5 { --animation-duration: 11.5s; --initial-top: 84%; --final-top: 50%; }
+  
+  @keyframes meet-and-move {
+    0% {
+      background-color: var(--orange);
+      left: 0%;
+      top: var(--initial-top);
+      opacity: 0%;
+    }
+    10% { opacity: 100%; }
+    45%, 55% {
+      left: 50%;
+      top: 50%;
+    }
+    90% { opacity: 100%; }
+    100% {
+      background-color: var(--lightOrange);
+      left: 90%;
+      top: var(--final-top);
+      opacity: 0%;
+    }
+  }
+  .keyboard {
+    display: grid;
+    grid-template-columns: repeat(10, 20px);
+    gap: 6px;
+    justify-content: center;
+    margin-top: 16px;
+  }
+  
+  .key {
+    width: 20px;
+    height: 20px;
+    background-color: #333;
+    border-radius: 4px;
+    animation: keyPress 1.5s infinite ease-in-out;
+    opacity: 0.3;
+  }
+  
+  @keyframes keyPress {
+    0%, 100% {
+      opacity: 0.3;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.2);
+    }
+  }
+  
+  /* Delay for each key to create typing effect */
+  .key:nth-child(1) { animation-delay: 0.1s; }
+  .key:nth-child(2) { animation-delay: 0.2s; }
+  /* Continue adding delays for each key to create the sequence */
+  .key:nth-child(20) { animation-delay: 2s; }
+  
+  .card-animation {
+    position: relative;
+    width: 100%;
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .connection-line {
+    position: absolute;
+    width: 90%;
+    height: 2px;
+    background-color: var(--darkBlue);
+    z-index: 1;
+    animation: pulse-line 2.5s ease-in-out infinite;
+  }
+  
+  .ball-connection {
+    position: absolute;
+    width: 1.2rem;
+    height: 1.2rem;
+    background-color: var(--darkOrange);
+    border-radius: 50%;
+    animation: connect-and-move var(--animation-duration) infinite ease-in-out;
+    top: 0%;
+  }
+  
+  .ball1-connection {
+    --animation-duration: 8s;
+    left: 0%;
+    top: 5%;
+  }
+  
+  .ball2-connection {
+    --animation-duration: 10s;
+    left: 20%;
+    top: 15%;
+  }
+  
+  .ball3-connection {
+    --animation-duration: 12s;
+    left: 40%;
+    top: 10%;
+  }
+  
+  .ball4-connection {
+    --animation-duration: 9s;
+    left: 60%;
+    top: 15%;
+  }
+  
+  .ball5-connection {
+    --animation-duration: 11s;
+    left: 80%;
+    top: 5%;
+  }
+  
+  @keyframes connect-and-move {
+    0% {
+      transform: scale(1);
+      background-color: var(--orange);
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.3);
+      left: 50%;
+      background-color: var(--lightOrange);
+    }
+    90% {
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1);
+      left: 100%;
+      opacity: 0;
+    }
+  }
+  
+  @keyframes pulse-line {
+    0%, 100% {
+      opacity: 0.3;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+  

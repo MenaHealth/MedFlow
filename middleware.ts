@@ -14,7 +14,8 @@ export async function middleware(req: any) {
         pathname.startsWith('/auth') ||
         pathname.match(PUBLIC_FILE) ||
         pathname === '/new-patient' ||
-        pathname === '/about'
+        pathname === '/overview' ||
+        pathname === '/about' // 
     ) {
         return NextResponse.next();
     }

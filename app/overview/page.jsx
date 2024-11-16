@@ -188,7 +188,7 @@ export default function TeamPage() {
                                 <h3 className="text-lg font-medium text-black">Andy</h3>
                                 <h3 className="text-sm font-small text-[var(--orange)] italic">Co-Founder</h3>
                                 <p className="mt-2 text-base text-darkBlue">
-                                    Andy's Bio.
+                                    Andy&apos;s Bio.
                                 </p>
                             </div>
                         </Card>

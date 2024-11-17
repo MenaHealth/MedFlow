@@ -104,8 +104,8 @@ const PatientDashboardContent: React.FC = () => {
             id: 'images',
             icon: PanelTopOpen,
             label: 'Images',
-            color: 'bg-darkBlue',
-            textColor: 'text-orange-50'
+            color: 'bg-grey-100',
+            textColor: 'text-darkBlue'
         },
         {
             id: 'contact',

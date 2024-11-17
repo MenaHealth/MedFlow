@@ -51,6 +51,8 @@ export function LoginForm() {
 
             if (response && !response.error) {
                 router.replace('/patient-info/dashboard');
+            } else {
+                console.error('Login error:', response?.error);
             }
         } catch (error) {
             console.error('Unexpected login error:', error);

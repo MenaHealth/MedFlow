@@ -1,6 +1,7 @@
 // app/api/patient/[id]/medications/rx-order/route.ts
 
 import { NextResponse } from 'next/server';
+import QRCode from 'qrcode';
 import Patient from '../../../../../../models/patient';
 import dbConnect from '../../../../../../utils/database';
 
@@ -26,15 +27,13 @@ export const POST = async (request: Request, { params }: { params: { id: string 
             return new NextResponse("Missing required fields", { status: 400 });
         }
 
-        // Map each prescription entry to match the schema
-        const formattedPrescriptions = prescriptions.map((p: any) => ({
-            diagnosis: p.diagnosis,
-            medication: p.medication,
-            dosage: p.dosage,
-            frequency: p.frequency,
-        }));
+        // Determine base URL based on environment
+        const baseUrl =
+            process.env.NODE_ENV === "production"
+                ? process.env.NEXT_PUBLIC_API_URL // Production URL from .env
+                : process.env.NEXTAUTH_URL || "http://localhost:3000"; // Local URL fallback
 
-        // Create a new RX order object
+        // Generate a new RX order object without the QR code
         const newRxOrder = {
             doctorSpecialty,
             prescribingDr,
@@ -44,12 +43,15 @@ export const POST = async (request: Request, { params }: { params: { id: string 
             validTill: new Date(validTill),
             city,
             validated,
-            prescriptions: formattedPrescriptions,
+            prescriptions: prescriptions.map((p: any) => ({
+                diagnosis: p.diagnosis,
+                medication: p.medication,
+                dosage: p.dosage,
+                frequency: p.frequency,
+            })),
         };
 
-        console.log("New RX Order:", newRxOrder);
-
-        // Add the new RX order to the patient's rxOrders array
+        // Save the new RX order in the patient's RX orders to get the `_id`
         const updatedPatient = await Patient.findByIdAndUpdate(
             patientId,
             { $push: { rxOrders: newRxOrder } },
@@ -60,26 +62,20 @@ export const POST = async (request: Request, { params }: { params: { id: string 
             return new NextResponse('Failed to update patient record', { status: 500 });
         }
 
-        console.log("Updated Patient after adding RX Order:", updatedPatient);
+        // Find the recently added RX order to get its `_id`
+        const addedRxOrder = updatedPatient.rxOrders[updatedPatient.rxOrders.length - 1];
+
+        // Generate QR code using RX order details
+        const qrCodeData = `${baseUrl}/api/rx-order/validate?patientId=${patientId}&rxOrderId=${addedRxOrder._id}`;
+        const qrCodeURL = await QRCode.toDataURL(qrCodeData);
+
+        // Update the RX order with the QR code
+        addedRxOrder.qrCode = qrCodeURL;
+        await updatedPatient.save();
+
         return new NextResponse(JSON.stringify(updatedPatient), { status: 201 });
     } catch (error) {
-        console.error('Failed to add rx order:', error);
-        return new NextResponse('Failed to add rx order', { status: 500 });
-    }
-};
-
-export const GET = async (request: Request, { params }: { params: { id: string } }) => {
-    try {
-        await dbConnect();
-
-        const patient = await Patient.findById(params.id).select('rxOrders');
-        if (!patient) {
-            return new NextResponse("Patient Not Found", { status: 404 });
-        }
-
-        return new NextResponse(JSON.stringify(patient.rxOrders), { status: 200 });
-    } catch (error) {
-        console.error("Error fetching RX orders:", error);
-        return new NextResponse("Internal Server Error", { status: 500 });
+        console.error('Failed to add RX order:', error);
+        return new NextResponse('Failed to add RX order', { status: 500 });
     }
 };

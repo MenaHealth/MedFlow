@@ -44,13 +44,6 @@ export default function RxOrderDrawerView({ isOpen, onClose, patientId, rxOrder 
                             </div>
                             <span className="mt-1 text-xs">Share SMS</span>
                         </button>
-                        <button onClick={sendTextMessage}
-                                className="flex flex-col items-center justify-center text-orange-950 hover:text-orange-500 transition-colors">
-                            <div className="rounded-full p-3 bg-orange-100 hover:bg-orange-200 transition-colors">
-                                <MessageSquareShare className="h-5 w-5"/>
-                            </div>
-                            <span className="mt-1 text-xs">WhatsApp Placeholder</span>
-                        </button>
                         <button onClick={() => onDownloadPDF(drawerRef)}
                                 className="flex flex-col items-center justify-center text-orange-900 hover:text-orange-500 transition-colors">
                             <div className="rounded-full p-3 bg-orange-100 hover:bg-orange-200 transition-colors">
@@ -92,6 +85,18 @@ export default function RxOrderDrawerView({ isOpen, onClose, patientId, rxOrder 
                             </div>
                         </div>
 
+                        {/* QR Code */}
+                        {rxOrder.qrCode && (
+                            <div className="bg-orange-50 p-4 rounded-lg flex justify-center items-center">
+                                <h3 className="font-semibold text-lg mb-4 text-center text-orange-900 border-b border-orange-200 pb-2">Prescription QR Code</h3>
+                                <img
+                                    src={rxOrder.qrCode}
+                                    alt="Prescription QR Code"
+                                    className="w-40 h-40"
+                                />
+                            </div>
+                        )}
+
                         {/* Medications */}
                         <div className="bg-orange-50 p-4 rounded-lg">
                             <h3 className="font-semibold text-lg mb-4 text-center text-orange-900 border-b border-orange-200 pb-2">Medications</h3>
@@ -126,7 +131,7 @@ export default function RxOrderDrawerView({ isOpen, onClose, patientId, rxOrder 
                                                     <Tablets className="text-orange-500 w-5 h-5"/>
                                                 </div>
                                             </div>
-                                            <div className="flex justify-between items-center">
+                                            <div className="flex justify-between items items-center">
                                                 <div className="flex flex-col flex-1">
                                                     <strong className="text-orange-900 mb-1">Frequency:</strong>
                                                     <p className="break-words">{prescription.frequency}</p>

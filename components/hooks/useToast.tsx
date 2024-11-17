@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useCallback } from 'react';
 import * as ToastPrimitives from "@radix-ui/react-toast"
 import { X } from "lucide-react"
 import { cn } from "@/utils/classNames"
+import {createApiWrapper} from "@/utils/apiWrapper";
 
 export type ToastProps = {
     title: string;
@@ -13,9 +14,14 @@ export type ToastProps = {
 type ToastContextType = {
     toast: ToastProps | null;
     setToast: (toast: ToastProps | null) => void;
+    api: ReturnType<typeof createApiWrapper>; // Add the `api` property
 };
 
-export const ToastContext = createContext<ToastContextType | null>(null);
+export const ToastContext = createContext<ToastContextType>({
+    toast: null,
+    setToast: () => {}, // Default no-op function
+    api: createApiWrapper(() => {}), // Provide a default API wrapper
+});
 
 export const useToast = () => {
     const context = useContext(ToastContext);

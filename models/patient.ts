@@ -4,41 +4,45 @@
   import { INote, noteSchema } from './note';
 
 
-export interface IRxOrder {
-    _id?: string;
-    doctorSpecialty: string;
-    prescribingDr: string;
-    drEmail: string;
-    drId: string;
-    prescribedDate: Date;
-    validTill: Date;
-    city: string;
-    validated: boolean;
-    prescriptions: Array<{
-      diagnosis: string;
-      medication: string;
-      dosage: string;
-      frequency: string;
-    }>;
-}
+  // models/patient.ts
 
-const rxOrderSchema = new Schema({
-    doctorSpecialty: { type: String, required: true },
-    prescribingDr: { type: String, required: true },
-    drEmail: { type: String, required: true },
-    drId: { type: String, required: true },
-    prescribedDate: { type: Date, required: true },
-    validTill: { type: Date, required: true },
-    city: { type: String, required: true },
-    validated: { type: Boolean, default: false },
-    prescriptions: [
-      {
-        diagnosis: { type: String, required: true },
-        medication: { type: String, required: true },
-        dosage: { type: String, required: true },
-        frequency: { type: String, required: true },
-      }
-    ]
+  export interface IRxOrder {
+      _id?: string;
+      doctorSpecialty: string;
+      prescribingDr: string;
+      drEmail: string;
+      drId: string;
+      prescribedDate: Date;
+      validTill: Date;
+      city: string;
+      validated: boolean;
+      prescriptions: Array<{
+          diagnosis: string;
+          medication: string;
+          dosage: string;
+          frequency: string;
+      }>;
+      qrCode?: string; // Add qrCode field
+  }
+
+  const rxOrderSchema = new Schema({
+      doctorSpecialty: { type: String, required: true },
+      prescribingDr: { type: String, required: true },
+      drEmail: { type: String, required: true },
+      drId: { type: String, required: true },
+      prescribedDate: { type: Date, required: true },
+      validTill: { type: Date, required: true },
+      city: { type: String, required: true },
+      validated: { type: Boolean, default: false },
+      prescriptions: [
+          {
+              diagnosis: { type: String, required: true },
+              medication: { type: String, required: true },
+              dosage: { type: String, required: true },
+              frequency: { type: String, required: true },
+          },
+      ],
+      qrCode: { type: String }, // Add qrCode field to schema
   });
 
 export interface IPatient extends Document {

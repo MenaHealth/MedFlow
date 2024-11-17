@@ -5,10 +5,10 @@ import React, { createContext, useContext, useState, useCallback, ReactNode, use
 import { useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { PatientInfoViewModel } from "./patient-info/PatientInfoViewModel";
-import { IPatient } from '../../models/patient';
-import { INote } from '../../models/note';
-import { IRxOrder } from '../../models/patient';
-import { IMedOrder } from '../../models/medOrder';
+import { IPatient } from '@/models/patient';
+import { INote } from '@/models/note';
+import { IRxOrder } from '@/models/patient';
+import { IMedOrder } from '@/models/medOrder';
 import {Types} from "mongoose";
 
 interface PatientInfo {
@@ -21,7 +21,7 @@ interface PatientInfo {
         countryCode: string;
         phoneNumber: string;
     };
-    patientID: string; 
+    patientID: string;
 }
 
 interface UserSession {
@@ -76,7 +76,7 @@ export const usePatientDashboard = () => {
 };
 
 export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const { id: patientId } = useParams() as { id: string }; // Retrieve `patientId` from useParams
+    const { id: patientId } = useParams() as { id: string };
     const { data: session, status } = useSession();
     const [activeTab, setActiveTab] = useState('patient-info');
     const [patientInfo, setPatientInfo] = useState<PatientInfo | null>(null);
@@ -145,7 +145,6 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
 
     const formatPreviousNotes = useCallback((notesData: INote[]) => {
         if (Array.isArray(notesData)) {
-            // Convert the Mongoose documents to plain objects while preserving the type
             const formattedNotes = notesData.map((note) => {
                 const plainNote = note.toObject ? note.toObject() : note;
                 return {
@@ -165,15 +164,15 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
 
     const fetchMedOrders = useCallback(async (medOrderIds: string[]): Promise<IMedOrder[]> => {
         try {
-            const response = await fetch(`/api/patient/${patientId}/medications/med-order`, {
-                method: 'POST',
+            const queryString = medOrderIds.join(',');
+            const response = await fetch(`/api/patient/${patientId}/medications/med-order?ids=${queryString}`, {
+                method: 'GET',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ medOrderIds })
             });
             if (!response.ok) throw new Error("Error fetching detailed med orders data");
 
             const data = await response.json();
-            return data as IMedOrder[];  // Ensure this is typed correctly to match IMedOrder[]
+            return data as IMedOrder[];
         } catch (error) {
             console.error('Error fetching med orders:', error);
             return [];
@@ -196,7 +195,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 setNotes([]);
             }
 
-            // Ensure data.rxOrders has a fallback of an empty array if undefined
+            // Handle rxOrders
             const formattedRxOrders = (data.rxOrders || []).map((order) =>
                 typeof order === 'string'
                     ? {
@@ -215,7 +214,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             );
             setRxOrders(formattedRxOrders);
 
-            // Handle medOrderIds extraction
+            // Handle medOrders
             const medOrderIds = data.medOrders?.map(order =>
                 order instanceof Types.ObjectId ? order.toString() : (order as any)._id || order
             ).filter(Boolean) as string[];
@@ -235,35 +234,34 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
         }
     }, [patientId, formatPatientInfo, formatPreviousNotes, fetchMedOrders]);
 
-    useEffect(() => {
-        if (patientId) {
-            fetchPatientData();
-        }
-    }, [patientId, fetchPatientData]);
-
     const refreshPatientNotes = () => fetchPatientData();
 
     const refreshMedications = async () => {
         setLoadingMedications(true);
+
         try {
-            const response = await fetch(`/api/patient/${patientId}/medications`);
-            if (!response.ok) throw new Error("Error fetching medications data");
+            // Fetch patient data (includes RX orders and med order IDs)
+            const response = await fetch(`/api/patient/${patientId}`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+            });
 
-            const data = await response.json();
-
-            setRxOrders(data.rxOrders || []);
-
-            const medOrderIds = data.medOrders?.map((order: string | { _id: string }) =>
-                typeof order === 'string' ? order : order._id
-            ).filter(Boolean) as string[];
-
-            if (medOrderIds.length > 0) {
-                const detailedMedOrders = await fetchMedOrders(medOrderIds);
-                setMedOrders(detailedMedOrders);
-            } else {
-                setMedOrders([]);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch patient data. Status: ${response.status}`);
             }
 
+            const patientData = await response.json();
+
+            // Set RX orders directly from patient data
+            setRxOrders(patientData.rxOrders || []);
+
+            // Extract med order IDs and use fetchMedOrders to get detailed med orders
+            const medOrderIds = (patientData.medOrders || []).map((order: any) =>
+                typeof order === 'string' ? order : order._id || ''
+            ).filter(Boolean);
+
+            const detailedMedOrders = await fetchMedOrders(medOrderIds);
+            setMedOrders(detailedMedOrders);
         } catch (error) {
             console.error('Error refreshing medications:', error);
         } finally {
@@ -314,6 +312,5 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
 };
 
 export default function Component() {
-    // This is a placeholder component to satisfy the React Component code block requirements
     return null;
 }

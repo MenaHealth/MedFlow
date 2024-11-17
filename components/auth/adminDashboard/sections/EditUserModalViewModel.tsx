@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { User } from './ExistingDoctorsAndTriageViewModel';
 import { useMutation, useQueryClient } from 'react-query';
 import { useSession } from 'next-auth/react';
-import useToast from '@/components/hooks/useToast';
+import { useToast } from '@/components/hooks/useToast';
 
 const userSchema = z.object({
     firstName: z.string().min(1, "First name is required"),

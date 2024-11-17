@@ -67,3 +67,19 @@ export const POST = async (request: Request, { params }: { params: { id: string 
         return new NextResponse('Failed to add rx order', { status: 500 });
     }
 };
+
+export const GET = async (request: Request, { params }: { params: { id: string } }) => {
+    try {
+        await dbConnect();
+
+        const patient = await Patient.findById(params.id).select('rxOrders');
+        if (!patient) {
+            return new NextResponse("Patient Not Found", { status: 404 });
+        }
+
+        return new NextResponse(JSON.stringify(patient.rxOrders), { status: 200 });
+    } catch (error) {
+        console.error("Error fetching RX orders:", error);
+        return new NextResponse("Internal Server Error", { status: 500 });
+    }
+};

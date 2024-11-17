@@ -1,7 +1,7 @@
 // components/form/forgotPassword/ResetPasswordViewModel.tsx
 
 import { useState, useEffect, useCallback } from 'react';
-import useToast from '@/components/hooks/useToast';
+import { useToast } from '@/components/hooks/useToast';
 import { useRouter } from 'next/navigation';
 
 interface ResetPasswordData {

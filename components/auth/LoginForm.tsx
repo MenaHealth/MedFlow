@@ -2,7 +2,6 @@
 'use client';
 
 import { useForm, FormProvider } from "react-hook-form";
-import useToast from '../hooks/useToast';
 import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -10,17 +9,18 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { signIn, getProviders } from "next-auth/react";
 import { BarLoader } from "react-spinners";
+import { useApi } from '@/components/hooks/useApi';
 
 const loginSchema = z.object({
     email: z.string().nonempty("Email is required.").email("Please enter a valid email address."),
-    password: z.string().nonempty("Password is required.").min(8, "incorrect password"),
+    password: z.string().nonempty("Password is required.").min(8, "Password must be at least 8 characters"),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
     const router = useRouter();
-    const { setToast } = useToast();
+    const api = useApi();
     const [submitting, setSubmitting] = useState(false);
     const [providers, setProviders] = useState<any>(null);
     const [showPassword, setShowPassword] = useState(false);
@@ -41,39 +41,19 @@ export function LoginForm() {
         fetchProviders();
     }, []);
 
-    const onError = (errors: any) => {
-        const errorMessages = [];
-        if (errors.email) {
-            errorMessages.push(errors.email.message);
-        }
-        if (errors.password) {
-            errorMessages.push(errors.password.message);
-        }
-        if (errorMessages.length > 0) {
-            setToast?.({
-                title: '❌',
-                description: errorMessages.join('\n'),
-                variant: 'error',
-            });
-        }
-    };
-
     const onSubmit = async (data: LoginFormValues) => {
         setSubmitting(true);
         try {
-            const response = await signIn('credentials', {
+            const response = await api.signIn('credentials', {
                 email: data.email,
                 password: data.password,
-                redirect: false,
             });
+
             if (response && !response.error) {
-                setToast?.({ title: '✓', description: 'You have successfully logged in.', variant: 'default' });
                 router.replace('/patient-info/dashboard');
-            } else if (response?.error) {
-                setToast?.({ title: 'Login Error', description: response.error, variant: 'error' });
             }
         } catch (error) {
-            setToast?.({ title: 'Login Error', description: 'An unexpected error occurred. Please try again.', variant: 'error' });
+            console.error('Unexpected login error:', error);
         } finally {
             setSubmitting(false);
         }
@@ -82,7 +62,7 @@ export function LoginForm() {
     return (
         <div className="w-full md:max-w-md bg-white p-4 md:p-8 rounded-lg shadow-md">
             <FormProvider {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-4">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                     <div className="relative">
                         <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                             Email

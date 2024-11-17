@@ -13,10 +13,8 @@ export async function GET(request: Request) {
     const search = searchParams.get('search') || '';
 
     try {
-        // Base query for authorized users
         const query: any = { authorized: true };
 
-        // Only apply search filter if search term is provided
         if (search) {
             query.$or = [
                 { lastName: { $regex: search, $options: 'i' } },
@@ -24,16 +22,15 @@ export async function GET(request: Request) {
             ];
         }
 
-        // Count the total number of matching users
         const totalUsers = await User.countDocuments(query);
 
-        // Fetch matching users with pagination, explicitly selecting 'authorized' field
+        // Sort by approval date in descending order (newest to oldest)
         const existingUsers = await User.find(query)
             .select('+authorized firstName lastName doctorSpecialty email accountType countries approvalDate')
+            .sort({ approvalDate: -1 })  // Sorts by newest first
             .skip(skip)
             .limit(limit);
 
-        // Return the data with pagination metadata
         return NextResponse.json({
             users: existingUsers,
             totalPages: Math.ceil(totalUsers / limit),

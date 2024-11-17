@@ -5,19 +5,16 @@ const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TO
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
-        // Check if the request is an incoming message from Twilio
         if (req.body.Body && req.body.From) {
-            // Handle incoming message
             const incomingMessage = req.body.Body;
             const fromNumber = req.body.From;
 
             console.log(`Received incoming WhatsApp message from ${fromNumber}: ${incomingMessage}`);
 
             try {
-                // Send an auto-reply to the incoming message
                 await client.messages.create({
                     body: `Thank you for your message: "${incomingMessage}"`,
-                    from: 'whatsapp:+14155238886', // Twilio's WhatsApp sandbox number
+                    from: 'whatsapp:+14155238886',
                     to: fromNumber,
                 });
 
@@ -27,7 +24,6 @@ export default async function handler(req, res) {
                 res.status(500).json({ success: false, error: error.message });
             }
         } else if (req.body.to && req.body.message) {
-            // Handle outgoing message
             const { to, message } = req.body;
 
             console.log(`Sending outgoing message to ${to}: ${message}`);

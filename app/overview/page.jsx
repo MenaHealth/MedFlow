@@ -120,7 +120,7 @@ export default function TeamPage() {
                         <Card className="p-6 bg-white bg-opacity-30 card-container">
                             <div className="flex flex-col items-center text-center">
                             <div className="flex items-center justify-center w-20 h-20 mb-4">
-                            <Image
+                            <img
                                         src="assets/images/mn1_hdst.png"
                                         alt="Michelle"
                                         className="rounded-full object-cover w-30 h-20"
@@ -130,7 +130,6 @@ export default function TeamPage() {
                                 <h3 className="text-sm font-small text-[var(--orange)] italic">Founder / CEO MENA Health</h3>
                                 <h3 className="text-xs font-small text-[var(--orange)] italic">Co-Founder / Project Lead Medflow </h3>
                                 <p className="text-xs mt-2 text-base text-darkBlue">
-                                    Michelle oversees the development of Medflow and is the Founder and CEO of its parent organization, MENA Health.
                                 </p>
                             </div>
                         </Card>
@@ -139,7 +138,7 @@ export default function TeamPage() {
                         <Card className="p-6 bg-white bg-opacity-30 card-container">
                             <div className="flex flex-col items-center text-center">
                             <div className="flex items-center justify-center w-20 h-20 mb-4">
-                            <Image
+                            <img
                                         src="assets/images/ma_hdst.jpeg"
                                         alt="Maya"
                                         className="rounded-full object-cover w-20 h-20"
@@ -149,8 +148,6 @@ export default function TeamPage() {
                                 <h3 className="text-sm font-small text-[var(--orange)] italic">Chief Development Officer MENA Health</h3>
                                 <h3 className="text-xs font-small text-[var(--orange)] italic">Co-Founder Medflow</h3>
                                 <p className="text-xs mt-2 text-base text-darkBlue">
-                                    Maya built Medflow with a passion for data mapping, computational health models and predictive analytics. She is currently
-                                    pursuing a Master&apos;s Degree in Data Science with a focus on Statistics and is passionate about leveraging Data Science to drive advancements for minority communities in modern medicine.
                                 </p>
                             </div>
                         </Card>
@@ -159,7 +156,7 @@ export default function TeamPage() {
                         <Card className="p-6 bg-white bg-opacity-30 card-container">
                             <div className="flex flex-col items-center text-center">
                             <div className="flex items-center justify-center w-20 h-20 mb-4">
-                            <Image
+                            <img
                                         src="assets/images/ke_hdst.jpg"
                                         alt="Kyle"
                                         className="rounded-full object-cover w-20 h-20"
@@ -168,9 +165,6 @@ export default function TeamPage() {
                                 <h3 className="text-lg font-medium text-black">Kyle</h3>
                                 <h3 className="text-sm font-small text-[var(--orange)] italic">Co-Founder Medflow</h3>
                                 <p className="text-xs mt-2 text-base text-darkBlue">
-                                Kyle built MedFlow drawing on his experience developing applications for organizations such as Sunnova Energy, 
-                                Ford Motor Company, the Girl Scouts of Northeast Texas, and the State of Michigan. He graduated from the University 
-                                of Michigan in 2019 with a Bachelor&apos;s degree in Information Science.
                                 </p>
                             </div>
                         </Card>

@@ -139,7 +139,7 @@ export default function TeamPage() {
                             <div className="flex flex-col items-center text-center">
                             <div className="flex items-center justify-center w-20 h-20 mb-4">
                             <img
-                                        src="assets/images/mh_hdst.jpeg"
+                                        src="assets/images/ma_hdst.jpeg"
                                         alt="Maya"
                                         className="rounded-full object-cover w-20 h-20"
                                     />

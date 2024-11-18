@@ -21,6 +21,7 @@ export default function TeamPage() {
         const handleIntersection = (entries, observer) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
+                    // Start counting when the section is visible
                     const animateCountUp = (elementId, target, duration) => {
                         const element = document.getElementById(elementId);
                         if (!element) return;
@@ -45,13 +46,14 @@ export default function TeamPage() {
                     animateCountUp('counter-physicians', 200, 2000);
                     animateCountUp('counter-countries', 10, 2000);
 
+                    // Disconnect the observer after triggering
                     observer.disconnect();
                 }
             });
         };
 
         const observer = new IntersectionObserver(handleIntersection, {
-            threshold: 0.3, 
+            threshold: 0.3, // Trigger when 30% of the section is visible
         });
 
         const target = document.getElementById('statistics-section');
@@ -88,9 +90,9 @@ export default function TeamPage() {
                     id="statistics-section"
                     className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-8 text-center"
                     style={{
-                        columnGap: "0px", 
-                        maxWidth: "60%", 
-                        margin: "0 auto", 
+                        columnGap: "0px", // Removes extra space between columns
+                        maxWidth: "60%", // Optional: Shrinks total container width
+                        margin: "0 auto", // Centers the section
                       }}
                 >
                     {/* Column 1 */}
@@ -149,7 +151,6 @@ export default function TeamPage() {
                                 </p>
                             </div>
                         </Card>
-
                         {/* Kyle */}
                         <Card className="p-6 bg-white bg-opacity-30 card-container">
                             <div className="flex flex-col items-center text-center">
@@ -170,8 +171,8 @@ export default function TeamPage() {
                         {/* Andy */}
                         <Card className="p-6 bg-white bg-opacity-30 card-container">
                             <div className="flex flex-col items-center text-center">
-                                <div className="flex items-center justify-center w-36 h-36 mb-4">
-                                <img
+                            <div className="flex items-center justify-center w-20 h-20 mb-4">
+                            <img
                                         src="assets/images/ac_hdst.jpg"
                                         alt="Andy"
                                         className="rounded-full object-cover w-20 h-20"
@@ -179,7 +180,7 @@ export default function TeamPage() {
                                 </div>
                                 <h3 className="text-lg font-medium text-black">Andy</h3>
                                 <h3 className="text-sm font-small text-[var(--orange)] italic">Co-Founder Medflow</h3>
-                                <p className="mt-2 text-base text-darkBlue">
+                                <p className="text-xs mt-2 text-base text-darkBlue">
                                 </p>
                             </div>
                         </Card>
@@ -189,4 +190,3 @@ export default function TeamPage() {
         </div>
     );
 }
-

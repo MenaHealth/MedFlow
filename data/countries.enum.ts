@@ -48,13 +48,13 @@ export enum CountriesPashto {
 export const CountriesListPashto = Object.values(CountriesPashto)
 
 export enum CountryCodes {
+    USA = '+1',
     EGYPT = '+20',
     AFGHANISTAN = '+93',
     LEBANON = '+961',
     JORDAN = '+962',
     SYRIA = '+963',
     YEMEN = '+967',
-    USA = '+1',
     PALESTINE = '+970',
     ISRAEL = '+972',
 }

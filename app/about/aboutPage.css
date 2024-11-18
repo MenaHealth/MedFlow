@@ -133,3 +133,36 @@
     opacity: 0%;
   }
 }
+.keyboard {
+  display: grid;
+  grid-template-columns: repeat(10, 20px);
+  gap: 6px;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.key {
+  width: 20px;
+  height: 20px;
+  background-color: #333;
+  border-radius: 4px;
+  animation: keyPress 1.5s infinite ease-in-out;
+  opacity: 0.3;
+}
+
+@keyframes keyPress {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+/* Delay for each key to create typing effect */
+.key:nth-child(1) { animation-delay: 0.1s; }
+.key:nth-child(2) { animation-delay: 0.2s; }
+/* Continue adding delays for each key to create the sequence */
+.key:nth-child(20) { animation-delay: 2s; }

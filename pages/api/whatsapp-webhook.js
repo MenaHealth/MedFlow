@@ -13,19 +13,7 @@ export default async function handler(req, res) {
 
             console.log(`Received incoming WhatsApp message from ${fromNumber}: ${incomingMessage}`);
 
-            try {
-                // Send an auto-reply to the incoming message
-                await client.messages.create({
-                    body: `Thank you for your message: "${incomingMessage}"`,
-                    from: 'whatsapp:+14155238886', // Twilio's WhatsApp sandbox number
-                    to: fromNumber,
-                });
-
-                res.status(200).json({ success: true });
-            } catch (error) {
-                console.error("Error sending auto-reply:", error);
-                res.status(500).json({ success: false, error: error.message });
-            }
+            res.status(200).json({ success: true });
         } else if (req.body.to && req.body.message) {
             // Handle outgoing message
             const { to, message } = req.body;

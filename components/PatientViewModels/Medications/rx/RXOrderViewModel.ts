@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useContext, useCallback, useState, useMemo } from 'react';
+import { ToastContext } from '@/components/hooks/useToast';
 import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewModelContext';
 import { IRxOrder } from "@/models/patient";
+import {Types} from "mongoose";
 
 interface Prescription {
     diagnosis: string;
@@ -10,10 +12,12 @@ interface Prescription {
 }
 
 export function useRXOrderViewModel(
-    patientId: string,
+    patientId: Types.ObjectId | undefined | string,
     onNewRxOrderSaved: (rxOrder: IRxOrder) => void,
-    city: string
+    city: string,
+    patientName: string
 ) {
+    const { api } = useContext(ToastContext);
     const { userSession, refreshMedications, addRxOrder } = usePatientDashboard();
     const [rxOrder, setRxOrder] = useState<IRxOrder>({
         doctorSpecialty: userSession?.doctorSpecialty || 'Not Selected',
@@ -27,6 +31,15 @@ export function useRXOrderViewModel(
         prescriptions: [{ diagnosis: '', medication: '', dosage: '', frequency: '' }],
     });
     const [isLoading, setIsLoading] = useState(false);
+
+    const isFormComplete = useMemo(() => {
+        return rxOrder.prescriptions.every(prescription =>
+            prescription.diagnosis &&
+            prescription.medication &&
+            prescription.dosage &&
+            prescription.frequency
+        );
+    }, [rxOrder.prescriptions]);
 
     const handleInputChange = (field: keyof IRxOrder, value: any) => {
         setRxOrder(prevOrder => ({
@@ -64,21 +77,15 @@ export function useRXOrderViewModel(
         }));
     };
 
-    const submitRxOrder = async () => {
+    const submitRxOrder = useCallback(async () => {
+        if (!isFormComplete) {
+            return;
+        }
+
         setIsLoading(true);
+
         try {
-            const response = await fetch(`/api/patient/${patientId}/medications/rx-order`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(rxOrder),
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text(); // Retrieve additional error info
-                throw new Error(`Failed to save RX order: ${errorText}`);
-            }
-
-            const savedRxOrder = await response.json();
+            const savedRxOrder = await api.post(`/api/patient/${patientId}/medications/rx-order`, rxOrder);
             addRxOrder(savedRxOrder);
             await refreshMedications();
             onNewRxOrderSaved(savedRxOrder);
@@ -95,13 +102,14 @@ export function useRXOrderViewModel(
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [api, rxOrder, patientId, addRxOrder, refreshMedications, onNewRxOrderSaved, isFormComplete]);
 
     return {
         rxOrder,
         setRxOrder,
         submitRxOrder,
         isLoading,
+        isFormComplete,
         handleInputChange,
         handlePrescriptionChange,
         addPrescription,

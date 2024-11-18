@@ -1,66 +1,28 @@
 // components/PatientViewModels/Medications/rx/RxOrderDrawerViewModel.ts
 
-import { useState, RefObject } from 'react';
+import { useState, RefObject, useEffect } from 'react';
 import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewModelContext';
 import { IRxOrder } from "@/models/patient";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import { Types } from 'mongoose';
 
 export function useRxOrderDrawerViewModel(
-    patientId: string,
-    onNewRxOrderSaved: (rxOrder: IRxOrder) => void,
-    initialRxOrder?: IRxOrder | null
+    patientId: Types.ObjectId | undefined | string,
+    onClose: () => void,
+    initialRxOrder: IRxOrder | null
 ) {
     const { userSession, patientInfo } = usePatientDashboard();
-    const [rxOrder, setRxOrder] = useState<IRxOrder>(initialRxOrder || {
-        doctorSpecialty: userSession?.doctorSpecialty || 'Not Selected',
-        prescribingDr: `${userSession?.firstName} ${userSession?.lastName}`,
-        drEmail: userSession?.email || '',
-        drId: userSession?.id || '',
-        prescribedDate: new Date(),
-        validTill: new Date(new Date().setMonth(new Date().getMonth() + 1)),
-        city: '',
-        validated: false,
-        prescriptions: [{ diagnosis: '', medication: '', dosage: '', frequency: '' }],
-    });
+    const [rxOrder, setRxOrder] = useState<IRxOrder | null>(null);
 
-    const handleInputChange = (field: keyof IRxOrder, value: any) => {
-        setRxOrder(prevOrder => ({
-            ...prevOrder,
-            [field]: value,
-        }));
-    };
-
-    const handlePrescriptionChange = (index: number, field: keyof IRxOrder["prescriptions"][0], value: string) => {
-        setRxOrder(prevOrder => {
-            const newPrescriptions = [...prevOrder.prescriptions];
-            newPrescriptions[index] = { ...newPrescriptions[index], [field]: value };
-            return {
-                ...prevOrder,
-                prescriptions: newPrescriptions,
-            };
-        });
-    };
-
-    const addPrescription = () => {
-        setRxOrder(prevOrder => ({
-            ...prevOrder,
-            prescriptions: [
-                ...prevOrder.prescriptions,
-                { diagnosis: '', medication: '', dosage: '', frequency: '' }
-            ],
-        }));
-    };
-
-    const removePrescription = (index: number) => {
-        setRxOrder(prevOrder => ({
-            ...prevOrder,
-            prescriptions: prevOrder.prescriptions.filter((_, i) => i !== index),
-        }));
-    };
+    useEffect(() => {
+        if (initialRxOrder) {
+            setRxOrder(initialRxOrder);
+        }
+    }, [initialRxOrder]);
 
     const onDownloadPDF = async (drawerRef: RefObject<HTMLDivElement>) => {
-        if (!drawerRef.current || !patientInfo) return;
+        if (!drawerRef.current || !patientInfo || !rxOrder) return;
 
         const canvas = await html2canvas(drawerRef.current, {
             scale: 2,
@@ -107,7 +69,7 @@ export function useRxOrderDrawerViewModel(
     };
 
     const onDownloadJPG = async (drawerRef: RefObject<HTMLDivElement>) => {
-        if (!drawerRef.current || !patientInfo) return;
+        if (!drawerRef.current || !patientInfo || !rxOrder) return;
 
         const canvas = await html2canvas(drawerRef.current, {
             scale: 2,
@@ -149,24 +111,17 @@ export function useRxOrderDrawerViewModel(
     };
 
     const sendTextMessage = () => {
-        if (!patientInfo) return;
+        if (!patientInfo || !rxOrder) return;
 
         const phoneNumber = `${patientInfo.phone?.countryCode || ''}${patientInfo.phone?.phoneNumber || ''}`;
-        const patientName = patientInfo.patientName;
-        const doctorName = rxOrder.prescribingDr || "Your Doctor";
-        const medicationsList = rxOrder.prescriptions[0]?.medication || "your prescription";
-        const message = `Hello ${patientName},\n\nThis is Dr. ${doctorName}. Here are your prescribed medications: ${medicationsList}.`;
+        const message = `Hello ${patientInfo.patientName},\n\nThis is Dr. ${rxOrder.prescribingDr}. You can access your prescription details at the following link:\n${rxOrder.rxUrl}\n\nPlease take this link to your pharmacy to fulfill the prescription.`;
 
+        // Use the `sms:` protocol to send the SMS
         window.location.href = `sms:${phoneNumber}?body=${encodeURIComponent(message)}`;
     };
 
     return {
         rxOrder,
-        setRxOrder,
-        handleInputChange,
-        handlePrescriptionChange,
-        addPrescription,
-        removePrescription,
         onDownloadPDF,
         onDownloadJPG,
         sendTextMessage,

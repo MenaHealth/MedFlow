@@ -1,6 +1,8 @@
 // app/api/patient/[id]/medications/rx-order/route.ts
 
+import { v4 as uuidv4 } from 'uuid';
 import { NextResponse } from 'next/server';
+import QRCode from 'qrcode';
 import Patient from '../../../../../../models/patient';
 import dbConnect from '../../../../../../utils/database';
 
@@ -26,15 +28,14 @@ export const POST = async (request: Request, { params }: { params: { id: string 
             return new NextResponse("Missing required fields", { status: 400 });
         }
 
-        // Map each prescription entry to match the schema
-        const formattedPrescriptions = prescriptions.map((p: any) => ({
-            diagnosis: p.diagnosis,
-            medication: p.medication,
-            dosage: p.dosage,
-            frequency: p.frequency,
-        }));
+        const baseUrl =
+            process.env.NODE_ENV === "production"
+                ? process.env.NEXT_PUBLIC_API_URL
+                : process.env.NEXTAUTH_URL || "http://localhost:3000";
 
-        // Create a new RX order object
+        const uniqueId = uuidv4(); // Generate a UUID for this RX order
+        const rxUrl = `${baseUrl}/rx-order/${uniqueId}`; // Construct the custom URL
+
         const newRxOrder = {
             doctorSpecialty,
             prescribingDr,
@@ -44,12 +45,16 @@ export const POST = async (request: Request, { params }: { params: { id: string 
             validTill: new Date(validTill),
             city,
             validated,
-            prescriptions: formattedPrescriptions,
+            prescriptions: prescriptions.map((p: any) => ({
+                diagnosis: p.diagnosis,
+                medication: p.medication,
+                dosage: p.dosage,
+                frequency: p.frequency,
+            })),
+            rxUrl, // Save the custom URL
         };
 
-        console.log("New RX Order:", newRxOrder);
-
-        // Add the new RX order to the patient's rxOrders array
+        // Save the new RX order
         const updatedPatient = await Patient.findByIdAndUpdate(
             patientId,
             { $push: { rxOrders: newRxOrder } },
@@ -60,10 +65,19 @@ export const POST = async (request: Request, { params }: { params: { id: string 
             return new NextResponse('Failed to update patient record', { status: 500 });
         }
 
-        console.log("Updated Patient after adding RX Order:", updatedPatient);
+        // Find the recently added RX order
+        const addedRxOrder = updatedPatient.rxOrders[updatedPatient.rxOrders.length - 1];
+
+        // Generate QR code based on the saved rxUrl
+        const qrCodeURL = await QRCode.toDataURL(rxUrl);
+
+        // Update the RX order with the QR code
+        addedRxOrder.qrCode = qrCodeURL;
+        await updatedPatient.save();
+
         return new NextResponse(JSON.stringify(updatedPatient), { status: 201 });
     } catch (error) {
-        console.error('Failed to add rx order:', error);
-        return new NextResponse('Failed to add rx order', { status: 500 });
+        console.error('Failed to add RX order:', error);
+        return new NextResponse('Failed to add RX order', { status: 500 });
     }
 };

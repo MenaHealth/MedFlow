@@ -21,7 +21,6 @@ export default function TeamPage() {
         const handleIntersection = (entries, observer) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    // Start counting when the section is visible
                     const animateCountUp = (elementId, target, duration) => {
                         const element = document.getElementById(elementId);
                         if (!element) return;
@@ -46,14 +45,13 @@ export default function TeamPage() {
                     animateCountUp('counter-physicians', 200, 2000);
                     animateCountUp('counter-countries', 10, 2000);
 
-                    // Disconnect the observer after triggering
                     observer.disconnect();
                 }
             });
         };
 
         const observer = new IntersectionObserver(handleIntersection, {
-            threshold: 0.3, // Trigger when 30% of the section is visible
+            threshold: 0.3, 
         });
 
         const target = document.getElementById('statistics-section');
@@ -90,9 +88,9 @@ export default function TeamPage() {
                     id="statistics-section"
                     className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-8 text-center"
                     style={{
-                        columnGap: "0px", // Removes extra space between columns
-                        maxWidth: "60%", // Optional: Shrinks total container width
-                        margin: "0 auto", // Centers the section
+                        columnGap: "0px", 
+                        maxWidth: "60%", 
+                        margin: "0 auto", 
                       }}
                 >
                     {/* Column 1 */}
@@ -173,11 +171,11 @@ export default function TeamPage() {
                         <Card className="p-6 bg-white bg-opacity-30 card-container">
                             <div className="flex flex-col items-center text-center">
                                 <div className="flex items-center justify-center w-36 h-36 mb-4">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke="var(--darkOrange)" className="w-12 h-12">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
-                                    </svg>
+                                <Image
+                                        src="assets/images/ac_hdst.jpg"
+                                        alt="Andy"
+                                        className="rounded-full object-cover w-20 h-20"
+                                    />
                                 </div>
                                 <h3 className="text-lg font-medium text-black">Andy</h3>
                                 <h3 className="text-sm font-small text-[var(--orange)] italic">Co-Founder Medflow</h3>
@@ -191,3 +189,4 @@ export default function TeamPage() {
         </div>
     );
 }
+

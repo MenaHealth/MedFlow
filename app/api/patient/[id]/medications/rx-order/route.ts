@@ -1,5 +1,6 @@
 // app/api/patient/[id]/medications/rx-order/route.ts
 
+import { v4 as uuidv4 } from 'uuid';
 import { NextResponse } from 'next/server';
 import QRCode from 'qrcode';
 import Patient from '../../../../../../models/patient';
@@ -27,13 +28,14 @@ export const POST = async (request: Request, { params }: { params: { id: string 
             return new NextResponse("Missing required fields", { status: 400 });
         }
 
-        // Determine base URL based on environment
         const baseUrl =
             process.env.NODE_ENV === "production"
-                ? process.env.NEXT_PUBLIC_API_URL // Production URL from .env
-                : process.env.NEXTAUTH_URL || "http://localhost:3000"; // Local URL fallback
+                ? process.env.NEXT_PUBLIC_API_URL
+                : process.env.NEXTAUTH_URL || "http://localhost:3000";
 
-        // Generate a new RX order object without the QR code
+        const uniqueId = uuidv4(); // Generate a UUID for this RX order
+        const rxUrl = `${baseUrl}/rx-order/${uniqueId}`; // Construct the custom URL
+
         const newRxOrder = {
             doctorSpecialty,
             prescribingDr,
@@ -49,9 +51,10 @@ export const POST = async (request: Request, { params }: { params: { id: string 
                 dosage: p.dosage,
                 frequency: p.frequency,
             })),
+            rxUrl, // Save the custom URL
         };
 
-        // Save the new RX order in the patient's RX orders to get the `_id`
+        // Save the new RX order
         const updatedPatient = await Patient.findByIdAndUpdate(
             patientId,
             { $push: { rxOrders: newRxOrder } },
@@ -62,12 +65,11 @@ export const POST = async (request: Request, { params }: { params: { id: string 
             return new NextResponse('Failed to update patient record', { status: 500 });
         }
 
-        // Find the recently added RX order to get its `_id`
+        // Find the recently added RX order
         const addedRxOrder = updatedPatient.rxOrders[updatedPatient.rxOrders.length - 1];
 
-        // Generate QR code using RX order details
-        const qrCodeData = `${baseUrl}/api/rx-order/validate?patientId=${patientId}&rxOrderId=${addedRxOrder._id}`;
-        const qrCodeURL = await QRCode.toDataURL(qrCodeData);
+        // Generate QR code based on the saved rxUrl
+        const qrCodeURL = await QRCode.toDataURL(rxUrl);
 
         // Update the RX order with the QR code
         addedRxOrder.qrCode = qrCodeURL;

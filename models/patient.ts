@@ -22,7 +22,8 @@
           dosage: string;
           frequency: string;
       }>;
-      qrCode?: string; // Add qrCode field
+      qrCode?: string;
+      rxUrl?: string;
   }
 
   const rxOrderSchema = new Schema({
@@ -42,7 +43,8 @@
               frequency: { type: String, required: true },
           },
       ],
-      qrCode: { type: String }, // Add qrCode field to schema
+      qrCode: { type: String },
+      rxUrl: { type: String},
   });
 
 export interface IPatient extends Document {

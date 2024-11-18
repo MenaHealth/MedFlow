@@ -24,7 +24,7 @@ export default function aboutPage() {
                     How it Works
                 </h1>
                 <p className="mt-3 max-w-md mx-auto text-base text-darkBlue sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
-                    The user-types of the app are:
+                    Medflow is designed to assist healthcare providers with specialized treatment in the MENA region. The user-types of the app are:
                 </p>
             </div>
 

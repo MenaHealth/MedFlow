@@ -34,7 +34,7 @@ export const POST = async (request: Request, { params }: { params: { id: string 
                 : process.env.NEXTAUTH_URL || "http://localhost:3000";
 
         const uniqueId = uuidv4(); // Generate a UUID for this RX order
-        const rxUrl = `${baseUrl}/rx-order/${uniqueId}`; // Construct the custom URL
+        const rxUrl = `${baseUrl}/rx-order/patient/${uniqueId}`; // Construct the custom URL
 
         const newRxOrder = {
             doctorSpecialty,

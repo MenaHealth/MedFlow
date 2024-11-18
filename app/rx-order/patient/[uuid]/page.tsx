@@ -1,4 +1,4 @@
-// app/rx-order/page.tsx
+// app/rx-order/patient/[uuid]/page.tsx
 'use client';
 
 import QRCodeDisplay from '@/components/PatientViewModels/Medications/rx/QRCodeDisplay';

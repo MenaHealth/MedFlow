@@ -56,7 +56,7 @@ export default function Nav() {
                     <>
                         <div className="hidden md:flex items-center space-x-4">
                             <NavItem href="/new-patient">New Patient</NavItem>
-                            <NavItem href="/about">Overview</NavItem>
+                            <NavItem href="/overview">Overview</NavItem>
                             <NavItem href="/about">About</NavItem>
                             <NavItem href="/auth">Login</NavItem>
                         </div>
@@ -95,7 +95,7 @@ export default function Nav() {
             {!session?.user && isMobileMenuOpen && (
                 <div className="md:hidden mt-4 space-y-2">
                     <NavItem href="/new-patient">New Patient</NavItem>
-                    <NavItem href="/about">Overview</NavItem>
+                    <NavItem href="/overview">Overview</NavItem>
                     <NavItem href="/about">About</NavItem>
                     <NavItem href="/auth">Login</NavItem>
                 </div>

@@ -1,44 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Medflow</title>
-
-    <style>
-        @font-face {
-            font-family: "CustomFont";
-            src: url("/assets/icons/44393f83cfe6e236d297.ttf") format("truetype");
-            font-weight: normal;
-            font-style: normal;
-        }
-    </style>
-
-    <link rel="icon" href="/assets/icons/4654d2832744cc3c1b9f75a433a7d91a.png" type="image/png">
-  
-    <link rel="preload" href="public/assets/wasm/agora-virtual-background.wasm" as="fetch" type="application/wasm" crossorigin="anonymous">
-    <link rel="preload" href="public/assets/wasm/denoiser-wasm-simd.wasm" as="fetch" type="application/wasm" crossorigin="anonymous">
-    <link rel="preload" href="public/assets/wasm/denoiser-wasm.wasm" as="fetch" type="application/wasm" crossorigin="anonymous">
-</head>
-<body>
-    <div id="root"></div>
-
-    <script>
-        const wasmFiles = [
-            "public/assets/wasm/agora-virtual-background.wasm",
-            "public/assets/wasm/denoiser-wasm-simd.wasm",
-            "public/assets/wasm/denoiser-wasm.wasm"
-        ];
-
-        wasmFiles.forEach(file => {
-            fetch(file)
-                .then(response => response.arrayBuffer())
-                .then(bytes => WebAssembly.instantiate(bytes))
-                .then(result => {
-                    console.log(`WebAssembly module loaded from ${file}:`, result.instance);
-                })
-                .catch(error => console.error(`Error loading ${file}:`, error));
-        });
-    </script>
-</body>
+    <head>
+        <meta charset="utf-8" />
+        <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#000000" />
+        <meta
+            name="description"
+            content="Web site created using create-react-app"
+        />
+        <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+        <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+        <title>React App</title>
+        <style type="text/css">
+            @font-face {
+                font-family: "Icomoon";
+                src: url("public/44393f83cfe6e236d297.ttf") format("truetype");
+                font-weight: normal;
+                font-style: normal;
+            }
+        </style>
+    </head>
+    <body>
+        <noscript>You need to enable JavaScript to run this app.</noscript>
+        <div id="root"></div>
+    </body>
 </html>
+

@@ -271,7 +271,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                                 patientInfo={{
                                                     patientName: patientInfo?.patientName || '',
                                                     phoneNumber: patientInfo?.phone?.phoneNumber || '',
-                                                    age: patientInfo?.age || '',
+                                                    dob: patientInfo?.dob ? new Date(patientInfo.dob) : new Date(), // Ensure dob is always a Date
                                                     city: patientInfo?.city || ''
                                                 }}
                                             />

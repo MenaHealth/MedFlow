@@ -5,18 +5,17 @@ import Patient from '@/models/patient';
 import dbConnect from '@/utils/database';
 import { IRxOrder } from '@/models/patient';
 
-export const POST = async (request: Request) => {
+export const POST = async (request: Request, { params }: { params: { uuid: string } }) => {
     try {
         await dbConnect();
 
-        const { uuid } = await request.json(); // Extract UUID from request body
+        const { uuid } = params;
 
         const patient = await Patient.findOne({ 'rxOrders.rxUrl': { $regex: uuid } });
         if (!patient) {
             return new NextResponse('RX order not found', { status: 404 });
         }
 
-        // Use IRxOrder type for the `order` parameter
         const rxOrder = patient.rxOrders.find((order: IRxOrder) => order.rxUrl?.includes(uuid));
         if (!rxOrder) {
             return new NextResponse('RX order not found', { status: 404 });
@@ -32,7 +31,7 @@ export const POST = async (request: Request) => {
 
         return new NextResponse('RX order successfully fulfilled', { status: 200 });
     } catch (error) {
-        console.error('Error validating RX order:', error);
+        console.error('Error fulfilling RX order:', error);
         return new NextResponse('Failed to fulfill RX order', { status: 500 });
     }
 };

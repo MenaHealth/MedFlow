@@ -25,6 +25,13 @@ const newPatientFormSchema = z.object({
         countryCode: z.string().min(1, "Country code is required"),
         phoneNumber: z.string().min(1, "Phone number is required"),
     }),
+    dob: z.string().refine(
+        (date) => {
+            const parsedDate = new Date(date);
+            return parsedDate >= new Date("1900-01-01") && parsedDate <= new Date();
+        },
+        { message: "Date of birth must be between 1900 and today" }
+    ),
     age: z.number().min(0, "Please enter a number greater than 0"),
     country: z.string().min(1, "Country is required"),
     city: z.string().min(1, "City is required"),
@@ -55,6 +62,7 @@ export function NewPatientForm({ handleSubmit, submitting, language }: NewPatien
                 countryCode: '',
                 phoneNumber: '',
             },
+            dob: '',
             age: 0,
             country: '',
             city: '',
@@ -105,8 +113,8 @@ export function NewPatientForm({ handleSubmit, submitting, language }: NewPatien
             farsi: "ایمیل:",
             pashto: "بریښنالیک:"
         },
-        age: {
-            english: "Age",
+        dob: {
+            english: "DoB",
             arabic: "العمر",
             farsi: "سن:",
             pashto: "عمر:"
@@ -224,30 +232,54 @@ export function NewPatientForm({ handleSubmit, submitting, language }: NewPatien
 
                 {/* Second row - age, phone, language */}
                 <div className="flex flex-col md:flex-row md:space-x-4">
-                    <div className="w-full md:w-1/4">
-                        <NumericalFormField form={form} fieldName="age" fieldLabel={fieldLabels.age[language]} />
+                    <div className="w-full md:w-1/4 mb-8">
+                        <label htmlFor="dob" className="block text-sm font-medium text-gray-700">
+                            {fieldLabels.dob[language]}
+                        </label>
+                        <input
+                            type="date"
+                            id="dob"
+                            // name="dob" // Keep only this
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                            min="1900-01-01"
+                            max={new Date().toISOString().split("T")[0]} // Set today's date as the max
+                            {...form.register("dob", { required: true })}
+                        />
+                        {form.formState.errors.dob && (
+                            <p className="mt-2 text-sm text-red-600">
+                                {form.formState.errors.dob.message || "Please select a valid date of birth."}
+                            </p>
+                        )}
                     </div>
                     <div className="w-full md:w-3/8">
-                        <PhoneFormField form={form} fieldName="phone" fieldLabel={fieldLabels.phone[language]} />
+                        <PhoneFormField form={form} fieldName="phone" fieldLabel={fieldLabels.phone[language]}/>
                     </div>
                     <div className="w-full md:w-3/8">
-                        <SelectFormField form={form} fieldName="language" fieldLabel={fieldLabels.language[language].label} selectOptions={fieldLabels.language[language].options}/>
+                        <SelectFormField
+                            form={form}
+                            fieldName="language"
+                            fieldLabel={fieldLabels.language[language].label}
+                            selectOptions={fieldLabels.language[language].options}
+                        />
                     </div>
                 </div>
 
                 {/* Third row - city, country */}
                 <div className="flex flex-col md:flex-row md:space-x-4">
                     <div className="w-full md:w-1/2">
-                        <SelectFormField form={form} fieldName="country" fieldLabel={fieldLabels.country[language].label} selectOptions={fieldLabels.country[language].options} />
+                        <SelectFormField form={form} fieldName="country"
+                                         fieldLabel={fieldLabels.country[language].label}
+                                         selectOptions={fieldLabels.country[language].options}/>
                     </div>
                     <div className="w-full md:w-1/2">
-                        <TextFormField fieldName="city" fieldLabel={fieldLabels.city[language]} />
+                        <TextFormField fieldName="city" fieldLabel={fieldLabels.city[language]}/>
                     </div>
                 </div>
 
                 {/* Fourth row - Chief Complaint */}
-                <TextAreaFormField form={form} fieldName="chiefComplaint" fieldLabel={fieldLabels.chiefComplaint[language]} />
-                
+                <TextAreaFormField form={form} fieldName="chiefComplaint"
+                                   fieldLabel={fieldLabels.chiefComplaint[language]}/>
+
                 {!session && (
                     <>
                         {/* Fifth row - Gender Preference */}

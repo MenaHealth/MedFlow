@@ -20,7 +20,6 @@ export const PATCH = async (request, { params }) => {
         firstName,
         lastName,
         phone,
-        age,
         dob,
         country,
         city,
@@ -55,7 +54,6 @@ export const PATCH = async (request, { params }) => {
         existingPatient.firstName = firstName ?? existingPatient.firstName;
         existingPatient.lastName = lastName ?? existingPatient.lastName;
         existingPatient.phone = phone ?? existingPatient.phone;
-        existingPatient.age = age ?? existingPatient.age;
         existingPatient.dob = dob ?? existingPatient.dob;
         existingPatient.country = country ?? existingPatient.country;
         existingPatient.city = city ?? existingPatient.city;

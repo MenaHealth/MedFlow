@@ -14,12 +14,12 @@ import { PhoneFormField } from '@/components/form/PhoneFormField';
 import { CountriesList } from '@/data/countries.enum';
 import { LanguagesList } from '@/data/languages.enum';
 import { format } from 'date-fns';
+import { PatientInfo } from './../PatientViewModelContext'
 
 const patientFormSchema = z.object({
     patientName: z.string(),
     patientID: z.string(),
     language: z.string().optional(),
-    age: z.string(),
     dob: z.date(),
     bmi: z.string().optional(),
     country: z.string().optional(),
@@ -45,7 +45,6 @@ type PatientFormValues = z.infer<typeof patientFormSchema> & {
     patientName: string;
     patientID: string;
     language?: string;
-    age: string;
     dob: Date;
     bmi?: string;
     country?: string;
@@ -72,7 +71,14 @@ const PatientInfoView: React.FC<{ isExpanded: boolean }> = ({ isExpanded }) => {
     const [isEditing, setIsEditing] = useState(false);
 
     const expandedDetails = patientViewModel?.getExpandedDetails();
-    const defaultValues = useMemo(() => expandedDetails || {}, [expandedDetails]);
+    const defaultValues = useMemo(() => {
+        return expandedDetails
+            ? {
+                ...expandedDetails,
+                dob: expandedDetails.dob ? new Date(expandedDetails.dob) : undefined,
+            }
+            : {};
+    }, [expandedDetails]);
 
     const form = useForm<PatientFormValues>({
         resolver: zodResolver(patientFormSchema),
@@ -92,8 +98,9 @@ const PatientInfoView: React.FC<{ isExpanded: boolean }> = ({ isExpanded }) => {
 
             const patientData = {
                 ...data,
-                city: data.city || '',
-                gender: data.gender || 'Not specified', // Provide a default value for `gender`
+                city: data.city || '', // Ensure city is always a string
+                country: data.country || '', // Ensure country is always a string
+                gender: data.gender || 'Not specified', // Provide a default value for gender
             };
 
             // Send the updated data to your backend using PATCH request
@@ -103,18 +110,20 @@ const PatientInfoView: React.FC<{ isExpanded: boolean }> = ({ isExpanded }) => {
                 headers: {
                     "Content-Type": "application/json",
                 },
-            }).then((response) => {
-                if (response.ok) {
-                    console.log("Patient updated successfully");
-                    setPatientInfo(patientData);
-                } else {
-                    console.error("Error updating patient:", response.statusText);
-                    alert("Error: " + response.statusText);
-                }
-            }).catch((error) => {
-                console.error("Network error:", error);
-                alert("An error occurred. Please try again.");
-            });
+            })
+                .then((response) => {
+                    if (response.ok) {
+                        console.log("Patient updated successfully");
+                        setPatientInfo(patientData as PatientInfo); // Type assertion to ensure compatibility
+                    } else {
+                        console.error("Error updating patient:", response.statusText);
+                        alert("Error: " + response.statusText);
+                    }
+                })
+                .catch((error) => {
+                    console.error("Network error:", error);
+                    alert("An error occurred. Please try again.");
+                });
         }
         setIsEditing(!isEditing);
     };
@@ -145,15 +154,11 @@ const PatientInfoView: React.FC<{ isExpanded: boolean }> = ({ isExpanded }) => {
                     <FormProvider {...form}>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {isEditing
-                                ? <TextFormField form={form} fieldName="age" fieldLabel="Age" defaultValue={expandedDetails?.age || ''} classNames='p-2'/>
-                                : <ReadOnlyField fieldName="age" fieldLabel="Age" value={expandedDetails?.age || 'N/A'}/>
-                            }
-                            {isEditing
                                 ? <DatePickerFormField name="dob" label="Date of Birth" type='past'/>
-                                : <ReadOnlyField
+                                :<ReadOnlyField
                                     fieldName="dob"
                                     fieldLabel="Date of Birth"
-                                    value={expandedDetails?.dob ? format(expandedDetails.dob, 'PPP') : 'N/A'}
+                                    value={expandedDetails?.dob ? format(new Date(expandedDetails.dob), 'PPP') : 'N/A'}
                                 />
                             }
                         </div>

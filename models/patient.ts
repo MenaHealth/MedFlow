@@ -55,7 +55,6 @@ export interface IPatient extends Document {
         countryCode: string;
         phoneNumber: string;
     }
-    age?: string;
     bmi?: string;
     dob?: Date;
     country?: string;
@@ -115,7 +114,6 @@ const PatientSchema = new Schema<IPatient>({
         countryCode: { type: String },
         phoneNumber: { type: String },
     },
-    age: { type: String },
     dob: { type: Date },
     city: { type: String },
     country: { type: String },

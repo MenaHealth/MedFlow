@@ -11,12 +11,14 @@ import { IRxOrder } from '@/models/patient';
 import { IMedOrder } from '@/models/medOrder';
 import {Types} from "mongoose";
 
-interface PatientInfo {
+export interface PatientInfo {
     patientName: string;
     city: string;
-    age: string;
     gender: string;
     dob: Date;
+    // i am not sure sure if patient dob is saved right now
+    country: string;
+    language: string;
     phone: {
         countryCode: string;
         phoneNumber: string;
@@ -127,15 +129,16 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
     const formatPatientInfo = useCallback((patientData: IPatient) => {
         const patientInfo: PatientInfo = {
             patientName: `${patientData.firstName} ${patientData.lastName}`,
-            age: patientData.age || '',
             city: patientData.city || '',
+            country: patientData.country || '',
+            language: patientData.language || '',
             gender: patientData.genderPreference || '',
-            dob: new Date(patientData.dob || Date.now()),
+            dob: patientData.dob ? new Date(patientData.dob) : new Date(), // Ensure it's a Date object
             phone: {
                 countryCode: patientData.phone?.countryCode || '',
                 phoneNumber: patientData.phone?.phoneNumber || '',
             },
-            patientID: patientData._id.toString() || '',
+            patientID: patientData._id?.toString() || '',
         };
         setPatientInfo(patientInfo);
         setPatientViewModel(new PatientInfoViewModel(patientData));

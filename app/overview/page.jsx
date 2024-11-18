@@ -129,8 +129,6 @@ export default function TeamPage() {
                                 <h3 className="text-lg font-medium text-black">Michelle</h3>
                                 <h3 className="text-sm font-small text-[var(--orange)] italic">Founder / CEO MENA Health</h3>
                                 <h3 className="text-xs font-small text-[var(--orange)] italic">Co-Founder / Project Lead Medflow </h3>
-                                <p className="text-xs mt-2 text-base text-darkBlue">
-                                </p>
                             </div>
                         </Card>
 
@@ -147,8 +145,6 @@ export default function TeamPage() {
                                 <h3 className="text-lg font-medium text-black">Maya</h3>
                                 <h3 className="text-sm font-small text-[var(--orange)] italic">Chief Development Officer MENA Health</h3>
                                 <h3 className="text-xs font-small text-[var(--orange)] italic">Co-Founder Medflow</h3>
-                                <p className="text-xs mt-2 text-base text-darkBlue">
-                                </p>
                             </div>
                         </Card>
                         {/* Kyle */}
@@ -163,8 +159,6 @@ export default function TeamPage() {
                                 </div>
                                 <h3 className="text-lg font-medium text-black">Kyle</h3>
                                 <h3 className="text-sm font-small text-[var(--orange)] italic">Co-Founder Medflow</h3>
-                                <p className="text-xs mt-2 text-base text-darkBlue">
-                                </p>
                             </div>
                         </Card>
 

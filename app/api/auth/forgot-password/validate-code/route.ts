@@ -1,4 +1,4 @@
-// app/api/auth/forgot-password/validate-code/route.ts
+// app/api/auth/forgot-password/pharmacist-code/route.ts
 
 import { NextResponse } from 'next/server';
 import dbConnect from '@/utils/database';
@@ -44,7 +44,7 @@ export async function GET(request: Request) {
         console.log('Reset link is valid');
         return NextResponse.json({ message: 'Reset link is valid' }, { status: 200 });
     } catch (error) {
-        console.error('Error in validate-code API:', error);
+        console.error('Error in pharmacist-code API:', error);
         return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
     }
 }

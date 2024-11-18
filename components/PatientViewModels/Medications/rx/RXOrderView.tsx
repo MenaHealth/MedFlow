@@ -26,7 +26,7 @@ interface RXOrderViewProps {
     patientInfo: {
         patientName: string;
         phoneNumber: string;
-        age: string;
+        dob: Date;
         city: string;
     };
 }

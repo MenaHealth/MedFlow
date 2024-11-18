@@ -2,7 +2,24 @@
 
 import React, { useRef } from "react";
 import { Types } from "mongoose";
-import { MessageSquareShare, Mail, Calendar, Phone, MapPin, User, Activity, Clock9, Clock, Aperture, Download, Hourglass, Tablets, PillBottle, BadgeAlert } from "lucide-react";
+import {
+    MessageSquareShare,
+    Mail,
+    Hash,
+    Phone,
+    MapPin,
+    User,
+    Activity,
+    Clock9,
+    Clock,
+    Aperture,
+    Download,
+    Hourglass,
+    Tablets,
+    PillBottle,
+    BadgeAlert,
+    Map, Ear, MapPinHouse, MapPinned, IdCard
+} from "lucide-react";
 import { Drawer, DrawerContent, DrawerHeader } from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/ScrollArea";
 import { usePatientDashboard } from "@/components/PatientViewModels/PatientViewModelContext";
@@ -68,11 +85,27 @@ export default function RxOrderDrawerView({ isOpen, onClose, patientId, rxOrder 
                         <div className="bg-orange-50 p-4 rounded-lg">
                             <h3 className="font-semibold text-lg mb-4 text-center text-orange-900 border-b border-orange-200 pb-2">Patient Information</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <p className="flex items-center"><User className="h-4 w-4 mr-2 text-orange-500"/><strong className="text-orange-900 mr-2">Name:</strong> {patientInfo.patientName}</p>
-                                <p className="flex items-center"><Calendar className="h-4 w-4 mr-2 text-orange-500"/><strong className="text-orange-900 mr-2">DOB:</strong> {patientInfo.dob.toLocaleDateString()}</p>
-                                <p className="flex items-center"><Phone className="h-4 w-4 mr-2 text-orange-500"/><strong className="text-orange-900 mr-2">Phone:</strong> {`${patientInfo.phone?.countryCode || ''} ${patientInfo.phone?.phoneNumber || ''}`}</p>
-                                <p className="flex items-center"><MapPin className="h-4 w-4 mr-2 text-orange-500"/><strong className="text-orange-900 mr-2">City:</strong> {patientInfo.city}</p>
+                                <p className="flex items-center"><User className="h-4 w-4 mr-2 text-orange-500"/><strong
+                                    className="text-orange-900 mr-2">Name:</strong> {patientInfo.patientName}</p>
+                                <p className="flex items-center">
+                                    <Hash className="h-4 w-4 mr-2 text-orange-500"/>
+                                    <strong
+                                        className="text-orange-900 mr-2">DoB:</strong> {patientInfo.dob.toLocaleDateString()}</p>
+                                <p className="flex items-center"><Phone
+                                    className="h-4 w-4 mr-2 text-orange-500"/><strong
+                                    className="text-orange-900 mr-2">Phone:</strong> {`${patientInfo.phone?.countryCode || ''} ${patientInfo.phone?.phoneNumber || ''}`}
+                                </p>
+                                <p className="flex items-center"><Ear
+                                    className="h-4 w-4 mr-2 text-orange-500"/><strong
+                                    className="text-orange-900 mr-2">Language:</strong> {patientInfo.language}</p>
+                                <p className="flex items-center"><MapPin
+                                    className="h-4 w-4 mr-2 text-orange-500"/><strong
+                                    className="text-orange-900 mr-2">Country:</strong> {patientInfo.country}</p>
+                                <p className="flex items-center"><MapPinned
+                                    className="h-4 w-4 mr-2 text-orange-500"/><strong
+                                    className="text-orange-900 mr-2">City:</strong> {patientInfo.city}</p>
                             </div>
+
                         </div>
 
                         {/* Prescribing Doctor */}
@@ -81,7 +114,7 @@ export default function RxOrderDrawerView({ isOpen, onClose, patientId, rxOrder 
                             <p className="flex items-center justify-center mb-4"><Mail className="h-4 w-4 mr-2 text-orange-500"/><strong className="text-orange-900 mr-2">Email:</strong> {rxOrder.drEmail}</p>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <p className="flex items-center"><Activity className="h-4 w-4 mr-2 text-orange-500"/><strong className="text-orange-900 mr-2">Prescribed By:</strong> Dr. {rxOrder.prescribingDr}</p>
-                                <p className="flex items-center"><Aperture className="h-4 w-4 mr-2 text-orange-500"/><strong className="text-orange-900 mr-2">Specialization:</strong> {rxOrder.doctorSpecialty}</p>
+                                <p className="flex items-center"><IdCard className="h-4 w-4 mr-2 text-orange-500"/><strong className="text-orange-900 mr-2">Specialization:</strong> {rxOrder.doctorSpecialty}</p>
                                 <p className="flex items-center"><Clock9 className="h-4 w-4 mr-2 text-orange-500"/><strong className="text-orange-900 mr-2">Prescribed Date:</strong> {new Date(rxOrder.prescribedDate).toLocaleDateString()}</p>
                                 <p className="flex items-center"><Clock className="h-4 w-4 mr-2 text-orange-500"/><strong className="text-orange-900 mr-2">Valid Till:</strong> {new Date(rxOrder.validTill).toLocaleDateString()}</p>
                             </div>

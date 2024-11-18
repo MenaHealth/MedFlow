@@ -28,7 +28,7 @@ const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({ uuid }) => {
     useEffect(() => {
         const fetchRxOrder = async () => {
             try {
-                const response = await fetch(`/api/rx-order-qr-code/${uuid}`);
+                const response = await fetch(`/api/rx-order-qr-code/patient/${uuid}`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch RX order');
                 }

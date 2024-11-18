@@ -1,9 +1,9 @@
-// app/api/rx-order-qr-code/[id]/route.ts
+// app/api/rx-order-qr-code/patient/[id]/route.ts
 
 import { NextResponse } from 'next/server';
-import Patient from "@/models/patient";
-import dbConnect from '../../../../utils/database';
-import { IRxOrder } from '@/models/patient'; // Import the IRxOrder interface
+import Patient from '@/models/patient';
+import dbConnect from '@/utils/database';
+import { IRxOrder } from '@/models/patient';
 
 export const GET = async (request: Request, { params }: { params: { uuid: string } }) => {
     try {
@@ -11,12 +11,13 @@ export const GET = async (request: Request, { params }: { params: { uuid: string
 
         const { uuid } = params;
 
+        // Find the patient with the RX order matching the UUID
         const patient = await Patient.findOne({ "rxOrders.rxUrl": { $regex: uuid } });
         if (!patient) {
             return new NextResponse('RX order not found', { status: 404 });
         }
 
-        // Use IRxOrder to type the `order` parameter
+        // Find the RX order within the patient's RX orders
         const rxOrder = patient.rxOrders.find((order: IRxOrder) => order.rxUrl?.includes(uuid));
         if (!rxOrder) {
             return new NextResponse('RX order not found', { status: 404 });
@@ -31,7 +32,7 @@ export const GET = async (request: Request, { params }: { params: { uuid: string
                 validTill: rxOrder.validTill,
                 prescriptions: rxOrder.prescriptions,
             }),
-            { status: 200 }
+            { status: 200, headers: { 'Content-Type': 'application/json' } }
         );
     } catch (error) {
         console.error('Error fetching RX order:', error);

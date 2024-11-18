@@ -18,7 +18,6 @@ export class PatientInfoViewModel {
 
     getExpandedDetails() {
         return {
-            age: this.patient?.age,
             bmi: this.patient?.bmi,
             pmhx: this.patient?.pmhx,
             pshx: this.patient?.pshx,

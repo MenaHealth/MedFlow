@@ -15,8 +15,6 @@ const features = [
     { icon: FileText, title: "Prescription Management", description: "Generate and manage drug prescription paperwork" },
 ]
 
-const baseURL = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://gaza-meds.vercel.app/';
-
 export default function aboutPage() {
     return (
     <div className="min-h-screen">
@@ -187,9 +185,7 @@ export default function aboutPage() {
                         <h2 className="text-3xl font-bold text-black">Doctor and Triage Coordinator Sign-up Process</h2>
                         <p>
                             <li>
-                                Sign up at <Link href={`${baseURL}/auth`}
-                                                 className="text-[var(--orange)] hover:underline">our
-                                registration page</Link>
+                                Sign up on the registration page.
                             </li>
                             <li>provide the following information:</li>
                         </p>

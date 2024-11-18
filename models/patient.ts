@@ -1,61 +1,60 @@
-  // models/patient.ts
-  import { Schema, model, models, Document, Types } from 'mongoose';
-  import { DoctorSpecialties as SPECIALTIES } from './../data/doctorSpecialty.enum';
-  import { INote, noteSchema } from './note';
+// models/patient.ts
+import { Schema, model, models, Document, Types } from 'mongoose';
+import { DoctorSpecialties as SPECIALTIES } from './../data/doctorSpecialty.enum';
+import { INote, noteSchema } from './note';
 
 
-  // models/patient.ts
+// models/patient.ts
 
-  export interface IRxOrder {
-      _id?: string;
-      doctorSpecialty: string;
-      prescribingDr: string;
-      drEmail: string;
-      drId: string;
-      prescribedDate: Date;
-      validTill: Date;
-      city: string;
-      validated: boolean;
-      prescriptions: Array<{
-          diagnosis: string;
-          medication: string;
-          dosage: string;
-          frequency: string;
-      }>;
-      qrCode?: string;
-      rxUrl?: string;
-  }
+export interface IRxOrder {
+    _id?: string;
+    doctorSpecialty: string;
+    prescribingDr: string;
+    drEmail: string;
+    drId: string;
+    prescribedDate: Date;
+    validTill: Date;
+    city: string;
+    validated: boolean;
+    prescriptions: Array<{
+        diagnosis: string;
+        medication: string;
+        dosage: string;
+        frequency: string;
+    }>;
+    qrCode?: string;
+    rxUrl?: string;
+}
 
-  const rxOrderSchema = new Schema({
-      doctorSpecialty: { type: String, required: true },
-      prescribingDr: { type: String, required: true },
-      drEmail: { type: String, required: true },
-      drId: { type: String, required: true },
-      prescribedDate: { type: Date, required: true },
-      validTill: { type: Date, required: true },
-      city: { type: String, required: true },
-      validated: { type: Boolean, default: false },
-      prescriptions: [
-          {
-              diagnosis: { type: String, required: true },
-              medication: { type: String, required: true },
-              dosage: { type: String, required: true },
-              frequency: { type: String, required: true },
-          },
-      ],
-      qrCode: { type: String },
-      rxUrl: { type: String},
-  });
+const rxOrderSchema = new Schema({
+    doctorSpecialty: { type: String, required: true },
+    prescribingDr: { type: String, required: true },
+    drEmail: { type: String, required: true },
+    drId: { type: String, required: true },
+    prescribedDate: { type: Date, required: true },
+    validTill: { type: Date, required: true },
+    city: { type: String, required: true },
+    validated: { type: Boolean, default: false },
+    prescriptions: [
+        {
+            diagnosis: { type: String, required: true },
+            medication: { type: String, required: true },
+            dosage: { type: String, required: true },
+            frequency: { type: String, required: true },
+        },
+    ],
+    qrCode: { type: String },
+    rxUrl: { type: String},
+});
 
 export interface IPatient extends Document {
     files?: any[];
     firstName: string;
     lastName: string;
-        phone?: {
-          countryCode: string;
-          phoneNumber: string;
-        }
-    age?: string;
+    phone?: {
+        countryCode: string;
+        phoneNumber: string;
+    }
     bmi?: string;
     dob?: Date;
     country?: string;
@@ -115,7 +114,6 @@ const PatientSchema = new Schema<IPatient>({
         countryCode: { type: String },
         phoneNumber: { type: String },
     },
-    age: { type: String },
     dob: { type: Date },
     city: { type: String },
     country: { type: String },

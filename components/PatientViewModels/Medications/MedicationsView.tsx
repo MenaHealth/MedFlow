@@ -7,8 +7,6 @@ import RXOrderView from './rx/RXOrderView';
 import MedOrderView from '@/components/PatientViewModels/Medications/med/MedOrderView';
 import PreviousMedicationsView from './previous/PreviousMedicationsView';
 import RxOrderDrawerView from './rx/RxOrderDrawerView';
-import { useRXOrderViewModel } from '@/components/PatientViewModels/Medications/rx/RXOrderViewModel';
-import { useMedOrderViewModel } from '@/components/PatientViewModels/Medications/med/MedOrderViewModel';
 import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewModelContext';
 import { BarLoader } from "react-spinners";
 import { DoctorSpecialtyList } from "@/data/doctorSpecialty.enum";
@@ -37,11 +35,8 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                     console.error("Invalid patientId string passed to MedicationsView:", patientId);
                     setIsValidPatientId(false);
                 }
-            } else if (patientId instanceof Types.ObjectId) {
-                setIsValidPatientId(true);
             } else {
-                console.error("Invalid patientId type passed to MedicationsView:", typeof patientId);
-                setIsValidPatientId(false);
+                setIsValidPatientId(true);
             }
         } else {
             console.error("No patientId passed to MedicationsView");
@@ -141,7 +136,7 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                 <div className="flex flex-col h-[100vh] overflow-hidden bg-orange-950">
                     <div className="flex-grow overflow-auto border-t-2 border-white rounded-lg">
                         {!isTriage && latestMedication && (
-                            <div className="p-4 border-b border-b-2 border-white rounded-lg">
+                            <div className="p-4 border-b border-white rounded-lg">
                                 <div className="text-white">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center space-x-2">

@@ -8,7 +8,6 @@ import { useRXOrderViewModel } from './RXOrderViewModel';
 import { DoctorSpecialtyList } from '@/data/doctorSpecialty.enum';
 import { Plus, Minus } from 'lucide-react';
 import { DatePickerFormField } from "@/components/form/DatePickerFormField";
-import RxOrderDrawerView from './RxOrderDrawerView';
 import { IRxOrder } from "@/models/patient";
 import { ToastComponent } from '@/components/hooks/useToast';
 import { ToastProvider } from '@/components/ui/toast';
@@ -33,12 +32,10 @@ interface RXOrderViewProps {
 }
 
 export default function RXOrderView({ patientId, patientInfo }: RXOrderViewProps) {
-    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [selectedRxOrder, setSelectedRxOrder] = useState<IRxOrder | null>(null);
 
     const onNewRxOrderSaved = (rxOrder: IRxOrder) => {
         setSelectedRxOrder(rxOrder);
-        // setIsDrawerOpen(true);  // Open drawer only after saving
     };
 
     const {
@@ -181,13 +178,6 @@ export default function RXOrderView({ patientId, patientInfo }: RXOrderViewProps
                             'Submit Rx Order'
                         )}
                     </Button>
-
-                    <RxOrderDrawerView
-                        isOpen={isDrawerOpen}
-                        onClose={() => setIsDrawerOpen(false)}
-                        rxOrder={selectedRxOrder}
-                        patientId={patientId}
-                    />
                 </div>
             </div>
             <ToastComponent />

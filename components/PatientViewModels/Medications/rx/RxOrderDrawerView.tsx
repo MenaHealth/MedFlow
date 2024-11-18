@@ -37,8 +37,10 @@ export default function RxOrderDrawerView({ isOpen, onClose, patientId, rxOrder 
             <DrawerContent direction="bottom" size="75%" title="Export Rx">
                 <DrawerHeader className="border-b border-orange-200 z-50 mb-4">
                     <div className="flex justify-center space-x-4 mt-4">
-                        <button onClick={sendTextMessage}
-                                className="flex flex-col items-center justify-center text-orange-950 hover:text-orange-500 transition-colors">
+                        <button
+                            onClick={sendTextMessage}
+                            className="flex flex-col items-center justify-center text-orange-950 hover:text-orange-500 transition-colors"
+                        >
                             <div className="rounded-full p-3 bg-orange-100 hover:bg-orange-200 transition-colors">
                                 <MessageSquareShare className="h-5 w-5"/>
                             </div>

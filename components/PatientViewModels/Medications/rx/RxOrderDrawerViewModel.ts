@@ -114,11 +114,9 @@ export function useRxOrderDrawerViewModel(
         if (!patientInfo || !rxOrder) return;
 
         const phoneNumber = `${patientInfo.phone?.countryCode || ''}${patientInfo.phone?.phoneNumber || ''}`;
-        const patientName = patientInfo.patientName;
-        const doctorName = rxOrder.prescribingDr || "Your Doctor";
-        const medicationsList = rxOrder.prescriptions[0]?.medication || "your prescription";
-        const message = `Hello ${patientName},\n\nThis is Dr. ${doctorName}. Here are your prescribed medications: ${medicationsList}.`;
+        const message = `Hello ${patientInfo.patientName},\n\nThis is Dr. ${rxOrder.prescribingDr}. You can access your prescription details at the following link:\n${rxOrder.rxUrl}\n\nPlease take this link to your pharmacy to fulfill the prescription.`;
 
+        // Use the `sms:` protocol to send the SMS
         window.location.href = `sms:${phoneNumber}?body=${encodeURIComponent(message)}`;
     };
 

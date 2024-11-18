@@ -15,7 +15,7 @@ export async function middleware(req: any) {
         pathname.startsWith('/rx-order') ||
         pathname.match(PUBLIC_FILE) ||
         pathname === '/new-patient' ||
-        pathname === '/overview' ||
+        // pathname === '/overview' ||
         pathname === '/about'
     ) {
         return NextResponse.next();

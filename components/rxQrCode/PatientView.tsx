@@ -1,4 +1,4 @@
-// components/PatientViewModels/Medications/rx/QRCodeDisplay.tsx
+// components/rxQrCode/PatientView.tsx
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -14,7 +14,7 @@ interface QRCodeDisplayProps {
     uuid: string;
 }
 
-const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({ uuid }) => {
+const PatientView: React.FC<QRCodeDisplayProps> = ({ uuid }) => {
     const [rxOrder, setRxOrder] = useState<{
         qrCode: string;
         doctorSpecialty: string;
@@ -76,4 +76,4 @@ const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({ uuid }) => {
     );
 };
 
-export default QRCodeDisplay;
+export default PatientView;

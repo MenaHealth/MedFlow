@@ -6,6 +6,7 @@ import { IRxOrder } from "@/models/patient";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { Types } from 'mongoose';
+import { useToast } from '@/components/hooks/useToast';
 
 export function useRxOrderDrawerViewModel(
     patientId: Types.ObjectId | undefined | string,
@@ -14,6 +15,7 @@ export function useRxOrderDrawerViewModel(
 ) {
     const { userSession, patientInfo } = usePatientDashboard();
     const [rxOrder, setRxOrder] = useState<IRxOrder | null>(null);
+    const { setToast } = useToast();
 
     useEffect(() => {
         if (initialRxOrder) {
@@ -45,8 +47,7 @@ export function useRxOrderDrawerViewModel(
         const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
         const logo = new Image();
-        logo.src = "/assets/images/mena_health_logo.jpeg";
-
+        logo.src = "/assets/images/mena_health_logo.jpeg"; // Corrected Path
         logo.onload = () => {
             const logoWidth = 300;
             const logoHeight = 120;
@@ -79,7 +80,7 @@ export function useRxOrderDrawerViewModel(
         });
 
         const logo = new Image();
-        logo.src = "/images/mena_health_logo.jpeg";
+        logo.src = "/assets/images/mena_health_logo.jpeg"; // Corrected Path
 
         await new Promise((resolve, reject) => {
             logo.onload = resolve;
@@ -120,10 +121,36 @@ export function useRxOrderDrawerViewModel(
         window.location.href = `sms:${phoneNumber}?body=${encodeURIComponent(message)}`;
     };
 
+    const copyLink = () => {
+        if (rxOrder && rxOrder.rxUrl) {
+            navigator.clipboard.writeText(rxOrder.rxUrl);
+            setToast({
+                title: 'Link Copied',
+                description: 'The prescription link has been copied to your clipboard.',
+                variant: 'success',
+            });
+        }
+    };
+
+    const copyMessage = () => {
+        if (patientInfo && rxOrder) {
+            const message = `Hello ${patientInfo.patientName},\n\nThis is Dr. ${rxOrder.prescribingDr}. You can access your prescription details at the following link:\n${rxOrder.rxUrl}\n\nPlease take this link to your pharmacy to fulfill the prescription.`;
+            navigator.clipboard.writeText(message);
+            setToast({
+                title: 'Message Copied',
+                description: 'The SMS message has been copied to your clipboard.',
+                variant: 'success',
+            });
+        }
+    };
+
+
     return {
         rxOrder,
         onDownloadPDF,
         onDownloadJPG,
         sendTextMessage,
+        copyLink,
+        copyMessage,
     };
 }

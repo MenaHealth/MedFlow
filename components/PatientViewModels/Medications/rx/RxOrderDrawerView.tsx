@@ -12,19 +12,27 @@ import {
     Activity,
     Clock9,
     Clock,
-    Aperture,
     Download,
+    FileText,
     Hourglass,
     Tablets,
-    PillBottle,
+    PillBottleIcon as PillBottle,
     BadgeAlert,
-    Map, Ear, MapPinHouse, MapPinned, IdCard
-} from "lucide-react";
+    Ear,
+    MapPinned,
+    BadgeIcon as IdCard,
+    MessageSquareDashed,
+    Link,
+    Image
+} from 'lucide-react';
 import { Drawer, DrawerContent, DrawerHeader } from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/ScrollArea";
 import { usePatientDashboard } from "@/components/PatientViewModels/PatientViewModelContext";
 import { IRxOrder } from "@/models/patient";
 import { useRxOrderDrawerViewModel } from "./RxOrderDrawerViewModel";
+import { Button } from "@/components/ui/button";
+import { ToastProvider } from '@/components/ui/toast';
+import { ToastComponent } from '@/components/hooks/useToast';
 
 interface RxOrderDrawerViewProps {
     isOpen: boolean;
@@ -33,49 +41,81 @@ interface RxOrderDrawerViewProps {
     rxOrder: IRxOrder | null;
 }
 
-export default function RxOrderDrawerView({ isOpen, onClose, patientId, rxOrder }: RxOrderDrawerViewProps) {
-    console.log("RxOrderDrawerView rendered with isOpen:", isOpen); // Track render state
-
+function RxOrderDrawerContent({ isOpen, onClose, patientId, rxOrder }: RxOrderDrawerViewProps) {
     const { patientInfo } = usePatientDashboard();
     const drawerRef = useRef<HTMLDivElement>(null);
+    // const { toast } = useToast();
 
     const {
         onDownloadPDF,
         onDownloadJPG,
         sendTextMessage,
+        copyLink,
+        copyMessage
     } = useRxOrderDrawerViewModel(patientId, onClose, rxOrder);
 
     if (!patientInfo || !rxOrder) {
         return null;
     }
 
+
     return (
         <Drawer isOpen={isOpen} onClose={onClose}>
             <DrawerContent direction="bottom" size="75%" title="Export Rx">
                 <DrawerHeader className="border-b border-orange-200 z-50 mb-4">
-                    <div className="flex justify-center space-x-4 mt-4">
+                    <div className="flex flex-wrap justify-center space-x-4 mt-4">
                         <button
                             onClick={sendTextMessage}
                             className="flex flex-col items-center justify-center text-orange-950 hover:text-orange-500 transition-colors"
                         >
                             <div className="rounded-full p-3 bg-orange-100 hover:bg-orange-200 transition-colors">
-                                <MessageSquareShare className="h-5 w-5"/>
+                                <MessageSquareShare className="h-5 w-5 transition-colors" />
                             </div>
                             <span className="mt-1 text-xs">Share SMS</span>
                         </button>
-                        <button onClick={() => onDownloadPDF(drawerRef)}
-                                className="flex flex-col items-center justify-center text-orange-900 hover:text-orange-500 transition-colors">
-                            <div className="rounded-full p-3 bg-orange-100 hover:bg-orange-200 transition-colors">
-                                <Download className="h-5 w-5"/>
+                        <button
+                            onClick={() => onDownloadPDF(drawerRef)}
+                            className="flex flex-col items-center justify-center text-orange-950 hover:text-orange-500 transition-colors"
+                        >
+                            <div
+                                className="relative rounded-full p-3 bg-orange-100 hover:bg-orange-200 transition-colors">
+                                <FileText className="h-5 w-5 transition-colors text-current" />
+                                <Download
+                                    className="absolute h-4 w-4 right-0.5 bottom-0.5 rounded-full transition-colors text-current"
+                                />
                             </div>
                             <span className="mt-1 text-xs">PDF</span>
                         </button>
-                        <button onClick={() => onDownloadJPG(drawerRef)}
-                                className="flex flex-col items-center justify-center text-orange-900 hover:text-orange-500 transition-colors">
-                            <div className="rounded-full p-3 bg-orange-100 hover:bg-orange-200 transition-colors">
-                                <Download className="h-5 w-5"/>
+                        <button
+                            onClick={() => onDownloadJPG(drawerRef)}
+                            className="flex flex-col items-center justify-center text-orange-950 hover:text-orange-500 transition-colors"
+                        >
+                            <div
+                                className="relative rounded-full p-3 bg-orange-100 hover:bg-orange-200 transition-colors">
+                                <Image className="h-5 w-5 transition-colors text-current" />
+                                <Download
+                                    className="absolute h-4 w-4 right-0.5 bottom-0.5 rounded-full transition-colors text-current"
+                                />
                             </div>
                             <span className="mt-1 text-xs">JPG</span>
+                        </button>
+                        <button
+                            onClick={copyLink}
+                            className="flex flex-col items-center justify-center text-orange-950 hover:text-orange-500 transition-colors"
+                        >
+                            <div className="rounded-full p-3 bg-orange-100 hover:bg-orange-200 transition-colors">
+                                <Link className="h-5 w-5 transition-colors text-current" />
+                            </div>
+                            <span className="mt-1 text-xs">Copy URL</span>
+                        </button>
+                        <button
+                            onClick={copyMessage}
+                            className="flex flex-col items-center justify-center text-orange-950 hover:text-orange-500 transition-colors"
+                        >
+                            <div className="rounded-full p-3 bg-orange-100 hover:bg-orange-200 transition-colors">
+                                <MessageSquareDashed className="h-5 w-5 transition-colors text-current" />
+                            </div>
+                            <span className="mt-1 text-xs">Copy Message</span>
                         </button>
                     </div>
                 </DrawerHeader>
@@ -83,7 +123,8 @@ export default function RxOrderDrawerView({ isOpen, onClose, patientId, rxOrder 
                     <div ref={drawerRef} className="p-6 space-y-6 bg-orange-950 rounded-lg">
                         {/* Patient Information */}
                         <div className="bg-orange-50 p-4 rounded-lg">
-                            <h3 className="font-semibold text-lg mb-4 text-center text-orange-900 border-b border-orange-200 pb-2">Patient Information</h3>
+                            <h3 className="font-semibold text-lg mb-4 text-center text-orange-900 border-b border-orange-200 pb-2">Patient
+                                Information</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <p className="flex items-center"><User className="h-4 w-4 mr-2 text-orange-500"/><strong
                                     className="text-orange-900 mr-2">Name:</strong> {patientInfo.patientName}</p>
@@ -105,7 +146,6 @@ export default function RxOrderDrawerView({ isOpen, onClose, patientId, rxOrder 
                                     className="h-4 w-4 mr-2 text-orange-500"/><strong
                                     className="text-orange-900 mr-2">City:</strong> {patientInfo.city}</p>
                             </div>
-
                         </div>
 
                         {/* Prescribing Doctor */}
@@ -184,5 +224,14 @@ export default function RxOrderDrawerView({ isOpen, onClose, patientId, rxOrder 
                 </ScrollArea>
             </DrawerContent>
         </Drawer>
+    );
+}
+
+export default function RxOrderDrawerView(props: RxOrderDrawerViewProps) {
+    return (
+        <ToastProvider>
+            <RxOrderDrawerContent {...props} />
+            <ToastComponent />
+        </ToastProvider>
     );
 }

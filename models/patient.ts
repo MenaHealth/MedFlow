@@ -24,6 +24,7 @@ export interface IRxOrder {
     }>;
     qrCode?: string;
     rxUrl?: string;
+    RxProvider?: string;
 }
 
 const rxOrderSchema = new Schema({
@@ -45,6 +46,7 @@ const rxOrderSchema = new Schema({
     ],
     qrCode: { type: String },
     rxUrl: { type: String},
+    RxProvider: { type: String},
 });
 
 export interface IPatient extends Document {

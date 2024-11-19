@@ -1,6 +1,7 @@
 'use client';
 
 import "@/styles/globals.css";
+import "@/styles/fonts.css";
 import LayoutWrapper from "@/components/LayoutWrapper";
 import { Providers } from "@/components/Providers";
 import { ToastContext, useToastState, ToastComponent } from '@/components/hooks/useToast';
@@ -16,17 +17,18 @@ export default function RootLayout({
 
     return (
         <html lang="en" className="h-full w-full">
-        <body className="h-full w-full flex flex-col">
-        <Providers>
-            <ToastContext.Provider value={{ ...toastState, api }}>
-                <div className="relative w-full">
-                    <div className="gradient absolute inset-0" />
-                </div>
-                <LayoutWrapper>{children}</LayoutWrapper>
-                <ToastComponent />
-            </ToastContext.Provider>
-        </Providers>
-        </body>
+            <title>MedFlow</title>
+            <body className="h-full w-full flex flex-col">
+            <Providers>
+                <ToastContext.Provider value={{ ...toastState, api }}>
+                    <div className="relative w-full">
+                        <div className="gradient absolute inset-0" />
+                    </div>
+                    <LayoutWrapper>{children}</LayoutWrapper>
+                    <ToastComponent />
+                </ToastContext.Provider>
+            </Providers>
+            </body>
         </html>
     );
 }

@@ -1,7 +1,7 @@
 // components/PatientViewModels/PatientViewModel
 import React, { useState, useEffect } from 'react';
 import { PatientDashboardProvider, usePatientDashboard } from './PatientViewModelContext';
-import { User, FileText, LoaderPinwheel, PanelTopOpen, PillBottle, MessageCircle } from 'lucide-react';
+import { User, FileText, LoaderPinwheel, PanelTopOpen, PillBottle, MessageCircle, ImageIcon, VideoIcon } from 'lucide-react';
 import PatientInfoView from './patient-info/PatientInfoView';
 import { CombinedNotesView } from './../../components/PatientViewModels/PatientNotes/CombinedNotesView';
 import { Skeleton } from './../../components/ui/skeleton';
@@ -65,17 +65,10 @@ const PatientDashboardContent: React.FC = () => {
                 ? `${expandedDetails.phone.countryCode}${expandedDetails.phone.phoneNumber}`
                 : `${expandedDetails?.country || ''}${expandedDetails?.pmhx || ''}`;
 
-                return (
-                    <div className="grid grid-cols-3 gap-4 p-4">
-                        <div className="bg-white p-4 flex items-center justify-center col-span-1">
-                            <WhatsAppMessages phoneNumber={phoneNumber} />
-                        </div>
-                        <div className="bg-white p-4 flex items-center justify-center col-span-2">
-                            <AppBuilderWrapper />
-                        </div>
-                    </div>
-                );
-            }
+                return <WhatsAppMessages phoneNumber={phoneNumber} />;
+        } else if (section === 'video') {
+            return <AppBuilderWrapper />
+        }
     };
 
     const sections = [
@@ -102,7 +95,7 @@ const PatientDashboardContent: React.FC = () => {
         },
         {
             id: 'images',
-            icon: PanelTopOpen,
+            icon: ImageIcon,
             label: 'Images',
             color: 'bg-grey-100',
             textColor: 'text-darkBlue'
@@ -112,6 +105,13 @@ const PatientDashboardContent: React.FC = () => {
             icon: MessageCircle,
             label: 'Contact',
             color: 'bg-green-600',
+            textColor: 'text-white'
+        },
+        {
+            id: 'video',
+            icon: VideoIcon,
+            label: 'Video',
+            color: 'bg-blue-500',
             textColor: 'text-white'
         }
     ];

@@ -1,7 +1,7 @@
 // app/rx-order/page.tsx
 'use client';
 
-import QRCodeDisplay from '@/components/Pharmacist/QRCodeDisplay';
+import PatientView from '@/components/rxQrCode/PatientView';
 
 export default function RXOrderPage({ params }: { params: { uuid: string } }) {
     const { uuid } = params; // Extract the `uuid` from dynamic route params
@@ -12,7 +12,7 @@ export default function RXOrderPage({ params }: { params: { uuid: string } }) {
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-            <QRCodeDisplay uuid={uuid} />
+            <PatientView uuid={uuid} />
         </div>
     );
 }

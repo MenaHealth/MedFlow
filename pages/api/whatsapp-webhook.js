@@ -23,7 +23,7 @@ export default async function handler(req, res) {
             try {
                 await client.messages.create({
                     body: message,
-                    from: 'whatsapp:+16822171910',
+                    from: 'whatsapp:+14155238886',
                     to: `whatsapp:${to}`,
                 });
                 res.status(200).json({ success: true });

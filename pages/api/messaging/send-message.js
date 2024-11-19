@@ -18,7 +18,7 @@ export default async function handler(req, res) {
         try {
             const twilioMessage = await client.messages.create({
                 body: message,
-                from: 'whatsapp:+14155238886',
+                from: 'whatsapp:+16822171910',
                 to: `whatsapp:${to}`,
             });
             res.status(200).json({ success: true, sid: twilioMessage.sid });

@@ -8,11 +8,12 @@ import { Skeleton } from './../../components/ui/skeleton';
 import MedicationsView from './Medications/MedicationsView';
 import ImageGallery from './image-gallery/ImageGallery';
 import WhatsAppMessages from './../../components/PatientViewModels/whatsapp-messages/messages';
+import { CircleLoader } from 'react-spinners';
 
 import dynamic from 'next/dynamic';
 
 // Import Agora App Builder Wrapper dynamically
-const AppBuilderWrapper = dynamic(() => import('./../../components/PatientViewModels/videocall/AppBuilderWrapper'), { ssr: false });
+const AppBuilderWrapper = dynamic(() => import('./../../components/PatientViewModels/videocall/AppBuilderWrapper'), { ssr: false, loading: () => <div className='w-full h-full flex flex-col justify-center items-center'><div>Please wait, this could take a minute or two...</div><CircleLoader color="#FF5722" /></div>});
 
 
 const PatientDashboardContent: React.FC = () => {

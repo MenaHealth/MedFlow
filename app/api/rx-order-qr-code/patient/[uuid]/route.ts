@@ -1,4 +1,4 @@
-// app/api/rx-order-qr-code/patient/[id]/route.ts
+// app/api/rx-order-qr-code/patient/[uuid]/route.ts
 
 import { NextResponse } from 'next/server';
 import Patient from '@/models/patient';
@@ -18,7 +18,7 @@ export const GET = async (request: Request, { params }: { params: { uuid: string
         }
 
         // Find the RX order within the patient's RX orders
-        const rxOrder = patient.rxOrders.find((order: IRxOrder) => order.rxUrl?.includes(uuid));
+        const rxOrder = patient.rxOrders.find((order: IRxOrder) => order.PatientRxUrl?.includes(uuid));
         if (!rxOrder) {
             return new NextResponse('RX order not found', { status: 404 });
         }

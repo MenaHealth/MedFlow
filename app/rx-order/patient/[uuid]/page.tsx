@@ -1,18 +1,20 @@
 // app/rx-order/patient/[id]/page.tsx
 'use client';
 
-import PatientView from '@/components/rxQrCode/PatientView';
+import PatientRxView from '@/components/rxQrCode/PatientRxView';
 
-export default function RXOrderPage({ params }: { params: { uuid: string } }) {
-    const { uuid } = params; // Extract the `uuid` from dynamic route params
+export default function RXOrderPage({ params }: { params: { id: string } }) {
+    const { id } = params;
 
-    if (!uuid) {
-        return <p className="text-center text-red-500">Invalid or missing UUID</p>;
+    if (!id || !id.includes('-')) {
+        return <p className="text-center text-red-500">Invalid or missing ID</p>;
     }
+
+    const [truncatedPatientId, uuid] = id.split('-');
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-            <PatientView uuid={uuid} />
+            <PatientRxView truncatedPatientId={truncatedPatientId} uuid={uuid} />
         </div>
     );
 }

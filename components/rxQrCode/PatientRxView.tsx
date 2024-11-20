@@ -1,4 +1,6 @@
-// components/rxQrCode/PatientView.tsx
+// components/rxQrCode/PatientRxView.tsx
+// This is the view that has the QR code on it
+
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -10,25 +12,29 @@ interface Prescription {
     frequency: string;
 }
 
-interface QRCodeDisplayProps {
+interface RxOrder {
+    qrCode: string;
+    doctorSpecialty: string;
+    prescribingDr: string;
+    validTill: string;
+    prescriptions: Prescription[];
+    PatientRxUrl: string;
+    PharmacyQrUrl: string;
+}
+
+interface PatientRxViewProps {
+    truncatedPatientId: string;
     uuid: string;
 }
 
-const PatientView: React.FC<QRCodeDisplayProps> = ({ uuid }) => {
-    const [rxOrder, setRxOrder] = useState<{
-        qrCode: string;
-        doctorSpecialty: string;
-        prescribingDr: string;
-        validTill: string;
-        prescriptions: Prescription[];
-    } | null>(null);
-
+const PatientRxView: React.FC<PatientRxViewProps> = ({ truncatedPatientId, uuid }) => {
+    const [rxOrder, setRxOrder] = useState<RxOrder | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchRxOrder = async () => {
             try {
-                const response = await fetch(`/api/rx-order-qr-code/patient/${uuid}`);
+                const response = await fetch(`/api/rx-order-qr-code?truncatedId=${truncatedPatientId}&uuid=${uuid}`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch RX order');
                 }
@@ -41,7 +47,7 @@ const PatientView: React.FC<QRCodeDisplayProps> = ({ uuid }) => {
         };
 
         fetchRxOrder();
-    }, [uuid]);
+    }, [truncatedPatientId, uuid]);
 
     if (error) {
         return <p className="text-red-500">Error: {error}</p>;
@@ -60,6 +66,8 @@ const PatientView: React.FC<QRCodeDisplayProps> = ({ uuid }) => {
                 <p><strong>Doctor Specialty:</strong> {rxOrder.doctorSpecialty}</p>
                 <p><strong>Prescribing Doctor:</strong> {rxOrder.prescribingDr}</p>
                 <p><strong>Valid Till:</strong> {new Date(rxOrder.validTill).toLocaleDateString()}</p>
+                <p><strong>Patient Rx URL:</strong> <a href={rxOrder.PatientRxUrl} className="text-blue-600 hover:underline">{rxOrder.PatientRxUrl}</a></p>
+                <p><strong>Pharmacy QR URL:</strong> <a href={rxOrder.PharmacyQrUrl} className="text-blue-600 hover:underline">{rxOrder.PharmacyQrUrl}</a></p>
                 <h3 className="mt-4 text-lg font-semibold">Prescriptions</h3>
                 <ul className="list-disc list-inside">
                     {rxOrder.prescriptions.map((prescription, index) => (
@@ -76,4 +84,4 @@ const PatientView: React.FC<QRCodeDisplayProps> = ({ uuid }) => {
     );
 };
 
-export default PatientView;
+export default PatientRxView;

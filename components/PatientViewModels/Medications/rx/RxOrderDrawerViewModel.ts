@@ -115,15 +115,15 @@ export function useRxOrderDrawerViewModel(
         if (!patientInfo || !rxOrder) return;
 
         const phoneNumber = `${patientInfo.phone?.countryCode || ''}${patientInfo.phone?.phoneNumber || ''}`;
-        const message = `Hello ${patientInfo.patientName},\n\nThis is Dr. ${rxOrder.prescribingDr}. You can access your prescription details at the following link:\n${rxOrder.rxUrl}\n\nPlease take this link to your pharmacy to fulfill the prescription.`;
+        const message = `Hello ${patientInfo.patientName},\n\nThis is Dr. ${rxOrder.prescribingDr}. You can access your prescription details at the following link:\n${rxOrder.PatientRxUrl}\n\nPlease take this link to your pharmacy to fulfill the prescription.`;
 
         // Use the `sms:` protocol to send the SMS
         window.location.href = `sms:${phoneNumber}?body=${encodeURIComponent(message)}`;
     };
 
     const copyLink = () => {
-        if (rxOrder && rxOrder.rxUrl) {
-            navigator.clipboard.writeText(rxOrder.rxUrl);
+        if (rxOrder && rxOrder.PatientRxUrl) {
+            navigator.clipboard.writeText(rxOrder.PatientRxUrl);
             setToast({
                 title: 'Link Copied',
                 description: 'The prescription link has been copied to your clipboard.',
@@ -134,7 +134,7 @@ export function useRxOrderDrawerViewModel(
 
     const copyMessage = () => {
         if (patientInfo && rxOrder) {
-            const message = `Hello ${patientInfo.patientName},\n\nThis is Dr. ${rxOrder.prescribingDr}. You can access your prescription details at the following link:\n${rxOrder.rxUrl}\n\nPlease take this link to your pharmacy to fulfill the prescription.`;
+            const message = `Hello ${patientInfo.patientName},\n\nThis is Dr. ${rxOrder.prescribingDr}. You can access your prescription details at the following link:\n${rxOrder.PatientRxUrl}\n\nPlease take this link to your pharmacy to fulfill the prescription.`;
             navigator.clipboard.writeText(message);
             setToast({
                 title: 'Message Copied',

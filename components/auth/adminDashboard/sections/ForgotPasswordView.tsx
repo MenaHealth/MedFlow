@@ -23,14 +23,14 @@ export default function ForgotPasswordView() {
 
     return (
         <div className="container mx-auto px-4 py-8 space-y-8">
-            <Card>
+            <Card backgroundColor="bg-orange-800" borderColor="border-white">
                 <CardHeader>
-                    <CardTitle>Forgot Password - Admin Reset</CardTitle>
+                    <CardTitle className="text-white">Admin pw reset</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={(e) => { e.preventDefault(); handleSearch(); }} className="space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="search-email">Search by email</Label>
+                            <Label htmlFor="search-email" className="text-white">Search by email</Label>
                             <div className="flex items-center space-x-2">
                                 <Input
                                     id="search-email"
@@ -38,12 +38,12 @@ export default function ForgotPasswordView() {
                                     placeholder="user@example.com"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="flex-grow"
+                                    className="flex-grow bg-white"
                                 />
                                 <Button
                                     type="submit"
                                     disabled={loading}
-                                    className="text-white hover:bg-orange-800"
+                                    className="text-white bg-orange-600"
                                 >
                                     {loading ? (
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -108,9 +108,9 @@ export default function ForgotPasswordView() {
                             </>
                         ) : (
                             <Button
-                                onClick={generateResetLink} // Add this line to call generateResetLink on click
+                                onClick={generateResetLink}
                                 disabled={loading}
-                                className="text-white hover:bg-orange-800"
+                                className="text-white bg-orange-700 hover:bg-orange-600"
                             >
                                 {loading ? (
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

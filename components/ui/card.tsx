@@ -3,15 +3,20 @@ import { cn } from "../../utils/classNames"
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
     children: React.ReactNode
+    backgroundColor?: string
+    borderColor?: string
 }
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
-    ({ className, children, ...props }, ref) => {
+    ({ className, children, backgroundColor, borderColor, ...props }, ref) => {
         return (
             <div
                 ref={ref}
                 className={cn(
-                    "relative rounded-lg border border-gray-200 bg-white backdrop-filter backdrop-blur-md text-gray-950 shadow-sm",
+                    "relative rounded-lg border shadow-sm",
+                    backgroundColor || "bg-white",
+                    borderColor || "border-gray-200",
+                    "backdrop-filter backdrop-blur-md text-gray-950",
                     className
                 )}
                 {...props}

@@ -15,7 +15,6 @@ export interface IRxOrder {
     prescribedDate: Date;
     validTill: Date;
     city: string;
-    validated: boolean;
     prescriptions: Array<{
         diagnosis: string;
         medication: string;
@@ -23,8 +22,10 @@ export interface IRxOrder {
         frequency: string;
     }>;
     qrCode?: string;
-    rxUrl?: string;
+    PatientRxUrl?: string;
+    PharmacyQrUrl?: string;
     RxProvider?: string;
+    rxStatus: 'not reviewed' | 'partially filled' | 'declined' | 'completed';
 }
 
 const rxOrderSchema = new Schema({
@@ -35,7 +36,6 @@ const rxOrderSchema = new Schema({
     prescribedDate: { type: Date, required: true },
     validTill: { type: Date, required: true },
     city: { type: String, required: true },
-    validated: { type: Boolean, default: false },
     prescriptions: [
         {
             diagnosis: { type: String, required: true },
@@ -45,8 +45,14 @@ const rxOrderSchema = new Schema({
         },
     ],
     qrCode: { type: String },
-    rxUrl: { type: String},
+    PatientRxUrl: { type: String},
+    PharmacyQrUrl: { type: String},
     RxProvider: { type: String},
+    rxStatus: {
+        type: String,
+        default: 'not reviewed',
+        enum: ['not reviewed', 'partially filled', 'declined', 'completed'],
+    },
 });
 
 export interface IPatient extends Document {

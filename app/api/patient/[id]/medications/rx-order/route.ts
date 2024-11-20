@@ -1,4 +1,5 @@
 // app/api/patient/[id]/medications/rx-order/route.ts
+// Save rx order, patient rx order url, generate a qr code and pharmacy url behind the qr code
 
 import { v4 as uuidv4 } from 'uuid';
 import { NextResponse } from 'next/server';
@@ -6,7 +7,7 @@ import QRCode from 'qrcode';
 import Patient from '../../../../../../models/patient';
 import dbConnect from '../../../../../../utils/database';
 
-export const POST = async (request: Request, { params }: { params: { id: string } }) => {
+export async function POST(request: Request, { params }: { params: { id: string } }) {
     try {
         await dbConnect();
 
@@ -19,7 +20,6 @@ export const POST = async (request: Request, { params }: { params: { id: string 
             drId,
             validTill,
             city,
-            validated,
             prescriptions
         } = requestData;
 
@@ -34,9 +34,15 @@ export const POST = async (request: Request, { params }: { params: { id: string 
                 : process.env.NEXTAUTH_URL || "http://localhost:3000";
 
         const uniqueId = uuidv4();
-        const rxUrl = `${baseUrl}/rx-order/patient/${uniqueId}`; // Construct the custom URL
+        const truncatedPatientId = patientId.slice(0, 4); // First 4 characters of patientId
+        const rxUrl = `${baseUrl}/rx-order/patient/${truncatedPatientId}-${uniqueId}`;
+        const qrUrl = `${baseUrl}/rx-order/pharmacy/${truncatedPatientId}-${uniqueId}`;
+
+        // Generate QR code based on the qrUrl (pharmacy URL)
+        const qrCodeURL = await QRCode.toDataURL(qrUrl);
 
         const newRxOrder = {
+            rxOrderId: uniqueId, // Add this line to store the uniqueId
             doctorSpecialty,
             prescribingDr,
             drEmail,
@@ -44,14 +50,15 @@ export const POST = async (request: Request, { params }: { params: { id: string 
             prescribedDate: new Date(),
             validTill: new Date(validTill),
             city,
-            validated,
             prescriptions: prescriptions.map((p: any) => ({
                 diagnosis: p.diagnosis,
                 medication: p.medication,
                 dosage: p.dosage,
                 frequency: p.frequency,
             })),
-            rxUrl, // Save the custom URL
+            PatientRxUrl: rxUrl,
+            PharmacyQrUrl: qrUrl,
+            qrCode: qrCodeURL,
         };
 
         // Save the new RX order
@@ -65,19 +72,9 @@ export const POST = async (request: Request, { params }: { params: { id: string 
             return new NextResponse('Failed to update patient record', { status: 500 });
         }
 
-        // Find the recently added RX order
-        const addedRxOrder = updatedPatient.rxOrders[updatedPatient.rxOrders.length - 1];
-
-        // Generate QR code based on the saved rxUrl
-        const qrCodeURL = await QRCode.toDataURL(rxUrl);
-
-        // Update the RX order with the QR code
-        addedRxOrder.qrCode = qrCodeURL;
-        await updatedPatient.save();
-
         return new NextResponse(JSON.stringify(updatedPatient), { status: 201 });
     } catch (error) {
         console.error('Failed to add RX order:', error);
         return new NextResponse('Failed to add RX order', { status: 500 });
     }
-};
+}

@@ -2,7 +2,7 @@ import { useContext, useCallback, useState, useMemo } from 'react';
 import { ToastContext } from '@/components/hooks/useToast';
 import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewModelContext';
 import { IRxOrder } from "@/models/patient";
-import {Types} from "mongoose";
+import { Types } from "mongoose";
 
 interface Prescription {
     diagnosis: string;
@@ -27,8 +27,8 @@ export function useRXOrderViewModel(
         prescribedDate: new Date(),
         validTill: new Date(new Date().setMonth(new Date().getMonth() + 1)),
         city,
-        validated: false,
         prescriptions: [{ diagnosis: '', medication: '', dosage: '', frequency: '' }],
+        rxStatus: 'not reviewed',
     });
     const [isLoading, setIsLoading] = useState(false);
 
@@ -85,7 +85,17 @@ export function useRXOrderViewModel(
         setIsLoading(true);
 
         try {
-            const savedRxOrder = await api.post(`/api/patient/${patientId}/medications/rx-order`, rxOrder);
+            const response = await api.post(`/api/patient/${patientId}/medications/rx-order`, rxOrder);
+            const savedRxOrder = response.data;
+
+            // Update the rxOrder state with the new URLs and QR code
+            setRxOrder(prevOrder => ({
+                ...prevOrder,
+                PatientRxUrl: savedRxOrder.PatientRxUrl,
+                PharmacyQrUrl: savedRxOrder.PharmacyQrUrl,
+                qrCode: savedRxOrder.qrCode,
+            }));
+
             addRxOrder(savedRxOrder);
             await refreshMedications();
             onNewRxOrderSaved(savedRxOrder);
@@ -96,6 +106,9 @@ export function useRXOrderViewModel(
                 prescribedDate: new Date(),
                 validTill: new Date(new Date().setMonth(new Date().getMonth() + 1)),
                 prescriptions: [{ diagnosis: '', medication: '', dosage: '', frequency: '' }],
+                PatientRxUrl: undefined,
+                PharmacyQrUrl: undefined,
+                qrCode: undefined,
             });
         } catch (error) {
             console.error('Failed to save RX order:', error);

@@ -1,3 +1,4 @@
+// components/PatientViewModels/Medications/rx/RXOrderViewModel.ts
 import { useContext, useCallback, useState, useMemo } from 'react';
 import { ToastContext } from '@/components/hooks/useToast';
 import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewModelContext';
@@ -78,7 +79,8 @@ export function useRXOrderViewModel(
     };
 
     const submitRxOrder = useCallback(async () => {
-        if (!isFormComplete) {
+        if (!isFormComplete || !patientId) {
+            console.error('Patient ID is undefined or form is incomplete');
             return;
         }
 
@@ -88,11 +90,18 @@ export function useRXOrderViewModel(
             const response = await api.post(`/api/patient/${patientId}/medications/rx-order`, rxOrder);
             const savedRxOrder = response.data;
 
-            // Update the rxOrder state with the new URLs and QR code
+            // Convert patientId to string and extract truncated ID
+            const truncatedPatientId = patientId.toString().slice(0, 4); // Ensure it's a string
+            const uuid = savedRxOrder.rxOrderId;
+
+            const PatientRxUrl = `${window.location.origin}/rx-order-qr-code/${truncatedPatientId}-${uuid}`;
+            const PharmacyQrUrl = `${window.location.origin}/rx-order-qr-code/pharmacy/${truncatedPatientId}-${uuid}`;
+
+            // Update state with new URLs
             setRxOrder(prevOrder => ({
                 ...prevOrder,
-                PatientRxUrl: savedRxOrder.PatientRxUrl,
-                PharmacyQrUrl: savedRxOrder.PharmacyQrUrl,
+                PatientRxUrl,
+                PharmacyQrUrl,
                 qrCode: savedRxOrder.qrCode,
             }));
 

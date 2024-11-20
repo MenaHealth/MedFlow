@@ -1,4 +1,4 @@
-// app/api/patient/[id]/medications/rx-order/route.ts
+// app/api/patient/[id]/medications/rx-order-qr-code/route.ts
 // Save rx order, patient rx order url, generate a qr code and pharmacy url behind the qr code
 
 import { v4 as uuidv4 } from 'uuid';
@@ -35,8 +35,8 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
         const uniqueId = uuidv4();
         const truncatedPatientId = patientId.slice(0, 4); // First 4 characters of patientId
-        const rxUrl = `${baseUrl}/rx-order/patient/${truncatedPatientId}-${uniqueId}`;
-        const qrUrl = `${baseUrl}/rx-order/pharmacy/${truncatedPatientId}-${uniqueId}`;
+        const rxUrl = `${baseUrl}/rx-order-qr-code/${truncatedPatientId}-${uniqueId}`;
+        const qrUrl = `${baseUrl}/rx-order-qr-code/pharmacy/${truncatedPatientId}-${uniqueId}`;
 
         // Generate QR code based on the qrUrl (pharmacy URL)
         const qrCodeURL = await QRCode.toDataURL(qrUrl);

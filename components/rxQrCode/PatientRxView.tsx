@@ -34,7 +34,7 @@ const PatientRxView: React.FC<PatientRxViewProps> = ({ truncatedPatientId, uuid 
     useEffect(() => {
         const fetchRxOrder = async () => {
             try {
-                const response = await fetch(`/api/rx-order-qr-code?truncatedId=${truncatedPatientId}&uuid=${uuid}`);
+                const response = await fetch(`/api/rx-order/${truncatedPatientId}-${uuid}`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch RX order');
                 }

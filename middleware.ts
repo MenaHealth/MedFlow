@@ -8,11 +8,11 @@ export async function middleware(req: any) {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
     const { pathname, searchParams } = req.nextUrl;
 
-    // Allow requests to public files, API routes, '/auth', and '/rx-order'
+    // Allow requests to public files, API routes, '/auth', and '/rx-order-qr-code'
     if (
         pathname.startsWith('/api') ||
         pathname.startsWith('/auth') ||
-        pathname.startsWith('/rx-order') ||
+        pathname.startsWith('/rx-order-qr-code') ||
         pathname.match(PUBLIC_FILE) ||
         pathname === '/new-patient' ||
         pathname === '/overview' ||

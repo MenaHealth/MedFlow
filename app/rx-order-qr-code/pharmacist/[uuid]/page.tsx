@@ -1,4 +1,4 @@
-// app/rx-order/pharmacist/[uuid]page.tsx
+// app/rx-order-qr-code/pharmacist/[uuid]page.tsx
 'use client';
 
 import PharmacistView from '@/components/rxQrCode/PharmacistView';

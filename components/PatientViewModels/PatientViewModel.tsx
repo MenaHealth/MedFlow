@@ -1,18 +1,19 @@
 // components/PatientViewModels/PatientViewModel
 import React, { useState, useEffect } from 'react';
 import { PatientDashboardProvider, usePatientDashboard } from './PatientViewModelContext';
-import { User, FileText, LoaderPinwheel, PanelTopOpen, PillBottle, MessageCircle } from 'lucide-react';
+import { User, FileText, LoaderPinwheel, PanelTopOpen, PillBottle, MessageCircle, ImageIcon, VideoIcon } from 'lucide-react';
 import PatientInfoView from './patient-info/PatientInfoView';
 import { CombinedNotesView } from './../../components/PatientViewModels/PatientNotes/CombinedNotesView';
 import { Skeleton } from './../../components/ui/skeleton';
 import MedicationsView from './Medications/MedicationsView';
 import ImageGallery from './image-gallery/ImageGallery';
 import WhatsAppMessages from './../../components/PatientViewModels/whatsapp-messages/messages';
+import { CircleLoader } from 'react-spinners';
 
 import dynamic from 'next/dynamic';
 
 // Import Agora App Builder Wrapper dynamically
-const AppBuilderWrapper = dynamic(() => import('./../../components/PatientViewModels/videocall/AppBuilderWrapper'), { ssr: false });
+const AppBuilderWrapper = dynamic(() => import('./../../components/PatientViewModels/videocall/AppBuilderWrapper'), { ssr: false, loading: () => <div className='w-full h-full flex flex-col justify-center items-center'><div>Please wait, this could take a minute or two...</div><CircleLoader color="#FF5722" /></div>});
 
 
 const PatientDashboardContent: React.FC = () => {
@@ -65,17 +66,10 @@ const PatientDashboardContent: React.FC = () => {
                 ? `${expandedDetails.phone.countryCode}${expandedDetails.phone.phoneNumber}`
                 : `${expandedDetails?.country || ''}${expandedDetails?.pmhx || ''}`;
 
-                return (
-                    <div className="grid grid-cols-3 gap-4 p-4">
-                        <div className="bg-white p-4 flex items-center justify-center col-span-1">
-                            <WhatsAppMessages phoneNumber={phoneNumber} />
-                        </div>
-                        <div className="bg-white p-4 flex items-center justify-center col-span-2">
-                            <AppBuilderWrapper />
-                        </div>
-                    </div>
-                );
-            }
+                return <WhatsAppMessages phoneNumber={phoneNumber} />;
+        } else if (section === 'video') {
+            return <AppBuilderWrapper />
+        }
     };
 
     const sections = [
@@ -102,7 +96,7 @@ const PatientDashboardContent: React.FC = () => {
         },
         {
             id: 'images',
-            icon: PanelTopOpen,
+            icon: ImageIcon,
             label: 'Images',
             color: 'bg-grey-100',
             textColor: 'text-darkBlue'
@@ -112,6 +106,13 @@ const PatientDashboardContent: React.FC = () => {
             icon: MessageCircle,
             label: 'Contact',
             color: 'bg-green-600',
+            textColor: 'text-white'
+        },
+        {
+            id: 'video',
+            icon: VideoIcon,
+            label: 'Video',
+            color: 'bg-blue-500',
             textColor: 'text-white'
         }
     ];

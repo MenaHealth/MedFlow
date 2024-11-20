@@ -1,6 +1,10 @@
+<<<<<<<< HEAD:components/rxQrCode/PatientRxView.tsx
 // components/rxQrCode/PatientRxView.tsx
 // This is the view that has the QR code on it
 
+========
+// components/rxQrCode/PatientView.tsx
+>>>>>>>> main:components/rxQrCode/PatientView.tsx
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -27,8 +31,20 @@ interface PatientRxViewProps {
     uuid: string;
 }
 
+<<<<<<<< HEAD:components/rxQrCode/PatientRxView.tsx
 const PatientRxView: React.FC<PatientRxViewProps> = ({ truncatedPatientId, uuid }) => {
     const [rxOrder, setRxOrder] = useState<RxOrder | null>(null);
+========
+const PatientView: React.FC<QRCodeDisplayProps> = ({ uuid }) => {
+    const [rxOrder, setRxOrder] = useState<{
+        qrCode: string;
+        doctorSpecialty: string;
+        prescribingDr: string;
+        validTill: string;
+        prescriptions: Prescription[];
+    } | null>(null);
+
+>>>>>>>> main:components/rxQrCode/PatientView.tsx
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -84,4 +100,8 @@ const PatientRxView: React.FC<PatientRxViewProps> = ({ truncatedPatientId, uuid 
     );
 };
 
+<<<<<<<< HEAD:components/rxQrCode/PatientRxView.tsx
 export default PatientRxView;
+========
+export default PatientView;
+>>>>>>>> main:components/rxQrCode/PatientView.tsx

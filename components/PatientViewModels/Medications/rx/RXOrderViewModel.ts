@@ -87,17 +87,18 @@ export function useRXOrderViewModel(
         setIsLoading(true);
 
         try {
+            // Send RX order to the backend
             const response = await api.post(`/api/patient/${patientId}/medications/rx-order`, rxOrder);
             const savedRxOrder = response.data;
 
-            // Convert patientId to string and extract truncated ID
-            const truncatedPatientId = patientId.toString().slice(0, 4); // Ensure it's a string
+            // Extract the UUID from the saved RX order
             const uuid = savedRxOrder.rxOrderId;
 
-            const PatientRxUrl = `${window.location.origin}/rx-order-qr-code/${truncatedPatientId}-${uuid}`;
-            const PharmacyQrUrl = `${window.location.origin}/rx-order-qr-code/pharmacy/${truncatedPatientId}-${uuid}`;
+            // Generate URLs using the UUID only
+            const PatientRxUrl = `${window.location.origin}/rx-order-qr-code/${uuid}`;
+            const PharmacyQrUrl = `${window.location.origin}/rx-order-qr-code/pharmacy/${uuid}`;
 
-            // Update state with new URLs
+            // Update state with new URLs and QR code
             setRxOrder(prevOrder => ({
                 ...prevOrder,
                 PatientRxUrl,
@@ -105,6 +106,7 @@ export function useRXOrderViewModel(
                 qrCode: savedRxOrder.qrCode,
             }));
 
+            // Add RX order to the state and refresh medications
             addRxOrder(savedRxOrder);
             await refreshMedications();
             onNewRxOrderSaved(savedRxOrder);

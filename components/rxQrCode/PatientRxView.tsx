@@ -13,6 +13,7 @@ interface Prescription {
 }
 
 interface RxOrder {
+    rxOrderId: string;
     qrCode: string;
     doctorSpecialty: string;
     prescribingDr: string;
@@ -23,38 +24,50 @@ interface RxOrder {
 }
 
 interface PatientRxViewProps {
-    truncatedPatientId: string;
     uuid: string;
 }
 
-const PatientRxView: React.FC<PatientRxViewProps> = ({ truncatedPatientId, uuid }) => {
+const PatientRxView: React.FC<PatientRxViewProps> = ({ uuid }) => {
     const [rxOrder, setRxOrder] = useState<RxOrder | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
         const fetchRxOrder = async () => {
             try {
-                const response = await fetch(`/api/rx-order/${truncatedPatientId}-${uuid}`);
+                const response = await fetch(`/api/rx-order-qr-code/${uuid}`);
                 if (!response.ok) {
-                    throw new Error('Failed to fetch RX order');
+                    const errorText = await response.text();
+                    throw new Error(`Failed to fetch RX order: ${response.status} ${response.statusText}. ${errorText}`);
                 }
 
                 const data = await response.json();
                 setRxOrder(data);
             } catch (err: any) {
                 setError(err.message || 'An unexpected error occurred');
+            } finally {
+                setLoading(false);
             }
         };
 
         fetchRxOrder();
-    }, [truncatedPatientId, uuid]);
+    }, [uuid]);
+
+    if (loading) {
+        return <p className="text-center">Loading RX Order...</p>;
+    }
 
     if (error) {
-        return <p className="text-red-500">Error: {error}</p>;
+        return (
+            <div className="text-center text-red-500">
+                <p>Error: {error}</p>
+                <p>UUID: {uuid}</p>
+            </div>
+        );
     }
 
     if (!rxOrder) {
-        return <p>Loading RX Order...</p>;
+        return <p className="text-center">No RX Order found for UUID: {uuid}</p>;
     }
 
     return (
@@ -63,6 +76,7 @@ const PatientRxView: React.FC<PatientRxViewProps> = ({ truncatedPatientId, uuid 
             <img src={rxOrder.qrCode} alt="QR Code for RX Order" className="border rounded-lg shadow-md" />
             <div className="p-4 bg-white rounded-lg shadow-md max-w-md w-full">
                 <h2 className="text-lg font-semibold">Order Details</h2>
+                <p><strong>RX Order ID:</strong> {rxOrder.rxOrderId}</p>
                 <p><strong>Doctor Specialty:</strong> {rxOrder.doctorSpecialty}</p>
                 <p><strong>Prescribing Doctor:</strong> {rxOrder.prescribingDr}</p>
                 <p><strong>Valid Till:</strong> {new Date(rxOrder.validTill).toLocaleDateString()}</p>
@@ -85,3 +99,4 @@ const PatientRxView: React.FC<PatientRxViewProps> = ({ truncatedPatientId, uuid 
 };
 
 export default PatientRxView;
+

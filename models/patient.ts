@@ -22,6 +22,7 @@ export interface IRxOrder {
     PharmacyQrUrl?: string;
     RxProvider?: string;
     rxStatus?: 'not reviewed' | 'partially filled' | 'declined' | 'completed';
+    partialRxNotes?: string;
 }
 
 const rxOrderSchema = new Schema({
@@ -49,6 +50,7 @@ const rxOrderSchema = new Schema({
         default: 'not reviewed',
         enum: ['not reviewed', 'partially filled', 'declined', 'completed'],
     },
+    partialRxNotes: { type: String},
 });
 
 export interface IPatient extends Document {

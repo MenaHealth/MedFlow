@@ -47,9 +47,6 @@ function RxOrderDrawerContent({ isOpen, onClose, patientId, rxOrder }: RxOrderDr
     // const { toast } = useToast();
 
     const {
-        onDownloadPDF,
-        onDownloadJPG,
-        sendTextMessage,
         copyLink,
         copyMessage
     } = useRxOrderDrawerViewModel(patientId, onClose, rxOrder);
@@ -64,41 +61,6 @@ function RxOrderDrawerContent({ isOpen, onClose, patientId, rxOrder }: RxOrderDr
             <DrawerContent direction="bottom" size="75%" title="Export Rx">
                 <DrawerHeader className="border-b border-orange-200 z-50 mb-4">
                     <div className="flex flex-wrap justify-center space-x-4 mt-4">
-                        <button
-                            onClick={sendTextMessage}
-                            className="flex flex-col items-center justify-center text-orange-950 hover:text-orange-500 transition-colors"
-                        >
-                            <div className="rounded-full p-3 bg-orange-100 hover:bg-orange-200 transition-colors">
-                                <MessageSquareShare className="h-5 w-5 transition-colors" />
-                            </div>
-                            <span className="mt-1 text-xs">Share SMS</span>
-                        </button>
-                        <button
-                            onClick={() => onDownloadPDF(drawerRef)}
-                            className="flex flex-col items-center justify-center text-orange-950 hover:text-orange-500 transition-colors"
-                        >
-                            <div
-                                className="relative rounded-full p-3 bg-orange-100 hover:bg-orange-200 transition-colors">
-                                <FileText className="h-5 w-5 transition-colors text-current" />
-                                <Download
-                                    className="absolute h-4 w-4 right-0.5 bottom-0.5 rounded-full transition-colors text-current"
-                                />
-                            </div>
-                            <span className="mt-1 text-xs">PDF</span>
-                        </button>
-                        <button
-                            onClick={() => onDownloadJPG(drawerRef)}
-                            className="flex flex-col items-center justify-center text-orange-950 hover:text-orange-500 transition-colors"
-                        >
-                            <div
-                                className="relative rounded-full p-3 bg-orange-100 hover:bg-orange-200 transition-colors">
-                                <Image className="h-5 w-5 transition-colors text-current" />
-                                <Download
-                                    className="absolute h-4 w-4 right-0.5 bottom-0.5 rounded-full transition-colors text-current"
-                                />
-                            </div>
-                            <span className="mt-1 text-xs">JPG</span>
-                        </button>
                         <button
                             onClick={copyLink}
                             className="flex flex-col items-center justify-center text-orange-950 hover:text-orange-500 transition-colors"

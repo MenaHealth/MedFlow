@@ -22,7 +22,7 @@ import {
     MapPinned,
     BadgeIcon as IdCard,
     MessageSquareDashed,
-    Link,
+    View,
     Image
 } from 'lucide-react';
 import { Drawer, DrawerContent, DrawerHeader } from "@/components/ui/drawer";
@@ -66,9 +66,9 @@ function RxOrderDrawerContent({ isOpen, onClose, patientId, rxOrder }: RxOrderDr
                             className="flex flex-col items-center justify-center text-orange-950 hover:text-orange-500 transition-colors"
                         >
                             <div className="rounded-full p-3 bg-orange-100 hover:bg-orange-200 transition-colors">
-                                <Link className="h-5 w-5 transition-colors text-current" />
+                                <View className="h-5 w-5 transition-colors text-current" />
                             </div>
-                            <span className="mt-1 text-xs">Copy URL</span>
+                            <span className="mt-1 text-xs">preview</span>
                         </button>
                         <button
                             onClick={copyMessage}

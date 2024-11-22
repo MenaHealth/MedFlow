@@ -1,5 +1,5 @@
 // app/api/patient/[id]/medications/rx-order/route.ts
-// saving a rx order URL for the patient and a QR code for the pharmacist
+// saving a rx order URL for the patient and a QR code for the pharmacy
 
 import { v4 as uuidv4 } from 'uuid';
 import { NextResponse } from 'next/server';
@@ -55,7 +55,7 @@ export const POST = async (request: Request, { params }: { params: { id: string 
                 frequency: p.frequency,
             })),
             PatientRxUrl: patientRxUrl,
-            PharmacyQrUrl: pharmacyQrUrl, // Save the pharmacist URL
+            PharmacyQrUrl: pharmacyQrUrl, // Save the pharmacy URL
         };
 
         // Save the new RX order

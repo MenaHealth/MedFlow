@@ -30,7 +30,7 @@ const PatientView: React.FC<QRCodeDisplayProps> = ({ uuid }) => {
             try {
                 const response = await fetch(`/api/rx-order-qr-code/patient/${uuid}`);
                 if (!response.ok) {
-                    throw new Error('Failed to fetch RX order');
+                    throw new Error('View Failed to fetch RX order');
                 }
 
                 const data = await response.json();

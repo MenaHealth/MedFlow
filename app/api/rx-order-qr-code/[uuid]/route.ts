@@ -36,6 +36,6 @@ export const GET = async (request: Request, { params }: { params: { uuid: string
         );
     } catch (error) {
         console.error('Error fetching RX order:', error);
-        return new NextResponse(JSON.stringify({ error: 'Failed to fetch RX order' }), { status: 500 });
+        return new NextResponse(JSON.stringify({ error: 'qr code api Failed to fetch RX order' }), { status: 500 });
     }
 };

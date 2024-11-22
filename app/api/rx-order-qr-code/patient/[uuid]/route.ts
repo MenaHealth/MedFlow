@@ -12,21 +12,27 @@ export const GET = async (request: Request, { params }: { params: { uuid: string
         const { uuid } = params;
 
         // Find the patient with the RX order matching the UUID
-        const patient = await Patient.findOne({ "rxOrders.rxUrl": { $regex: uuid } });
+        const patient = await Patient.findOne({ "rxOrders.PatientRxUrl": { $regex: uuid } });
         if (!patient) {
-            return new NextResponse('RX order not found', { status: 404 });
+            return new NextResponse(
+                JSON.stringify({ error: 'RX order not found: patient' }),
+                { status: 404 }
+            );
         }
 
-        // Find the RX order within the patient's RX orders
-        const rxOrder = patient.rxOrders.find((order: IRxOrder) => order.rxUrl?.includes(uuid));
+        // Find the specific RX order
+        const rxOrder = patient.rxOrders.find((order: IRxOrder) => order.PatientRxUrl?.includes(uuid));
         if (!rxOrder) {
-            return new NextResponse('RX order not found', { status: 404 });
+            return new NextResponse(
+                JSON.stringify({ error: 'RX order not found: order' }),
+                { status: 404 }
+            );
         }
 
         // Return detailed RX order information
         return new NextResponse(
             JSON.stringify({
-                qrCode: rxOrder.qrCode,
+                PharmacyQrCode: rxOrder.PharmacyQrCode, // Fixed field name
                 doctorSpecialty: rxOrder.doctorSpecialty,
                 prescribingDr: rxOrder.prescribingDr,
                 validTill: rxOrder.validTill,
@@ -36,6 +42,9 @@ export const GET = async (request: Request, { params }: { params: { uuid: string
         );
     } catch (error) {
         console.error('Error fetching RX order:', error);
-        return new NextResponse('Failed to fetch RX order', { status: 500 });
+        return new NextResponse(
+            JSON.stringify({ error: 'Failed to fetch RX order' }),
+            { status: 500 }
+        );
     }
 };

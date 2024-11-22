@@ -1,3 +1,4 @@
+// components/ui/table.tsx
 "use client"
 
 import React, {useState, useMemo, useRef, useEffect} from 'react'

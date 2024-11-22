@@ -16,7 +16,7 @@ interface QRCodeDisplayProps {
 
 const PatientView: React.FC<QRCodeDisplayProps> = ({ uuid }) => {
     const [rxOrder, setRxOrder] = useState<{
-        qrCode: string;
+        PharmacyQrCode: string;
         doctorSpecialty: string;
         prescribingDr: string;
         validTill: string;
@@ -30,7 +30,7 @@ const PatientView: React.FC<QRCodeDisplayProps> = ({ uuid }) => {
             try {
                 const response = await fetch(`/api/rx-order-qr-code/patient/${uuid}`);
                 if (!response.ok) {
-                    throw new Error('Failed to fetch RX order');
+                    throw new Error('View Failed to fetch RX order');
                 }
 
                 const data = await response.json();
@@ -54,7 +54,7 @@ const PatientView: React.FC<QRCodeDisplayProps> = ({ uuid }) => {
     return (
         <div className="flex flex-col items-center justify-center space-y-6">
             <h1 className="text-2xl font-bold">Prescription Details</h1>
-            <img src={rxOrder.qrCode} alt="QR Code for RX Order" className="border rounded-lg shadow-md" />
+            <img src={rxOrder.PharmacyQrCode} alt="QR Code for RX Order" className="border rounded-lg shadow-md" />
             <div className="p-4 bg-white rounded-lg shadow-md max-w-md w-full">
                 <h2 className="text-lg font-semibold">Order Details</h2>
                 <p><strong>Doctor Specialty:</strong> {rxOrder.doctorSpecialty}</p>

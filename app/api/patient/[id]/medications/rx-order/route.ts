@@ -1,8 +1,10 @@
 // app/api/patient/[id]/medications/rx-order/route.ts
+// saving a rx order URL for the patient and a QR code for the pharmacy
 
 import { v4 as uuidv4 } from 'uuid';
 import { NextResponse } from 'next/server';
 import QRCode from 'qrcode';
+import sharp from 'sharp';
 import Patient from '../../../../../../models/patient';
 import dbConnect from '../../../../../../utils/database';
 
@@ -20,7 +22,7 @@ export const POST = async (request: Request, { params }: { params: { id: string 
             validTill,
             city,
             validated,
-            prescriptions
+            prescriptions,
         } = requestData;
 
         // Validate required fields
@@ -34,7 +36,8 @@ export const POST = async (request: Request, { params }: { params: { id: string 
                 : process.env.NEXTAUTH_URL || "http://localhost:3000";
 
         const uniqueId = uuidv4();
-        const rxUrl = `${baseUrl}/rx-order/patient/${uniqueId}`; // Construct the custom URL
+        const patientRxUrl = `${baseUrl}/rx-order/patient/${uniqueId}`; // Patient URL
+        const pharmacyQrUrl = `${baseUrl}/rx-order/pharmacy/${uniqueId}`; // Pharmacist URL
 
         const newRxOrder = {
             doctorSpecialty,
@@ -51,7 +54,8 @@ export const POST = async (request: Request, { params }: { params: { id: string 
                 dosage: p.dosage,
                 frequency: p.frequency,
             })),
-            rxUrl, // Save the custom URL
+            PatientRxUrl: patientRxUrl,
+            PharmacyQrUrl: pharmacyQrUrl, // Save the pharmacy URL
         };
 
         // Save the new RX order
@@ -68,11 +72,26 @@ export const POST = async (request: Request, { params }: { params: { id: string 
         // Find the recently added RX order
         const addedRxOrder = updatedPatient.rxOrders[updatedPatient.rxOrders.length - 1];
 
-        // Generate QR code based on the saved rxUrl
-        const qrCodeURL = await QRCode.toDataURL(rxUrl);
+        // Generate QR code as a data URL
+        const qrCodeDataURL = await QRCode.toDataURL(pharmacyQrUrl, { errorCorrectionLevel: 'L' });
+
+        // Extract the base64 part from the data URL
+        const base64Data = qrCodeDataURL.split(',')[1];
+
+        // Convert base64 to a buffer
+        const qrCodeBuffer = Buffer.from(base64Data, 'base64');
+
+        // Compress the QR code using sharp
+        const compressedQrCodeBuffer = await sharp(qrCodeBuffer)
+            .png({ quality: 70 }) // Compress PNG with quality setting
+            .resize(256, 256) // Resize to 256x256
+            .toBuffer();
+
+        // Convert buffer to base64 for storage
+        const compressedQrCodeBase64 = `data:image/png;base64,${compressedQrCodeBuffer.toString('base64')}`;
 
         // Update the RX order with the QR code
-        addedRxOrder.qrCode = qrCodeURL;
+        addedRxOrder.PharmacyQrCode = compressedQrCodeBase64; // Save compressed QR code
         await updatedPatient.save();
 
         return new NextResponse(JSON.stringify(updatedPatient), { status: 201 });

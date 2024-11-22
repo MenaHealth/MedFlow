@@ -21,7 +21,6 @@ export function usePreviousMedicationsViewModel() {
                 dosage: prescription.dosage,
                 frequency: prescription.frequency,
             })),
-            validated: order.validated,
         }));
     };
 

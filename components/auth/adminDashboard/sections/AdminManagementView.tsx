@@ -4,14 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table } from "@/components/ui/table";
 import { useAdminManagementViewModel } from './AdminManagementViewModel';
-
-interface Admin {
-    _id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    adminStartDate: string;
-}
+import type { IAdmin } from '@/models/admin';
 
 export default function AdminManagementView() {
     const {
@@ -31,7 +24,7 @@ export default function AdminManagementView() {
 
     const [selectedAdmins, setSelectedAdmins] = useState<Set<string>>(new Set());
 
-    const firstAdminId = adminsData[0]?._id;
+    const firstAdminId = adminsData[0]?.userId.toString();
 
     const toggleSelectAdmin = (adminId: string) => {
         if (adminId === firstAdminId) return;
@@ -42,22 +35,21 @@ export default function AdminManagementView() {
         });
     };
 
-// Transform adminsData to ensure each entry has adminStartDate
-    const transformedAdminsData = (adminsData as Admin[]).map((admin) => ({
+    const transformedAdminsData = adminsData.map((admin) => ({
         ...admin,
-        adminStartDate: admin.adminStartDate || new Date().toISOString(), // Use current date as a default
+        adminStartDate: admin.adminStartDate || new Date().toISOString(),
     }));
 
     const columns = [
         {
             key: 'select',
             header: '',
-            render: (_: any, admin: Admin) => (
+            render: (_: any, admin: IAdmin) => (
                 <input
                     type="checkbox"
-                    checked={selectedAdmins.has(admin._id)}
-                    onChange={() => toggleSelectAdmin(admin._id)}
-                    disabled={admin._id === firstAdminId}
+                    checked={selectedAdmins.has(admin.userId.toString())}
+                    onChange={() => toggleSelectAdmin(admin.userId.toString())}
+                    disabled={admin.userId.toString() === firstAdminId}
                 />
             ),
         },
@@ -67,17 +59,17 @@ export default function AdminManagementView() {
         {
             key: 'adminStartDate',
             header: 'Start Date',
-            render: (value: string) => new Date(value).toLocaleDateString(),
+            render: (value: Date) => new Date(value).toLocaleDateString(),
         },
         {
             key: 'actions',
             header: 'Actions',
-            render: (_: any, admin: Admin) => (
+            render: (_: any, admin: IAdmin) => (
                 <Button
                     className="hover:text-darkBlue hover:border-orange-500 hover:border-2 hover:bg-white transition-colors"
                     size="icon"
-                    onClick={() => handleRemoveAdmin(admin._id)}
-                    disabled={admin._id === firstAdminId}
+                    onClick={() => handleRemoveAdmin(admin.userId.toString())}
+                    disabled={admin.userId.toString() === firstAdminId}
                 >
                     <UserMinus className="w-5 h-5" />
                 </Button>
@@ -108,8 +100,8 @@ export default function AdminManagementView() {
                         className="w-full p-2 mt-2 border rounded-md bg-darkBlue text-white"
                     >
                         <option value="">-- Select a user --</option>
-                        {selectedUser.map((user: Admin) => (
-                            <option key={user._id} value={user._id}>
+                        {selectedUser.map((user: IAdmin) => (
+                            <option key={user.userId.toString()} value={user.userId.toString()}>
                                 {user.firstName} {user.lastName} ({user.email})
                             </option>
                         ))}
@@ -121,7 +113,6 @@ export default function AdminManagementView() {
                 </Button>
             </div>
 
-            {/* Table for displaying current admins */}
             <Table
                 data={transformedAdminsData}
                 columns={columns}
@@ -132,7 +123,6 @@ export default function AdminManagementView() {
                 headerTextColor="darkBlue"
             />
 
-            {/* Multi-Select Delete Button */}
             {selectedAdmins.size > 0 && (
                 <div className="flex justify-center mt-4">
                     <Button
@@ -146,7 +136,6 @@ export default function AdminManagementView() {
                 </div>
             )}
 
-            {/* Load More Button */}
             <div className="flex justify-center mt-4">
                 {hasMoreAdmins && !loadingAdmins && (
                     <Button onClick={loadMoreAdmins} className="flex items-center space-x-2">
@@ -159,3 +148,4 @@ export default function AdminManagementView() {
         </div>
     );
 }
+

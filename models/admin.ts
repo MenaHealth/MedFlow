@@ -1,4 +1,4 @@
-// models/adminDashboard.ts
+// models/admin.ts
 import mongoose, {model, Model, models} from 'mongoose';
 import {IMedOrder, medOrderSchema} from "@/models/medOrder";
 

@@ -91,9 +91,11 @@ export async function GET(request: Request) {
         }
 
         return NextResponse.json({ admins }, { status: 200 });
-    } catch (error) {
-        console.error('Error in GET request:', error);
-        return NextResponse.json({ message: 'Failed to fetch admins' }, { status: 500 });
+    } catch (error: unknown) {
+        console.error('Detailed error in GET request:', error);
+            if (error instanceof Error) {
+                return NextResponse.json({message: 'Failed to fetch admins', error: error.message}, {status: 500});
+            }
     }
 }
 

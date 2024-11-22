@@ -3,7 +3,7 @@
 import { NextResponse } from 'next/server';
 import Patient from '@/models/patient';
 import dbConnect from '@/utils/database';
-import { IRxOrder } from '@/models/patient';
+import { IRxOrder, IPatient } from '@/models/patient';
 
 export const GET = async (request: Request, { params }: { params: { uuid: string } }) => {
     try {
@@ -29,13 +29,23 @@ export const GET = async (request: Request, { params }: { params: { uuid: string
             );
         }
 
-        // Return detailed RX order information
+        // Return detailed RX order information along with patient details
         return new NextResponse(
             JSON.stringify({
-                PharmacyQrCode: rxOrder.PharmacyQrCode, // Fixed field name
+                // Patient information
+                patientName: `${patient.firstName} ${patient.lastName}`,
+                patientDob: patient.dob,
+                patientCountry: patient.country,
+                patientCity: patient.city,
+
+                // RX order information
+                PharmacyQrCode: rxOrder.PharmacyQrCode,
                 doctorSpecialty: rxOrder.doctorSpecialty,
                 prescribingDr: rxOrder.prescribingDr,
                 validTill: rxOrder.validTill,
+                prescribedDate: rxOrder.prescribedDate,
+                city: rxOrder.city,
+                rxStatus: rxOrder.rxStatus,
                 prescriptions: rxOrder.prescriptions,
             }),
             { status: 200, headers: { 'Content-Type': 'application/json' } }

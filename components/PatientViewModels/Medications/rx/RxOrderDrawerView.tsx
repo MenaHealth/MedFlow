@@ -161,11 +161,11 @@ function RxOrderDrawerContent({ isOpen, onClose, patientId, rxOrder }: RxOrderDr
                         </div>
 
                         {/* QR Code */}
-                        {rxOrder.qrCode && (
+                        {rxOrder.PharmacyQrCode && (
                             <div className="bg-orange-50 p-4 rounded-lg flex justify-center items-center">
                                 <h3 className="font-semibold text-lg mb-4 text-center text-orange-900 border-b border-orange-200 pb-2">Prescription QR Code</h3>
                                 <img
-                                    src={rxOrder.qrCode}
+                                    src={rxOrder.PharmacyQrCode}
                                     alt="Prescription QR Code"
                                     className="w-40 h-40"
                                 />

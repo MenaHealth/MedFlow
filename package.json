@@ -66,6 +66,7 @@
     "react-query": "^3.39.3",
     "react-spinners": "^0.14.1",
     "react-zoom-pan-pinch": "^3.6.1",
+    "sharp": "^0.33.5",
     "simple-oauth2": "^5.1.0",
     "stream": "^0.0.3",
     "tailwind-merge": "^2.2.2",

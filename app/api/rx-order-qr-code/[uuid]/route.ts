@@ -3,7 +3,7 @@
 import { NextResponse } from 'next/server';
 import Patient from "@/models/patient";
 import dbConnect from '../../../../utils/database';
-import { IRxOrder } from '@/models/patient'; // Import the IRxOrder interface
+import { IRxOrder } from '@/models/patient';
 
 export const GET = async (request: Request, { params }: { params: { uuid: string } }) => {
     try {
@@ -11,21 +11,22 @@ export const GET = async (request: Request, { params }: { params: { uuid: string
 
         const { uuid } = params;
 
-        const patient = await Patient.findOne({ "rxOrders.rxUrl": { $regex: uuid } });
+        // Search for the patient using the RX URL
+        const patient = await Patient.findOne({ "rxOrders.PatientRxUrl": { $regex: uuid } });
         if (!patient) {
-            return new NextResponse('RX order not found', { status: 404 });
+            return new NextResponse(JSON.stringify({ error: 'Patient with RX order not found' }), { status: 404 });
         }
 
-        // Use IRxOrder to type the `order` parameter
-        const rxOrder = patient.rxOrders.find((order: IRxOrder) => order.rxUrl?.includes(uuid));
+        // Find the specific RX order using the UUID
+        const rxOrder = patient.rxOrders.find((order: IRxOrder) => order.PatientRxUrl?.includes(uuid));
         if (!rxOrder) {
-            return new NextResponse('RX order not found', { status: 404 });
+            return new NextResponse(JSON.stringify({ error: 'RX order not found' }), { status: 404 });
         }
 
-        // Return detailed RX order information
+        // Return RX order details, including the QR code
         return new NextResponse(
             JSON.stringify({
-                qrCode: rxOrder.qrCode,
+                PharmacyQrCode: rxOrder.PharmacyQrCode,
                 doctorSpecialty: rxOrder.doctorSpecialty,
                 prescribingDr: rxOrder.prescribingDr,
                 validTill: rxOrder.validTill,
@@ -35,6 +36,6 @@ export const GET = async (request: Request, { params }: { params: { uuid: string
         );
     } catch (error) {
         console.error('Error fetching RX order:', error);
-        return new NextResponse('Failed to fetch RX order', { status: 500 });
+        return new NextResponse(JSON.stringify({ error: 'Failed to fetch RX order' }), { status: 500 });
     }
 };

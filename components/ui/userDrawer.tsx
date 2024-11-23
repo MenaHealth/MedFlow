@@ -23,7 +23,7 @@ interface UserDrawerProps {
         image?: string | null
         firstName?: string
         lastName?: string
-        isAdmin?: boolean
+        isAdmin?: boolean;
     }
 }
 

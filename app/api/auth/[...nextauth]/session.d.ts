@@ -1,40 +1,27 @@
 // app/api/auth/[...nextauth]/session.d.ts
+import { DefaultSession } from "next-auth";
+import { Countries } from "@/data/countries.enum";
+import { Languages } from "@/data/languages.enum";
+import { DoctorSpecialtyList } from "@/data/doctorSpecialty.enum";
 
-import NextAuth from 'next-auth';
-import { Countries, Languages } from '@/utils/enums'; // Make sure to import these
-
-declare module 'next-auth' {
+declare module "next-auth" {
     interface Session {
         user: {
             _id: string;
             email: string;
             firstName: string;
             lastName: string;
-            accountType: 'Doctor' | 'Triage';
-            isAdmin: boolean;
-            image?: string;
-            doctorSpecialty?: string;
+            city: string;
+            countries: Countries[]; // Connect the Countries enum here
             languages?: Languages[];
+            accountType: 'Doctor' | 'Triage';
+            isAdmin: boolean | undefined;
+            image?: string;
+            doctorSpecialty?: DoctorSpecialtyList;
             token?: string;
             gender?: 'male' | 'female';
-            dob?: Date;
-            countries?: Countries[];
-        };
-    }
-
-    interface JWT {
-        _id: string;
-        accountType: 'Doctor' | 'Triage';
-        firstName: string;
-        lastName: string;
-        isAdmin: boolean;
-        token?: string;
-        doctorSpecialty?: string;
-        languages?: Languages[]; // Update to use the enum
-        gender?: 'male' | 'female';
-        dob: Date;
-        countries?: Countries[]; // Update to use the enum
-        email: string;
-        image?: string;
+            dob?: Date | String;
+        } & DefaultSession["user"]
     }
 }
+

@@ -1,19 +1,14 @@
 // components/PatientViewModels/Medications/rx/RxOrderDrawerViewModel.ts
 
-import { useState, RefObject, useEffect } from 'react';
-import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewModelContext';
+import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react'; // Import the session hook
 import { IRxOrder } from "@/models/patient";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
-import { Types } from 'mongoose';
 import { useToast } from '@/components/hooks/useToast';
 
 export function useRxOrderDrawerViewModel(
-    patientId: Types.ObjectId | undefined | string,
-    onClose: () => void,
     initialRxOrder: IRxOrder | null
 ) {
-    const { userSession, patientInfo } = usePatientDashboard();
+    const { data: session } = useSession(); // Use session directly here
     const [rxOrder, setRxOrder] = useState<IRxOrder | null>(null);
     const { setToast } = useToast();
 
@@ -35,8 +30,11 @@ export function useRxOrderDrawerViewModel(
     };
 
     const copyMessage = () => {
-        if (patientInfo && rxOrder) {
-            const message = `Hello ${patientInfo.patientName},\n\nThis is Dr. ${rxOrder.prescribingDr}. You can access your prescription details at the following link:\n${rxOrder.PatientRxUrl}\n\nPlease take this link to your pharmacy to fulfill the prescription.`;
+        if (rxOrder) {
+            const message = `Hello, this is Dr. ${session?.user?.firstName} ${session?.user?.lastName}. 
+            You can access your prescription details at the following link:
+            ${rxOrder.PatientRxUrl}.
+            Please take this link to your pharmacy to fulfill the prescription.`;
             navigator.clipboard.writeText(message);
             setToast({
                 title: 'Message Copied',
@@ -45,7 +43,6 @@ export function useRxOrderDrawerViewModel(
             });
         }
     };
-
 
     return {
         rxOrder,

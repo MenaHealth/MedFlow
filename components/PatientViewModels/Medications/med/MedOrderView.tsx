@@ -179,30 +179,8 @@ export default function MedOrderView({ patientId, user }: MedOrderViewProps) {
                         {isLoading ? 'Submitting...' : 'Submit Medical Order'}
                     </Button>
                 </div>
-
-                    {/*<div className="space-y-6 max-w-2xl mx-auto bg-orange-950">*/}
-                    {/*    <Button*/}
-                    {/*        onClick={submitRxOrder}*/}
-                    {/*        disabled={isLoading || !isFormComplete}*/}
-                    {/*        className="w-full flex justify-center items-center"*/}
-                    {/*        variant="submit"*/}
-                    {/*    >*/}
-                    {/*        {isLoading ? (*/}
-                    {/*            <ClipLoader size={24} color={orange300} loading={isLoading}/>*/}
-                    {/*        ) : (*/}
-                    {/*            'Submit Rx Order'*/}
-                    {/*        )}*/}
-                    {/*    </Button>*/}
-
-                    {/*    <RxOrderDrawerView*/}
-                    {/*        isOpen={isDrawerOpen}*/}
-                    {/*        onClose={() => setIsDrawerOpen(false)}*/}
-                    {/*        rxOrder={selectedRxOrder}*/}
-                    {/*        patientId={patientId}*/}
-                    {/*    />*/}
-                    {/*</div>*/}
                 </div>
                 <ToastComponent/>
         </ToastProvider>
-);
+    );
 }

@@ -1,4 +1,4 @@
-// utils/countries.enum.ts
+// data/countries.enum.ts
 export enum Countries {
     EGYPT = 'Egypt',
     PALESTINE_GAZA = 'Palestine - Gaza',

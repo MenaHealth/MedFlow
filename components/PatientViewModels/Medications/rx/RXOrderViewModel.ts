@@ -1,7 +1,7 @@
 // components/PatientViewModels/Medications/rx/RXOrderViewModel.ts
-import { useContext, useCallback, useState, useMemo } from 'react';
+import {useCallback, useState, useMemo, useContext} from 'react';
+import { useSession } from 'next-auth/react'; // Import the session hook
 import { ToastContext } from '@/components/hooks/useToast';
-import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewModelContext';
 import { IRxOrder } from "@/models/patient";
 import { Types } from "mongoose";
 
@@ -18,18 +18,21 @@ export function useRXOrderViewModel(
     city: string,
     patientName: string
 ) {
+    const { data: session } = useSession(); // Use session directly here
     const { api } = useContext(ToastContext);
-    const { userSession, refreshMedications, addRxOrder } = usePatientDashboard();
-    const [rxOrder, setRxOrder] = useState<IRxOrder>({
-        doctorSpecialty: userSession?.doctorSpecialty || 'Not Selected',
-        prescribingDr: `${userSession?.firstName} ${userSession?.lastName}`,
-        drEmail: userSession?.email || '',
-        drId: userSession?.id || '',
+
+    const initialRxOrder: IRxOrder = {
+        doctorSpecialty: session?.user?.doctorSpecialty || 'Not Selected',
+        prescribingDr: `${session?.user?.firstName || ''} ${session?.user?.lastName || ''}`,
+        drEmail: session?.user?.email || '',
+        drId: session?.user?._id || '',
         prescribedDate: new Date(),
         validTill: new Date(new Date().setMonth(new Date().getMonth() + 1)),
         city,
         prescriptions: [{ diagnosis: '', medication: '', dosage: '', frequency: '' }],
-    });
+    };
+
+    const [rxOrder, setRxOrder] = useState<IRxOrder>(initialRxOrder);
     const [isLoading, setIsLoading] = useState(false);
 
     const isFormComplete = useMemo(() => {
@@ -85,7 +88,6 @@ export function useRXOrderViewModel(
         setIsLoading(true);
 
         try {
-            // Add patient and pharmacy details to Rx order
             const updatedRxOrder = {
                 ...rxOrder,
                 city,
@@ -96,13 +98,11 @@ export function useRXOrderViewModel(
 
             const savedRxOrder = await api.post(`/api/patient/${patientId}/medications/rx-order`, updatedRxOrder);
 
-            addRxOrder(savedRxOrder);
-            await refreshMedications();
             onNewRxOrderSaved(savedRxOrder);
 
             // Reset form after saving
             setRxOrder({
-                ...rxOrder,
+                ...initialRxOrder,
                 prescribedDate: new Date(),
                 validTill: new Date(new Date().setMonth(new Date().getMonth() + 1)),
                 prescriptions: [{ diagnosis: '', medication: '', dosage: '', frequency: '' }],
@@ -112,7 +112,7 @@ export function useRXOrderViewModel(
         } finally {
             setIsLoading(false);
         }
-    }, [api, rxOrder, patientId, addRxOrder, refreshMedications, onNewRxOrderSaved, isFormComplete, city]);
+    }, [api, rxOrder, patientId, onNewRxOrderSaved, isFormComplete, city, initialRxOrder]);
 
     return {
         rxOrder,

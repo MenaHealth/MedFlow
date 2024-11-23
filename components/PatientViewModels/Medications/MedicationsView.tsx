@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { IRxOrder } from '@/models/patient';
 import { IMedOrder } from '@/models/medOrder';
 import {Types} from "mongoose";
+import { useSession } from 'next-auth/react'; // Import the session hook
 
 interface MedicationsViewProps {
     patientId: string | Types.ObjectId;
@@ -22,6 +23,7 @@ interface MedicationsViewProps {
 }
 
 export default function MedicationsView({ patientId }: MedicationsViewProps) {
+    const { data: session } = useSession(); // Add this line to use the global session
 
 
     const [isValidPatientId, setIsValidPatientId] = useState(false);
@@ -45,7 +47,6 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
     }, [patientId]);
 
     const {
-        userSession,
         rxOrders,
         medOrders,
         loadingMedications,
@@ -128,8 +129,8 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
         );
     }
 
-    const isDoctor = userSession?.accountType === 'Doctor';
-    const isTriage = userSession?.accountType === 'Triage';
+    const isDoctor = session?.user?.accountType === 'Doctor';
+    const isTriage = session?.user?.accountType === 'Triage';
 
     return (
         <FormProvider {...methods}>
@@ -263,15 +264,15 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                         {templateType === 'rxOrder' && (
                                             <RXOrderView
                                                 user={{
-                                                    firstName: userSession?.firstName || '',
-                                                    lastName: userSession?.lastName || '',
-                                                    doctorSpecialty: (userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList) || 'NOT_SELECTED',
+                                                    firstName: session?.user?.firstName || '',
+                                                    lastName: session?.user?.lastName || '',
+                                                    doctorSpecialty: (session?.user?.doctorSpecialty as unknown as keyof typeof DoctorSpecialtyList) || 'NOT_SELECTED',
                                                 }}
                                                 patientId={patientId}
                                                 patientInfo={{
                                                     patientName: patientInfo?.patientName || '',
                                                     phoneNumber: patientInfo?.phone?.phoneNumber || '',
-                                                    dob: patientInfo?.dob ? new Date(patientInfo.dob) : new Date(), // Ensure dob is always a Date
+                                                    dob: patientInfo?.dob ? new Date(patientInfo.dob) : new Date(),
                                                     city: patientInfo?.city || ''
                                                 }}
                                             />
@@ -280,9 +281,9 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                             <MedOrderView
                                                 patientId={patientId}
                                                 user={{
-                                                    firstName: userSession?.firstName || '',
-                                                    lastName: userSession?.lastName || '',
-                                                    doctorSpecialty: (userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList) || 'NOT_SELECTED',
+                                                    firstName: session?.user?.firstName || '',
+                                                    lastName: session?.user?.lastName || '',
+                                                    doctorSpecialty: (session?.user?.doctorSpecialty as unknown as keyof typeof DoctorSpecialtyList) || 'NOT_SELECTED',
                                                 }}
                                             />
                                         )}

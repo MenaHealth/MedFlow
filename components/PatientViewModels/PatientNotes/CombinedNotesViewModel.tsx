@@ -2,6 +2,7 @@
 import { useState, useCallback } from 'react';
 import { usePatientDashboard } from "../PatientViewModelContext";
 import { INote } from "@/models/note";
+import { useSession } from 'next-auth/react'; // Import the session hook
 
 // Define the PhysicianNote interface
 export interface PhysicianNote {
@@ -45,7 +46,10 @@ export interface SubjectiveNote {
 }
 
 export function CombinedNotesViewModel(patientId: string) {
-    const { notes, authorName, authorID, refreshPatientNotes, userSession } = usePatientDashboard();
+    const { data: session } = useSession(); // Use session directly here
+    const { notes, refreshPatientNotes } = usePatientDashboard();
+    const authorName = `${session?.user?.firstName || ''} ${session?.user?.lastName || ''}`;
+    const authorID = session?.user?._id || '';
     const [templateType, setTemplateType] = useState<'physician' | 'procedure' | 'subjective'>('physician');
     const [isLoading, setIsLoading] = useState(false);
     const [noteId, setNoteId] = useState<string | null>(null);
@@ -160,7 +164,7 @@ export function CombinedNotesViewModel(patientId: string) {
                 noteData = {
                     noteType: 'physician',
                     content: physicianNote,  // Directly assign the physicianNote object
-                    email: userSession?.email,
+                    email: session?.user.email,
                     authorName,
                     authorID,
                     draft,
@@ -171,7 +175,7 @@ export function CombinedNotesViewModel(patientId: string) {
                 noteData = {
                     noteType: 'procedure',
                     content: procedureNote,  // Directly assign the procedureNote object
-                    email: userSession?.email,
+                    email: session?.user.email,
                     authorName,
                     authorID,
                     draft,
@@ -182,7 +186,7 @@ export function CombinedNotesViewModel(patientId: string) {
                 noteData = {
                     noteType: 'subjective',
                     content: subjectiveNote,  // Directly assign the subjectiveNote object
-                    email: userSession?.email,
+                    email: session?.user.email,
                     authorName,
                     authorID,
                     draft,
@@ -214,7 +218,7 @@ export function CombinedNotesViewModel(patientId: string) {
         } finally {
             setIsLoading(false);
         }
-    }, [templateType, physicianNote, procedureNote, subjectiveNote, patientId, authorID, authorName, userSession, refreshPatientNotes]);
+    }, [templateType, physicianNote, procedureNote, subjectiveNote, patientId, authorID, authorName, session, refreshPatientNotes]);
 
     const deleteNote = async (noteId: string) => {
         try {

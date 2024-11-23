@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { PatientDashboardProvider, usePatientDashboard } from './PatientViewModelContext';
 import { User, FileText, LoaderPinwheel, PanelTopOpen, PillBottle, MessageCircle, ImageIcon, VideoIcon } from 'lucide-react';
 import PatientInfoView from './patient-info/PatientInfoView';
-import { CombinedNotesView } from './../../components/PatientViewModels/PatientNotes/CombinedNotesView';
-import { Skeleton } from './../../components/ui/skeleton';
+import { CombinedNotesView } from '@/components/PatientViewModels/PatientNotes/CombinedNotesView';
+import { Skeleton } from '@/components/ui/skeleton';
 import MedicationsView from './Medications/MedicationsView';
 import ImageGallery from './image-gallery/ImageGallery';
 import WhatsAppMessages from './../../components/PatientViewModels/whatsapp-messages/messages';
@@ -23,11 +23,6 @@ const PatientDashboardContent: React.FC = () => {
         fetchPatientData,
         isExpanded,
         toggleExpand,
-        rxOrders,
-        medOrders,
-        loadingMedications,
-        refreshMedications,
-        userSession,
     } = usePatientDashboard();
 
     const [openSections, setOpenSections] = useState<string[]>(['patient-info']);

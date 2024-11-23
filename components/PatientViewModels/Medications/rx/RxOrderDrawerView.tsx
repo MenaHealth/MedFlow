@@ -1,9 +1,9 @@
 // components/PatientViewModels/Medications/rx/RxOrderDrawerView.tsx
 
 import React, { useRef } from "react";
+import Image from 'next/image';
 import { Types } from "mongoose";
 import {
-    MessageSquareShare,
     Mail,
     Hash,
     Phone,
@@ -12,8 +12,6 @@ import {
     Activity,
     Clock9,
     Clock,
-    Download,
-    FileText,
     Hourglass,
     Tablets,
     PillBottleIcon as PillBottle,
@@ -23,14 +21,12 @@ import {
     BadgeIcon as IdCard,
     MessageSquareDashed,
     View,
-    Image
 } from 'lucide-react';
 import { Drawer, DrawerContent, DrawerHeader } from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/ScrollArea";
 import { usePatientDashboard } from "@/components/PatientViewModels/PatientViewModelContext";
 import { IRxOrder } from "@/models/patient";
 import { useRxOrderDrawerViewModel } from "./RxOrderDrawerViewModel";
-import { Button } from "@/components/ui/button";
 import { ToastProvider } from '@/components/ui/toast';
 import { ToastComponent } from '@/components/hooks/useToast';
 
@@ -41,15 +37,14 @@ interface RxOrderDrawerViewProps {
     rxOrder: IRxOrder | null;
 }
 
-function RxOrderDrawerContent({ isOpen, onClose, patientId, rxOrder }: RxOrderDrawerViewProps) {
+function RxOrderDrawerContent({ isOpen, onClose, rxOrder }: RxOrderDrawerViewProps) {
     const { patientInfo } = usePatientDashboard();
     const drawerRef = useRef<HTMLDivElement>(null);
-    // const { toast } = useToast();
 
     const {
         copyLink,
         copyMessage
-    } = useRxOrderDrawerViewModel(patientId, onClose, rxOrder);
+    } = useRxOrderDrawerViewModel(rxOrder); // Pass rxOrder directly to the view model
 
     if (!patientInfo || !rxOrder) {
         return null;
@@ -125,11 +120,15 @@ function RxOrderDrawerContent({ isOpen, onClose, patientId, rxOrder }: RxOrderDr
                         {/* QR Code */}
                         {rxOrder.PharmacyQrCode && (
                             <div className="bg-orange-50 p-4 rounded-lg flex justify-center items-center">
-                                <h3 className="font-semibold text-lg mb-4 text-center text-orange-900 border-b border-orange-200 pb-2">Prescription QR Code</h3>
-                                <img
+                                <h3 className="font-semibold text-lg mb-4 text-center text-orange-900 border-b border-orange-200 pb-2">
+                                    Prescription QR Code
+                                </h3>
+                                <Image
                                     src={rxOrder.PharmacyQrCode}
                                     alt="Prescription QR Code"
-                                    className="w-40 h-40"
+                                    width={160} // Equivalent to the w-40 class
+                                    height={160} // Equivalent to the h-40 class
+                                    className="rounded"
                                 />
                             </div>
                         )}

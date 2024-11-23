@@ -2,34 +2,28 @@ import { useSession } from 'next-auth/react';
 import { useState, useCallback } from 'react';
 import { useQueryClient } from 'react-query';
 import { useToast } from '@/components/hooks/useToast';
-
-interface User {
-    _id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-}
+import { IAdmin } from "@/models/admin";
+import { Types } from 'mongoose';
 
 export function useAdminManagementViewModel() {
-    const { data: session } = useSession(); // Access session data
-    const token = session?.user.token; // Get the token from the session
+    const [adminsData, setAdminsData] = useState<IAdmin[]>([]);
+    const { data: session } = useSession();
+    const token = session?.user.token;
     const queryClient = useQueryClient();
     const { setToast } = useToast();
 
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedUser, setSelectedUser] = useState<string | null>(null);
     const [currentOffset, setCurrentOffset] = useState(0);
-    const [adminsData, setAdminsData] = useState<User[]>([]);
     const [loadingAdmins, setLoadingAdmins] = useState(false);
     const [hasMoreAdmins, setHasMoreAdmins] = useState(true);
     const limit = 20;
 
-    // Fetch function for admin data with JWT token
-    const fetchAdmins = async (offset: number) => {
+    const fetchAdmins = async (offset: number): Promise<IAdmin[]> => {
         const response = await fetch(`/api/admin/management?offset=${offset}&limit=${limit}`, {
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`, // Include JWT token
+                Authorization: `Bearer ${token}`,
             },
         });
         if (!response.ok) throw new Error('Failed to fetch admins');
@@ -37,7 +31,6 @@ export function useAdminManagementViewModel() {
         return data.admins || [];
     };
 
-    // Initial fetch and appending data for "load more" functionality
     const loadMoreAdmins = useCallback(async () => {
         if (loadingAdmins || !hasMoreAdmins) return;
 
@@ -57,7 +50,7 @@ export function useAdminManagementViewModel() {
         } finally {
             setLoadingAdmins(false);
         }
-    }, [loadingAdmins, hasMoreAdmins, currentOffset, setToast]);
+    }, [loadingAdmins, hasMoreAdmins, currentOffset, setToast, token]);
 
     const handleAddAdmin = async () => {
         if (!selectedUser) {
@@ -74,7 +67,7 @@ export function useAdminManagementViewModel() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`, // Include JWT token here
+                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({ userId: selectedUser }),
             });
@@ -88,10 +81,10 @@ export function useAdminManagementViewModel() {
             });
 
             setSelectedUser(null);
-            setAdminsData([]); // Clear existing data to avoid duplicates
-            setCurrentOffset(0); // Reset offset to start from beginning
-            setHasMoreAdmins(true); // Reset load more flag
-            loadMoreAdmins(); // Fetch fresh data
+            setAdminsData([]);
+            setCurrentOffset(0);
+            setHasMoreAdmins(true);
+            loadMoreAdmins();
         } catch (error) {
             console.error('Error adding admin:', error);
             setToast?.({
@@ -117,7 +110,7 @@ export function useAdminManagementViewModel() {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`, // Include JWT token here
+                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({ adminId }),
             });
@@ -130,7 +123,7 @@ export function useAdminManagementViewModel() {
                 variant: 'default',
             });
 
-            setAdminsData((prev) => prev.filter((admin) => admin._id !== adminId));
+            setAdminsData((prev) => prev.filter((admin) => admin.userId.toString() !== adminId));
         } catch (error) {
             console.error('Error removing admin:', error);
             setToast?.({
@@ -147,7 +140,7 @@ export function useAdminManagementViewModel() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`, // Include JWT token here
+                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({ adminIds }),
             });
@@ -160,8 +153,7 @@ export function useAdminManagementViewModel() {
                 variant: 'default',
             });
 
-            // Remove deleted admins from local state
-            setAdminsData((prev) => prev.filter((admin) => !adminIds.includes(admin._id)));
+            setAdminsData((prev) => prev.filter((admin) => !adminIds.includes(admin.userId.toString())));
         } catch (error) {
             console.error('Error removing selected admins:', error);
             setToast?.({
@@ -179,7 +171,7 @@ export function useAdminManagementViewModel() {
             const res = await fetch(`/api/admin/GET/existing-users?search=${searchQuery}`, {
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`, // Include JWT token here
+                    Authorization: `Bearer ${token}`,
                 },
             });
             if (!res.ok) throw new Error('Failed to fetch users');
@@ -210,3 +202,4 @@ export function useAdminManagementViewModel() {
         handleRemoveSelectedAdmins,
     };
 }
+

@@ -235,23 +235,22 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
         }
     };
 
+
     const addRxOrder = useCallback((newRxOrder: IRxOrder) => {
-        setRxOrders(prevOrders => [...prevOrders, newRxOrder]);
-        fetchPatientData();
-    }, [fetchPatientData]);
+        setRxOrders((prevOrders) => [newRxOrder, ...prevOrders]);
+    }, []);
 
     const addMedOrder = useCallback((newMedOrder: IMedOrder) => {
-        setMedOrders(prevOrders => [...prevOrders, newMedOrder]);
-        fetchPatientData();
-    }, [fetchPatientData]);
+        setMedOrders((prevOrders) => [newMedOrder, ...prevOrders]); // Add the new med order to the top
+    }, []);
 
     return (
         <PatientViewModelContext.Provider
             value={{
                 activeTab,
                 setActiveTab,
+                patientInfo,
                 setPatientInfo,
-                patientInfo: memoizedPatientInfo,
                 notes,
                 draftNotes,
                 loadingPatientInfo,
@@ -260,11 +259,11 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 patientViewModel,
                 isExpanded,
                 toggleExpand,
-                refreshPatientNotes,
+                refreshPatientNotes: fetchPatientData,
                 rxOrders,
                 medOrders,
                 loadingMedications,
-                refreshMedications,
+                refreshMedications, // <-- Pass the correct function
                 addRxOrder,
                 addMedOrder,
             }}

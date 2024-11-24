@@ -106,6 +106,8 @@ export interface IPatient extends Document {
         lastName?: string;
         email?: string;
     };
+    isPatient?: boolean;
+    patientRelation?: string;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -154,6 +156,8 @@ const PatientSchema = new Schema<IPatient>({
     visits: [{ type: Schema.Types.ObjectId, ref: 'Visit' }],
     triagedBy: { type: Object },
     doctor: { type: Object },
+    isPatient: { type: Boolean, default: undefined },
+    patientRelation: { type: String },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date }
 });

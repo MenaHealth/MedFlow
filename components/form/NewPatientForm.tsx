@@ -1,11 +1,10 @@
 "use client";
 // components/form/NewPatientForm.tsx
 import { FormProvider, useForm } from "react-hook-form";
-import * as React from "react";
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { TextFormField } from "@/components/ui/TextFormField";
-import { NumericalFormField } from "@/components/form/NumericalFormField";
 import { TextAreaFormField } from "@/components/ui/TextAreaFormField";
 import { PhoneFormField } from "@/components/form/PhoneFormField";
 import { Button } from "@/components/ui/button";
@@ -32,13 +31,24 @@ const newPatientFormSchema = z.object({
         },
         { message: "Date of birth must be between 1900 and today" }
     ),
-    age: z.number().min(0, "Please enter a number greater than 0"),
     country: z.string().min(1, "Country is required"),
     city: z.string().min(1, "City is required"),
     language: z.string().min(1, "Language is required"),
     chiefComplaint: z.string().min(1, "Please enter the main reason you seek medical care"),
     genderPreference: z.string(),
     previouslyRegistered: z.string(),
+    isPatientFields: z.object({
+        isPatient: z.boolean(),
+        patientRelation: z.string().optional(),
+    }).superRefine((data, context) => {
+        if (!data.isPatient && (!data.patientRelation || data.patientRelation.trim() === "")) {
+            context.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Patient relation is required",
+                path: ["patientRelation"],
+            });
+        }
+    }),
     createdAt: z.date(),
 });
 
@@ -53,6 +63,8 @@ type NewPatientFormProps = {
 export function NewPatientForm({ handleSubmit, submitting, language }: NewPatientFormProps) {
     const { data: session } = useSession();
 
+    const [isPatient, setIsPatient] = useState(true); 
+
     const form = useForm<NewPatientFormValues>({
         resolver: zodResolver(newPatientFormSchema),
         defaultValues: {
@@ -63,14 +75,17 @@ export function NewPatientForm({ handleSubmit, submitting, language }: NewPatien
                 phoneNumber: '',
             },
             dob: '',
-            age: 0,
             country: '',
             city: '',
             language: '',
             chiefComplaint: '',
             genderPreference: '',
             previouslyRegistered: '',
-            createdAt: new Date(),
+            isPatientFields: {
+                isPatient,
+                patientRelation: '',
+            },
+            createdAt: new Date()
         },
     });
 
@@ -91,7 +106,13 @@ export function NewPatientForm({ handleSubmit, submitting, language }: NewPatien
                 data.country = Countries[mappedCountryKey];
             }
         }
-        handleSubmit(data);
+        console.log(data);
+        const newData = JSON.parse(JSON.stringify(data));
+        newData.isPatient = data.isPatientFields.isPatient;
+        newData.patientRelation = data.isPatientFields.patientRelation;
+        delete newData.isPatientFields;
+        console.log(newData);
+        handleSubmit(newData);
     };
 
     const fieldLabels = {
@@ -209,6 +230,18 @@ export function NewPatientForm({ handleSubmit, submitting, language }: NewPatien
             farsi: "شکایت پزشکی:",
             pashto: "طبي شکایت:"
         },
+        isPatient: {
+            english: 'Please check this box if you are filling out this form on behalf of the patient',
+            arabic: 'يرجى تحديد هذا المربع إذا كنت تقوم بملء هذا النموذج نيابة عن المريض',
+            farsi: 'اگر از طرف بیمار این فرم را پر می کنید، لطفاً این کادر را علامت بزنید',
+            pashto: 'مهرباني وکړئ دا بکس چیک کړئ که تاسو د ناروغ په استازیتوب دا فورمه ډکه کړئ'
+        },
+        patientRelation: {
+            english: 'What is your relation to the patient?',
+            arabic: 'ما هي علاقتك بالمريض؟',
+            farsi: 'نسبت شما با بیمار چیست؟',
+            pashto: 'ستاسو د ناروغ سره څه اړیکه ده؟'
+        },
         submitting: {
             english: ["Submit New Patient", "Submitting..."],
             arabic: ["إرسال مريض جديد", "تقديم"],
@@ -223,24 +256,24 @@ export function NewPatientForm({ handleSubmit, submitting, language }: NewPatien
                 {/* Top row - name */}
                 <div className="flex flex-col md:flex-row md:space-x-4">
                     <div className="w-full md:w-1/2">
-                        <TextFormField fieldName="firstName" fieldLabel={fieldLabels.firstName[language]} />
+                        <TextFormField fieldName="firstName" fieldLabel={fieldLabels.firstName[language]} error={form.formState.errors.firstName?.message} />
                     </div>
                     <div className="w-full md:w-1/2">
-                        <TextFormField fieldName="lastName" fieldLabel={fieldLabels.lastName[language]} />
+                        <TextFormField fieldName="lastName" fieldLabel={fieldLabels.lastName[language]} error={form.formState.errors.lastName?.message} />
                     </div>
                 </div>
 
                 {/* Second row - age, phone, language */}
                 <div className="flex flex-col md:flex-row md:space-x-4">
-                    <div className="w-full md:w-1/4 mb-8">
-                        <label htmlFor="dob" className="block text-sm font-medium text-gray-700">
+                    <div className="w-full md:w-1/4 space-y-2">
+                        <label htmlFor="dob" className="text-sm font-medium">
                             {fieldLabels.dob[language]}
                         </label>
                         <input
                             type="date"
                             id="dob"
                             // name="dob" // Keep only this
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm h-10"
                             min="1900-01-01"
                             max={new Date().toISOString().split("T")[0]} // Set today's date as the max
                             {...form.register("dob", { required: true })}
@@ -252,7 +285,7 @@ export function NewPatientForm({ handleSubmit, submitting, language }: NewPatien
                         )}
                     </div>
                     <div className="w-full md:w-3/8">
-                        <PhoneFormField form={form} fieldName="phone" fieldLabel={fieldLabels.phone[language]}/>
+                        <PhoneFormField form={form} fieldName="phone" fieldLabel={fieldLabels.phone[language]} countryCodeError={form.formState.errors.phone?.countryCode?.message}/>
                     </div>
                     <div className="w-full md:w-3/8">
                         <SelectFormField
@@ -272,13 +305,14 @@ export function NewPatientForm({ handleSubmit, submitting, language }: NewPatien
                                          selectOptions={fieldLabels.country[language].options}/>
                     </div>
                     <div className="w-full md:w-1/2">
-                        <TextFormField fieldName="city" fieldLabel={fieldLabels.city[language]}/>
+                        <TextFormField error={form.formState.errors.city?.message} fieldName="city" fieldLabel={fieldLabels.city[language]}/>
                     </div>
                 </div>
 
                 {/* Fourth row - Chief Complaint */}
                 <TextAreaFormField form={form} fieldName="chiefComplaint"
-                                   fieldLabel={fieldLabels.chiefComplaint[language]}/>
+                                   fieldLabel={fieldLabels.chiefComplaint[language]}
+                                   error={form.formState.errors.chiefComplaint?.message}/>
 
                 {!session && (
                     <>
@@ -301,6 +335,23 @@ export function NewPatientForm({ handleSubmit, submitting, language }: NewPatien
                                 radioOptions={fieldLabels.previouslyRegistered[language].options}
                             />
                         </div>
+
+                        {/* Seventh row - Is Patient or Filling on behalf */}
+                        <div className="flex mx-2">
+                            <>
+                                <input type="checkbox" onChange={() => {form.setValue("isPatientFields.isPatient", !isPatient); setIsPatient(!isPatient);}}/>
+                                <span className='mx-2'>{fieldLabels.isPatient[language]}</span>
+                            </>
+                        </div>
+                            
+                        {/* Eighth row - Patient Relation */}
+                        {
+                            !isPatient && (
+                                <>
+                                    <TextFormField fieldName="isPatientFields.patientRelation" fieldLabel={fieldLabels.patientRelation[language]} error={form.formState.errors.isPatientFields?.patientRelation?.message}/>
+                                </>
+                            )
+                        }
                     </>
                 )}
                 

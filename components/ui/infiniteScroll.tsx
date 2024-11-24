@@ -9,6 +9,9 @@ interface InfiniteScrollProps {
     next: () => void;
     dataLength: number;
     threshold?: number;
+    height?: string | number;
+    className?: string;
+    loader?: React.ReactNode;
 }
 
 const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
@@ -16,7 +19,10 @@ const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
                                                            hasMore,
                                                            isLoading,
                                                            next,
-                                                           threshold = 300
+                                                           threshold = 300,
+                                                           height,
+                                                           className = '',
+                                                           loader,
                                                        }) => {
     const loaderRef = useRef<HTMLDivElement | null>(null);
 
@@ -46,11 +52,16 @@ const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
         };
     }, [handleObserver, threshold]);
 
+    const containerStyle: React.CSSProperties = {
+        height: height ? height : 'auto',
+        overflowY: height ? 'auto' : 'visible',
+    };
+
     return (
-        <div>
+        <div style={containerStyle} className={className}>
             {children}
             <div ref={loaderRef}>
-                {isLoading && (
+                {isLoading && (loader || (
                     <div className="flex justify-center my-4">
                         <svg
                             className="animate-spin h-8 w-8 text-gray-500"
@@ -73,10 +84,11 @@ const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
                             ></path>
                         </svg>
                     </div>
-                )}
+                ))}
             </div>
         </div>
     );
 };
 
 export default InfiniteScroll;
+

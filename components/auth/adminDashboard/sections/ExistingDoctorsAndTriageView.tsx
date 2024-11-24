@@ -154,7 +154,7 @@ export default function ExistingDoctorsAndTriageView() {
     };
 
     return (
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-8 h-screen flex flex-col">
             <div className="flex flex-col mb-4 space-y-4 sm:flex-row sm:justify-between sm:space-y-0">
                 <div className="relative w-full sm:w-64">
                     <Input
@@ -175,7 +175,7 @@ export default function ExistingDoctorsAndTriageView() {
                             size="sm"
                             className="absolute right-2 top-1/2 transform -translate-y-1/2"
                         >
-                            <X className="w-4 h-4" />
+                            <X className="w-4 h-4"/>
                         </Button>
                     )}
                 </div>
@@ -199,20 +199,27 @@ export default function ExistingDoctorsAndTriageView() {
                         variant="outline"
                         className="w-full sm:w-auto"
                     >
-                        <Download className="w-4 h-4 mr-2" />
+                        <Download className="w-4 h-4 mr-2"/>
                         Export CSV
                     </Button>
                 </div>
             </div>
 
-            <div className="min-h-[400px] mb-8">
-                <ScrollArea className="w-full rounded-md border border-orange-300">
-                    <div className="w-max min-w-full">
+            <div className="flex-grow overflow-hidden">
+                <ScrollArea className="w-full h-full rounded-md border border-orange-300">
+                    <div className="w-max min-w-full h-full">
                         <InfiniteScroll
                             dataLength={filteredUsers.length}
                             next={nextExistingUsers}
                             hasMore={!!hasMoreExistingUsers}
                             isLoading={loadingExistingUsers}
+                            height="100vh"
+                            className="overflow-auto"
+                            loader={
+                                <div className="flex justify-center items-center py-4">
+                                    <Loader2 className="h-8 w-8 animate-spin"/>
+                                </div>
+                            }
                         >
                             <Table
                                 data={filteredUsers}
@@ -225,22 +232,29 @@ export default function ExistingDoctorsAndTriageView() {
                                 hoverBackgroundColor="hover:bg-white"
                                 hoverTextColor="hover:text-darkBlue"
                             />
+                            {!hasMoreExistingUsers && filteredUsers.length > 0 && (
+                                <div
+                                    className="text-center py-4 text-orange-950 bg-orange-100 border-t border-orange-300">
+                                    No more existing users to load.
+                                </div>
+                            )}
+                            {filteredUsers.length === 0 && !loadingExistingUsers && (
+                                <div className="text-center py-4 text-orange-950 bg-orange-100">
+                                    No existing users found.
+                                </div>
+                            )}
                         </InfiniteScroll>
                     </div>
-                    <ScrollBar orientation="horizontal" />
+                    <ScrollBar orientation="horizontal"/>
                 </ScrollArea>
             </div>
+
 
             <div className="space-y-4 pb-8">
                 {loadingExistingUsers && (
                     <div className="flex justify-center items-center py-4">
                         <Loader2 className="h-8 w-8 animate-spin"/>
                     </div>
-                )}
-                {!hasMoreExistingUsers && filteredUsers.length > 0 && (
-                    <p className="text-center py-4 text-orange-950">
-                        No more existing users to load.
-                    </p>
                 )}
                 {filteredUsers.length === 0 && !loadingExistingUsers && (
                     <p className="text-center py-4 text-orange-950">

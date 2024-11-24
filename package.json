@@ -73,6 +73,7 @@
     "twilio": "^5.3.5",
     "uuid": "^10.0.0",
     "vaul": "^1.0.0",
+    "viber-bot": "^1.0.18",
     "zod": "^3.22.4"
   },
   "devDependencies": {

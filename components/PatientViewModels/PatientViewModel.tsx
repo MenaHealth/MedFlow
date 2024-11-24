@@ -7,7 +7,7 @@ import { CombinedNotesView } from './../../components/PatientViewModels/PatientN
 import { Skeleton } from './../../components/ui/skeleton';
 import MedicationsView from './Medications/MedicationsView';
 import ImageGallery from './image-gallery/ImageGallery';
-import WhatsAppMessages from './../../components/PatientViewModels/whatsapp-messages/messages';
+import ViberMessages from './../../components/PatientViewModels/viber-messages/messages'; // Import ViberMessages
 
 import dynamic from 'next/dynamic';
 
@@ -64,12 +64,12 @@ const PatientDashboardContent: React.FC = () => {
             const phoneNumber = expandedDetails?.phone
                 ? `${expandedDetails.phone.countryCode}${expandedDetails.phone.phoneNumber}`
                 : `${expandedDetails?.country || ''}${expandedDetails?.pmhx || ''}`;
-
-                return <WhatsAppMessages phoneNumber={phoneNumber} />;
+    
+            return <ViberMessages phoneNumber={phoneNumber} />; // Pass phoneNumber to ViberMessages
         } else if (section === 'video') {
-            return <AppBuilderWrapper />
+            return <AppBuilderWrapper />;
         }
-    };
+    };    
 
     const sections = [
         {
@@ -104,7 +104,7 @@ const PatientDashboardContent: React.FC = () => {
             id: 'contact',
             icon: MessageCircle,
             label: 'Contact',
-            color: 'bg-green-600',
+            color: 'bg-purple-600',
             textColor: 'text-white'
         },
         {

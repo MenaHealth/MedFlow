@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { IRxOrder } from '@/models/patient';
 import { IMedOrder } from '@/models/medOrder';
 import {Types} from "mongoose";
+import { useSession } from 'next-auth/react'; // Import the session hook
 
 interface MedicationsViewProps {
     patientId: string | Types.ObjectId;
@@ -22,6 +23,7 @@ interface MedicationsViewProps {
 }
 
 export default function MedicationsView({ patientId }: MedicationsViewProps) {
+    const { data: session } = useSession(); // Add this line to use the global session
 
 
     const [isValidPatientId, setIsValidPatientId] = useState(false);
@@ -45,11 +47,11 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
     }, [patientId]);
 
     const {
-        userSession,
         rxOrders,
         medOrders,
         loadingMedications,
         patientInfo,
+        addRxOrder,
     } = usePatientDashboard();
 
     const [templateType, setTemplateType] = useState<'rxOrder' | 'medOrder'>('rxOrder');
@@ -76,8 +78,17 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
         });
     }, [rxOrders, medOrders]);
 
-    const latestMedication = allMedications[0];
+    const latestMedication = allMedications[0] || {
+        prescriptions: [],
+        medications: [],
+        city: 'Unknown',
+        patientCity: 'Unknown',
+        validTill: null,
+    };
     const formatDateTime = (date: Date) => {
+        if (isNaN(date.getTime())) {
+            return 'Invalid Date';
+        }
         return new Intl.DateTimeFormat('en-US', {
             year: 'numeric',
             month: 'short',
@@ -128,8 +139,8 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
         );
     }
 
-    const isDoctor = userSession?.accountType === 'Doctor';
-    const isTriage = userSession?.accountType === 'Triage';
+    const isDoctor = session?.user?.accountType === 'Doctor';
+    const isTriage = session?.user?.accountType === 'Triage';
 
     return (
         <FormProvider {...methods}>
@@ -173,33 +184,66 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                     {isLatestExpanded && (
                                         <div className="mt-2 p-2 bg-white text-darkBlue rounded-sm">
                                             <p>
-                                                <strong>City:</strong> {isRxOrder ? latestMedication.city : latestMedication.patientCity}
+                                                <strong>City:</strong> {isRxOrder ? latestMedication?.city : latestMedication?.patientCity || 'Unknown'}
                                             </p>
-                                            {isRxOrder && <p><strong>Valid
-                                                Till:</strong> {new Date(latestMedication.validTill).toLocaleDateString()}
-                                            </p>}
+                                            {isRxOrder && (
+                                                <p>
+                                                    <strong>Valid Till:</strong>{' '}
+                                                    {latestMedication?.validTill
+                                                        ? new Date(latestMedication.validTill).toLocaleDateString()
+                                                        : 'Not Available'}
+                                                </p>
+                                            )}
                                             <h4 className="mt-2 font-bold">{isRxOrder ? 'Prescriptions:' : 'Medications:'}</h4>
                                             {isRxOrder ? (
-                                                (latestMedication as IRxOrder).prescriptions.map((med, medIndex) => (
-                                                    <div key={`latest-med-${medIndex}`}
-                                                         className="mt-2 p-2 bg-gray-100 rounded-sm">
-                                                        <p><strong>Diagnosis:</strong> {med.diagnosis}</p>
-                                                        <p><strong>Medication:</strong> {med.medication}</p>
-                                                        <p><strong>Dosage:</strong> {med.dosage}</p>
-                                                        <p><strong>Frequency:</strong> {med.frequency}</p>
+                                                latestMedication?.prescriptions?.length > 0 ? (
+                                                    latestMedication.prescriptions.map((med, medIndex) => (
+                                                        <div
+                                                            key={`latest-med-${medIndex}`}
+                                                            className="mt-2 p-2 bg-gray-100 rounded-sm"
+                                                        >
+                                                            <p>
+                                                                <strong>Diagnosis:</strong> {med.diagnosis || 'N/A'}
+                                                            </p>
+                                                            <p>
+                                                                <strong>Medication:</strong> {med.medication || 'N/A'}
+                                                            </p>
+                                                            <p>
+                                                                <strong>Dosage:</strong> {med.dosage || 'N/A'}
+                                                            </p>
+                                                            <p>
+                                                                <strong>Frequency:</strong> {med.frequency || 'N/A'}
+                                                            </p>
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <p>No prescriptions available.</p>
+                                                )
+                                            ) : latestMedication?.medications?.length ? (
+                                                latestMedication.medications.map((med, medIndex) => (
+                                                    <div
+                                                        key={`latest-med-${medIndex}`}
+                                                        className="mt-2 p-2 bg-gray-100 rounded-sm"
+                                                    >
+                                                        <p>
+                                                            <strong>Diagnosis:</strong> {med.diagnosis || 'N/A'}
+                                                        </p>
+                                                        <p>
+                                                            <strong>Medication:</strong> {med.medication || 'N/A'}
+                                                        </p>
+                                                        <p>
+                                                            <strong>Dosage:</strong> {med.dosage || 'N/A'}
+                                                        </p>
+                                                        <p>
+                                                            <strong>Frequency:</strong> {med.frequency || 'N/A'}
+                                                        </p>
+                                                        <p>
+                                                            <strong>Quantity:</strong> {med.quantity || 'N/A'}
+                                                        </p>
                                                     </div>
                                                 ))
                                             ) : (
-                                                (latestMedication as IMedOrder).medications.map((med, medIndex) => (
-                                                    <div key={`latest-med-${medIndex}`}
-                                                         className="mt-2 p-2 bg-gray-100 rounded-sm">
-                                                        <p><strong>Diagnosis:</strong> {med.diagnosis}</p>
-                                                        <p><strong>Medication:</strong> {med.medication}</p>
-                                                        <p><strong>Dosage:</strong> {med.dosage}</p>
-                                                        <p><strong>Frequency:</strong> {med.frequency}</p>
-                                                        <p><strong>Quantity:</strong> {med.quantity}</p>
-                                                    </div>
-                                                ))
+                                                <p>No medications available.</p>
                                             )}
                                         </div>
                                     )}
@@ -263,26 +307,27 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
                                         {templateType === 'rxOrder' && (
                                             <RXOrderView
                                                 user={{
-                                                    firstName: userSession?.firstName || '',
-                                                    lastName: userSession?.lastName || '',
-                                                    doctorSpecialty: (userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList) || 'NOT_SELECTED',
+                                                    firstName: session?.user?.firstName || '',
+                                                    lastName: session?.user?.lastName || '',
+                                                    doctorSpecialty: (session?.user?.doctorSpecialty as unknown as keyof typeof DoctorSpecialtyList) || 'NOT_SELECTED',
                                                 }}
                                                 patientId={patientId}
                                                 patientInfo={{
                                                     patientName: patientInfo?.patientName || '',
                                                     phoneNumber: patientInfo?.phone?.phoneNumber || '',
-                                                    dob: patientInfo?.dob ? new Date(patientInfo.dob) : new Date(), // Ensure dob is always a Date
+                                                    dob: patientInfo?.dob ? new Date(patientInfo.dob) : new Date(),
                                                     city: patientInfo?.city || ''
                                                 }}
+                                                onNewRxOrderSaved={addRxOrder} // Pass context function here
                                             />
                                         )}
                                         {templateType === 'medOrder' && (
                                             <MedOrderView
                                                 patientId={patientId}
                                                 user={{
-                                                    firstName: userSession?.firstName || '',
-                                                    lastName: userSession?.lastName || '',
-                                                    doctorSpecialty: (userSession?.doctorSpecialty as keyof typeof DoctorSpecialtyList) || 'NOT_SELECTED',
+                                                    firstName: session?.user?.firstName || '',
+                                                    lastName: session?.user?.lastName || '',
+                                                    doctorSpecialty: (session?.user?.doctorSpecialty as unknown as keyof typeof DoctorSpecialtyList) || 'NOT_SELECTED',
                                                 }}
                                             />
                                         )}

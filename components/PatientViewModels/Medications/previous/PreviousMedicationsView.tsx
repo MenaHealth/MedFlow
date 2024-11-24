@@ -77,6 +77,9 @@ export default function PreviousMedicationsView({
     };
 
     const formatDateTime = (date: Date) => {
+        if (isNaN(date.getTime())) {
+            return 'Invalid Date';
+        }
         return new Intl.DateTimeFormat('en-US', {
             year: 'numeric',
             month: 'short',

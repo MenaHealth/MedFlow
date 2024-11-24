@@ -1,34 +1,46 @@
-'use client';
+// types/next-auth.d.ts
+import { DefaultSession } from "next-auth";
+import { Countries } from "@/data/countries.enum";
+import { Languages } from "@/data/languages.enum";
+import { DoctorSpecialtyList } from "@/data/doctorSpecialty.enum";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
-import type { Session } from 'next-auth';
+declare module "next-auth" {
+    interface Session {
+        user: {
+            _id: string;
+            email: string;
+            firstName: string;
+            lastName: string;
+            city: string;
+            countries: Countries[];
+            languages?: Languages[];
+            accountType: 'Doctor' | 'Triage';
+            isAdmin: boolean;
+            image?: string;
+            doctorSpecialty?: DoctorSpecialtyList;
+            token?: string;
+            gender?: 'male' | 'female';
+            dob?: Date | string;
+        } & DefaultSession["user"]
+    }
+}
 
-export default function Component() {
-    const router = useRouter();
-    const { data: session, status } = useSession();
-    const [userSession, setUserSession] = useState<Session['user'] | null>(null);
-
-    useEffect(() => {
-        if (status === 'authenticated' && session?.user) {
-            setUserSession(session.user);
-        }
-    }, [session, status]);
-
-    useEffect(() => {
-        if (userSession) {
-            const userAccountType = userSession.accountType;
-
-            if (userAccountType === 'Pending') {
-                router.replace('/complete-signup');
-            } else if (userAccountType === 'Doctor' || userAccountType === 'Triage') {
-                router.replace('/patient-info/dashboard');
-            } else {
-                router.replace('/complete-signup');
-            }
-        }
-    }, [router, userSession]);
-
-    return null;
+declare module "next-auth/jwt" {
+    interface JWT {
+        id: string;
+        email: string;
+        accountType: 'Doctor' | 'Triage';
+        firstName: string;
+        lastName: string;
+        city?: string;
+        countries?: Countries[];
+        languages?: Languages[];
+        isAdmin?: boolean;
+        image?: string;
+        doctorSpecialty?: DoctorSpecialtyList;
+        token?: string;
+        gender?: 'male' | 'female';
+        dob?: string | Date;
+        accessToken?: string;
+    }
 }

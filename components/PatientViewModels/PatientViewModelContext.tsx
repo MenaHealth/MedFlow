@@ -16,7 +16,6 @@ export interface PatientInfo {
     city: string;
     gender: string;
     dob: Date;
-    // i am not sure sure if patient dob is saved right now
     country: string;
     language: string;
     phone: {
@@ -56,9 +55,6 @@ interface PatientContext {
     isExpanded: boolean;
     toggleExpand: () => void;
     refreshPatientNotes: () => Promise<void>;
-    userSession: UserSession | null;
-    authorName: string;
-    authorID: string;
     rxOrders: IRxOrder[];
     medOrders: IMedOrder[];
     loadingMedications: boolean;
@@ -79,7 +75,6 @@ export const usePatientDashboard = () => {
 
 export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const { id: patientId } = useParams() as { id: string };
-    const { data: session, status } = useSession();
     const [activeTab, setActiveTab] = useState('patient-info');
     const [patientInfo, setPatientInfo] = useState<PatientInfo | null>(null);
     const [notes, setNotes] = useState<INote[]>([]);
@@ -88,41 +83,9 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
     const [loadingNotes, setLoadingNotes] = useState(false);
     const [patientViewModel, setPatientViewModel] = useState<PatientInfoViewModel | null>(null);
     const [isExpanded, setIsExpanded] = useState(false);
-    const [userSession, setUserSession] = useState<UserSession | null>(null);
-    const [authorName, setAuthorName] = useState('');
-    const [authorID, setAuthorID] = useState('');
     const [rxOrders, setRxOrders] = useState<IRxOrder[]>([]);
     const [medOrders, setMedOrders] = useState<IMedOrder[]>([]);
     const [loadingMedications, setLoadingMedications] = useState(false);
-
-    useEffect(() => {
-        if (status === 'authenticated' && session?.user) {
-            const firstName = session.user.firstName || '';
-            const lastName = session.user.lastName || '';
-            const userId = session.user._id || '';
-
-            setUserSession({
-                id: userId,
-                email: session.user.email,
-                firstName,
-                lastName,
-                accountType: session.user.accountType,
-                isAdmin: session.user.isAdmin,
-                image: session.user.image,
-                doctorSpecialty: session.user.doctorSpecialty,
-                languages: session.user.languages,
-                token: session.user.token,
-                gender: session.user.gender,
-                dob: session.user.dob,
-                countries: session.user.countries,
-            });
-
-            setAuthorName(`${firstName} ${lastName}`.trim());
-            setAuthorID(userId);
-        }
-    }, [session, status]);
-
-    const memoizedUserSession = useMemo(() => userSession, [userSession]);
 
     const toggleExpand = () => setIsExpanded(prev => !prev);
 
@@ -130,10 +93,10 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
         const patientInfo: PatientInfo = {
             patientName: `${patientData.firstName} ${patientData.lastName}`,
             city: patientData.city || '',
-            country: patientData.country || '',
+            country: patientData.country || '', // Ensure country is set
             language: patientData.language || '',
             gender: patientData.genderPreference || '',
-            dob: patientData.dob ? new Date(patientData.dob) : new Date(), // Ensure it's a Date object
+            dob: patientData.dob ? new Date(patientData.dob) : new Date(),
             phone: {
                 countryCode: patientData.phone?.countryCode || '',
                 phoneNumber: patientData.phone?.phoneNumber || '',
@@ -272,23 +235,22 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
         }
     };
 
+
     const addRxOrder = useCallback((newRxOrder: IRxOrder) => {
-        setRxOrders(prevOrders => [...prevOrders, newRxOrder]);
-        fetchPatientData();
-    }, [fetchPatientData]);
+        setRxOrders((prevOrders) => [newRxOrder, ...prevOrders]);
+    }, []);
 
     const addMedOrder = useCallback((newMedOrder: IMedOrder) => {
-        setMedOrders(prevOrders => [...prevOrders, newMedOrder]);
-        fetchPatientData();
-    }, [fetchPatientData]);
+        setMedOrders((prevOrders) => [newMedOrder, ...prevOrders]); // Add the new med order to the top
+    }, []);
 
     return (
         <PatientViewModelContext.Provider
             value={{
                 activeTab,
                 setActiveTab,
+                patientInfo,
                 setPatientInfo,
-                patientInfo: memoizedPatientInfo,
                 notes,
                 draftNotes,
                 loadingPatientInfo,
@@ -297,14 +259,11 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 patientViewModel,
                 isExpanded,
                 toggleExpand,
-                refreshPatientNotes,
-                userSession: memoizedUserSession,
-                authorName,
-                authorID,
+                refreshPatientNotes: fetchPatientData,
                 rxOrders,
                 medOrders,
                 loadingMedications,
-                refreshMedications,
+                refreshMedications, // <-- Pass the correct function
                 addRxOrder,
                 addMedOrder,
             }}

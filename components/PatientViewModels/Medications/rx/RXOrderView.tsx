@@ -22,22 +22,18 @@ interface User {
 
 interface RXOrderViewProps {
     user: User;
-    patientId: Types.ObjectId | undefined | string,
+    patientId: Types.ObjectId | undefined | string;
     patientInfo: {
         patientName: string;
         phoneNumber: string;
         dob: Date;
         city: string;
     };
+    onNewRxOrderSaved: (rxOrder: IRxOrder) => void;
 }
 
-export default function RXOrderView({ patientId, patientInfo }: RXOrderViewProps) {
-    const [selectedRxOrder, setSelectedRxOrder] = useState<IRxOrder | null>(null);
 
-    const onNewRxOrderSaved = (rxOrder: IRxOrder) => {
-        setSelectedRxOrder(rxOrder);
-    };
-
+export default function RXOrderView({ patientId, patientInfo, onNewRxOrderSaved }: RXOrderViewProps) {
     const {
         rxOrder,
         submitRxOrder,
@@ -47,7 +43,7 @@ export default function RXOrderView({ patientId, patientInfo }: RXOrderViewProps
         handlePrescriptionChange,
         addPrescription,
         removePrescription,
-    } = useRXOrderViewModel(patientId, onNewRxOrderSaved, patientInfo.city, patientInfo.patientName);  // Pass patientName here
+    } = useRXOrderViewModel(patientId, patientInfo.city, patientInfo.patientName);
 
 
     const orange300 = "#ffa270";

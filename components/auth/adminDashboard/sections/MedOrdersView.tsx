@@ -1,5 +1,6 @@
-// ADMIN not patient view!!
 // components/auth/adminDashboard/sections/MedOrdersView.tsx
+// ADMIN MED ORDERS view!!
+
 import React, { useState } from 'react'
 import { Table, TableColumn } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"

@@ -239,7 +239,6 @@ export function NewPatientForm({ handleSubmit, submitting, language }: NewPatien
                         <input
                             type="date"
                             id="dob"
-                            // name="dob" // Keep only this
                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                             min="1900-01-01"
                             max={new Date().toISOString().split("T")[0]} // Set today's date as the max

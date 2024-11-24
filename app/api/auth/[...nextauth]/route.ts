@@ -120,13 +120,18 @@ const handler = NextAuth({
                 token.isAdmin = sessionUser.isAdmin;
                 token.dob = sessionUser.dob;
                 token.doctorSpecialty = sessionUser.doctorSpecialty;
+
+                // Sign the token properly
                 token.accessToken = jwt.sign(
-                    { id: sessionUser.id, email: sessionUser.email, isAdmin: sessionUser.isAdmin },
-                    process.env.JWT_SECRET!,
+                    {
+                        id: sessionUser.id,
+                        email: sessionUser.email,
+                        isAdmin: sessionUser.isAdmin,
+                    },
+                    process.env.JWT_SECRET!, // Ensure JWT_SECRET is set in your environment
                     { expiresIn: '2d' }
                 );
             }
-
             return token;
         },
         async session({ session, token }: { session: Session; token: JWT }) {
@@ -148,6 +153,7 @@ const handler = NextAuth({
                     !!token.isAdmin, // Ensure it's always a boolean
                     token.accountType as AccountType
                 );
+                session.user.token = token.accessToken as string;
             }
             return session;
         },

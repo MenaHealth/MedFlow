@@ -1,10 +1,13 @@
 // components/form/Medications/MedOrderViewModel.ts
+//SUBMITTING MED ORDERS
+
 
 import { useCallback, useState, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
 import { useToast } from '@/components/hooks/useToast';
 import { IMedOrder } from '@/models/medOrder';
 import { Types } from 'mongoose';
+import {usePatientDashboard} from "@/components/PatientViewModels/PatientViewModelContext";
 
 // Define a new type that only includes the fields we need for the form state
 type MedOrderFormState = {
@@ -31,6 +34,8 @@ type MedOrderFormState = {
 export function useMedOrderViewModel(patientId: string | Types.ObjectId, patientName: string, city: string, countries: string[], phone: string) {
     const { data: session, status } = useSession(); // Access the session here
     const { setToast } = useToast();
+    const { refreshMedications, addMedOrder } = usePatientDashboard(); // Access context methods
+
 
     const initialMedOrder: MedOrderFormState = {
         doctorSpecialty: session?.user?.doctorSpecialty || 'Not Selected',
@@ -122,6 +127,7 @@ export function useMedOrderViewModel(patientId: string | Types.ObjectId, patient
                 throw new Error(`Failed to save Med order: ${errorText}`);
             }
 
+
             const savedMedOrder: IMedOrder = await response.json();
 
             setToast({
@@ -129,6 +135,9 @@ export function useMedOrderViewModel(patientId: string | Types.ObjectId, patient
                 description: `${medOrder.medications.map((m) => m.medication).join(', ')} submitted for ${patientName}`,
                 variant: 'success',
             });
+
+            // Add the new MedOrder to context or trigger a refresh
+            addMedOrder(savedMedOrder); // Optionally use refreshMedications() for a full refresh
 
             // Reset form
             setMedOrder({
@@ -146,7 +155,7 @@ export function useMedOrderViewModel(patientId: string | Types.ObjectId, patient
         } finally {
             setIsLoading(false);
         }
-    }, [medOrder, patientId, isFormComplete, setToast, patientName, initialMedOrder]);
+    }, [medOrder, patientId, isFormComplete, setToast, patientName, initialMedOrder, addMedOrder]);
 
     return {
         medOrder,

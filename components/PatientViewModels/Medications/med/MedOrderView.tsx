@@ -11,8 +11,7 @@ import { DoctorSpecialtyList } from "@/data/doctorSpecialty.enum";
 import { ToastProvider } from '@/components/ui/toast';
 import { ToastComponent } from '@/components/hooks/useToast';
 import { Types } from "mongoose";
-import {ClipLoader} from "react-spinners";
-import RxOrderDrawerView from "@/components/PatientViewModels/Medications/rx/RxOrderDrawerView";
+import {usePatientDashboard} from "@/components/PatientViewModels/PatientViewModelContext";
 
 interface User {
     firstName: string;
@@ -26,6 +25,8 @@ interface MedOrderViewProps {
 }
 
 export default function MedOrderView({ patientId, user }: MedOrderViewProps) {
+    const { patientInfo } = usePatientDashboard(); // Access patient info from context
+
     const {
         medOrder,
         isLoading,
@@ -33,9 +34,14 @@ export default function MedOrderView({ patientId, user }: MedOrderViewProps) {
         addMedication,
         removeMedication,
         submitMedOrder,
-    } = useMedOrderViewModel(patientId, user.firstName, user.doctorSpecialty);
+    } = useMedOrderViewModel(
+        patientId,
+        patientInfo?.patientName || '',
+        patientInfo?.city || '',
+        [patientInfo?.country || ''], // Country array
+        patientInfo?.phone?.phoneNumber || '' // Phone number
+    );
 
-    // Optimized isFormComplete logic
     const isFormComplete = useMemo(() =>
             medOrder.medications.every(medication =>
                 medication.diagnosis?.trim() &&
@@ -50,8 +56,8 @@ export default function MedOrderView({ patientId, user }: MedOrderViewProps) {
         <ToastProvider>
             <div className="space-y-6 max-w-2xl mx-auto bg-orange-950 p-4">
                 <fieldset className="border rounded-lg bg-white shadow-sm">
-                    <legend className="text-lg font-semibold px-2 bg-orange-950 text-white rounded-lg">Doctor and
-                        Patient Details
+                    <legend className="text-lg font-semibold px-2 bg-orange-950 text-white rounded-lg">
+                        Doctor and Patient Details
                     </legend>
                     <div className="space-y-4 p-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -98,12 +104,11 @@ export default function MedOrderView({ patientId, user }: MedOrderViewProps) {
                         </div>
                     </div>
                 </fieldset>
-
+                {/* Medications Section */}
                 {medOrder.medications.map((medication, index) => (
                     <fieldset key={index}
                               className="border rounded-lg p-4 md:p-6 bg-white shadow-sm relative overflow-hidden">
-                        <legend
-                            className="text-lg font-semibold px-2 flex items-center w-full bg-orange-950 text-white rounded-lg">
+                        <legend className="text-lg font-semibold px-2 flex items-center w-full bg-orange-950 text-white rounded-lg">
                             <span>Medication {index + 1}</span>
                             <div className="ml-auto flex space-x-2">
                                 {index === medOrder.medications.length - 1 && (
@@ -114,7 +119,7 @@ export default function MedOrderView({ patientId, user }: MedOrderViewProps) {
                                         className="h-7 w-7 rounded-full"
                                         aria-label="Add medication"
                                     >
-                                        <Plus className="h-4 w-4"/>
+                                        <Plus className="h-4 w-4" />
                                     </Button>
                                 )}
                                 {medOrder.medications.length > 1 && (
@@ -125,7 +130,7 @@ export default function MedOrderView({ patientId, user }: MedOrderViewProps) {
                                         className="h-7 w-7 rounded-full text-white hover:bg-accent hover:text-accent-foreground"
                                         aria-label="Remove medication"
                                     >
-                                        <Minus className="h-4 w-4"/>
+                                        <Minus className="h-4 w-4" />
                                     </Button>
                                 )}
                             </div>
@@ -168,7 +173,6 @@ export default function MedOrderView({ patientId, user }: MedOrderViewProps) {
                         </div>
                     </fieldset>
                 ))}
-
                 <div className="space-y-6 max-w-2xl mx-auto bg-orange-950">
                     <Button
                         onClick={submitMedOrder}

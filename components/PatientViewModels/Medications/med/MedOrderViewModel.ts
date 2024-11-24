@@ -1,7 +1,7 @@
 // components/form/Medications/MedOrderViewModel.ts
 
 import { useCallback, useState, useMemo } from 'react';
-import { useSession } from 'next-auth/react'; // Import the session hook
+import { useSession } from 'next-auth/react';
 import { useToast } from '@/components/hooks/useToast';
 import { IMedOrder } from '@/models/medOrder';
 import { Types } from 'mongoose';
@@ -28,7 +28,7 @@ type MedOrderFormState = {
     }>;
 };
 
-export function useMedOrderViewModel(patientId: string | Types.ObjectId, patientName: string, city: string) {
+export function useMedOrderViewModel(patientId: string | Types.ObjectId, patientName: string, city: string, countries: string[], phone: string) {
     const { data: session, status } = useSession(); // Access the session here
     const { setToast } = useToast();
 
@@ -38,9 +38,9 @@ export function useMedOrderViewModel(patientId: string | Types.ObjectId, patient
         drEmail: session?.user?.email || '',
         drId: session?.user?._id || '',
         patientName,
-        patientPhone: '', // This should be updated based on available patient data
+        patientPhone: phone, // Use the passed phone argument
         patientCity: city,
-        patientCountry: '', // Update based on available patient data
+        patientCountry: countries[0] || '', // Use the first country from the array
         patientId,
         orderDate: new Date(),
         validated: false,

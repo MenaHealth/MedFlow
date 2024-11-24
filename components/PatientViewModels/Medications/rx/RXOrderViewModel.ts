@@ -19,7 +19,7 @@ export function useRXOrderViewModel(
     patientName: string
 ) {
     const { data: session } = useSession();
-    const { addRxOrder, refreshMedications } = usePatientDashboard(); // Include refreshMedications
+    const { addRxOrder, refreshMedications } = usePatientDashboard(); 
     const { api } = useContext(ToastContext);
 
     const initialRxOrder: IRxOrder = {

@@ -93,10 +93,10 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
         const patientInfo: PatientInfo = {
             patientName: `${patientData.firstName} ${patientData.lastName}`,
             city: patientData.city || '',
-            country: patientData.country || '',
+            country: patientData.country || '', // Ensure country is set
             language: patientData.language || '',
             gender: patientData.genderPreference || '',
-            dob: patientData.dob ? new Date(patientData.dob) : new Date(), // Ensure it's a Date object
+            dob: patientData.dob ? new Date(patientData.dob) : new Date(),
             phone: {
                 countryCode: patientData.phone?.countryCode || '',
                 phoneNumber: patientData.phone?.phoneNumber || '',

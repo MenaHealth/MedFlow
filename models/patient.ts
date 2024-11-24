@@ -20,7 +20,8 @@ export interface IRxOrder {
     PatientRxUrl?: string;
     PharmacyQrCode?: string;
     PharmacyQrUrl?: string;
-    RxProvider?: string;
+    RxDispenserName?: string;
+    RxDispenserContact?: string;
     rxStatus?: 'not reviewed' | 'partially filled' | 'declined' | 'completed';
     partialRxNotes?: string;
 }
@@ -44,7 +45,8 @@ const rxOrderSchema = new Schema({
     PatientRxUrl: { type: String},
     PharmacyQrCode: { type: String },
     PharmacyQrUrl: { type: String},
-    RxProvider: { type: String},
+    RxDispenserName: { type: String},
+    RxDispenserContact: { type: String},
     rxStatus: {
         type: String,
         default: 'not reviewed',

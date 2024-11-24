@@ -1,44 +1,37 @@
 // app/api/admin/management/route.ts
 
-import { NextResponse } from 'next/server';
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import { NextRequest, NextResponse } from 'next/server';
+import { JwtPayload } from 'jsonwebtoken';
 import Admin from './../../../../models/admin';
 import dbConnect from './../../../../utils/database';
 import User from './../../../../models/user';
 import { sendApprovalEmail } from '@/utils/emails/user-approval';
+import { getToken } from "next-auth/jwt";
 
 const SECRET = process.env.JWT_SECRET as string;
 if (!SECRET) {
     throw new Error("JWT_SECRET is not set in environment variables");
 }
 
-function verifyAdminToken(authHeader: string | null): JwtPayload | null {
-    if (!authHeader) {
-        console.error('Authorization header missing');
-        return null;
-    }
-    const token = authHeader.split(' ')[1];
+async function verifyAdminToken(req: NextRequest): Promise<JwtPayload | null> {
     try {
-        const decoded = jwt.verify(token, SECRET) as JwtPayload;
-        if (decoded?.isAdmin) {
-            return decoded;
-        } else {
-            console.error('Admin access required');
+        const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+        if (!token || !token.isAdmin) {
             return null;
         }
+        return token as JwtPayload;
     } catch (error) {
-        console.error('JWT verification failed:', error);
+        console.error("JWT verification failed:", error);
         return null;
     }
 }
 
 // POST: Add a user to the admin collection
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
     try {
         await dbConnect();
 
-        const authHeader = request.headers.get('authorization');
-        const decoded = verifyAdminToken(authHeader);
+        const decoded = await verifyAdminToken(request);
         if (!decoded) {
             return NextResponse.json({ message: 'Unauthorized access' }, { status: 403 });
         }
@@ -75,12 +68,11 @@ export async function POST(request: Request) {
 }
 
 // GET: Fetch all admins
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
     try {
         await dbConnect();
 
-        const authHeader = request.headers.get('authorization');
-        const decoded = verifyAdminToken(authHeader);
+        const decoded = await verifyAdminToken(request);
         if (!decoded) {
             return NextResponse.json({ message: 'Unauthorized access' }, { status: 403 });
         }
@@ -93,19 +85,19 @@ export async function GET(request: Request) {
         return NextResponse.json({ admins }, { status: 200 });
     } catch (error: unknown) {
         console.error('Detailed error in GET request:', error);
-            if (error instanceof Error) {
-                return NextResponse.json({message: 'Failed to fetch admins', error: error.message}, {status: 500});
-            }
+        if (error instanceof Error) {
+            return NextResponse.json({message: 'Failed to fetch admins', error: error.message}, {status: 500});
+        }
+        return NextResponse.json({message: 'An unknown error occurred'}, {status: 500});
     }
 }
 
 // DELETE: Remove a user from the admin collection
-export async function DELETE(request: Request) {
+export async function DELETE(request: NextRequest) {
     try {
         await dbConnect();
 
-        const authHeader = request.headers.get('authorization');
-        const decoded = verifyAdminToken(authHeader);
+        const decoded = await verifyAdminToken(request);
         if (!decoded) {
             return NextResponse.json({ message: 'Unauthorized access' }, { status: 403 });
         }

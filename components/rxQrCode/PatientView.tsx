@@ -105,7 +105,7 @@ const PatientView: React.FC<QRCodeDisplayProps> = ({ uuid }) => {
                             <DialogTrigger asChild>
                                 <Button
                                     variant="outline"
-                                    className="absolute -top-4 -right-4 bg-white text-orange-500 shadow-md rounded-full p-1 z-10"
+                                    className="absolute -top-4 -right-4 bg-white text-orange-500 hover:bg-orange-500 hover:text-white shadow-md rounded-full p-1 z-10"
                                 >
                                     <Expand className="h-4 w-4"/>
                                     <span className="sr-only">Expand QR Code</span>

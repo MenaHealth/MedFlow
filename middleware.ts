@@ -5,8 +5,7 @@ import { getToken } from 'next-auth/jwt';
 const PUBLIC_FILE = /\.(.*)$/;
 
 export async function middleware(req: any) {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-    const { pathname, searchParams } = req.nextUrl;
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });    const { pathname, searchParams } = req.nextUrl;
 
     // Allow requests to public files, API routes, '/auth', and '/rx-order'
     if (

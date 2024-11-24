@@ -258,6 +258,17 @@ export default function PatientTriage() {
     }
   }
 
+  const dobToAge = (dob) => {
+    const today = new Date();
+    const birthDate = new Date(dob);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age.toString();
+  }
+
 
 
 
@@ -352,7 +363,7 @@ export default function PatientTriage() {
             </div>
           )}
         </div>
-        <TableContainer component={Paper} style={{ maxHeight: '80vh', overflow: 'visible', zIndex: 1 }}>
+        <TableContainer component={Paper} style={{ maxHeight: '80vh', zIndex: 1 }}>
           <Table sx={{ minWidth: 650 }} aria-label="simple table">
             <TableHead className="MuiTableHead-root">
               <TableRow>
@@ -505,7 +516,7 @@ export default function PatientTriage() {
                         </div>
                       </TableCellWithTooltip>
                       <TableCell align="center" style={{ minWidth: '150px' }}>{row.lastName}</TableCell>
-                      <TableCell align="center">{row.age || ''}</TableCell>
+                      <TableCell align="center">{row.age || (row.dob ? dobToAge(row.dob) : '')}</TableCell>
                       <TableCell align="center" style={{ minWidth: '150px' }}>{formatLocation(row.city, row.country)}</TableCell>
                       <TableCell align="center">{row.language}</TableCell>
                       <TableCellWithTooltip tooltipText={row.chiefComplaint} maxWidth='175px'>

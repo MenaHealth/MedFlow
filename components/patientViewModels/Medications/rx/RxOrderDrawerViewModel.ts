@@ -1,4 +1,4 @@
-// components/PatientViewModels/Medications/rx/RxOrderDrawerViewModel.ts
+// components/patientViewModels/Medications/rx/RxOrderDrawerViewModel.ts
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react'; // Import the session hook

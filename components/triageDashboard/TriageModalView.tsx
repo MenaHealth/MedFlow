@@ -1,4 +1,4 @@
-// components/TriageDashboard/TriageModalView.tsx
+// components/triageDashboard/TriageModalView.tsx
 
 
 

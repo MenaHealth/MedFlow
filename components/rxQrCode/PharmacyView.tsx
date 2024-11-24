@@ -170,10 +170,10 @@ const PharmacyView = ({ uuid }: { uuid: string }) => {
                         <Label>RX Status</Label>
                         <Select
                             value={rxOrder.rxStatus}
-                            onValueChange={(value) => setRxOrder({ ...rxOrder, rxStatus: value as IRxOrder['rxStatus'] })}
+                            onValueChange={(value) => setRxOrder({...rxOrder, rxStatus: value as IRxOrder['rxStatus']})}
                         >
                             <SelectTrigger>
-                                <SelectValue placeholder="Select RX Status" />
+                                <SelectValue placeholder="Select RX Status"/>
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="not reviewed">Not Reviewed</SelectItem>
@@ -189,17 +189,26 @@ const PharmacyView = ({ uuid }: { uuid: string }) => {
                             <Textarea
                                 value={rxOrder.partialRxNotes || ''}
                                 onChange={(e) =>
-                                    setRxOrder({ ...rxOrder, partialRxNotes: e.target.value })
+                                    setRxOrder({...rxOrder, partialRxNotes: e.target.value})
                                 }
                             />
                         </div>
                     )}
                     <div>
-                        <Label>RX Provider (your name)</Label>
+                        <Label>Name of RX dispenser </Label>
                         <Input
-                            value={rxOrder.RxProvider || ''}
+                            value={rxOrder.RxDispenserName || ''}
                             onChange={(e) =>
-                                setRxOrder({ ...rxOrder, RxProvider: e.target.value })
+                                setRxOrder({...rxOrder, RxDispenserName: e.target.value})
+                            }
+                        />
+                    </div>
+                    <div>
+                        <Label>RX dispenser contact info </Label>
+                        <Input
+                            value={rxOrder.RxDispenserContact || ''}
+                            onChange={(e) =>
+                                setRxOrder({...rxOrder, RxDispenserContact: e.target.value})
                             }
                         />
                     </div>
@@ -210,14 +219,14 @@ const PharmacyView = ({ uuid }: { uuid: string }) => {
                     >
                         {loading ? (
                             <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin"/>
                                 Saving...
                             </>
                         ) : (
                             'Save Changes'
                         )}
                     </Button>
-                    {successMessage && <div className="text-green-500 text-center">{successMessage}</div>}
+                    {successMessage && <div className="text-white bg-orange-500 text-center">{successMessage}</div>}
                 </div>
             </CardContent>
         </Card>

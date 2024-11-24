@@ -1,4 +1,4 @@
-// PatientViewModels/videocall/AppBuilderWrapper.tsx
+// patientViewModels/videocall/AppBuilderWrapper.tsx
 import AgoraAppBuilder from "@appbuilder/react";
 
 const AppBuilderWrapper = () => {

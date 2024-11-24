@@ -1,4 +1,4 @@
-// components/PatientViewModels/PatientNotes/PreviousNotesViewModel.tsx
+// components/patientViewModels/PatientNotes/PreviousNotesViewModel.tsx
 import { usePatientDashboard } from '../../PatientViewModelContext';
 import { INote } from './../../../../models/note';
 

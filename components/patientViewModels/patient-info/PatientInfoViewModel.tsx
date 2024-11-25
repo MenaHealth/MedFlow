@@ -21,6 +21,7 @@ export class PatientInfoViewModel {
             bmi: this.patient?.bmi,
             pmhx: this.patient?.pmhx,
             pshx: this.patient?.pshx,
+            telegramChatId: { type: String }, 
             famhx: this.patient?.famhx,
             dob: this.patient?.dob || null,
             patientID: this.patient?._id,

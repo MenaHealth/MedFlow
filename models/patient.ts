@@ -68,6 +68,7 @@ export interface IPatient extends Document {
     country?: string;
     city?: string;
     language?: string;
+    telegramChatId?: string;
     genderPreference?: string;
     previouslyRegistered?: string;
     chiefComplaint?: string;
@@ -121,6 +122,7 @@ const PatientSchema = new Schema<IPatient>({
     phone: {
         countryCode: { type: String },
         phoneNumber: { type: String },
+        telegramChatId: { type: String },
     },
     dob: { type: Date },
     city: { type: String },

@@ -23,6 +23,7 @@ export interface PatientInfo {
         phoneNumber: string;
     };
     patientID: string;
+    telegramChatId?: string;
 }
 
 interface UserSession {
@@ -93,7 +94,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
         const patientInfo: PatientInfo = {
             patientName: `${patientData.firstName} ${patientData.lastName}`,
             city: patientData.city || '',
-            country: patientData.country || '', // Ensure country is set
+            country: patientData.country || '', 
             language: patientData.language || '',
             gender: patientData.genderPreference || '',
             dob: patientData.dob ? new Date(patientData.dob) : new Date(),
@@ -102,6 +103,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 phoneNumber: patientData.phone?.phoneNumber || '',
             },
             patientID: patientData._id?.toString() || '',
+            telegramChatId: (patientData.telegramChatId || '') as string,
         };
         setPatientInfo(patientInfo);
         setPatientViewModel(new PatientInfoViewModel(patientData));

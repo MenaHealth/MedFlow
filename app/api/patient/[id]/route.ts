@@ -3,14 +3,13 @@ import Patient from "./../../../../models/patient";
 import dbConnect from "./../../../../utils/database";
 import { Types } from "mongoose";
 
-// Define the type for params
+
 interface Params {
     params: {
         id: string;
     };
 }
 
-// Update the type annotations for the GET and PATCH handlers
 export const GET = async (request: Request, { params }: Params) => {
     try {
         await dbConnect();
@@ -25,7 +24,20 @@ export const GET = async (request: Request, { params }: Params) => {
             return new Response("Patient Not Found", { status: 404 });
         }
 
-        return new Response(JSON.stringify(patient), { status: 200 });
+  
+        const responsePayload = {
+            firstName: patient.firstName,
+            lastName: patient.lastName,
+            phone: patient.phone,
+            dob: patient.dob,
+            genderPreference: patient.genderPreference,
+            country: patient.country,
+            city: patient.city,
+            language: patient.language,
+            telegramChatId: patient.telegramChatId || "",
+        };
+
+        return new Response(JSON.stringify(responsePayload), { status: 200 });
     } catch (error) {
         console.error("Error fetching patient:", error);
         return new Response("Internal Server Error", { status: 500 });

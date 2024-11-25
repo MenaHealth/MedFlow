@@ -2,6 +2,7 @@ export default async function handler(req, res) {
     console.log('Request body:', req.body); 
 
     const { message } = req.body;
+    const telegramUrl = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`;
 
     if (message) {
         console.log('Message received:', message);

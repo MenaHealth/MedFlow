@@ -1,30 +1,19 @@
-import Patient from '../../../../models/patient';
-
 export default async function handler(req, res) {
     const { message } = req.body;
 
-    if (message && message.text === '/start') {
-        const chatId = message.chat.id; 
-        const phoneNumber = message.contact?.phone_number; 
-        console.log('Received /start:', { chatId, phoneNumber });
+    if (message) {
+        const chatId = message.chat.id; // Get patient's Telegram chat_id
+        const text = message.text; // Message content
 
-        if (!phoneNumber) {
-            return res.status(400).send('Phone number not provided.');
+        if (text === '/start') {
+            // Save chatId in your database and link it to the patient
+            await updatePatientChatIdByPhone(message.chat.id, 'PATIENT_PHONE_NUMBER'); // Implement this logic
+            return res.status(200).send('Chat ID saved');
         }
 
-        const patient = await Patient.findOneAndUpdate(
-            { "phone.phoneNumber": phoneNumber }, 
-            { $set: { telegramChatId: chatId } }, 
-            { new: true } 
-        );
-
-        if (!patient) {
-            return res.status(404).send('Patient not found for the provided phone number.');
-        }
-
-        console.log('Chat ID saved for patient:', patient);
-        return res.status(200).send('Chat ID successfully linked to the patient.');
+        // Handle incoming messages
+        return res.status(200).send('Message received');
     }
 
-    res.status(200).send('No /start command received.');
+    return res.status(400).send('Invalid request');
 }

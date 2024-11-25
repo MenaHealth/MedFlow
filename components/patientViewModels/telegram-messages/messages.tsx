@@ -16,6 +16,7 @@ const TelegramMessages: React.FC<TelegramMessagesProps> = ({ chatId }) => {
     const handleSendMessage = async () => {
         if (!message.trim()) return;
 
+        // Add user's message to the chat history
         setChatHistory((prev) => [...prev, { text: message, sender: 'user' }]);
         setMessage(""); // Clear the input field
 
@@ -28,6 +29,7 @@ const TelegramMessages: React.FC<TelegramMessagesProps> = ({ chatId }) => {
                 body: JSON.stringify({ chat_id: chatId, message }),
             });
 
+            // Handle the response
             const data = await res.json();
             if (data.success) {
                 setResponse("Message sent successfully!");
@@ -53,7 +55,17 @@ const TelegramMessages: React.FC<TelegramMessagesProps> = ({ chatId }) => {
     };
 
     return (
-        <Box sx={{ width: '100%', maxWidth: 400, mx: 'auto', mt: 5, p: 2, border: '1px solid #ddd', borderRadius: 3 }}>
+        <Box
+            sx={{
+                width: '100%',
+                maxWidth: 400,
+                mx: 'auto',
+                mt: 5,
+                p: 2,
+                border: '1px solid #ddd',
+                borderRadius: 3,
+            }}
+        >
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                 <TelegramIcon fontSize="large" sx={{ color: '#0088cc', mr: 1 }} />
                 <Typography variant="h6" component="h2">

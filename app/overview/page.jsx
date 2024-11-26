@@ -15,8 +15,6 @@ const features = [
     { icon: FileText, title: "Prescription Management", description: "Generate and manage drug prescription paperwork" },
 ]
 
-const baseURL = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://gaza-meds.vercel.app/';
-
 export default function TeamPage() {
     useEffect(() => {
         const handleIntersection = (entries, observer) => {

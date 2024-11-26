@@ -1,59 +1,72 @@
-// /Users/kamasine/jenin/MedFlow/pages/api/telegram-webhook.js
-const sendTelegramMessage = async (chatId, text) => {
-    const telegramUrl = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`;
+// pages/api/telegram-webhook.js
 
-    try {
-        const response = await fetch(telegramUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: chatId, text }),
-        });
 
-        const result = await response.json();
-        console.log("Telegram API Response:", result);
+import { TelegramClient } from "telegram";
+import { StringSession } from "telegram/sessions";
 
-        if (!response.ok) {
-            throw new Error(result.description || 'Failed to send Telegram message');
-        }
+const apiId = process.env.TELEGRAM_API_ID; // Your Telegram API ID
+const apiHash = process.env.TELEGRAM_API_HASH; // Your Telegram API Hash
+const stringSession = new StringSession(process.env.TELEGRAM_SESSION); // Use saved session string
 
-        return result;
-    } catch (error) {
-        console.error("Error sending Telegram message:", error.message);
-        throw error;
-    }
-};
+const client = new TelegramClient(stringSession, parseInt(apiId), apiHash, {
+    connectionRetries: 5,
+});
 
 export default async function handler(req, res) {
+    if (req.method !== "POST") {
+        return res.status(405).json({ error: "Method not allowed" });
+    }
+
+    const { phoneNumber, message } = req.body;
+
+    console.log("[Telegram Webhook] Incoming Request Body:", req.body);
+
+    if (!phoneNumber || !message) {
+        console.error("[Telegram Webhook] Error: Missing phone number or message.");
+        return res.status(400).json({ error: "Phone number and message are required" });
+    }
+
     try {
-        console.log("Incoming request body:", JSON.stringify(req.body, null, 2)); // Log the full request body
-        const { message } = req.body;
+        // Connect Telegram client using the saved session
+        if (!client.connected) {
+            console.log("[Telegram Webhook] Connecting Telegram Client...");
+            await client.connect();
+        }
+        console.log("[Telegram Webhook] Telegram client connected!");
 
-        if (!message || !message.chat || !message.chat.id) {
-            console.error("Invalid request structure:", req.body);
-            return res.status(400).json({ error: "Invalid request structure" });
+        // Fetch contacts
+        console.log("[Telegram Webhook] Fetching contacts...");
+        const contacts = await client.invoke({
+            _: "contacts.getContacts",
+            hash: 0,
+        });
+
+        console.log("[Telegram Webhook] Contacts fetched:", contacts);
+
+        // Search for the user by phone number
+        const user = contacts.users.find((u) => u.phone === phoneNumber.replace("+", ""));
+
+        if (!user) {
+            console.error("[Telegram Webhook] Error: User not found for phone number:", phoneNumber);
+            return res.status(404).json({ error: "User not found for the given phone number." });
         }
 
-        const chatId = message.chat.id;
-        const text = message.text;
+        const chatId = user.id;
 
-        console.log(`Received message: "${text}" from chat ID: ${chatId}`);
+        // Log resolved chat ID
+        console.log("[Telegram Webhook] Resolved Chat ID:", chatId);
 
-        if (text === '/start') {
-            console.log("Saving chat ID:", chatId);
+        // Send message to the resolved chat ID
+        console.log("[Telegram Webhook] Sending message:", message);
+        const response = await client.sendMessage(chatId, {
+            message,
+        });
 
-            await saveChatIdToPatient(chatId, 'PATIENT_IDENTIFIER'); 
-        
-            return res.status(200).send('Chat ID saved');
-        }
-        
+        console.log("[Telegram Webhook] Message Sent Response:", response);
 
-        console.log("Forwarding message to Telegram...");
-        const telegramResponse = await sendTelegramMessage(chatId, `Forwarded: ${text}`);
-        console.log("Telegram message sent:", telegramResponse);
-
-        return res.status(200).json({ message: 'Message received and forwarded to Telegram' });
+        res.status(200).json({ success: true, response });
     } catch (error) {
-        console.error("Error in webhook handler:", error);
-        return res.status(500).json({ error: 'Internal server error' });
+        console.error("[Telegram Webhook] Error sending Telegram message:", error);
+        res.status(500).json({ error: "Internal server error" });
     }
 }

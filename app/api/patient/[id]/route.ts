@@ -24,7 +24,7 @@ export const GET = async (request: Request, { params }: Params) => {
             return new Response("Patient Not Found", { status: 404 });
         }
 
-  
+
         const responsePayload = {
             firstName: patient.firstName,
             lastName: patient.lastName,
@@ -35,6 +35,8 @@ export const GET = async (request: Request, { params }: Params) => {
             city: patient.city,
             language: patient.language,
             telegramChatId: patient.telegramChatId || "",
+            rxOrders: patient.rxOrders || [],
+            medOrders: patient.medOrders || [],
         };
 
         return new Response(JSON.stringify(responsePayload), { status: 200 });

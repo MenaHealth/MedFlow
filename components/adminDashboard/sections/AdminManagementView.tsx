@@ -1,151 +1,113 @@
 import React, { useState } from 'react';
-import { ChevronDown, Search, UserRoundCheck, UserMinus } from 'lucide-react';
+import { Table, TableColumn } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Table } from "@/components/ui/table";
+import { Loader2, ChevronDown, ChevronRight } from "lucide-react";
 import { useAdminManagementViewModel } from './AdminManagementViewModel';
 import type { IAdmin } from '@/models/admin';
 
 export default function AdminManagementView() {
     const {
         adminsData,
-        loadingAdmins,
-        hasMoreAdmins,
-        loadMoreAdmins,
-        handleAddAdmin,
         handleRemoveAdmin,
-        handleRemoveSelectedAdmins,
         handleSearch,
         searchQuery,
         setSearchQuery,
-        selectedUser,
-        setSelectedUser,
+        fetchAllAdmins,
     } = useAdminManagementViewModel();
 
-    const [selectedAdmins, setSelectedAdmins] = useState<Set<string>>(new Set());
 
-    const firstAdminId = adminsData[0]?.userId.toString();
-
-    const toggleSelectAdmin = (adminId: string) => {
-        if (adminId === firstAdminId) return;
-        setSelectedAdmins((prev) => {
-            const newSelected = new Set(prev);
-            newSelected.has(adminId) ? newSelected.delete(adminId) : newSelected.add(adminId);
-            return newSelected;
-        });
-    };
-
-    const transformedAdminsData = adminsData.map((admin) => ({
-        ...admin,
-        adminStartDate: admin.adminStartDate || new Date().toISOString(),
-    }));
-
-    const columns = [
+    const columns: TableColumn<IAdmin>[] = [
         {
-            key: 'select',
-            header: '',
-            render: (_: any, admin: IAdmin) => (
-                <input
-                    type="checkbox"
-                    checked={selectedAdmins.has(admin.userId.toString())}
-                    onChange={() => toggleSelectAdmin(admin.userId.toString())}
-                    disabled={admin.userId.toString() === firstAdminId}
-                />
-            ),
+            key: 'firstName',
+            id: 'firstName',
+            header: 'First Name',
+            width: 'w-32',
         },
-        { key: 'firstName', header: 'First Name' },
-        { key: 'lastName', header: 'Last Name' },
-        { key: 'email', header: 'Email' },
+        {
+            key: 'lastName',
+            id: 'lastName',
+            header: 'Last Name',
+            width: 'w-32',
+        },
+        {
+            key: 'email',
+            id: 'email',
+            header: 'Email',
+            width: 'w-48',
+        },
         {
             key: 'adminStartDate',
+            id: 'adminStartDate',
             header: 'Start Date',
-            render: (value: Date) => new Date(value).toLocaleDateString(),
+            width: 'w-40',
+            render: (value) => new Date(value as string).toLocaleDateString('en-US'),
         },
         {
             key: 'actions',
+            id: 'actions',
             header: 'Actions',
-            render: (_: any, admin: IAdmin) => (
+            render: (_value, admin) => (
                 <Button
-                    className="hover:text-darkBlue hover:border-orange-500 hover:border-2 hover:bg-white transition-colors"
-                    size="icon"
+                    size="sm"
                     onClick={() => handleRemoveAdmin(admin.userId.toString())}
-                    disabled={admin.userId.toString() === firstAdminId}
+                    className="bg-red-500 text-white hover:bg-red-600"
                 >
-                    <UserMinus className="w-5 h-5" />
+                    Remove
                 </Button>
             ),
+            width: 'w-32',
         },
     ];
 
+
+    const handleSearchSubmit = () => {
+        handleSearch();
+        console.log("Search query submitted:", searchQuery);
+    };
+
+    if (!adminsData || adminsData.length === 0) {
+        return (
+            <div className="flex justify-center items-center py-4">
+                <Loader2 className="h-8 w-8 animate-spin text-white" />
+            </div>
+        );
+    }
+
     return (
-        <div className="container mx-auto px-4 py-8 bg-darkBlue text-orange-50">
-            <div className="mb-4 p-4 border-2 border-orange-50 rounded-lg">
-                <h3 className="text-xl mb-2">Add New Admin</h3>
-                <div className="flex items-center bg-orange-50 text-darkBlue">
-                    <Input
+        <div className="container mx-auto px-4 py-8">
+            <div className="mb-4 flex flex-wrap items-center">
+                <div className="ml-auto flex items-center space-x-2">
+                    <input
                         type="text"
                         placeholder="Search by email"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="flex-grow"
+                        className="p-2 border rounded-md bg-gray-50 text-black"
                     />
-                    <Button onClick={handleSearch}>
-                        <Search className="w-5 h-5" />
+                    <Button
+                        onClick={handleSearchSubmit}
+                        variant="outline"
+                        className="text-orange-950 border-2 border-white hover:bg-orange-800 hover:text-white transition-colors"
+                    >
+                        Search
                     </Button>
                 </div>
-
-                {Array.isArray(selectedUser) && (
-                    <select
-                        onChange={(e) => setSelectedUser(e.target.value)}
-                        className="w-full p-2 mt-2 border rounded-md bg-darkBlue text-white"
-                    >
-                        <option value="">-- Select a user --</option>
-                        {selectedUser.map((user: IAdmin) => (
-                            <option key={user.userId.toString()} value={user.userId.toString()}>
-                                {user.firstName} {user.lastName} ({user.email})
-                            </option>
-                        ))}
-                    </select>
-                )}
-
-                <Button onClick={handleAddAdmin} disabled={!selectedUser}>
-                    <UserRoundCheck className="w-5 h-5" />
-                </Button>
             </div>
 
-            <Table
-                data={transformedAdminsData}
-                columns={columns}
-                backgroundColor="darkBlue"
-                textColor="orange-50"
-                stickyHeader={true}
-                headerBackgroundColor="orange-50"
-                headerTextColor="darkBlue"
-            />
-
-            {selectedAdmins.size > 0 && (
-                <div className="flex justify-center mt-4">
-                    <Button
-                        variant="submit"
-                        onClick={() => handleRemoveSelectedAdmins(Array.from(selectedAdmins))}
-                        className="flex items-center space-x-2"
-                    >
-                        <UserMinus className="w-5 h-5" />
-                        <span>Delete Selected</span>
-                    </Button>
-                </div>
-            )}
-
-            <div className="flex justify-center mt-4">
-                {hasMoreAdmins && !loadingAdmins && (
-                    <Button onClick={loadMoreAdmins} className="flex items-center space-x-2">
-                        <ChevronDown className="w-5 h-5" />
-                        <span>Load More</span>
-                    </Button>
-                )}
-                {loadingAdmins && <p className="text-center py-4">Loading...</p>}
+            <div className="rounded-lg overflow-hidden border border-orange-900">
+                <Table
+                    data={adminsData}
+                    columns={columns}
+                    backgroundColor="bg-darkBlue"
+                    textColor="text-orange-50"
+                    borderColor="border-orange-900"
+                    headerBackgroundColor="bg-orange-950"
+                    headerTextColor="text-orange-50"
+                    hoverBackgroundColor="hover:bg-orange-950"
+                    hoverTextColor="hover:text-darkBlue"
+                    stickyHeader={true}
+                />
             </div>
         </div>
     );
 }
-

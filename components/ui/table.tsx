@@ -178,22 +178,22 @@ export function Table<T>({
         <div
             ref={tableRef}
             className={`relative overflow-x-auto ${backgroundColor} ${stickyHeader ? 'max-h-[500px] overflow-y-auto' : ''}`}
-            style={{ paddingBottom: isOneColumn ? '2rem' : '0' }} // Add padding when there's only one column
+            style={{ paddingBottom: isOneColumn ? '2rem' : '0' }}
         >
             <table className={`w-full border-collapse ${textColor}`}>
                 <thead
-                    className={`${headerBackgroundColor} ${headerTextColor} ${stickyHeader ? 'sticky top-0 z-10' : ''}`}>
+                    className={`${headerBackgroundColor} ${stickyHeader ? 'sticky top-0 z-10' : ''}`}>
                 <tr>
                     {columns.map((column) => (
                         <th
                             key={column.id || column.key.toString()}
-                            className={`px-4 py-2 ${column.width || ''} ${column.hidden && !expandedColumns.includes(column.key.toString()) ? 'w-12' : ''}`}
+                            className={`px-4 py-2 ${column.width || ''} ${column.hidden && !expandedColumns.includes(column.key.toString()) ? 'w-12' : ''} ${headerTextColor}`}
                             style={{width: columnWidths[column.key.toString()]}}
                         >
                             {renderHeaderCell(column)}
                         </th>
                     ))}
-                    <th className="px-4 py-2 w-12">
+                    <th className={`px-4 py-2 w-12 ${headerTextColor}`}>
                         <button
                             onClick={toggleAllColumns}
                             className="flex items-center focus:outline-none group relative"
@@ -209,24 +209,24 @@ export function Table<T>({
                     sortedData.map((item, index) => (
                         <tr
                             key={index}
-                            className={`border-t ${borderColor} ${onRowClick ? 'cursor-pointer' : ''} ${hoverBackgroundColor} ${hoverTextColor}`}
+                            className={`border-t ${borderColor} ${onRowClick ? 'cursor-pointer' : ''} ${hoverBackgroundColor} ${hoverTextColor} ${backgroundColor}`}
                             onClick={() => onRowClick && onRowClick(item)}
                         >
                             {columns.map((column) => (
                                 <td
                                     key={column.key.toString()}
-                                    className={`px-4 py-2 ${column.width || ''} ${column.hidden && !expandedColumns.includes(column.key.toString()) ? 'hidden' : ''}`}
+                                    className={`px-4 py-2 ${column.width || ''} ${column.hidden && !expandedColumns.includes(column.key.toString()) ? 'hidden' : ''} ${textColor}`}
                                     style={{width: columnWidths[column.key.toString()]}}
                                 >
                                     {getCellValue(item, column)}
                                 </td>
                             ))}
-                            <td className="px-4 py-2 w-12"></td>
+                            <td className={`px-4 py-2 w-12 ${textColor}`}></td>
                         </tr>
                     ))
                 ) : (
                     <tr>
-                        <td colSpan={columns.length} className="text-center py-4">
+                        <td colSpan={columns.length} className={`text-center py-4 ${textColor}`}>
                             No data available.
                         </td>
                     </tr>
@@ -236,3 +236,5 @@ export function Table<T>({
         </div>
     )
 }
+
+

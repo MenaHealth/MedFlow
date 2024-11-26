@@ -94,7 +94,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
         const patientInfo: PatientInfo = {
             patientName: `${patientData.firstName} ${patientData.lastName}`,
             city: patientData.city || '',
-            country: patientData.country || '', 
+            country: patientData.country || '',
             language: patientData.language || '',
             gender: patientData.genderPreference || '',
             dob: patientData.dob ? new Date(patientData.dob) : new Date(),
@@ -103,8 +103,9 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 phoneNumber: patientData.phone?.phoneNumber || '',
             },
             patientID: patientData._id?.toString() || '',
-            telegramChatId: (patientData.telegramChatId || '') as string,
+            telegramChatId: patientData.telegramChatId || '',
         };
+
         setPatientInfo(patientInfo);
         setPatientViewModel(new PatientInfoViewModel(patientData));
     }, []);
@@ -164,22 +165,24 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             }
 
             // Handle rxOrders
-            const formattedRxOrders = (data.rxOrders || []).map((order) =>
-                typeof order === 'string'
-                    ? {
-                        id: order,
-                        doctorSpecialty: 'General',
-                        prescribingDr: 'Unknown',
-                        drEmail: 'unknown@example.com',
-                        drId: 'unknown',
-                        prescribedDate: new Date(),
-                        validTill: new Date(),
-                        city: 'Unknown City',
-                        validated: false,
-                        prescriptions: []
-                    } as IRxOrder
-                    : order
-            );
+            const formattedRxOrders = Array.isArray(data.rxOrders) && data.rxOrders.length > 0
+                ? data.rxOrders.map((order) =>
+                    typeof order === 'string'
+                        ? {
+                            id: order,
+                            doctorSpecialty: 'General',
+                            prescribingDr: 'Unknown',
+                            drEmail: 'unknown@example.com',
+                            drId: 'unknown',
+                            prescribedDate: new Date(),
+                            validTill: new Date(),
+                            city: 'Unknown City',
+                            validated: false,
+                            prescriptions: []
+                        } as IRxOrder
+                        : order
+                )
+                : [];
             setRxOrders(formattedRxOrders);
 
             // Handle medOrders

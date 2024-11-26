@@ -72,6 +72,7 @@
     "stream": "^0.0.3",
     "tailwind-merge": "^2.2.2",
     "tailwindcss-animate": "^1.0.7",
+    "telegram": "^2.26.8",
     "twilio": "^5.3.5",
     "uuid": "^10.0.0",
     "vaul": "^1.0.0",

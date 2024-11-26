@@ -7,14 +7,23 @@ import { CombinedNotesView } from '@/components/patientViewModels/PatientNotes/C
 import { Skeleton } from '@/components/ui/skeleton';
 import MedicationsView from './Medications/MedicationsView';
 import ImageGallery from './image-gallery/ImageGallery';
-import WhatsAppMessages from '@/components/patientViewModels/whatsapp-messages/messages';
+import TelegramMessages from '@/components/patientViewModels/telegram-messages/messages';
 import { CircleLoader } from 'react-spinners';
 
 import dynamic from 'next/dynamic';
 
-// Import Agora App Builder Wrapper dynamically
-const AppBuilderWrapper = dynamic(() => import('@/components/patientViewModels/videocall/AppBuilderWrapper'), { ssr: false, loading: () => <div className='w-full h-full flex flex-col justify-center items-center'><div>Please wait, this could take a minute or two...</div><CircleLoader color="#FF5722" /></div>});
-
+const AppBuilderWrapper = dynamic(
+    () => import('@/components/patientViewModels/videocall/AppBuilderWrapper'),
+    {
+        ssr: false,
+        loading: () => (
+            <div className='w-full h-full flex flex-col justify-center items-center'>
+                <div>Please wait, this could take a minute or two...</div>
+                <CircleLoader color="#FF5722" />
+            </div>
+        )
+    }
+);
 
 const PatientDashboardContent: React.FC = () => {
     const {
@@ -55,17 +64,13 @@ const PatientDashboardContent: React.FC = () => {
             return <MedicationsView patientId={patientViewModel?.getPrimaryDetails().patientID || ''} />;
         } else if (section === 'images') {
             return <ImageGallery />;
-        } else if (section === 'contact') {
-            const expandedDetails = patientViewModel?.getExpandedDetails();
-            const phoneNumber = expandedDetails?.phone
-                ? `${expandedDetails.phone.countryCode}${expandedDetails.phone.phoneNumber}`
-                : `${expandedDetails?.country || ''}${expandedDetails?.pmhx || ''}`;
-
-                return <WhatsAppMessages phoneNumber={phoneNumber} />;
-        } else if (section === 'video') {
-            return <AppBuilderWrapper />
-        }
-    };
+        }    else if (section === 'contact') {
+                const expandedDetails = patientViewModel?.getExpandedDetails();
+                const chatId = (expandedDetails?.telegramChatId || '') as string; 
+            
+                return <TelegramMessages chatId={chatId} />;
+            }            
+    };    
 
     const sections = [
         {

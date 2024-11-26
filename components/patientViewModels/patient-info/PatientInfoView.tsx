@@ -27,6 +27,7 @@ const patientFormSchema = z.object({
     phone: z.object({
         countryCode: z.string(),
         phoneNumber: z.string(),
+        telegramChatId: z.string().optional(), 
     }),
     email: z.string().optional(),
     occupation: z.string().optional(),
@@ -132,7 +133,7 @@ const PatientInfoView: React.FC<{ isExpanded: boolean }> = ({ isExpanded }) => {
 
     useEffect(() => {
         if (expandedDetails && !form.formState.isDirty && !hasResetRef.current) {
-            form.reset(expandedDetails as PatientFormValues);
+            form.reset(expandedDetails as unknown as PatientFormValues);
             hasResetRef.current = true;
         }
     }, [expandedDetails]);

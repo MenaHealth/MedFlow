@@ -1,24 +1,31 @@
 export default async function handler(req, res) {
-    if (req.method === 'POST') {
-        const { message } = req.body;
+    console.log('Request body:', req.body); 
 
-        if (message && message.text) {
-            const chatId = message.chat.id;
-            const userMessage = message.text;
+    const { message } = req.body;
+    const telegramUrl = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`;
 
-            console.log(`Received message from ${chatId}: ${userMessage}`);
+    if (message) {
+        console.log('Message received:', message);
 
-            // Example: Send a reply to the user
-            const reply = `You said: ${userMessage}`;
-            await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ chat_id: chatId, text: reply }),
-            });
+        const chatId = message.chat.id; 
+        const text = message.text; 
+
+        if (text === '/start') {
+            console.log('Start command received, chatId:', chatId);
+
+            try {
+               
+                await updatePatientChatIdByPhone(chatId, 'PATIENT_PHONE_NUMBER'); 
+                return res.status(200).send('Chat ID saved');
+            } catch (error) {
+                console.error('Error saving chat ID:', error);
+                return res.status(500).send('Failed to save chat ID');
+            }
         }
 
-        res.status(200).send("OK");
-    } else {
-        res.status(405).send("Method Not Allowed");
+        return res.status(200).send('Message received');
     }
+
+    console.error('No message in request body');
+    return res.status(400).send('Invalid request');
 }

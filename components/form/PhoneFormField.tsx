@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
+import { FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { CountryCodesList } from '@/data/countries.enum'; // Assuming this is a string enum or array
 
 type CountryCodes = typeof CountryCodesList[number]; // Infers the type from the array or enum
@@ -9,17 +9,18 @@ export function PhoneFormField({
     fieldName,
     fieldLabel,
     defaultValue,
+    countryCodeError,
     classNames
 }: {
     form: any;
     fieldName: string;
     fieldLabel: string;
     defaultValue?: { countryCode: string; phoneNumber: string };
+    countryCodeError?: string;
     classNames?: string;
 }) {
     const [countryCode, setCountryCode] = useState<CountryCodes | undefined>(defaultValue?.countryCode as CountryCodes); // Default to undefined or the initial value
     const [phoneNumber, setPhoneNumber] = useState(defaultValue?.phoneNumber || '');
-    const [countryCodeError, setCountryCodeError] = useState<string | null>(null); // To track the error state
 
     const handleCountryCodeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedCode = e.target.value as CountryCodes;
@@ -27,7 +28,7 @@ export function PhoneFormField({
 
         // Clear the error if a country code is selected
         if (selectedCode) {
-            setCountryCodeError(null);
+            form.clearErrors(fieldName);
         }
     };
 
@@ -43,7 +44,6 @@ export function PhoneFormField({
     const handleValidation = () => {
         // Ensure that a country code is selected
         if (!countryCode) {
-            setCountryCodeError('Country code is required');
             return false;
         }
 
@@ -99,7 +99,6 @@ export function PhoneFormField({
                         </div>
                         {/* Show error message if country code is not selected */}
                         {countryCodeError && <p className="text-red-500 text-sm">{countryCodeError}</p>}
-                        <FormMessage />
                     </FormItem>
                 )}
             />

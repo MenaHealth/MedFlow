@@ -65,7 +65,7 @@ const TextFormField: React.FC<Props> = ({
     const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         if (!readOnly) {
             setIsFocused(false);
-            setHasValue(!!e.target.value);
+            setHasValue(!!e?.target?.value);
             if (onBlur) onBlur(e);
         }
     };

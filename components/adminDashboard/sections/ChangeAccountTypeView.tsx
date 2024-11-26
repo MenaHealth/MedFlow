@@ -20,7 +20,6 @@ export default function ChangeAccountTypeView() {
             headers: { 'Content-Type': 'application/json' },
         })
             .then(() => {
-                console.log({ ...session, user: { ...session?.user, accountType } });
                 update({ ...session, user: { ...session?.user, accountType } });
                 alert(`Account type updated successfully to ${accountType}!`);
             })

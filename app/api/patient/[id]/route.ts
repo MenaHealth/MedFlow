@@ -24,27 +24,7 @@ export const GET = async (request: Request, { params }: Params) => {
             return new Response("Patient Not Found", { status: 404 });
         }
 
-        console.log("[Debug] Patient fetched from DB:", JSON.stringify(patient, null, 2));
-
-        const responsePayload = {
-            _id: patient._id.toString(),
-            firstName: patient.firstName,
-            lastName: patient.lastName,
-            phone: patient.phone,
-            dob: patient.dob,
-            genderPreference: patient.genderPreference,
-            country: patient.country,
-            city: patient.city,
-            language: patient.language,
-            telegramChatId: patient.telegramChatId || "",
-            telegramAccessHash: patient.telegramAccessHash || "",
-            rxOrders: patient.rxOrders || [],
-            medOrders: patient.medOrders || [],
-        };
-
-        console.log("[Debug] Response payload:", JSON.stringify(responsePayload, null, 2));
-
-        return new Response(JSON.stringify(responsePayload), { status: 200 });
+        return new Response(JSON.stringify(patient), { status: 200 });
     } catch (error) {
         console.error("Error fetching patient:", error);
         return new Response("Internal Server Error", { status: 500 });

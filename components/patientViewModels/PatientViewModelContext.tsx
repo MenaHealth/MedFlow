@@ -11,7 +11,6 @@ import { IMedOrder } from '@/models/medOrder';
 import {Types} from "mongoose";
 
 export interface PatientInfo {
-    patientID: string;
     patientName: string;
     city: string;
     gender: string;
@@ -22,6 +21,7 @@ export interface PatientInfo {
         countryCode: string;
         phoneNumber: string;
     };
+    patientID: string;
     telegramChatId?: string;
     telegramAccessHash?: string;
 }
@@ -74,9 +74,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
 
     const toggleExpand = () => setIsExpanded(prev => !prev);
 
-    const formatPatientInfo = useCallback((patientData: IPatient) => {
-        console.log("[Debug] Raw patient data from API:", JSON.stringify(patientData, null, 2));
-
+    const formatPatientInfo = useCallback((patientData: IPatient, id: string) => {
         const patientInfo: PatientInfo = {
             patientName: `${patientData.firstName} ${patientData.lastName}`,
             city: patientData.city || '',
@@ -88,12 +86,9 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 countryCode: patientData.phone?.countryCode || '',
                 phoneNumber: patientData.phone?.phoneNumber || '',
             },
-            patientID: patientData._id || '',
-            telegramChatId: patientData.telegramChatId || '',
-            telegramAccessHash: patientData.telegramAccessHash || '',
+            patientID: id,
+            telegramChatId: (patientData.telegramChatId || '') as string,
         };
-
-        console.log("[Debug] Formatted patientInfo:", JSON.stringify(patientInfo, null, 2));
         setPatientInfo(patientInfo);
         setPatientViewModel(new PatientInfoViewModel(patientData));
     }, []);
@@ -110,7 +105,6 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                     patientName: memoizedPatientInfo?.patientName || '',
                 } as INote;
             });
-            setNotes(formattedNotes);
             setNotes(formattedNotes.filter((note) => note.draft === false));
             setDraftNotes(formattedNotes.filter((note) => note.draft === true));
         } else {
@@ -145,7 +139,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const data = await response.json() as IPatient;
-            formatPatientInfo(data);
+            formatPatientInfo(data, patientId);
             if (data.notes) {
                 formatPreviousNotes(data.notes);
             } else {
@@ -153,24 +147,22 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             }
 
             // Handle rxOrders
-            const formattedRxOrders = Array.isArray(data.rxOrders) && data.rxOrders.length > 0
-                ? data.rxOrders.map((order) =>
-                    typeof order === 'string'
-                        ? {
-                            id: order,
-                            doctorSpecialty: 'General',
-                            prescribingDr: 'Unknown',
-                            drEmail: 'unknown@example.com',
-                            drId: 'unknown',
-                            prescribedDate: new Date(),
-                            validTill: new Date(),
-                            city: 'Unknown City',
-                            validated: false,
-                            prescriptions: []
-                        } as IRxOrder
-                        : order
-                )
-                : [];
+            const formattedRxOrders = (data.rxOrders || []).map((order) =>
+                typeof order === 'string'
+                    ? {
+                        id: order,
+                        doctorSpecialty: 'General',
+                        prescribingDr: 'Unknown',
+                        drEmail: 'unknown@example.com',
+                        drId: 'unknown',
+                        prescribedDate: new Date(),
+                        validTill: new Date(),
+                        city: 'Unknown City',
+                        validated: false,
+                        prescriptions: []
+                    } as IRxOrder
+                    : order
+            );
             setRxOrders(formattedRxOrders);
 
             // Handle medOrders
@@ -256,7 +248,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 rxOrders,
                 medOrders,
                 loadingMedications,
-                refreshMedications, // <-- Pass the correct function
+                refreshMedications,
                 addRxOrder,
                 addMedOrder,
             }}

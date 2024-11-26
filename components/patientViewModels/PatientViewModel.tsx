@@ -65,9 +65,11 @@ const PatientDashboardContent: React.FC = () => {
         } else if (section === 'images') {
             return <ImageGallery />;
         }    else if (section === 'contact') {
-                return <TelegramMessages/>;
-            }            
-    };    
+                return <TelegramMessages />;
+        } else if (section === 'video') {
+            return <AppBuilderWrapper />
+        }
+    };
 
     const sections = [
         {

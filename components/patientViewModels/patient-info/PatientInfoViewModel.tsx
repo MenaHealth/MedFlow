@@ -1,4 +1,4 @@
-// components/PatientViewModels/patient-info/PatientInfoViewModel.tsx
+// components/patientViewModels/patient-info/PatientInfoViewModel.tsx
 import { IPatient } from '../../../models/patient';
 
 export class PatientInfoViewModel {

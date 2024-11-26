@@ -1,4 +1,4 @@
-// components/PatientViewModels/PatientNotes/PreviousNotesView.tsx
+// components/patientViewModels/PatientNotes/PreviousNotesView.tsx
 import React, { useState, Dispatch, SetStateAction } from 'react';
 import { ChevronDown, ChevronsDown, ChevronsUp, ChevronUp, Trash2Icon } from 'lucide-react';
 import { usePreviousNotesViewModel } from './PreviousNotesViewModel';

@@ -1,4 +1,4 @@
-// components/PatientViewModels/Medications/med/MedOrderView.tsx
+// components/patientViewModels/Medications/med/MedOrderView.tsx
 //SUBMITTING MED ORDERS
 
 
@@ -13,7 +13,7 @@ import { DoctorSpecialtyList } from "@/data/doctorSpecialty.enum";
 import { ToastProvider } from '@/components/ui/toast';
 import { ToastComponent } from '@/components/hooks/useToast';
 import { Types } from "mongoose";
-import {usePatientDashboard} from "@/components/PatientViewModels/PatientViewModelContext";
+import {usePatientDashboard} from "@/components/patientViewModels/PatientViewModelContext";
 
 interface User {
     firstName: string;

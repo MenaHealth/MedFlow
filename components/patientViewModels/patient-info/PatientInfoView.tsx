@@ -1,8 +1,8 @@
-// components/PatientViewModels/patient-info/PatientInfoView.tsx
+// components/patientViewModels/patient-info/PatientInfoView.tsx
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { Card, CardContent } from "../../ui/card";
 import ReadOnlyField from '../../form/ReadOnlyField';
-import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewModelContext';
+import { usePatientDashboard } from '@/components/patientViewModels/PatientViewModelContext';
 import { Button } from '@/components/ui/button';
 import { TextFormField } from '@/components/form/TextFormField';
 import { SelectFormField } from '@/components/form/SelectFormField';

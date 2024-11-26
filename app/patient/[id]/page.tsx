@@ -1,7 +1,7 @@
 // app/patient/[id]/page.tsx
 'use client';
 
-import PatientViewModel from '@/components/PatientViewModels/PatientViewModel';
+import PatientViewModel from '@/components/patientViewModels/PatientViewModel';
 import { useParams } from 'next/navigation';
 
 const PatientView = () => {

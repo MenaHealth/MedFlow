@@ -7,7 +7,7 @@ import { useSession } from 'next-auth/react';
 import { useToast } from '@/components/hooks/useToast';
 import { IMedOrder } from '@/models/medOrder';
 import { Types } from 'mongoose';
-import {usePatientDashboard} from "@/components/PatientViewModels/PatientViewModelContext";
+import { usePatientDashboard } from "@/components/patientViewModels/PatientViewModelContext";
 
 // Define a new type that only includes the fields we need for the form state
 type MedOrderFormState = {

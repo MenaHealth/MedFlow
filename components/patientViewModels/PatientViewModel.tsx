@@ -1,19 +1,19 @@
-// components/PatientViewModels/PatientViewModel
+// components/patientViewModels/PatientViewModel
 import React, { useState, useEffect } from 'react';
 import { PatientDashboardProvider, usePatientDashboard } from './PatientViewModelContext';
 import { User, FileText, LoaderPinwheel, PanelTopOpen, PillBottle, MessageCircle, ImageIcon, VideoIcon } from 'lucide-react';
 import PatientInfoView from './patient-info/PatientInfoView';
-import { CombinedNotesView } from '@/components/PatientViewModels/PatientNotes/CombinedNotesView';
+import { CombinedNotesView } from '@/components/patientViewModels/PatientNotes/CombinedNotesView';
 import { Skeleton } from '@/components/ui/skeleton';
 import MedicationsView from './Medications/MedicationsView';
 import ImageGallery from './image-gallery/ImageGallery';
-import TelegramMessages from '@/components/PatientViewModels/telegram-messages/messages';
+import TelegramMessages from '@/components/patientViewModels/telegram-messages/messages';
 import { CircleLoader } from 'react-spinners';
 
 import dynamic from 'next/dynamic';
 
 const AppBuilderWrapper = dynamic(
-    () => import('@/components/PatientViewModels/videocall/AppBuilderWrapper'),
+    () => import('@/components/patientViewModels/videocall/AppBuilderWrapper'),
     {
         ssr: false,
         loading: () => (

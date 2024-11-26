@@ -65,10 +65,7 @@ const PatientDashboardContent: React.FC = () => {
         } else if (section === 'images') {
             return <ImageGallery />;
         }    else if (section === 'contact') {
-                const expandedDetails = patientViewModel?.getExpandedDetails();
-                const chatId = (expandedDetails?.telegramChatId || '') as string; 
-            
-                return <TelegramMessages chatId={chatId} />;
+                return <TelegramMessages/>;
             }            
     };    
 

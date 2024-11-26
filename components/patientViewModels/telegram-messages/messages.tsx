@@ -10,22 +10,27 @@ const TelegramMessages: React.FC = () => {
     const [message, setMessage] = useState("");
 
     const handleSendMessage = async () => {
-        if (!patientInfo?.phone?.phoneNumber || !message.trim()) {
-            console.error("Phone number or message is missing");
-            alert("Patient phone number or message is missing.");
+        // Log the values to debug
+        console.log("[Debug] PatientInfo in TelegramMessages:", patientInfo);
+        console.log("[Debug] TelegramChatId:", patientInfo?.telegramChatId);
+        console.log("[Debug] TelegramAccessHash:", patientInfo?.telegramAccessHash);
+        console.log("[Debug] Message:", message);
+
+
+        if (!patientInfo?.telegramChatId || !patientInfo?.telegramAccessHash || !message.trim()) {
+            console.error("Telegram ID, access hash, or message is missing");
+            alert("Telegram ID, access hash, or message is missing.");
             return;
         }
 
-        // Combine countryCode and phoneNumber
-        const fullPhoneNumber = `${patientInfo.phone.countryCode}${patientInfo.phone.phoneNumber}`;
-
         try {
-            console.log("[TelegramMessages] Sending request with phone number:", fullPhoneNumber);
+            console.log("[TelegramMessages] Sending request with Telegram ID:", patientInfo.telegramChatId);
             const res = await fetch("/api/telegram-webhook", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    phoneNumber: fullPhoneNumber,
+                    chatId: patientInfo.telegramChatId, // Use telegramChatId
+                    accessHash: patientInfo.telegramAccessHash, // Use telegramAccessHash
                     message,
                 }),
             });

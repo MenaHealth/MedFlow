@@ -24,6 +24,7 @@ export const GET = async (request: Request, { params }: Params) => {
             return new Response("Patient Not Found", { status: 404 });
         }
 
+        console.log("[Debug] Patient fetched from DB:", JSON.stringify(patient, null, 2));
 
         const responsePayload = {
             firstName: patient.firstName,
@@ -35,9 +36,12 @@ export const GET = async (request: Request, { params }: Params) => {
             city: patient.city,
             language: patient.language,
             telegramChatId: patient.telegramChatId || "",
+            telegramAccessHash: patient.telegramAccessHash || "",
             rxOrders: patient.rxOrders || [],
             medOrders: patient.medOrders || [],
         };
+
+        console.log("[Debug] Response payload:", JSON.stringify(responsePayload, null, 2));
 
         return new Response(JSON.stringify(responsePayload), { status: 200 });
     } catch (error) {

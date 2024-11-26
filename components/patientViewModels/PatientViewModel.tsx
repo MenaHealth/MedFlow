@@ -69,7 +69,9 @@ const PatientDashboardContent: React.FC = () => {
                 const chatId = (expandedDetails?.telegramChatId || '') as string; 
             
                 return <TelegramMessages chatId={chatId} />;
-            }            
+        } else if (section === 'video') {
+            return <AppBuilderWrapper />
+        }            
     };    
 
     const sections = [

@@ -11,7 +11,7 @@ import { Button } from "../../ui/button";
 import { ScrollArea } from '../../ui/ScrollArea';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import ReadOnlyField from "../../form/ReadOnlyField";
-import { Resizable } from './../../ui/Resizable';
+import { Resizable } from '../../ui/Resizable';
 
 interface NotesViewProps {
     patientId: string;

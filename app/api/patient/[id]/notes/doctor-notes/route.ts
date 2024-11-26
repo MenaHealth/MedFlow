@@ -77,21 +77,11 @@ export const PATCH = async (request: Request, { params }: Params) => {
         if (!patient) {
             return new Response(`Patient with ID ${params.id} not found`, { status: 404 });
         }
-        console.log('Patient:', patient);
-        console.log(noteId)
-        console.log(noteType)
-        console.log(content)
-        console.log(email)
-        console.log(authorName)
-        console.log(authorID)
-        console.log(draft)
         const noteIndex = patient.notes.findIndex((note: INote) => note._id.toString() === noteId);
-        console.log('Note index:', noteIndex);
         console.log(noteIndex === -1)
         if (noteIndex === -1) {
             return await POST(altRequest, { params  });       
         }
-        console.log('Note index:', noteIndex);
         patient.notes[noteIndex].noteType = noteType;
         patient.notes[noteIndex].content = content;
         patient.notes[noteIndex].email = email;

@@ -1,4 +1,4 @@
-// components/patientViewModels/Medications/previous/PreviousMedicationsView.tsx
+// components/PatientViewModels/Medications/previous/PreviousMedicationsView.tsx
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronDown, ChevronUp, Share, ChevronsDown, ChevronsUp } from 'lucide-react';
@@ -6,7 +6,7 @@ import { ScrollArea } from '../../../ui/ScrollArea';
 import RxOrderDrawerView from '../rx/RxOrderDrawerView';
 import { IRxOrder } from '../../../../models/patient';
 import { IMedOrder } from '../../../../models/medOrder';
-import { usePatientDashboard } from '@/components/patientViewModels/PatientViewModelContext';
+import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewModelContext';
 import { Button } from '@/components/ui/button';
 import { Types } from "mongoose";
 

@@ -1,10 +1,10 @@
-// components/patientViewModels/Medications/rx/RXOrderViewModel.ts
+// components/PatientViewModels/Medications/rx/RXOrderViewModel.ts
 import {useCallback, useState, useMemo, useContext} from 'react';
 import { useSession } from 'next-auth/react'; // Import the session hook
 import { ToastContext } from '@/components/hooks/useToast';
 import { IRxOrder } from "@/models/patient";
 import { Types } from "mongoose";
-import {usePatientDashboard} from "@/components/patientViewModels/PatientViewModelContext";
+import {usePatientDashboard} from "@/components/PatientViewModels/PatientViewModelContext";
 
 interface Prescription {
     diagnosis: string;

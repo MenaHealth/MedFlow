@@ -1,4 +1,4 @@
-// components/patientViewModels/PatientNotes/CombinedNotesViewModel.tsx
+// components/PatientViewModels/PatientNotes/CombinedNotesViewModel.tsx
 import { useState, useCallback } from 'react';
 import { usePatientDashboard } from "../PatientViewModelContext";
 import { INote } from "@/models/note";

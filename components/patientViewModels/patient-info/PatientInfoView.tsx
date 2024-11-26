@@ -1,8 +1,8 @@
-// components/patientViewModels/patient-info/PatientInfoView.tsx
+// components/PatientViewModels/patient-info/PatientInfoView.tsx
 import { useEffect, useState, useMemo, useRef } from 'react';
-import { Card, CardContent } from "./../../../components/ui/card";
-import ReadOnlyField from './../../../components/form/ReadOnlyField';
-import { usePatientDashboard } from '@/components/patientViewModels/PatientViewModelContext';
+import { Card, CardContent } from "../../ui/card";
+import ReadOnlyField from '../../form/ReadOnlyField';
+import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewModelContext';
 import { Button } from '@/components/ui/button';
 import { TextFormField } from '@/components/form/TextFormField';
 import { SelectFormField } from '@/components/form/SelectFormField';
@@ -14,7 +14,7 @@ import { PhoneFormField } from '@/components/form/PhoneFormField';
 import { CountriesList } from '@/data/countries.enum';
 import { LanguagesList } from '@/data/languages.enum';
 import { format } from 'date-fns';
-import { PatientInfo } from './../PatientViewModelContext'
+import { PatientInfo } from '../PatientViewModelContext';
 
 const patientFormSchema = z.object({
     patientName: z.string(),
@@ -72,6 +72,7 @@ const PatientInfoView: React.FC<{ isExpanded: boolean }> = ({ isExpanded }) => {
     const [isEditing, setIsEditing] = useState(false);
 
     const expandedDetails = patientViewModel?.getExpandedDetails();
+    console.log(expandedDetails)
     const defaultValues = useMemo(() => {
         return expandedDetails
             ? {

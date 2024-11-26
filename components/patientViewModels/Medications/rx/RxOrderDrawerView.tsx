@@ -1,4 +1,4 @@
-// components/patientViewModels/Medications/rx/RxOrderDrawerView.tsx
+// components/PatientViewModels/Medications/rx/RxOrderDrawerView.tsx
 
 import React, { useRef } from "react";
 import Image from 'next/image';
@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import { Drawer, DrawerContent, DrawerHeader } from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/ScrollArea";
-import { usePatientDashboard } from "@/components/patientViewModels/PatientViewModelContext";
+import { usePatientDashboard } from "@/components/PatientViewModels/PatientViewModelContext";
 import { IRxOrder } from "@/models/patient";
 import { useRxOrderDrawerViewModel } from "./RxOrderDrawerViewModel";
 import { ToastProvider } from '@/components/ui/toast';

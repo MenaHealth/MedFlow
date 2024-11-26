@@ -1,4 +1,4 @@
-// components/patientViewModels/Medications/previous/PreviousMedicationsViewModel.tsx
+// components/PatientViewModels/Medications/previous/PreviousMedicationsViewModel.tsx
 
 import { usePatientDashboard } from '../../PatientViewModelContext';
 import { IRxOrder } from '@/models/patient';

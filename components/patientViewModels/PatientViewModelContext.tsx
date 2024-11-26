@@ -1,9 +1,8 @@
-// components/patientViewModels/PatientViewModelContext.tsx
+// components/PatientViewModels/PatientViewModelContext.tsx
 "use client"
 
 import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect, useMemo } from 'react';
 import { useParams } from 'next/navigation';
-import { useSession } from 'next-auth/react';
 import { PatientInfoViewModel } from "./patient-info/PatientInfoViewModel";
 import { IPatient } from '@/models/patient';
 import { INote } from '@/models/note';
@@ -90,7 +89,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
 
     const toggleExpand = () => setIsExpanded(prev => !prev);
 
-    const formatPatientInfo = useCallback((patientData: IPatient) => {
+    const formatPatientInfo = useCallback((patientData: IPatient, id: string) => {
         const patientInfo: PatientInfo = {
             patientName: `${patientData.firstName} ${patientData.lastName}`,
             city: patientData.city || '',
@@ -102,7 +101,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 countryCode: patientData.phone?.countryCode || '',
                 phoneNumber: patientData.phone?.phoneNumber || '',
             },
-            patientID: patientData._id?.toString() || '',
+            patientID: id,
             telegramChatId: (patientData.telegramChatId || '') as string,
         };
         setPatientInfo(patientInfo);
@@ -121,7 +120,6 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                     patientName: memoizedPatientInfo?.patientName || '',
                 } as INote;
             });
-            setNotes(formattedNotes);
             setNotes(formattedNotes.filter((note) => note.draft === false));
             setDraftNotes(formattedNotes.filter((note) => note.draft === true));
         } else {
@@ -156,7 +154,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const data = await response.json() as IPatient;
-            formatPatientInfo(data);
+            formatPatientInfo(data, patientId);
             if (data.notes) {
                 formatPreviousNotes(data.notes);
             } else {

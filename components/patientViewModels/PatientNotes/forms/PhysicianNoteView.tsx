@@ -1,5 +1,5 @@
 import React from 'react';
-import { TextFormField } from "./../../../../components/ui/TextFormField";
+import { TextFormField } from "../../../ui/TextFormField";
 import { PhysicianNote } from '../CombinedNotesViewModel';
 import {ScrollArea} from "../../../ui/ScrollArea";
 

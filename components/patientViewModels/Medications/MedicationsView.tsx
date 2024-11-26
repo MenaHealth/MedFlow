@@ -1,13 +1,13 @@
-// components/patientViewModels/Medications/MedicationsView.tsx
+// components/PatientViewModels/Medications/MedicationsView.tsx
 
 import React, { useState, useEffect } from 'react';
 import { useForm, FormProvider } from "react-hook-form";
 import { RadioCard } from '@/components/ui/radio-card';
 import RXOrderView from './rx/RXOrderView';
-import MedOrderView from '@/components/patientViewModels/Medications/med/MedOrderView';
+import MedOrderView from '@/components/PatientViewModels/Medications/med/MedOrderView';
 import PreviousMedicationsView from './previous/PreviousMedicationsView';
 import RxOrderDrawerView from './rx/RxOrderDrawerView';
-import { usePatientDashboard } from '@/components/patientViewModels/PatientViewModelContext';
+import { usePatientDashboard } from '@/components/PatientViewModels/PatientViewModelContext';
 import { BarLoader } from "react-spinners";
 import { DoctorSpecialtyList } from "@/data/doctorSpecialty.enum";
 import { ChevronDown, ChevronUp, Share } from 'lucide-react'

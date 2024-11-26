@@ -64,6 +64,18 @@ const ConfirmationModal = ({ patientId, patientName, onClose, submittingFromNoSe
             farsi: "لطفاً این کادر را علامت بزنید و تأیید کنید که شرایط ثبت نام بیمار را خوانده و درک کرده اید و موافقت می کنید",
             pashto: "مهرباني وکړئ دا بکس چیک کړئ دا تاییدوي چې تاسو د ناروغ د راجسټریشن شرایط لوستلي او پوهیږئ او موافق یاست"
         },
+        agreeSMS: {
+            english: "Check box if you consent to the following: \nI hereby consent and state my preference to have my physician and other staff at MENA Health communicate with me by standard SMS messaging or through a third party communications application (including but not limited to Telegram); regarding various aspects of my medical care, which may include, but shall not be limited to, test results, prescriptions, appointments, and billing.",
+            arabic: `خانة الاختيار إذا كنت توافق على ما يلي:
+أوافق بموجب هذا وأصرح بتفضيلي أن يتواصل معي طبيبي وغيره من الموظفين في شركة مينا هيلث عبر الرسائل النصية القصيرة القياسية أو من خلال تطبيق اتصالات تابع لجهة خارجية (بما في ذلك على سبيل المثال لا الحصر Viber وTelegram)؛ فيما يتعلق بالجوانب المختلفة لرعايتي الطبية، والتي قد تشمل، على سبيل المثال لا الحصر، نتائج الاختبارات والوصفات الطبية والمواعيد والفواتير. 
+`,
+            farsi: `اگر به موارد زیر رضایت دارید، کادر را علامت بزنید:
+بدینوسیله موافقت می‌کنم و ترجیح می‌دهم که پزشک و سایر کارکنان من در MENA Health با پیام‌های SMS استاندارد یا از طریق یک برنامه ارتباطی شخص ثالث (از جمله Viber، Telegram) با من در ارتباط باشند. در رابطه با جنبه‌های مختلف مراقبت‌های پزشکی من، که ممکن است شامل نتایج آزمایش، نسخه‌ها، قرار ملاقات‌ها و صورت‌حساب باشد، اما محدود به آن نیست.
+`,
+            pashto: `بکس چیک کړئ که تاسو لاندې سره موافق یاست:
+زه په دې توګه موافق یم او خپل غوره توب بیانوم چې د MENA روغتیا کې زما ډاکټر او نور کارمندان له ما سره د معیاري SMS پیغام یا د دریمې ډلې ارتباطي غوښتنلیک له لارې اړیکه ونیسي (په شمول مګر په وایبر، ټیلیګرام پورې محدود ندي)؛ زما د طبي پاملرنې د مختلفو اړخونو په اړه، چې کېدای شي شامل وي، مګر د ازموینې پایلې، نسخې، ملاقاتونه، او بل کول باید محدود نه وي.
+`
+        },
         submit: {
             english: "Submit",
             arabic: "يُقدِّم",
@@ -125,13 +137,16 @@ const ConfirmationModal = ({ patientId, patientName, onClose, submittingFromNoSe
                     <p>&bull;&nbsp;{values.transferData[language]}</p>
                     <br />
                     <input type="checkbox" id="agree" name="agree" value="agree" />
-                    <label for="agree" className='text-gray-500'>&nbsp;{values.checkBox[language]}</label>
+                    <label for="agree" className='text-gray-500'>&nbsp;{values.agree[language]}</label>
+                    <br />
+                    <input type="checkbox" id="agreeSMS" name="agreeSMS" value="agreeSMS" />
+                    <label for="agreeSMS" className='text-gray-500'>&nbsp;{values.agreeSMS[language]}</label>
 
                     <div className="flex justify-end mt-4 space-x-4">
                         <button
                             className="px-4 py-2 bg-blue-500 text-white rounded"
                             onClick={() => {
-                                if (document.getElementById('agree').checked) {
+                                if (document.getElementById('agree').checked && document.getElementById('agreeSMS').checked) {
                                     setSubmittingFromNoSession(false);
                                     submit();
                                 } else {

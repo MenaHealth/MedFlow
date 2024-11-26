@@ -1,6 +1,5 @@
 // components/patientViewModels/patient-info/PatientInfoViewModel.tsx
-import { add } from 'date-fns';
-import { IPatient } from './../../../models/patient';
+import { IPatient } from '../../../models/patient';
 
 export class PatientInfoViewModel {
     patient: IPatient | null = null;

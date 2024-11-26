@@ -123,6 +123,7 @@ const PatientSchema = new Schema<IPatient>({
         countryCode: { type: String },
         phoneNumber: { type: String },
         telegramChatId: { type: String },
+        telegramAccessHash: { type: String },
     },
     dob: { type: Date },
     city: { type: String },

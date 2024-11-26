@@ -58,8 +58,15 @@ export default async function handler(req, res) {
 
         // Send message to the resolved chat ID
         console.log("[Telegram Webhook] Sending message:", message);
-        const response = await client.sendMessage(chatId, {
+        const response = await client.invoke({
+            _: "messages.sendMessage",
+            peer: {
+                _: "inputPeerUser",
+                user_id: chatId,
+                access_hash: user.access_hash, // Ensure this is included
+            },
             message,
+            random_id: BigInt(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)),
         });
 
         console.log("[Telegram Webhook] Message Sent Response:", response);

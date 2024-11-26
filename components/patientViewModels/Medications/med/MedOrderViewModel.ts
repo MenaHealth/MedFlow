@@ -7,9 +7,8 @@ import { useSession } from 'next-auth/react';
 import { useToast } from '@/components/hooks/useToast';
 import { IMedOrder } from '@/models/medOrder';
 import { Types } from 'mongoose';
-import {usePatientDashboard} from "@/components/patientViewModels/PatientViewModelContext";
+import { usePatientDashboard } from "@/components/patientViewModels/PatientViewModelContext";
 
-// Define a new type that only includes the fields we need for the form state
 type MedOrderFormState = {
     doctorSpecialty: string;
     prescribingDr: string;
@@ -32,25 +31,24 @@ type MedOrderFormState = {
 };
 
 export function useMedOrderViewModel(patientId: string | Types.ObjectId, patientName: string, city: string, countries: string[], phone: string) {
-    const { data: session, status } = useSession(); // Access the session here
+    const { data: session } = useSession();
     const { setToast } = useToast();
-    const { refreshMedications, addMedOrder } = usePatientDashboard(); // Access context methods
+    const { refreshMedications, addMedOrder } = usePatientDashboard();
 
-
-    const initialMedOrder: MedOrderFormState = {
+    const initialMedOrder = useMemo<MedOrderFormState>(() => ({
         doctorSpecialty: session?.user?.doctorSpecialty || 'Not Selected',
         prescribingDr: `${session?.user?.firstName || ''} ${session?.user?.lastName || ''}`,
         drEmail: session?.user?.email || '',
         drId: session?.user?._id || '',
         patientName,
-        patientPhone: phone, // Use the passed phone argument
+        patientPhone: phone,
         patientCity: city,
-        patientCountry: countries[0] || '', // Use the first country from the array
+        patientCountry: countries[0] || '',
         patientId,
         orderDate: new Date(),
         validated: false,
         medications: [{ diagnosis: '', medication: '', dosage: '', frequency: '', quantity: '' }],
-    };
+    }), [session, patientName, phone, city, countries, patientId]);
 
     const [medOrder, setMedOrder] = useState<MedOrderFormState>(initialMedOrder);
     const [isLoading, setIsLoading] = useState(false);
@@ -127,7 +125,6 @@ export function useMedOrderViewModel(patientId: string | Types.ObjectId, patient
                 throw new Error(`Failed to save Med order: ${errorText}`);
             }
 
-
             const savedMedOrder: IMedOrder = await response.json();
 
             setToast({
@@ -136,10 +133,8 @@ export function useMedOrderViewModel(patientId: string | Types.ObjectId, patient
                 variant: 'success',
             });
 
-            // Add the new MedOrder to context or trigger a refresh
-            addMedOrder(savedMedOrder); // Optionally use refreshMedications() for a full refresh
+            addMedOrder(savedMedOrder);
 
-            // Reset form
             setMedOrder({
                 ...initialMedOrder,
                 orderDate: new Date(),
@@ -155,7 +150,7 @@ export function useMedOrderViewModel(patientId: string | Types.ObjectId, patient
         } finally {
             setIsLoading(false);
         }
-    }, [medOrder, patientId, isFormComplete, setToast, patientName, initialMedOrder, addMedOrder]);
+    }, [isFormComplete, medOrder, patientId, setToast, patientName, initialMedOrder, addMedOrder]);
 
     return {
         medOrder,

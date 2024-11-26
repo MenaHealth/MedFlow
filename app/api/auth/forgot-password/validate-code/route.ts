@@ -6,6 +6,8 @@ import User from '@/models/user';
 
 const BASE_URL = process.env.NEXTAUTH_URL || 'http://localhost:3000';
 
+export const dynamic = 'force-dynamic'; // Mark this route as dynamic
+
 export async function GET(request: Request) {
     console.log('Validate code API called');
     await dbConnect();

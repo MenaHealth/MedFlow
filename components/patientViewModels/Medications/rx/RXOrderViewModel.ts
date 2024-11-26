@@ -22,7 +22,7 @@ export function useRXOrderViewModel(
     const { addRxOrder, refreshMedications } = usePatientDashboard(); 
     const { api } = useContext(ToastContext);
 
-    const initialRxOrder: IRxOrder = {
+    const initialRxOrder = useMemo(() => ({
         doctorSpecialty: session?.user?.doctorSpecialty || 'Not Selected',
         prescribingDr: `${session?.user?.firstName || ''} ${session?.user?.lastName || ''}`,
         drEmail: session?.user?.email || '',
@@ -31,7 +31,7 @@ export function useRXOrderViewModel(
         validTill: new Date(new Date().setMonth(new Date().getMonth() + 1)),
         city,
         prescriptions: [{ diagnosis: '', medication: '', dosage: '', frequency: '' }],
-    };
+    }), [session, city]);
 
     const [rxOrder, setRxOrder] = useState<IRxOrder>(initialRxOrder);
     const [isLoading, setIsLoading] = useState(false);

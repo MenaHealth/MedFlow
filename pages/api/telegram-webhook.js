@@ -3,6 +3,7 @@
 
 import { TelegramClient } from "telegram";
 import { StringSession } from "telegram/sessions";
+import { Api } from "telegram";
 
 const apiId = process.env.TELEGRAM_API_ID; // Your Telegram API ID
 const apiHash = process.env.TELEGRAM_API_HASH; // Your Telegram API Hash
@@ -31,17 +32,18 @@ export default async function handler(req, res) {
         }
         console.log("[Telegram Webhook] Telegram client connected!");
 
-        console.log("[Telegram Webhook] Sending message:", message);
-        const response = await client.invoke({
-            _: "messages.sendMessage",
-            peer: {
-                _: "inputPeerUser",
-                user_id: chatId, // Use chat ID from request
-                access_hash: accessHash, // Use access hash from request
-            },
-            message,
-            random_id: BigInt(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)),
-        });
+        console.log("[Telegram Webhook] Preparing to send message:", message);
+
+        const response = await client.invoke(
+            new Api.messages.SendMessage({
+                peer: new Api.InputPeerUser({
+                    userId: BigInt(chatId), // Convert chatId to BigInt
+                    accessHash: BigInt(accessHash), // Convert accessHash to BigInt
+                }),
+                message,
+                randomId: BigInt(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)),
+            })
+        );
 
         console.log("[Telegram Webhook] Message Sent Response:", response);
 

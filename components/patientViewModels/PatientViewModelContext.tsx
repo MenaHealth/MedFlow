@@ -11,6 +11,7 @@ import { IMedOrder } from '@/models/medOrder';
 import {Types} from "mongoose";
 
 export interface PatientInfo {
+    patientID: string;
     patientName: string;
     city: string;
     gender: string;
@@ -21,7 +22,6 @@ export interface PatientInfo {
         countryCode: string;
         phoneNumber: string;
     };
-    patientID: string;
     telegramChatId?: string;
     telegramAccessHash?: string;
 }
@@ -88,9 +88,9 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 countryCode: patientData.phone?.countryCode || '',
                 phoneNumber: patientData.phone?.phoneNumber || '',
             },
-            patientID: patientData._id?.toString() || '',
+            patientID: patientData._id || '',
             telegramChatId: patientData.telegramChatId || '',
-            telegramAccessHash: patientData.telegramAccessHash || '', // Ensure this is set correctly
+            telegramAccessHash: patientData.telegramAccessHash || '',
         };
 
         console.log("[Debug] Formatted patientInfo:", JSON.stringify(patientInfo, null, 2));

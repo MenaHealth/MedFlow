@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { IRxOrder } from '@/models/patient';
 import { IMedOrder } from '@/models/medOrder';
 import {Types} from "mongoose";
-import { useSession } from 'next-auth/react'; // Import the session hook
+import { useSession } from 'next-auth/react';
 
 interface MedicationsViewProps {
     patientId: string | Types.ObjectId;
@@ -23,7 +23,7 @@ interface MedicationsViewProps {
 }
 
 export default function MedicationsView({ patientId }: MedicationsViewProps) {
-    const { data: session } = useSession(); // Add this line to use the global session
+    const { data: session } = useSession();
 
 
     const [isValidPatientId, setIsValidPatientId] = useState(false);

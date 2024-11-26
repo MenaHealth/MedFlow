@@ -53,10 +53,14 @@ export function useExistingDoctorsAndTriageViewModel() {
         }
     );
 
-    const existingUsers = data?.pages.flatMap((page) => page.users) || [];
+    // Memoize the `existingUsers` array
+    const existingUsers = useMemo(() => {
+        return data?.pages.flatMap((page) => page.users) || [];
+    }, [data?.pages]);
 
+    // Filter users based on the search term
     const filteredUsers = useMemo(() => {
-        return existingUsers.filter(user =>
+        return existingUsers.filter((user) =>
             user.email.toLowerCase().includes(searchTerm.toLowerCase())
         );
     }, [existingUsers, searchTerm]);

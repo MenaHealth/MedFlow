@@ -136,7 +136,7 @@ const PatientInfoView: React.FC<{ isExpanded: boolean }> = ({ isExpanded }) => {
             form.reset(expandedDetails as unknown as PatientFormValues);
             hasResetRef.current = true;
         }
-    }, [expandedDetails]);
+    }, [expandedDetails, form]);
 
     if (loadingPatientInfo || !patientViewModel) {
         return <div>Loading...</div>;

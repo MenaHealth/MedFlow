@@ -27,6 +27,7 @@ export const GET = async (request: Request, { params }: Params) => {
         console.log("[Debug] Patient fetched from DB:", JSON.stringify(patient, null, 2));
 
         const responsePayload = {
+            _id: patient._id.toString(),
             firstName: patient.firstName,
             lastName: patient.lastName,
             phone: patient.phone,

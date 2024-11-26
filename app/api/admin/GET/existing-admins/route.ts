@@ -1,3 +1,5 @@
+// app/api/admin/GET/existing-admins/route.ts
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from "next/server";
 import Admin from "@/models/admin";
 import { initializeDatabase, verifyAdminToken } from "@/utils/adminAPI";

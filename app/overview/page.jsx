@@ -3,14 +3,15 @@
 import React, { useEffect } from 'react'
 import { Card } from '@/components/ui/card'
 import './teamPage.css'
+import Image from 'next/image';
 import Link from "next/link";
-import { ClipboardList, ClipboardPlus, Calendar, Image, Stethoscope, FileText } from 'lucide-react'
+import { ClipboardList, ClipboardPlus, Calendar, ImagePlus, Stethoscope, FileText } from 'lucide-react'
 
 const features = [
     { icon: ClipboardList, title: "View Patient Info", description: "Access comprehensive patient information" },
     { icon: Calendar, title: "Schedule Lab Visits", description: "Easily manage and schedule laboratory appointments" },
     { icon: Stethoscope, title: "Take Patient Notes", description: "Record detailed medical notes for each patient" },
-    { icon: Image, title: "Image Gallery", description: "Maintain a dedicated image gallery for each patient" },
+    { icon: ImagePlus, title: "Image Gallery", description: "Maintain a dedicated image gallery for each patient" },
     { icon: FileText, title: "Prescription Management", description: "Generate and manage drug prescription paperwork" },
 ]
 
@@ -123,7 +124,7 @@ export default function TeamPage() {
                         {/* Michelle */}
                         <Card className="p-2 bg-white bg-opacity-30 card-container">
                             <div className="flex flex-col items-center text-center">
-                                <img
+                                <image
                                     src="assets/images/mn1_hdst.png"
                                     alt="Michelle"
                                     className="rounded-full object-cover w-20 h-20 mb-4"
@@ -137,7 +138,7 @@ export default function TeamPage() {
                         {/* Maya */}
                         <Card className="p-2 bg-white bg-opacity-30 card-container">
                             <div className="flex flex-col items-center text-center">
-                                <img
+                                <image
                                     src="assets/images/ma_hdst.jpeg"
                                     alt="Maya"
                                     className="rounded-full object-cover w-20 h-20 mb-4"
@@ -151,7 +152,7 @@ export default function TeamPage() {
                         {/* Kyle */}
                         <Card className="p-2 bg-white bg-opacity-30 card-container">
                             <div className="flex flex-col items-center text-center">
-                                <img
+                                <image
                                     src="assets/images/ke_hdst.jpg"
                                     alt="Kyle"
                                     className="rounded-full object-cover w-20 h-20 mb-4"
@@ -164,7 +165,7 @@ export default function TeamPage() {
                         {/* Andy */}
                         <Card className="p-2 bg-white bg-opacity-30 card-container">
                             <div className="flex flex-col items-center text-center">
-                                <img
+                                <image
                                     src="assets/images/ac_hdst.jpg"
                                     alt="Andy"
                                     className="rounded-full object-cover w-20 h-20 mb-4"

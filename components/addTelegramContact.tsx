@@ -1,6 +1,5 @@
 // components/addTelegramContact.tsx
 
-
 import { TelegramClient } from "telegram";
 import { StringSession } from "telegram/sessions";
 import { Api } from "telegram";
@@ -53,7 +52,7 @@ async function addTelegramContact(patient: IPatient) {
 
         // Filter valid users with accessHash
         const validUsers = response.users.filter(
-            (user): user is Api.User => "accessHash" in user
+            (user): user is Api.User => "accessHash" in user && user.accessHash !== undefined
         );
 
         if (!validUsers || validUsers.length === 0) {
@@ -62,9 +61,15 @@ async function addTelegramContact(patient: IPatient) {
 
         const user = validUsers[0]; // Retrieve the first valid user
 
+        if (!user.accessHash) {
+            throw new Error("Access hash is missing from the user object.");
+        }
+
+        console.log("Telegram info:", { userId: user.id.toString(), accessHash: user.accessHash.toString() });
+
         return {
-            userId: user.id,
-            accessHash: user.accessHash,
+            userId: user.id.toString(), // Convert BigInt to string
+            accessHash: user.accessHash.toString(), // Convert BigInt to string
         };
     } catch (error) {
         console.error("Error adding Telegram contact:", error);

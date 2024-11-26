@@ -72,7 +72,6 @@ const PatientInfoView: React.FC<{ isExpanded: boolean }> = ({ isExpanded }) => {
     const [isEditing, setIsEditing] = useState(false);
 
     const expandedDetails = patientViewModel?.getExpandedDetails();
-    console.log(expandedDetails)
     const defaultValues = useMemo(() => {
         return expandedDetails
             ? {

@@ -7,7 +7,6 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { UserRoundPlus } from "lucide-react"
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -285,27 +284,13 @@ export default function PatientTriage() {
   return (
     <>
       <div className="w-full relative dashboard-page">
-        <div className="flex justify-between items-center py-3">
-          <Link
-            href="/create-patient"
-            className="flex items-center justify-center no-underline"
-          >
-            <div className="relative group ml-4 bg-darkBlue p-2">
-              <UserRoundPlus color={"white"} bsize={22} />
-              <span className="absolute left-full ml-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap bg-white px-2 py-1 rounded shadow-lg">
-                Add New Patient
-              </span>
-            </div>
-          </Link>
+        <div className="flex items-center py-3">
           <h2
             className="flex-1 text-center font-bold"
             style={{ fontSize: "24px" }}
           >
             <span className="blue_gradient">Patient List</span>
           </h2>
-          <div style={{ width: 48 }}>
-            {" "}
-          </div>
         </div>  
         <div className="flex flex-wrap gap-2 mb-4">
           {priorityFilter !== "all" && (

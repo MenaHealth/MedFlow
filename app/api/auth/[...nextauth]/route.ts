@@ -105,7 +105,7 @@ const handler = NextAuth({
         }),
     ],
     callbacks: {
-        async jwt({ token, user }) {
+        async jwt({ token, user, trigger }) {
             if (user) {
                 const sessionUser = user as SessionUser;
 
@@ -131,6 +131,13 @@ const handler = NextAuth({
                     process.env.JWT_SECRET!, // Ensure JWT_SECRET is set in your environment
                     { expiresIn: '2d' }
                 );
+            }
+            if (trigger === 'update' && token?.isAdmin) {
+                if (token.accountType === 'Doctor') {
+                    token.accountType = 'Triage';
+                } else if (token.accountType === 'Triage') {
+                    token.accountType = 'Doctor';
+                }
             }
             return token;
         },

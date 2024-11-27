@@ -19,8 +19,8 @@ export default function ChangeAccountTypeView() {
             body: JSON.stringify({ accountType }),
             headers: { 'Content-Type': 'application/json' },
         })
-            .then(() => {
-                update({ ...session, user: { ...session?.user, accountType } });
+            .then(async () => {
+                await update({ ...session, user: { ...session?.user, accountType } });
                 alert(`Account type updated successfully to ${accountType}!`);
             })
             .catch((error) => {

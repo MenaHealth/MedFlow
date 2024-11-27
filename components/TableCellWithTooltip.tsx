@@ -71,7 +71,7 @@ const TableCellWithTooltip: React.FC<TableCellWithTooltipProps> = ({ children, t
                 open={isHovered && showTooltip} // Only show tooltip when both conditions are true
             >
                 <div
-                    className="block overflow-hidden text-ellipsis text-sm cursor-pointer"
+                    className="block overflow-hidden text-ellipsis text-sm"
                     style={{
                         maxWidth,
                         whiteSpace: 'nowrap',

@@ -29,6 +29,8 @@ const AdminDashboardContent = () => {
     const [isRefreshing, setIsRefreshing] = useState(false);
     const { data: session } = useSession();
 
+    console.log(session)
+
     const handleToggleSection = (sectionId: typeof sections[number]['id']) => {
         setOpenSection(prev => prev === sectionId ? null : sectionId);
     };

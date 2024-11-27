@@ -1,59 +1,55 @@
-const sendTelegramMessage = async (chatId, text) => {
-    const telegramUrl = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`;
+// pages/api/telegram-webhook.js
 
-    try {
-        const response = await fetch(telegramUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: chatId, text }),
-        });
 
-        const result = await response.json();
-        console.log("Telegram API Response:", result);
+import { TelegramClient } from "telegram";
+import { StringSession } from "telegram/sessions";
+import { Api } from "telegram";
 
-        if (!response.ok) {
-            throw new Error(result.description || 'Failed to send Telegram message');
-        }
+const apiId = process.env.TELEGRAM_API_ID; // Your Telegram API ID
+const apiHash = process.env.TELEGRAM_API_HASH; // Your Telegram API Hash
+const stringSession = new StringSession(process.env.TELEGRAM_SESSION); // Use saved session string
 
-        return result;
-    } catch (error) {
-        console.error("Error sending Telegram message:", error.message);
-        throw error;
-    }
-};
+const client = new TelegramClient(stringSession, parseInt(apiId), apiHash, {
+    connectionRetries: 5,
+});
 
 export default async function handler(req, res) {
+    if (req.method !== "POST") {
+        return res.status(405).json({ error: "Method not allowed" });
+    }
+
+    const { chatId, accessHash, message } = req.body;
+
+    if (!chatId || !accessHash || !message) {
+        console.error("[Telegram Webhook] Error: Missing chat ID, access hash, or message.");
+        return res.status(400).json({ error: "Chat ID, access hash, and message are required" });
+    }
+
     try {
-        console.log("Incoming webhook request:", req.body);
-
-        const { message } = req.body;
-
-        if (message) {
-            const chatId = message.chat.id;
-            const text = message.text;
-
-            console.log("Received message:", text, "from chat ID:", chatId);
-
-            if (text === '/start') {
-                console.log("Saving chat ID:", chatId);
-                return res.status(200).send('Chat ID saved');
-            }
-
-            console.log("Forwarding message to Telegram...");
-            try {
-                const telegramResponse = await sendTelegramMessage(chatId, `Forwarded: ${text}`);
-                console.log("Telegram message sent:", telegramResponse);
-                return res.status(200).send('Message received and forwarded to Telegram');
-            } catch (err) {
-                console.error("Error sending Telegram message:", err.message);
-                return res.status(500).send('Failed to forward message to Telegram');
-            }
+        if (!client.connected) {
+            console.log("[Telegram Webhook] Connecting Telegram Client...");
+            await client.connect();
         }
+        console.log("[Telegram Webhook] Telegram client connected!");
 
-        console.error("Invalid request: No message object found");
-        return res.status(400).send('Invalid request');
+        console.log("[Telegram Webhook] Preparing to send message:", message);
+
+        const response = await client.invoke(
+            new Api.messages.SendMessage({
+                peer: new Api.InputPeerUser({
+                    userId: BigInt(chatId), // Convert chatId to BigInt
+                    accessHash: BigInt(accessHash), // Convert accessHash to BigInt
+                }),
+                message,
+                randomId: BigInt(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)),
+            })
+        );
+
+        console.log("[Telegram Webhook] Message Sent Response:", response);
+
+        res.status(200).json({ success: true, response });
     } catch (error) {
-        console.error("Error in webhook handler:", error);
-        return res.status(500).send('Internal server error');
+        console.error("[Telegram Webhook] Error sending Telegram message:", error);
+        res.status(500).json({ error: "Internal server error" });
     }
 }

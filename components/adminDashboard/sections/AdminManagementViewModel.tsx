@@ -1,90 +1,100 @@
 import { useSession } from 'next-auth/react';
-import { useState, useCallback } from 'react';
-import { useQueryClient } from 'react-query';
+import { useState, useCallback, useEffect } from 'react';
 import { useToast } from '@/components/hooks/useToast';
 import { IAdmin } from "@/models/admin";
-import { Types } from 'mongoose';
 
 export function useAdminManagementViewModel() {
     const [adminsData, setAdminsData] = useState<IAdmin[]>([]);
     const { data: session } = useSession();
     const token = session?.user.token;
-    const queryClient = useQueryClient();
     const { setToast } = useToast();
 
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedUser, setSelectedUser] = useState<string | null>(null);
-    const [currentOffset, setCurrentOffset] = useState(0);
-    const [loadingAdmins, setLoadingAdmins] = useState(false);
-    const [hasMoreAdmins, setHasMoreAdmins] = useState(true);
-    const limit = 20;
+    const [selectedUser, setSelectedUser] = useState<IAdmin[]>([]);
 
-    const fetchAdmins = async (offset: number): Promise<IAdmin[]> => {
-        const response = await fetch(`/api/admin/management?offset=${offset}&limit=${limit}`, {
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`,
-            },
-        });
-        if (!response.ok) throw new Error('Failed to fetch admins');
-        const data = await response.json();
-        return data.admins || [];
-    };
-
-    const loadMoreAdmins = useCallback(async () => {
-        if (loadingAdmins || !hasMoreAdmins) return;
-
-        setLoadingAdmins(true);
+    const fetchAllAdmins = useCallback(async () => {
         try {
-            const newAdmins = await fetchAdmins(currentOffset);
-            setAdminsData((prev) => [...prev, ...newAdmins]);
-            setHasMoreAdmins(newAdmins.length === limit);
-            setCurrentOffset((prevOffset) => prevOffset + limit);
+            console.log("Fetching all admins...");
+            const res = await fetch('/api/admin/GET/existing-admins', {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (!res.ok) {
+                console.error("Failed to fetch admins. Response status:", res.status);
+                throw new Error('Failed to fetch admins');
+            }
+
+            const data = await res.json();
+            console.log("Raw data fetched from API:", data);
+
+            setAdminsData(data.admins || []);
+            console.log("Admins data set in state:", data.admins || []);
         } catch (error) {
-            console.error('Error loading more admins:', error);
+            console.error('Error fetching admins:', error);
             setToast?.({
                 title: 'Error',
-                description: 'Failed to load more admins.',
+                description: 'Failed to fetch admins.',
                 variant: 'destructive',
             });
-        } finally {
-            setLoadingAdmins(false);
         }
-    }, [loadingAdmins, hasMoreAdmins, currentOffset, setToast, token]);
+    }, [token, setToast]);
 
-    const handleAddAdmin = async () => {
-        if (!selectedUser) {
-            setToast?.({
-                title: 'Error',
-                description: 'Please select a user to add as admin.',
-                variant: 'destructive',
-            });
-            return;
-        }
+    useEffect(() => {
+        fetchAllAdmins();
+    }, [fetchAllAdmins]);
+
+    useEffect(() => {
+        console.log("Admins data in state:", adminsData);
+    }, [adminsData]);
+
+    const handleSearch = useCallback(async () => {
+        if (!searchQuery) return;
 
         try {
-            const response = await fetch('/api/admin/management', {
+            const res = await fetch(`/api/admin/GET/admin-mgmt-search?search=${encodeURIComponent(searchQuery)}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (!res.ok) throw new Error('Failed to search admins');
+
+            const data = await res.json();
+            setSelectedUser(data.admins || []);
+        } catch (error) {
+            console.error('Error searching admins:', error);
+            setToast?.({
+                title: 'Error',
+                description: 'Failed to search admins.',
+                variant: 'destructive',
+            });
+        }
+    }, [searchQuery, token, setToast]);
+
+    const handleAddAdmin = async (userId: string) => {
+        try {
+            const res = await fetch(`/api/admin/POST/admin-mgmt-add`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify({ userId: selectedUser }),
+                body: JSON.stringify({ userId }),
             });
 
-            if (!response.ok) throw new Error('Failed to add admin');
+            if (!res.ok) throw new Error('Failed to add admin');
 
             setToast?.({
                 title: 'Success',
-                description: 'User successfully added as admin.',
+                description: 'Admin added successfully.',
                 variant: 'default',
             });
 
-            setSelectedUser(null);
-            setAdminsData([]);
-            setCurrentOffset(0);
-            setHasMoreAdmins(true);
-            loadMoreAdmins();
+            await fetchAllAdmins(); // Reload admins after adding
         } catch (error) {
             console.error('Error adding admin:', error);
             setToast?.({
@@ -96,18 +106,9 @@ export function useAdminManagementViewModel() {
     };
 
     const handleRemoveAdmin = async (adminId: string) => {
-        if (adminsData.length <= 1) {
-            setToast?.({
-                title: 'Error',
-                description: 'There must be at least one admin.',
-                variant: 'destructive',
-            });
-            return;
-        }
-
         try {
-            const response = await fetch('/api/admin/management', {
-                method: 'DELETE',
+            const res = await fetch(`/api/admin/POST/admin-mgmt-remove`, {
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`,
@@ -115,7 +116,7 @@ export function useAdminManagementViewModel() {
                 body: JSON.stringify({ adminId }),
             });
 
-            if (!response.ok) throw new Error('Failed to remove admin');
+            if (!res.ok) throw new Error('Failed to remove admin');
 
             setToast?.({
                 title: 'Success',
@@ -123,7 +124,7 @@ export function useAdminManagementViewModel() {
                 variant: 'default',
             });
 
-            setAdminsData((prev) => prev.filter((admin) => admin.userId.toString() !== adminId));
+            await fetchAllAdmins(); // Reload admins after removing
         } catch (error) {
             console.error('Error removing admin:', error);
             setToast?.({
@@ -134,72 +135,16 @@ export function useAdminManagementViewModel() {
         }
     };
 
-    const handleRemoveSelectedAdmins = async (adminIds: string[]) => {
-        try {
-            const response = await fetch('/api/admin/management/bulk-delete', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ adminIds }),
-            });
-
-            if (!response.ok) throw new Error('Failed to delete selected admins');
-
-            setToast?.({
-                title: 'Success',
-                description: 'Selected admins removed successfully.',
-                variant: 'default',
-            });
-
-            setAdminsData((prev) => prev.filter((admin) => !adminIds.includes(admin.userId.toString())));
-        } catch (error) {
-            console.error('Error removing selected admins:', error);
-            setToast?.({
-                title: 'Error',
-                description: 'Failed to delete selected admins.',
-                variant: 'destructive',
-            });
-        }
-    };
-
-    const handleSearch = useCallback(async () => {
-        if (!searchQuery) return;
-
-        try {
-            const res = await fetch(`/api/admin/GET/existing-users?search=${searchQuery}`, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            if (!res.ok) throw new Error('Failed to fetch users');
-            const data = await res.json();
-            setSelectedUser(data.users || []);
-        } catch (error) {
-            console.error('Error searching users:', error);
-            setToast?.({
-                title: 'Error',
-                description: 'Failed to search users.',
-                variant: 'destructive',
-            });
-        }
-    }, [searchQuery, setToast, token]);
-
     return {
         adminsData,
-        loadingAdmins,
-        hasMoreAdmins,
-        loadMoreAdmins,
-        handleAddAdmin,
-        handleRemoveAdmin,
         handleSearch,
         searchQuery,
         setSearchQuery,
         selectedUser,
         setSelectedUser,
-        handleRemoveSelectedAdmins,
+        handleAddAdmin,
+        handleRemoveAdmin,
+        fetchAllAdmins,
     };
 }
 

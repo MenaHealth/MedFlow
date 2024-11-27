@@ -1,7 +1,7 @@
 // components/patientViewModels/PatientViewModelContext.tsx
 "use client"
 
-import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useState, useCallback, ReactNode, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import { PatientInfoViewModel } from "./patient-info/PatientInfoViewModel";
 import { IPatient } from '@/models/patient';
@@ -23,22 +23,7 @@ export interface PatientInfo {
     };
     patientID: string;
     telegramChatId?: string;
-}
-
-interface UserSession {
-    id: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    accountType: 'Doctor' | 'Triage';
-    isAdmin: boolean;
-    image?: string;
-    doctorSpecialty?: string;
-    languages?: string[];
-    token?: string;
-    gender?: 'male' | 'female';
-    dob?: Date;
-    countries?: string[];
+    telegramAccessHash?: string;
 }
 
 interface PatientContext {
@@ -80,7 +65,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
     const [notes, setNotes] = useState<INote[]>([]);
     const [draftNotes, setDraftNotes] = useState<INote[]>([]);
     const [loadingPatientInfo, setLoadingPatientInfo] = useState(false);
-    const [loadingNotes, setLoadingNotes] = useState(false);
+    const [loadingNotes] = useState(false);
     const [patientViewModel, setPatientViewModel] = useState<PatientInfoViewModel | null>(null);
     const [isExpanded, setIsExpanded] = useState(false);
     const [rxOrders, setRxOrders] = useState<IRxOrder[]>([]);
@@ -93,7 +78,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
         const patientInfo: PatientInfo = {
             patientName: `${patientData.firstName} ${patientData.lastName}`,
             city: patientData.city || '',
-            country: patientData.country || '', 
+            country: patientData.country || '',
             language: patientData.language || '',
             gender: patientData.genderPreference || '',
             dob: patientData.dob ? new Date(patientData.dob) : new Date(),
@@ -263,7 +248,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 rxOrders,
                 medOrders,
                 loadingMedications,
-                refreshMedications, // <-- Pass the correct function
+                refreshMedications,
                 addRxOrder,
                 addMedOrder,
             }}

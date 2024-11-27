@@ -546,8 +546,7 @@ export default function PatientTriage() {
                                   },
                                   body: JSON.stringify({
                                     _id: rows[index]["_id"],
-                                    status: "In-Progress",
-                                    priority: value, // New priority value
+                                    priority: value,
                                   }),
                                 });
                                 const updatedRows = [...rows];

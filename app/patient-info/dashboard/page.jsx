@@ -134,7 +134,7 @@ export default function PatientTriage() {
         (row) => row.doctor?.email 
                 ? row.doctor?.email === session.user.email 
                 : row.triagedBy
-                  && Object.keys(row.triagedBy).length !== 0 
+                  && Object.keys(row.triagedBy).length !== 0
                   && session.user.languages?.includes(row.language) 
                   && session.user.doctorSpecialty === row.specialty
       );
@@ -164,6 +164,12 @@ export default function PatientTriage() {
         return;
       }
       triagedBy = { firstName: session.user?.firstName, lastName: session.user?.lastName, email: session.user?.email };
+    } else if (value === 'In-Progress') {
+      if (session.user.accountType === 'Triage') {
+        triggerToast('You must be a doctor to take this patient.');
+        return;
+      }
+      doctor = { firstName: session.user?.firstName, lastName: session.user?.lastName, email: session.user?.email };
     }
 
     try {

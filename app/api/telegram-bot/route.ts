@@ -10,6 +10,9 @@ export async function POST(request: Request) {
 
         const { chatId } = await request.json();
 
+        // Ensure no trailing slash in the base URL
+        const baseUrl = (process.env.NEXTAUTH_URL || 'http://localhost:3000').replace(/\/+$/, "");
+
         // Check if this is a new user
         let patient = await Patient.findOne({ telegramChatId: chatId });
 
@@ -22,7 +25,7 @@ export async function POST(request: Request) {
             await patient.save();
 
             // Generate a unique registration URL
-            const registrationUrl = `${process.env.NEXTAUTH_URL}/new-patient/telegram/${patient._id}`;
+            const registrationUrl = `${baseUrl}/new-patient/telegram/${patient._id}`;
             console.log("Generated Registration URL:", registrationUrl);
 
             return NextResponse.json({
@@ -31,8 +34,9 @@ export async function POST(request: Request) {
             });
         } else {
             // For existing users, generate a link to their patient dashboard
-            const patientDashboardUrl = `${process.env.NEXTAUTH_URL}/patient/${patient._id}`;
+            const patientDashboardUrl = `${baseUrl}/patient/${patient._id}`;
             console.log("Generated Patient Dashboard URL:", patientDashboardUrl);
+
             return NextResponse.json({
                 message: "Welcome back! Here's your patient dashboard.",
                 patientDashboardUrl
@@ -43,7 +47,3 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 }
-
-
-
-

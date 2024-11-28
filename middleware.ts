@@ -7,19 +7,19 @@ const PUBLIC_FILE = /\.(.*)$/;
 export async function middleware(req: any) {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });    const { pathname, searchParams } = req.nextUrl;
 
-    // Allow requests to public files, API routes, '/auth', and '/rx-order'
     if (
         pathname.startsWith('/api') ||
         pathname.startsWith('/auth') ||
         pathname.startsWith('/rx-order') ||
+        pathname.startsWith('/new-patient') ||
         pathname.match(PUBLIC_FILE) ||
-        pathname === '/new-patient' ||
         pathname === '/api/telegram-bot' ||
         pathname === '/overview' ||
         pathname === '/about'
     ) {
         return NextResponse.next();
     }
+    // Allow requests to public files, API routes, '/auth', and '/rx-order'
 
     // Redirect reset-password requests to the login page with the reset code
     if (pathname === '/reset-password' && searchParams.has('code')) {

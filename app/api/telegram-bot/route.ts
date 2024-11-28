@@ -22,20 +22,19 @@ export async function POST(request: Request) {
             await patient.save();
 
             // Generate a unique registration URL
-            const registrationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/register/${patient._id}`;
-
-            // In a real-world scenario, you would send this URL to the user via Telegram API
-            console.log(`Sending registration URL to ${chatId}: ${registrationUrl}`);
+            const registrationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/new-patient/telegram/${patient._id}`;
 
             return NextResponse.json({
                 message: "Welcome! Please complete your registration using the link provided.",
                 registrationUrl
             });
         } else {
-            // Handle existing user interaction
+            // For existing users, generate a link to their patient dashboard
+            const patientDashboardUrl = `${process.env.NEXT_PUBLIC_APP_URL}/patient/${patient._id}`;
+
             return NextResponse.json({
-                message: "Welcome back! How can I assist you today?",
-                patientId: patient._id
+                message: "Welcome back! Here's your patient dashboard.",
+                patientDashboardUrl
             });
         }
     } catch (error) {
@@ -43,5 +42,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 }
+
+
 
 

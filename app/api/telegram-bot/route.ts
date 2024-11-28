@@ -34,7 +34,7 @@ export async function POST(request: Request) {
             });
         } else {
             // For existing users, generate a link to their patient dashboard
-            const patientDashboardUrl = `${baseUrl}/patient/${patient._id}`;
+            const patientDashboardUrl = `${baseUrl}//new-patient/telegram/${patient._id}`;
             console.log("Generated Patient Dashboard URL:", patientDashboardUrl);
 
             return NextResponse.json({

@@ -22,7 +22,7 @@ export async function POST(request: Request) {
             await patient.save();
 
             // Generate a unique registration URL
-            const registrationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/new-patient/telegram/${patient._id}`;
+            const registrationUrl = `${process.env.NEXTAUTH_URL}/new-patient/telegram/${patient._id}`;
             console.log("Generated Registration URL:", registrationUrl);
 
             return NextResponse.json({
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
             });
         } else {
             // For existing users, generate a link to their patient dashboard
-            const patientDashboardUrl = `${process.env.NEXT_PUBLIC_APP_URL}/patient/${patient._id}`;
+            const patientDashboardUrl = `${process.env.NEXTAUTH_URL}/patient/${patient._id}`;
             console.log("Generated Patient Dashboard URL:", patientDashboardUrl);
             return NextResponse.json({
                 message: "Welcome back! Here's your patient dashboard.",

@@ -2,31 +2,19 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { BarLoader } from "react-spinners";
-import { NewPatientFormTelegram } from "@/components/form/NewPatientFormTelegram";
+import { NewPatientFormTelegramView } from "@/components/form/NewPatientFormTelegramView";
 import ConfirmationModal from "@/components/ConfirmationModal";
 import ErrorModal from "@/components/ErrorModal";
+import { NewPatientFormTelegramValues } from "@/components/form/NewPatientFormTelegramViewModel";
+import { Button } from "@/components/ui/button";
 
 type TelegramPatientFormProps = {
     params: {
         id: string;
     };
-};
-
-type FormData = {
-    firstName: string;
-    lastName: string;
-    phone: {
-        countryCode: string;
-        phoneNumber: string;
-    };
-    dob: string;
-    country: string;
-    city: string;
-    language: string;
-    chiefComplaint: string;
 };
 
 type PatientData = {
@@ -43,8 +31,28 @@ const TelegramPatientForm = ({ params }: TelegramPatientFormProps) => {
     const [showErrorModal, setShowErrorModal] = useState(false);
     const [patientData, setPatientData] = useState<Partial<PatientData> | undefined>(undefined);
     const [error, setError] = useState<string | null>(null);
+    const [language, setLanguage] = useState<"english" | "arabic" | "farsi" | "pashto">("english");
 
-    const updatePatient = async (formData: FormData) => {
+    useEffect(() => {
+        const fetchPatientData = async () => {
+            try {
+                const response = await fetch(`/api/patient/${id}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setPatientData(data.patient);
+                } else {
+                    setError("Failed to fetch patient data");
+                }
+            } catch (error) {
+                console.error("Error fetching patient data:", error);
+                setError("An unexpected error occurred while fetching patient data");
+            }
+        };
+
+        fetchPatientData();
+    }, [id]);
+
+    const createOrUpdatePatient = async (formData: NewPatientFormTelegramValues) => {
         setIsSubmitting(true);
         setError(null);
 
@@ -65,7 +73,7 @@ const TelegramPatientForm = ({ params }: TelegramPatientFormProps) => {
                 setShowErrorModal(true);
             }
         } catch (error) {
-            console.error("Error updating patient:", error);
+            console.error("Error creating/updating patient:", error);
             setError("An unexpected error occurred. Please try again.");
             setShowErrorModal(true);
         } finally {
@@ -78,32 +86,68 @@ const TelegramPatientForm = ({ params }: TelegramPatientFormProps) => {
         router.replace(`/patient/${id}`);
     };
 
+    const header = {
+        english: patientData ? "Update Patient Information" : "New Patient Form",
+        arabic: patientData ? "تحديث معلومات المريض" : "نموذج مريض جديد",
+        farsi: patientData ? "به روز رسانی اطلاعات بیمار" : "فرم بیمار جدید",
+        pashto: patientData ? "د ناروغ معلومات تازه کول" : "د نوي ناروغ فورمه",
+    };
+
     return (
         <div className="w-full max-w-4xl mx-auto">
-            <h1 className="text-3xl font-bold mb-8 mt-8 text-center">Update Patient Information</h1>
+            <h1 className="text-3xl font-bold mb-8 mt-8 text-center">{header[language]}</h1>
+            <div className="flex flex-col md:flex-row md:space-x-4 justify-center mb-8">
+                <Button
+                    className="hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    style={{ backgroundColor: 'rgb(71, 140, 143)' }}
+                    onClick={() => setLanguage("english")}
+                >
+                    English
+                </Button>
+                <Button
+                    className="hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    style={{ backgroundColor: 'rgb(71, 140, 143)' }}
+                    onClick={() => setLanguage("arabic")}
+                >
+                    العربية
+                </Button>
+                <Button
+                    className="hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    style={{ backgroundColor: 'rgb(71, 140, 143)' }}
+                    onClick={() => setLanguage("farsi")}
+                >
+                    فارسی
+                </Button>
+                <Button
+                    className="hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    style={{ backgroundColor: 'rgb(71, 140, 143)' }}
+                    onClick={() => setLanguage("pashto")}
+                >
+                    پښتو
+                </Button>
+            </div>
             <div className="border border-gray-300 p-8 bg-white shadow rounded-lg">
                 {submitting ? (
                     <div className="flex justify-center">
                         <BarLoader color="#FF5722" />
                     </div>
                 ) : (
-                    <NewPatientFormTelegram
-                        handleSubmit={updatePatient}
-                        submitting={submitting}
-                        language="english"
-                        initialData={patientData || undefined} // Transform null to undefined
+                    <NewPatientFormTelegramView
+                        onSubmit={createOrUpdatePatient}
+                        language={language}
+                        initialData={patientData}
                     />
                 )}
             </div>
             {showModal && (
                 <ConfirmationModal
-                    patientId={id} // Pass patient ID
+                    patientId={id}
                     patientName={{ firstName: patientData?.firstName || "", lastName: patientData?.lastName || "" }}
                     onClose={handleModalClose}
                     submittingFromNoSession={false}
                     setSubmittingFromNoSession={() => {}}
-                    submit={updatePatient}
-                    language="english"
+                    submit={createOrUpdatePatient}
+                    language={language}
                 />
             )}
             {showErrorModal && (
@@ -114,3 +158,6 @@ const TelegramPatientForm = ({ params }: TelegramPatientFormProps) => {
 };
 
 export default TelegramPatientForm;
+
+
+

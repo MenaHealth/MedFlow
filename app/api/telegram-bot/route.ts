@@ -16,6 +16,9 @@ export async function POST(request: Request) {
             ? process.env.DEV_TELEGRAM_BOT_KEY
             : process.env.PROD_TELEGRAM_BOT_KEY;
 
+        console.log("Provided Key:", providedKey);
+        console.log("Expected Key:", expectedKey);
+
         if (providedKey !== expectedKey) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
@@ -52,10 +55,11 @@ export async function POST(request: Request) {
         } else {
             // For existing users, generate a link to their patient dashboard
             const patientDashboardUrl = `${baseUrl}/new-patient/telegram/${patient._id}`;
+            console.log("Generated Patient Dashboard URL:", patientDashboardUrl);
 
             const personalizedMessage = firstName
-                ? `Welcome back, ${firstName}! Here's your patient link.`
-                : "Welcome back! Here's your patient link.";
+                ? `Welcome back, ${firstName}! Here's your patient dashboard.`
+                : "Welcome back! Here's your patient info.";
 
             return NextResponse.json({
                 message: personalizedMessage,

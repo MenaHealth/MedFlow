@@ -8,6 +8,21 @@ export async function POST(request: Request) {
     try {
         await dbConnect();
 
+        // Extract MedFlow_key from the Authorization header
+        const authHeader = request.headers.get('Authorization');
+
+        const providedKey = authHeader ? decodeURIComponent(authHeader.split(' ')[1]) : null;
+        const expectedKey = process.env.NODE_ENV === 'development'
+            ? process.env.DEV_TELEGRAM_BOT_KEY
+            : process.env.PROD_TELEGRAM_BOT_KEY;
+
+        console.log("Provided Key:", providedKey);
+        console.log("Expected Key:", expectedKey);
+
+        if (providedKey !== expectedKey) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         const { chatId, firstName, lastName } = await request.json();
 
         const baseUrl = (process.env.NEXTAUTH_URL || 'http://localhost:3000').replace(/\/+$/, "");
@@ -31,7 +46,7 @@ export async function POST(request: Request) {
                 ? `Welcome, ${firstName}! Please complete your registration using the link provided.`
                 : "Welcome! Please complete your registration using the link provided.";
 
-            console.log("Generated personalized message:", personalizedMessage); // Log the message
+            console.log("Generated personalized message:", personalizedMessage);
 
             return NextResponse.json({
                 message: personalizedMessage,
@@ -42,11 +57,9 @@ export async function POST(request: Request) {
             const patientDashboardUrl = `${baseUrl}/new-patient/telegram/${patient._id}`;
             console.log("Generated Patient Dashboard URL:", patientDashboardUrl);
 
-            console.log("Received payload:", { chatId, firstName, lastName });
             const personalizedMessage = firstName
                 ? `Welcome back, ${firstName}! Here's your patient dashboard.`
                 : "Welcome back! Here's your patient info.";
-            console.log("Generated personalized message:", personalizedMessage);
 
             return NextResponse.json({
                 message: personalizedMessage,

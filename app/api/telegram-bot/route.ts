@@ -24,10 +24,10 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: "Unauthorized", debug: debugInfo }, { status: 401 });
         }
 
-        const { chatId, firstName, lastName } = await request.json();
+        // Extract chatId and language from the request body
+        const { chatId, language } = await request.json();
         debugInfo.chatId = chatId;
-        debugInfo.firstName = firstName;
-        debugInfo.lastName = lastName;
+        debugInfo.language = language;
 
         const baseUrl = (process.env.NEXTAUTH_URL || 'http://localhost:3000').replace(/\/+$/, "");
         debugInfo.baseUrl = baseUrl;
@@ -36,39 +36,35 @@ export async function POST(request: Request) {
         debugInfo.patientExists = !!patient;
 
         if (!patient) {
+            // Create a new patient with the provided chatId and language
             patient = new Patient({
                 telegramChatId: chatId,
-                firstName: firstName || 'Telegram',
-                lastName: lastName || 'Patient',
+                language: language || 'english', // Default to English if no language provided
             });
             await patient.save();
 
             const registrationUrl = `${baseUrl}/new-patient/telegram/${patient._id}`;
             debugInfo.registrationUrl = registrationUrl;
 
-            const personalizedMessage = firstName
-                ? `Welcome, ${firstName}! Please complete your registration using the link provided.`
-                : "Welcome! Please complete your registration using the link provided.";
-
-            debugInfo.personalizedMessage = personalizedMessage;
-
             return NextResponse.json({
-                message: personalizedMessage,
+                message: "Welcome! Please complete your registration using the link provided.",
                 registrationUrl,
                 debug: debugInfo, // Include debug info in the response
             });
         } else {
+            // Update the patient's language if it's not already set
+            if (!patient.language && language) {
+                patient.language = language;
+                await patient.save();
+            }
+
             const patientDashboardUrl = `${baseUrl}/new-patient/telegram/${patient._id}`;
             debugInfo.patientDashboardUrl = patientDashboardUrl;
 
-            const personalizedMessage = firstName
-                ? `Welcome back, ${firstName}! Here's your patient dashboard.`
-                : "Welcome back! Here's your patient info.";
-
-            debugInfo.personalizedMessage = personalizedMessage;
-
+            console.log("patient ID: " + patient._id )
+            console.log("telegram chat ID =: " + chatId )
             return NextResponse.json({
-                message: personalizedMessage,
+                message: "Welcome back! Here's your patient info.",
                 patientDashboardUrl,
                 debug: debugInfo, // Include debug info in the response
             });

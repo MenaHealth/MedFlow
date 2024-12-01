@@ -119,7 +119,7 @@ export interface IPatient extends Document {
 
 const PatientSchema = new Schema<IPatient>({
     files: [{ type: Object }],
-    firstName: { type: String, required: true },
+    firstName: { type: String },
     lastName: { type: String },
     bmi: { type: String },
     phone: {

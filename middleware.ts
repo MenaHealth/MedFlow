@@ -13,7 +13,7 @@ export async function middleware(req: any) {
         pathname.startsWith('/rx-order') ||
         pathname.startsWith('/new-patient') ||
         pathname.match(PUBLIC_FILE) ||
-        pathname === '/api/telegram-bot' ||
+        pathname === '/api/telegram-bot-doctor-messages' ||
         pathname === '/overview' ||
         pathname === '/about'
     ) {

@@ -1,4 +1,4 @@
-// components/patientViewModels/telegram-messages/TelegramMessages.tsx
+// components/patientViewModels/telegram-messages/TelegramMessagesDoctorView.tsx
 
 "use client";
 
@@ -6,7 +6,7 @@ import React, { useEffect } from "react";
 import { useTelegramMessagesViewModel } from "./TelegramMessagesViewModel";
 import { TelegramMessagesView } from "./TelegramMessagesView";
 
-const TelegramMessages: React.FC<{ telegramChatId: string }> = ({ telegramChatId }) => {
+const TelegramMessagesDoctorView: React.FC<{ telegramChatId: string }> = ({ telegramChatId }) => {
     const {
         messages,
         newMessage,
@@ -33,4 +33,4 @@ const TelegramMessages: React.FC<{ telegramChatId: string }> = ({ telegramChatId
     );
 };
 
-export default TelegramMessages;
+export default TelegramMessagesDoctorView;

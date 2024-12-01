@@ -7,7 +7,7 @@ import { CombinedNotesView } from '@/components/patientViewModels/PatientNotes/C
 import { Skeleton } from '@/components/ui/skeleton';
 import MedicationsView from './Medications/MedicationsView';
 import ImageGallery from './image-gallery/ImageGallery';
-import TelegramMessages from '@/components/patientViewModels/telegram-messages/TelegramMessages';
+import TelegramMessagesDoctorView from '@/components/patientViewModels/telegram-messages/TelegramMessagesDoctorView';
 import { CircleLoader } from 'react-spinners';
 
 import dynamic from 'next/dynamic';
@@ -66,7 +66,7 @@ const PatientDashboardContent: React.FC = () => {
             return <ImageGallery />;
         }    else if (section === "contact") {
             return (
-                <TelegramMessages
+                <TelegramMessagesDoctorView
                     telegramChatId={patientViewModel?.getExpandedDetails().telegramChatId || ""}
                 />
             );

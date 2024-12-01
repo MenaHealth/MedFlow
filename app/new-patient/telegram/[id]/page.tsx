@@ -20,6 +20,7 @@ type TelegramPatientFormProps = {
 type PatientData = {
     firstName: string;
     lastName: string;
+    hasSubmittedInfo: boolean;
 };
 
 const TelegramPatientForm = ({ params }: TelegramPatientFormProps) => {
@@ -59,7 +60,7 @@ const TelegramPatientForm = ({ params }: TelegramPatientFormProps) => {
         try {
             const response = await fetch(`/api/patient/new/telegram`, {
                 method: "POST",
-                body: JSON.stringify({ id, ...formData }),
+                body: JSON.stringify({ id, ...formData, hasSubmittedInfo: true }),
                 headers: { "Content-Type": "application/json" },
             });
 
@@ -87,10 +88,17 @@ const TelegramPatientForm = ({ params }: TelegramPatientFormProps) => {
     };
 
     const header = {
-        english: patientData ? "Update Patient Information" : "New Patient Form",
-        arabic: patientData ? "تحديث معلومات المريض" : "نموذج مريض جديد",
-        farsi: patientData ? "به روز رسانی اطلاعات بیمار" : "فرم بیمار جدید",
-        pashto: patientData ? "د ناروغ معلومات تازه کول" : "د نوي ناروغ فورمه",
+        english: patientData?.hasSubmittedInfo ? "Thank you for submitting" : (patientData ? "Update Patient Information" : "New Patient Form"),
+        arabic: patientData?.hasSubmittedInfo ? "شكرا لتقديمك" : (patientData ? "تحديث معلومات المريض" : "نموذج مريض جديد"),
+        farsi: patientData?.hasSubmittedInfo ? "با تشکر از ارسال شما" : (patientData ? "به روز رسانی اطلاعات بیمار" : "فرم بیمار جدید"),
+        pashto: patientData?.hasSubmittedInfo ? "د سپارلو لپاره مننه" : (patientData ? "د ناروغ معلومات تازه کول" : "د نوي ناروغ فورمه"),
+    };
+
+    const submittedMessage = {
+        english: "Thanks for submitting. Please wait for our team to review your info.",
+        arabic: "شكرا على التقديم. يرجى الانتظار حتى يراجع فريقنا معلوماتك.",
+        farsi: "با تشکر از ارسال. لطفاً منتظر بمانید تا تیم ما اطلاعات شما را بررسی کند.",
+        pashto: "د سپارلو لپاره مننه. مهرباني وکړئ صبر وکړئ چې زموږ ټیم ستاسو معلومات وګوري.",
     };
 
     return (
@@ -131,6 +139,8 @@ const TelegramPatientForm = ({ params }: TelegramPatientFormProps) => {
                     <div className="flex justify-center">
                         <BarLoader color="#FF5722" />
                     </div>
+                ) : patientData?.hasSubmittedInfo ? (
+                    <p className="text-center text-lg">{submittedMessage[language]}</p>
                 ) : (
                     <NewPatientFormTelegramView
                         onSubmit={createOrUpdatePatient}
@@ -158,6 +168,8 @@ const TelegramPatientForm = ({ params }: TelegramPatientFormProps) => {
 };
 
 export default TelegramPatientForm;
+
+
 
 
 

@@ -114,6 +114,7 @@ export interface IPatient extends Document {
     patientRelation?: string;
     createdAt?: Date;
     updatedAt?: Date;
+    hasSubmittedInfo?: boolean;
 }
 
 
@@ -165,7 +166,8 @@ const PatientSchema = new Schema<IPatient>({
     isPatient: { type: Boolean, default: undefined },
     patientRelation: { type: String },
     createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date }
+    updatedAt: { type: Date },
+    hasSubmittedInfo: { type: Boolean, default: false }
 });
 
 const Patient = models.Patient || model<IPatient>('Patient', PatientSchema);

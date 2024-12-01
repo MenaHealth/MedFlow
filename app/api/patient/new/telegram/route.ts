@@ -3,6 +3,7 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/utils/database";
 import Patient from "@/models/patient";
+import { sendPatientRegistrationMessage, getSubmissionMessage } from "@/utils/telegram/signupConfirmation";
 
 export async function POST(request: Request) {
     try {
@@ -22,7 +23,14 @@ export async function POST(request: Request) {
 
         // Update the patient's data
         Object.assign(patient, updateData);
+        patient.hasSubmittedInfo = true;
         await patient.save();
+
+        // Send Telegram message
+        if (patient.telegramChatId) {
+            const message = getSubmissionMessage(patient.language || 'english');
+            await sendPatientRegistrationMessage(patient.telegramChatId, message);
+        }
 
         return NextResponse.json({ message: "Patient updated successfully", patient });
     } catch (error) {
@@ -30,3 +38,4 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 }
+

@@ -150,7 +150,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             }
 
             // Handle rxOrders
-            const formattedRxOrders = (data.patient.rxOrders || []).map((order) =>
+            const formattedRxOrders = (data.patient.rxOrders || []).map((order: IRxOrder | string) =>
                 typeof order === 'string'
                     ? {
                         id: order,
@@ -172,8 +172,8 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             console.log("Telegram Chat ID in PatientInfo:", patientInfo?.telegramChatId);
 
             // Handle medOrders
-            const medOrderIds = data.patient.medOrders?.map(order =>
-                order instanceof Types.ObjectId ? order.toString() : (order as any)._id || order
+            const medOrderIds = data.patient.medOrders?.map((order: Types.ObjectId | { _id: string }) =>
+                order instanceof Types.ObjectId ? order.toString() : order._id || ""
             ).filter(Boolean) as string[];
 
             if (medOrderIds && medOrderIds.length > 0) {

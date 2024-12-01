@@ -1,3 +1,4 @@
+// utils/telegram/signupConfirmation.ts
 import TelegramBot from 'node-telegram-bot-api';
 
 const botToken = process.env.NODE_ENV === 'development'

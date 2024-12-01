@@ -37,6 +37,7 @@ export async function GET(
             firstName: patient.firstName,
             lastName: patient.lastName,
             phone: patient.phone,
+            telegramChatId: patient.telegramChatId,
         });
 
         return NextResponse.json({ patient });

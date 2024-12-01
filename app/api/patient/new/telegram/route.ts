@@ -21,12 +21,10 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: "Patient not found" }, { status: 404 });
         }
 
-        // Update the patient's data
         Object.assign(patient, updateData);
         patient.hasSubmittedInfo = true;
         await patient.save();
 
-        // Send Telegram message
         if (patient.telegramChatId) {
             const message = getSubmissionMessage(patient.language || 'english');
             await sendPatientRegistrationMessage(patient.telegramChatId, message);

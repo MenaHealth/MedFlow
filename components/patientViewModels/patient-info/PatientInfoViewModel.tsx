@@ -17,10 +17,14 @@ export class PatientInfoViewModel {
 
     getExpandedDetails() {
         return {
+            gender: this.patient?.genderPreference,
+            genderPreference: this.patient?.genderPreference,
+            firstName: this.patient?.firstName,
+            lastName: this.patient?.lastName,
+            telegramChatId: this.patient?.telegramChatId || "",
             bmi: this.patient?.bmi,
             pmhx: this.patient?.pmhx,
             pshx: this.patient?.pshx,
-            telegramChatId: { type: String }, 
             famhx: this.patient?.famhx,
             dob: this.patient?.dob || null,
             patientID: this.patient?._id,

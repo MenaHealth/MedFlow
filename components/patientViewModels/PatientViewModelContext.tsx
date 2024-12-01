@@ -23,7 +23,6 @@ export interface PatientInfo {
     };
     patientID: string;
     telegramChatId?: string;
-    telegramAccessHash?: string;
 }
 
 interface PatientContext {
@@ -87,7 +86,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 phoneNumber: patientData.phone?.phoneNumber || '',
             },
             patientID: id,
-            telegramChatId: (patientData.telegramChatId || '') as string,
+            telegramChatId: patientData.telegramChatId || "",
         };
         setPatientInfo(patientInfo);
         setPatientViewModel(new PatientInfoViewModel(patientData));
@@ -138,16 +137,20 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            const data = await response.json() as IPatient;
-            formatPatientInfo(data, patientId);
-            if (data.notes) {
-                formatPreviousNotes(data.notes);
+            const data = await response.json();
+
+            // Ensure we pass the nested `patient` object to `formatPatientInfo`
+            console.log("Raw patient data from API:", data);
+            formatPatientInfo(data.patient, patientId);
+
+            if (data.patient.notes) {
+                formatPreviousNotes(data.patient.notes);
             } else {
                 setNotes([]);
             }
 
             // Handle rxOrders
-            const formattedRxOrders = (data.rxOrders || []).map((order) =>
+            const formattedRxOrders = (data.patient.rxOrders || []).map((order) =>
                 typeof order === 'string'
                     ? {
                         id: order,
@@ -165,8 +168,11 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             );
             setRxOrders(formattedRxOrders);
 
+            console.log("PatientInfo:", patientInfo);
+            console.log("Telegram Chat ID in PatientInfo:", patientInfo?.telegramChatId);
+
             // Handle medOrders
-            const medOrderIds = data.medOrders?.map(order =>
+            const medOrderIds = data.patient.medOrders?.map(order =>
                 order instanceof Types.ObjectId ? order.toString() : (order as any)._id || order
             ).filter(Boolean) as string[];
 

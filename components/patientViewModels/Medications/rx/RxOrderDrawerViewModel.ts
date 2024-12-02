@@ -37,7 +37,7 @@ export function useRxOrderDrawerViewModel(
             Please take this link to your pharmacy to fulfill the prescription.`;
             navigator.clipboard.writeText(message);
             setToast({
-                title: 'Message Copied',
+                title: 'TelegramMessage Copied',
                 description: 'The SMS message has been copied to your clipboard.',
                 variant: 'success',
             });

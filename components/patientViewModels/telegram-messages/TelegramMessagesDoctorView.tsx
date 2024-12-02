@@ -17,8 +17,9 @@ const TelegramMessagesDoctorView: React.FC<{ telegramChatId: string }> = ({ tele
     } = useTelegramMessagesViewModel();
 
     useEffect(() => {
+        console.log("Loading messages for Telegram Chat ID:", telegramChatId);
         if (telegramChatId) {
-            loadMessages(telegramChatId); // Pass telegramChatId to loadMessages
+            loadMessages(telegramChatId);
         }
     }, [loadMessages, telegramChatId]);
 

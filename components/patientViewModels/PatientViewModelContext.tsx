@@ -88,6 +88,8 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             patientID: id,
             telegramChatId: patientData.telegramChatId || "",
         };
+
+        console.log("Setting PatientInfo:", patientInfo);
         setPatientInfo(patientInfo);
         setPatientViewModel(new PatientInfoViewModel(patientData));
     }, []);
@@ -139,9 +141,9 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             }
             const data = await response.json();
 
-            // Ensure we pass the nested `patient` object to `formatPatientInfo`
             console.log("Raw patient data from API:", data);
             formatPatientInfo(data.patient, patientId);
+            console.log(formatPatientInfo);
 
             if (data.patient.notes) {
                 formatPreviousNotes(data.patient.notes);

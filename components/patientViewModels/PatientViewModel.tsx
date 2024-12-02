@@ -27,6 +27,7 @@ const AppBuilderWrapper = dynamic(
 
 const PatientDashboardContent: React.FC = () => {
     const {
+        patientInfo, // Ensure this contains the telegramChatId
         patientViewModel,
         loadingPatientInfo,
         fetchPatientData,
@@ -64,11 +65,11 @@ const PatientDashboardContent: React.FC = () => {
             return <MedicationsView patientId={patientViewModel?.getPrimaryDetails().patientID || ''} />;
         } else if (section === 'images') {
             return <ImageGallery />;
-        }    else if (section === "contact") {
-            return (
-                <TelegramMessagesDoctorView
-                    telegramChatId={patientViewModel?.getExpandedDetails().telegramChatId || ""}
-                />
+        }    else  if (section === 'contact') {
+            return patientInfo?.telegramChatId ? (
+                <TelegramMessagesDoctorView telegramChatId={patientInfo.telegramChatId} />
+            ) : (
+                <div className="text-center">Telegram Chat ID is not available.</div>
             );
         } else if (section === 'video') {
             return <AppBuilderWrapper />

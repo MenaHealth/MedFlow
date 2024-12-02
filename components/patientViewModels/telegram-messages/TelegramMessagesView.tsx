@@ -8,7 +8,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Send } from 'lucide-react'
-import { TelegramMessage } from './TelegramMessagesViewModel'
+
+export interface TelegramMessage {
+    id: string;
+    text: string;
+    sender: string;
+    timestamp: Date;
+}
 
 interface TelegramMessagesViewProps {
     messages: TelegramMessage[]
@@ -65,4 +71,3 @@ export const TelegramMessagesView: React.FC<TelegramMessagesViewProps> = ({
         </Card>
     )
 }
-

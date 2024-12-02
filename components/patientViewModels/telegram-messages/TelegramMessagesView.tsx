@@ -98,4 +98,3 @@ export const TelegramMessagesView: React.FC<TelegramMessagesViewProps> = ({
         </Card>
     )
 }
-

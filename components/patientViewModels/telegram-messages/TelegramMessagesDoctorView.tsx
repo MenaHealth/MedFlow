@@ -28,7 +28,7 @@ const TelegramMessagesDoctorView: React.FC<{ telegramChatId: string }> = ({ tele
             messages={messages}
             newMessage={newMessage}
             setNewMessage={setNewMessage}
-            sendMessage={() => sendMessage(telegramChatId)} // Pass telegramChatId to sendMessage
+            sendMessage={() => sendMessage(telegramChatId)}
             isLoading={isLoading}
         />
     );

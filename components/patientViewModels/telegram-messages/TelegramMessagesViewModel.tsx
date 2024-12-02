@@ -3,10 +3,11 @@
 import { useCallback, useState } from "react";
 
 interface TelegramMessage {
-    id: string;
+    _id: string;
     text: string;
     sender: string;
     timestamp: Date;
+    isSelf: boolean;
 }
 
 export function useTelegramMessagesViewModel() {
@@ -28,7 +29,17 @@ export function useTelegramMessagesViewModel() {
             }
 
             const data = await response.json();
-            setMessages(data.messages);
+
+            // Map API data to the correct shape
+            const formattedMessages: TelegramMessage[] = data.messages.map((message: any) => ({
+                _id: message._id,
+                text: message.text,
+                sender: message.sender,
+                timestamp: new Date(message.timestamp),
+                isSelf: message.sender === "You",
+            }));
+
+            setMessages(formattedMessages);
         } catch (error) {
             console.error("Error loading messages:", error);
         } finally {
@@ -65,10 +76,11 @@ export function useTelegramMessagesViewModel() {
                 setMessages((prevMessages) => [
                     ...prevMessages,
                     {
-                        id: data.savedMessage._id || `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                        _id: data.savedMessage._id || `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
                         text: newMessage,
                         sender: "You",
                         timestamp: new Date(data.savedMessage.timestamp),
+                        isSelf: true, // Add this line
                     },
                 ]);
                 setNewMessage("");

@@ -22,8 +22,21 @@ export const registrationSubmittedMessages = {
     pashto: "ستاسو د راجستریشن د وړاندې کولو څخه مننه. زموږ د ټیم یو غړی به ژر تاسو سره اړیکه ونیسي.",
 };
 
+// Explicitly type the keys of the signupMessages object
+type LanguageKeys = keyof typeof signupMessages;
+
 // Function to get patient signup message
-export function getPatientSignupMessage(language, link) {
-    const message = signupMessages[language];
-    return message ? `${message}\n\n${link}` : signupMessages.english + `\n\n${link}`;
+export function getPatientSignupMessage(language: string, link: string): string {
+    // Normalize the language to lowercase
+    const normalizedLanguage = language.toLowerCase();
+
+    // Check if the normalized language is a valid key
+    if (normalizedLanguage in signupMessages) {
+        const message = signupMessages[normalizedLanguage as LanguageKeys];
+        return `${message}\n\n${link}`;
+    }
+
+    // Fallback to English
+    console.warn(`Language not found: "${language}". Falling back to English.`);
+    return `${signupMessages.english}\n\n${link}`;
 }

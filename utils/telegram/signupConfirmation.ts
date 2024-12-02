@@ -1,5 +1,6 @@
 // utils/telegram/signupConfirmation.ts
 import TelegramBot from "node-telegram-bot-api";
+import { signupMessages } from "@/utils/telegram/patientSignupLink";
 
 // Configure Telegram Bot
 const botToken = process.env.NODE_ENV === "development"
@@ -16,13 +17,30 @@ const submissionMessages = {
     pashto: "تاسو په بریالیتوب سره خپل د ناروغ د راجستریشن فارم MENA روغتیا ته سپارلی. زموږ د طبي ټیم غړی به ژر تر ژره له تاسو سره اړیکه ونیسي.",
 };
 
+// Explicit type for languages map
+const languagesMap: Record<string, keyof typeof signupMessages> = {
+    english: "english",
+    arabic: "arabic",
+    farsi: "farsi",
+    pashto: "pashto",
+};
+
 // Function to get submission message based on language
 export function getSubmissionMessage(language: string): string {
-    const message = submissionMessages[language as keyof typeof submissionMessages];
+    // Normalize the language to lowercase for comparison
+    const normalizedLanguage = language.toLowerCase();
+
+    // Map normalized language to the appropriate key in your enum
+    const mappedLanguage = languagesMap[normalizedLanguage] || "english"; // Default to English if not found
+
+    // Retrieve the appropriate message
+    const message = signupMessages[mappedLanguage];
+
     if (!message) {
         console.warn(`Language not found: "${language}". Falling back to English.`);
     }
-    return message || submissionMessages.english;
+
+    return message || signupMessages.english;
 }
 
 // Function to send a Telegram message

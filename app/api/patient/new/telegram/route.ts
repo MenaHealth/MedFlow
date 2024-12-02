@@ -70,7 +70,7 @@ export async function POST(request: Request) {
 
         // Send confirmation message with registration URL
         if (patient.telegramChatId) {
-            const message = `${getSubmissionMessage(language || "english")}\n\nComplete your registration here: ${registrationUrl}`;
+            const message = `${getSubmissionMessage(language || "english")}}`;
             await sendPatientRegistrationMessage(patient.telegramChatId, message);
             console.log(`Sent registration message to Chat ID ${telegramChatId}`);
         }

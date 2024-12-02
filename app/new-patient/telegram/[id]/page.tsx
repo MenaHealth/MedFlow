@@ -60,7 +60,7 @@ const TelegramPatientForm = ({ params }: TelegramPatientFormProps) => {
         try {
             const response = await fetch(`/api/patient/new/telegram`, {
                 method: "POST",
-                body: JSON.stringify({ id, ...formData, hasSubmittedInfo: true }),
+                body: JSON.stringify({ patientId: id, ...formData, hasSubmittedInfo: false }), // Pass patientId correctly
                 headers: { "Content-Type": "application/json" },
             });
 

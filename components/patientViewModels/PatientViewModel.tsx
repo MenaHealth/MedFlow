@@ -65,9 +65,11 @@ const PatientDashboardContent: React.FC = () => {
             return <MedicationsView patientId={patientViewModel?.getPrimaryDetails().patientID || ''} />;
         } else if (section === 'images') {
             return <ImageGallery />;
-        }    else  if (section === 'contact') {
+        } else if (section === 'contact') {
             return patientInfo?.telegramChatId ? (
-                <TelegramMessagesDoctorView telegramChatId={patientInfo.telegramChatId} />
+                <div className="bg-gradient-to-b from-orange-500 to-white h-full">
+                    <TelegramMessagesDoctorView telegramChatId={patientInfo.telegramChatId} />
+                </div>
             ) : (
                 <div className="text-center">Telegram Chat ID is not available.</div>
             );
@@ -109,7 +111,7 @@ const PatientDashboardContent: React.FC = () => {
             id: 'contact',
             icon: MessageCircle,
             label: 'Contact',
-            color: 'bg-green-600',
+            color: 'bg-orange-500',
             textColor: 'text-white'
         },
         {

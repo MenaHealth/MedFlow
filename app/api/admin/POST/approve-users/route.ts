@@ -3,8 +3,9 @@
 import { NextResponse } from 'next/server';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import User from '@/models/user';
-import dbConnect from '@/utils/database';
+`import dbConnect from '@/utils/database';`
 import { sendApprovalEmail } from '@/utils/emails/user-approval';
+import dbConnect from "@/utils/database";
 
 const SECRET = process.env.JWT_SECRET as string;
 if (!SECRET) {

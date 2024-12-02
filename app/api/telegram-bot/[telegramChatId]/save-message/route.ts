@@ -19,7 +19,7 @@ async function sendLogToChatbot(log: object) {
         });
         console.log("Log sent to chatbot server:", log);
     } catch (error) {
-        console.error("Failed to send log to chatbot server:", error.message || error);
+        console.error("Failed to send log to chatbot server:", (error as Error).message || error);
     }
 }
 
@@ -89,7 +89,7 @@ export async function PATCH(
         console.log(`Message saved for Chat ID ${telegramChatId}:`, newMessage);
         return NextResponse.json({ message: "Message saved successfully", savedMessage: newMessage });
     } catch (error) {
-        console.error("Error handling save-message request:", error.message || error);
+        console.error("Error handling save-message request:", (error as Error).message || error);
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 }

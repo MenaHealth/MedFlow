@@ -33,6 +33,7 @@ const TelegramPatientForm = ({ params }: TelegramPatientFormProps) => {
     const [patientData, setPatientData] = useState<Partial<PatientData> | undefined>(undefined);
     const [error, setError] = useState<string | null>(null);
     const [language, setLanguage] = useState<"english" | "arabic" | "farsi" | "pashto">("english");
+    const [formDataState, setFormDataState] = useState(undefined);
 
     useEffect(() => {
         const fetchPatientData = async () => {
@@ -56,18 +57,19 @@ const TelegramPatientForm = ({ params }: TelegramPatientFormProps) => {
     const createOrUpdatePatient = async (formData: NewPatientFormTelegramValues) => {
         setIsSubmitting(true);
         setError(null);
+        const submittedFormData = formData ?? formDataState;
 
         try {
             const response = await fetch(`/api/patient/new/telegram`, {
                 method: "POST",
-                body: JSON.stringify({ patientId: id, ...formData, hasSubmittedInfo: false }), // Pass patientId correctly
+                body: JSON.stringify({ patientId: id, ...submittedFormData, hasSubmittedInfo: false }), // Pass patientId correctly
                 headers: { "Content-Type": "application/json" },
             });
 
             if (response.ok) {
                 const data = await response.json();
                 setPatientData(data.patient);
-                setShowModal(true);
+                setShowModal(false);
             } else {
                 const errorMessage = await response.text();
                 setError(errorMessage);
@@ -146,6 +148,8 @@ const TelegramPatientForm = ({ params }: TelegramPatientFormProps) => {
                         onSubmit={createOrUpdatePatient}
                         language={language}
                         initialData={patientData}
+                        setFormDataState={setFormDataState}
+                        setShowModal={setShowModal}
                     />
                 )}
             </div>
@@ -154,7 +158,7 @@ const TelegramPatientForm = ({ params }: TelegramPatientFormProps) => {
                     patientId={id}
                     patientName={{ firstName: patientData?.firstName || "", lastName: patientData?.lastName || "" }}
                     onClose={handleModalClose}
-                    submittingFromNoSession={false}
+                    submittingFromNoSession={true}
                     setSubmittingFromNoSession={() => {}}
                     submit={createOrUpdatePatient}
                     language={language}

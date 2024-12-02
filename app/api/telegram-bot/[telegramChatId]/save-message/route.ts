@@ -1,5 +1,4 @@
 // app/api/telegram-bot/[telegramChatId]/save-message/route.ts
-// app/api/telegram-bot/[telegramChatId]/save-message/route.ts
 
 import { NextResponse } from "next/server";
 import axios from "axios";

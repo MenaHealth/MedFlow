@@ -43,7 +43,7 @@ export const TelegramMessagesView: React.FC<TelegramMessagesViewProps> = ({
     return (
         <Card className="w-full max-w-md mx-auto h-[600px] flex flex-col">
             <CardHeader className="border-b p-4">
-                <CardTitle className="text-xl">Messages</CardTitle>
+                <CardTitle className="text-xl">Telegram Messages</CardTitle>
             </CardHeader>
             <CardContent className="flex-grow p-0 overflow-hidden">
                 <ScrollArea className="h-full w-full" ref={scrollAreaRef}>

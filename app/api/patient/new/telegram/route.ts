@@ -10,31 +10,56 @@ export async function POST(request: Request) {
         await dbConnect();
 
         // Parse request JSON
-        const { telegramChatId, language, ...updateData } = await request.json();
+        const { patientId, telegramChatId, language, ...updateData } = await request.json();
 
-        // Ensure required fields
-        // if (!telegramChatId) {
-        //     return NextResponse.json({ error: "Telegram Chat ID is required" }, { status: 400 });
-        // }
+        let patient;
 
-        // Check if the patient exists or create a new one
-        let patient = await Patient.findOne({ telegramChatId });
+        // If patientId is provided, use it to find and update the patient
+        if (patientId) {
+            console.log("Fetching patient by ID:", patientId);
+            patient = await Patient.findById(patientId);
 
-        if (!patient) {
-            console.log("No patient found for Chat ID, creating a new patient.");
-            patient = new Patient({
-                telegramChatId,
-                language: language || "english",
-                hasSubmittedInfo: false,
-                ...updateData, // Include any additional data
-            });
-            await patient.save();
-        } else {
-            console.log("Updating existing patient for Chat ID:", telegramChatId);
+            if (!patient) {
+                console.error("Patient not found for provided ID:", patientId);
+                return NextResponse.json({ error: "Patient not found" }, { status: 404 });
+            }
+
+            // Update existing patient
             Object.assign(patient, updateData);
             patient.language = language || patient.language;
             patient.hasSubmittedInfo = true;
+
+            // Ensure the Telegram Chat ID is preserved
+            if (!patient.telegramChatId && telegramChatId) {
+                patient.telegramChatId = telegramChatId;
+            }
+
             await patient.save();
+        } else {
+            // If no patientId is provided, attempt to find by telegramChatId or create a new patient
+            if (!telegramChatId) {
+                return NextResponse.json({ error: "Patient ID or Telegram Chat ID is required" }, { status: 400 });
+            }
+
+            console.log("Fetching patient by Telegram Chat ID:", telegramChatId);
+            patient = await Patient.findOne({ telegramChatId });
+
+            if (!patient) {
+                console.log("No patient found for Telegram Chat ID. Creating a new patient.");
+                patient = new Patient({
+                    telegramChatId,
+                    language: language || "english",
+                    hasSubmittedInfo: false,
+                    ...updateData, // Include additional data
+                });
+                await patient.save();
+            } else {
+                console.log("Updating existing patient for Telegram Chat ID:", telegramChatId);
+                Object.assign(patient, updateData);
+                patient.language = language || patient.language;
+                patient.hasSubmittedInfo = true;
+                await patient.save();
+            }
         }
 
         // Generate registration URL

@@ -5,8 +5,12 @@ import dbConnect from "@/utils/database";
 import TelegramThread from "@/models/telegramThread";
 
 export async function GET(request: Request, { params }: { params: { telegramChatId: string } }) {
+    console.log("GET /api/telegram-bot/:telegramChatId/get called");
+    console.log("Request Params:", params);
+
     try {
         await dbConnect();
+        console.log("Database connected");
 
         const { telegramChatId } = params;
 
@@ -16,12 +20,15 @@ export async function GET(request: Request, { params }: { params: { telegramChat
         }
 
         // Fetch the thread for the given chat ID
+        console.log(`Fetching thread for Chat ID: ${telegramChatId}`);
         const thread = await TelegramThread.findOne({ chatId: telegramChatId });
 
         if (!thread) {
-            console.error(`Thread not found for chat ID: ${telegramChatId}`);
+            console.error(`Thread not found for Chat ID: ${telegramChatId}`);
             return NextResponse.json({ error: "Thread not found" }, { status: 404 });
         }
+
+        console.log(`Thread found for Chat ID ${telegramChatId}:`, thread.messages);
 
         return NextResponse.json({ messages: thread.messages });
     } catch (error) {

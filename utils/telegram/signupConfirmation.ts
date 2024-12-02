@@ -16,6 +16,7 @@ const submissionMessages = {
     pashto: "تاسو په بریالیتوب سره خپل د ناروغ د راجستریشن فارم MENA روغتیا ته سپارلی. زموږ د طبي ټیم غړی به ژر تر ژره له تاسو سره اړیکه ونیسي.",
 };
 
+// Function to get submission message based on language
 export function getSubmissionMessage(language: string): string {
     const message = submissionMessages[language as keyof typeof submissionMessages];
     if (!message) {

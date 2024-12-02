@@ -1,0 +1,29 @@
+// utils/telegram/patientSignupLink.ts
+
+export const signupMessages = {
+    english: `
+Welcome to MENA Health, please use the link below to complete the patient registration form.
+`,
+    arabic: `
+مرحبًا بكم في مينا هيلث، يرجى استخدام الرابط أدناه لاستكمال نموذج تسجيل المريض.
+`,
+    farsi: `
+به MENA Health خوش آمدید، لطفا از لینک زیر برای تکمیل فرم ثبت نام بیمار استفاده کنید.
+`,
+    pashto: `
+د MENA روغتیا ته ښه راغلاست، مهرباني وکړئ د ناروغ د راجستریشن فارم ډکولو لپاره لاندې لینک وکاروئ.
+`,
+};
+
+export const registrationSubmittedMessages = {
+    english: "Thank you for submitting your registration. A member of our team will contact you soon.",
+    arabic: "شكراً لتقديم التسجيل الخاص بك. سيتواصل معك أحد أعضاء فريقنا قريبًا.",
+    farsi: "با تشکر از ثبت نام شما. یکی از اعضای تیم ما به زودی با شما تماس خواهد گرفت.",
+    pashto: "ستاسو د راجستریشن د وړاندې کولو څخه مننه. زموږ د ټیم یو غړی به ژر تاسو سره اړیکه ونیسي.",
+};
+
+// Function to get patient signup message
+export function getPatientSignupMessage(language, link) {
+    const message = signupMessages[language];
+    return message ? `${message}\n\n${link}` : signupMessages.english + `\n\n${link}`;
+}

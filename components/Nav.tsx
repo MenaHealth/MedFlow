@@ -94,7 +94,6 @@ export default function Nav() {
             {!session?.user && isMobileMenuOpen && (
                 <div className="md:hidden mt-4 space-y-2">
                     <NavItem href="/new-patient">New Patient</NavItem>
-                    <NavItem href="/overview">Overview</NavItem>
                     <NavItem href="/about">About</NavItem>
                     <NavItem href="/auth">Login</NavItem>
                 </div>

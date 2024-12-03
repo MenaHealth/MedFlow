@@ -80,12 +80,13 @@ const TelegramPatientForm = ({ params }: TelegramPatientFormProps) => {
     const createOrUpdatePatient = async (formData: NewPatientFormTelegramValues) => {
         setIsSubmitting(true);
         setError(null);
+
         const submittedFormData = formData ?? formDataState;
 
         try {
             const response = await fetch(`/api/patient/new/telegram`, {
                 method: "POST",
-                body: JSON.stringify({ patientId: id, ...submittedFormData, hasSubmittedInfo: false }), // Pass patientId correctly
+                body: JSON.stringify({ patientId: id, ...submittedFormData }),
                 headers: { "Content-Type": "application/json" },
             });
 

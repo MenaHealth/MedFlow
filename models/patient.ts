@@ -134,7 +134,11 @@ const PatientSchema = new Schema<IPatient>({
     country: { type: String },
     genderPreference: { type: String },
     previouslyRegistered: { type: String },
-    language: { type: String },
+// models/patient.ts
+    language: {
+        type: String,
+        enum: ['English', 'Arabic', 'Farsi', 'Pashto'],
+    },
     chiefComplaint: { type: String },
     email: { type: String },
     diagnosis: { type: String },

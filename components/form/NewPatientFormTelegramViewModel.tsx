@@ -47,8 +47,8 @@ export type NewPatientFormTelegramValues = z.infer<typeof newPatientFormTelegram
 
 type UseNewPatientFormTelegramViewModelProps = {
     initialData?: Partial<NewPatientFormTelegramValues>;
-    patientId?: string; // Add this to fetch patient data
-    formLanguage: "english" | "arabic" | "farsi" | "pashto";
+    patientId?: string;
+    formLanguage: "English" | "Arabic" | "Farsi" | "Pashto";
     onSubmit: (formData: NewPatientFormTelegramValues) => Promise<void>;
     setFormDataState: (data: any) => void,
     setShowModal: (showModal: boolean) => void
@@ -123,7 +123,7 @@ export function useNewPatientFormTelegramViewModel({ initialData, patientId, for
 
     const handleSubmit = form.handleSubmit(async (data) => {
         setSubmitting(true);
-        if (formLanguage !== "english") {
+        if (formLanguage !== "English") {
             const inputLanguage = data.language; // User's selection in their language
             const inputCountry = data.country;
             const mappedLanguageKey = mapLanguageToEnglish(inputLanguage, formLanguage);

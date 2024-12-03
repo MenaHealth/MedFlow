@@ -26,7 +26,7 @@ import {
 
 type NewPatientFormTelegramViewProps = {
     onSubmit: (formData: NewPatientFormTelegramValues) => Promise<void>;
-    language: "english" | "arabic" | "farsi" | "pashto";
+    language: "English" | "Arabic" | "Farsi" | "Pashto";
     initialData?: Partial<NewPatientFormTelegramValues>;
     patientId?: string; // Pass patientId to fetch data
     setFormDataState: (data: any) => void;
@@ -61,47 +61,47 @@ export function NewPatientFormTelegramView({
 
     
     const fieldLabels = {
-        firstName: { english: "First Name", arabic: "الاسم الأول", farsi: "نام:", pashto: "لومړی نوم:" },
-        lastName: { english: "Last Name", arabic: "العائلة اسم", farsi: "نام خانوادگی:", pashto: "تخلص:" },
-        dob: { english: "Date of Birth", arabic: "العمر", farsi: "سن:", pashto: "عمر:" },
-        phone: { english: "Phone Number", arabic: "رقم الهاتف", farsi: "شماره تلفن:", pashto: "د تلیفون شمیره:" },
+        firstName: { English: "First Name", Arabic: "الاسم الأول", Farsi: "نام:", Pashto: "لومړی نوم:" },
+        lastName: { English: "Last Name", Arabic: "العائلة اسم", Farsi: "نام خانوادگی:", Pashto: "تخلص:" },
+        dob: { English: "Date of Birth", Arabic: "العمر", Farsi: "سن:", Pashto: "عمر:" },
+        phone: { English: "Phone Number", Arabic: "رقم الهاتف", Farsi: "شماره تلفن:", Pashto: "د تلیفون شمیره:" },
         country: {
-            english: { label: "Country", options: CountriesList },
-            arabic: { label: "بلد", options: CountriesListArabic },
-            farsi: { label: "کشور:", options: CountriesListFarsi },
-            pashto: { label: "هیواد:", options: CountriesListPashto },
+            English: { label: "Country", options: CountriesList },
+            Arabic: { label: "بلد", options: CountriesListArabic },
+            Farsi: { label: "کشور:", options: CountriesListFarsi },
+            Pashto: { label: "هیواد:", options: CountriesListPashto },
         },
-        city: { english: "City", arabic: "مدينة", farsi: "شهر:", pashto: "ښار:" },
+        city: { English: "City", Arabic: "مدينة", Farsi: "شهر:", Pashto: "ښار:" },
         language: {
-            english: { label: "Language", options: LanguagesList },
-            arabic: { label: "اللغة", options: LanguagesListArabic },
-            farsi: { label: "زبان:", options: LanguagesListFarsi },
-            pashto: { label: "ژبه:", options: LanguagesListPashto },
+            English: { label: "Language", options: LanguagesList },
+            Arabic: { label: "اللغة", options: LanguagesListArabic },
+            Farsi: { label: "زبان:", options: LanguagesListFarsi },
+            Pashto: { label: "ژبه:", options: LanguagesListPashto },
         },
-        chiefComplaint: { english: "Chief Complaint", arabic: "طبية الشكوى", farsi: "شکایت پزشکی:", pashto: "طبي شکایت:" },
+        chiefComplaint: { English: "Chief Complaint", Arabic: "طبية الشكوى", Farsi: "شکایت پزشکی:", Pashto: "طبي شکایت:" },
         genderPreference: {
-            english: { label: "Doctor Gender Preference", options: ["Female", "Male", "No Preference"] },
-            arabic: { label: "تفضيل جنس الطبيب", options: ["أنثى", "ذكر", "كلا"] },
-            farsi: { label: "ترجیح جنسیت پزشک", options: ["زن", "مرد", "هیچ"] },
-            pashto: { label: "د ډاکټر جنسیت غوره توب", options: ["ښځه", "نارینه", "هیڅ"] },
+            English: { label: "Doctor Gender Preference", options: ["Female", "Male", "No Preference"] },
+            Arabic: { label: "تفضيل جنس الطبيب", options: ["أنثى", "ذكر", "كلا"] },
+            Farsi: { label: "ترجیح جنسیت پزشک", options: ["زن", "مرد", "هیچ"] },
+            Pashto: { label: "د ډاکټر جنسیت غوره توب", options: ["ښځه", "نارینه", "هیڅ"] },
         },
         isPatient: {
-            english: 'Please check this box if you are filling out this form on behalf of the patient',
-            arabic: 'يرجى تحديد هذا المربع إذا كنت تقوم بملء هذا النموذج نيابة عن المريض',
-            farsi: 'اگر از طرف بیمار این فرم را پر می کنید، لطفاً این کادر را علامت بزنید',
-            pashto: 'مهرباني وکړئ دا بکس چیک کړئ که تاسو د ناروغ په استازیتوب دا فورمه ډکه کړئ'
+            English: 'Please check this box if you are filling out this form on behalf of the patient',
+            Arabic: 'يرجى تحديد هذا المربع إذا كنت تقوم بملء هذا النموذج نيابة عن المريض',
+            Farsi: 'اگر از طرف بیمار این فرم را پر می کنید، لطفاً این کادر را علامت بزنید',
+            Pashto: 'مهرباني وکړئ دا بکس چیک کړئ که تاسو د ناروغ په استازیتوب دا فورمه ډکه کړئ'
         },
         patientRelation: {
-            english: 'What is your relation to the patient?',
-            arabic: 'ما هي علاقتك بالمريض؟',
-            farsi: 'نسبت شما با بیمار چیست؟',
-            pashto: 'ستاسو د ناروغ سره څه اړیکه ده؟'
+            English: 'What is your relation to the patient?',
+            Arabic: 'ما هي علاقتك بالمريض؟',
+            Farsi: 'نسبت شما با بیمار چیست؟',
+            Pashto: 'ستاسو د ناروغ سره څه اړیکه ده؟'
         },
         submitting: {
-            english: ["Submit New Patient", "Submitting..."],
-            arabic: ["إرسال مريض جديد", "تقديم"],
-            farsi: ["ارائه بیمار جدید", "ارائه"],
-            pashto: ["نوی ناروغ وسپاري", "سپارل"]
+            English: ["Submit New Patient", "Submitting..."],
+            Arabic: ["إرسال مريض جديد", "تقديم"],
+            Farsi: ["ارائه بیمار جدید", "ارائه"],
+            Pashto: ["نوی ناروغ وسپاري", "سپارل"]
         }
     };
 

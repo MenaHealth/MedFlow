@@ -1,11 +1,9 @@
-// app/about/page.tsx
-'use client'
+'use client';
 
-import React from 'react'
-import { Card } from '@/components/ui/card'
-import './aboutPage.css'
-import Link from "next/link";
-import { ClipboardList, ClipboardPlus, Calendar, Image, Stethoscope, FileText } from 'lucide-react'
+import React, { useEffect } from 'react';
+import { Card } from '@/components/ui/card';
+import './aboutPage.css';
+import { ClipboardList, ClipboardPlus, Calendar, Image, Stethoscope, FileText } from 'lucide-react';
 
 const features = [
     { icon: ClipboardList, title: "View Patient Info", description: "Access comprehensive patient information" },
@@ -13,10 +11,165 @@ const features = [
     { icon: Stethoscope, title: "Take Patient Notes", description: "Record detailed medical notes for each patient" },
     { icon: Image, title: "Image Gallery", description: "Maintain a dedicated image gallery for each patient" },
     { icon: FileText, title: "Prescription Management", description: "Generate and manage drug prescription paperwork" },
-]
+];
 
-export default function aboutPage() {
+export default function AboutPage() {
+    useEffect(() => {
+        const handleIntersection = (entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const animateCountUp = (elementId, target, duration) => {
+                        const element = document.getElementById(elementId);
+                        if (!element) return;
+
+                        const start = 0;
+                        const increment = Math.ceil(target / (duration / 50));
+                        let current = start;
+
+                        const updateCounter = () => {
+                            current += increment;
+                            if (current > target) current = target;
+                            element.innerText = current;
+
+                            if (current < target) {
+                                setTimeout(updateCounter, 50);
+                            }
+                        };
+
+                        updateCounter();
+                    };
+
+                    animateCountUp('counter-physicians', 200, 2000);
+                    animateCountUp('counter-countries', 10, 2000);
+                    animateCountUp('counter-specialties', 30, 2000);
+
+                    observer.disconnect();
+                }
+            });
+        };
+
+        const observer = new IntersectionObserver(handleIntersection, { threshold: 0.3 });
+        const target = document.getElementById('statistics-section');
+        if (target) {
+            observer.observe(target);
+        }
+    }, []);
+
     return (
+        <div className="min-h-screen">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+                <div className="text-center mb-16">
+                    <h1 className="text-4xl font-bold tracking-tight text-black sm:text-5xl md:text-6xl">
+                        First Virtual Hospital
+                    </h1>
+                    <p className="mt-3 max-w-md mx-auto text-base text-darkBlue sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
+                        for the MENA Region 
+                    </p>
+                    <p className="text-center mt-3 max-w-md mx-auto text-base text-darkBlue sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
+                        MedFlow connects a global network of volunteer doctors to support on-the-ground healthcare facilities under crisis. 
+                        It empowers online triage management, telehealth, and prescription management to optimize urgent treatment, giving displaced civilians 
+                        control over their medical histories and ensuring physicians have the autonomy to provide informed care — no matter where they are.
+                    </p>
+                </div>
+                </div>
+
+                {/* Animation Section */}
+                <div className="card-animation">
+                    <div className="ball-connection ball1-connection"></div>
+                    <div className="ball-connection ball2-connection"></div>
+                    <div className="ball-connection ball3-connection"></div>
+                    <div className="ball-connection ball4-connection"></div>
+                    <div className="ball-connection ball5-connection"></div>
+                </div>
+
+                {/* Statistics Section */}
+                <div
+                    id="statistics-section"
+                    className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-8 text-center"
+                    style={{
+                        columnGap: "0px",
+                        maxWidth: "80%",
+                        margin: "0 auto",
+                    }}
+                >
+                    <div>
+                        <h2 className="text-6xl font-bold text-[var(--orange)]">
+                            <span id="counter-physicians">0</span>+
+                        </h2>
+                        <p className="mt-2 text-lg text-darkBlue">Onboarded Physicians</p>
+                    </div>
+                    <div>
+                        <h2 className="text-6xl font-bold text-[var(--orange)]">
+                            <span id="counter-specialties">0</span>+
+                        </h2>
+                        <p className="mt-2 text-lg text-darkBlue">Specialties Offered</p>
+                    </div>
+                    <div>
+                        <h2 className="text-6xl font-bold text-[var(--orange)]">
+                            <span id="counter-countries">0</span>
+                        </h2>
+                        <p className="mt-2 text-lg text-darkBlue">Countries of Interest</p>
+                    </div>
+                </div>
+
+                {/* Team Section */}
+                <div className="mt-20">
+                    <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4 lg:gap-x-8 lg:gap-y-4">
+                        {/* Michelle */}
+                        <Card className="p-2 bg-white bg-opacity-30 card-container">
+                            <div className="flex flex-col items-center text-center">
+                                <img
+                                    src="assets/images/mn1_hdst.png"
+                                    alt="Michelle"
+                                    className="rounded-full object-cover w-20 h-20 mb-4"
+                                />
+                                <h3 className="text-lg font-medium text-black">Michelle</h3>
+                                <h3 className="text-sm text-[var(--orange)] italic">Founder / CEO MENA Health</h3>
+                                <h3 className="text-xs text-[var(--orange)] italic">Co-Founder / Project Lead Medflow </h3>
+                            </div>
+                        </Card>
+
+                        {/* Maya */}
+                        <Card className="p-2 bg-white bg-opacity-30 card-container">
+                            <div className="flex flex-col items-center text-center">
+                                <img
+                                    src="assets/images/ma_hdst.jpeg"
+                                    alt="Maya"
+                                    className="rounded-full object-cover w-20 h-20 mb-4"
+                                />
+                                <h3 className="text-lg font-medium text-black">Maya</h3>
+                                <h3 className="text-sm text-[var(--orange)] italic">Chief Development Officer MENA Health</h3>
+                                <h3 className="text-xs text-[var(--orange)] italic">Co-Founder Medflow</h3>
+                            </div>
+                        </Card>
+
+                        {/* Kyle */}
+                        <Card className="p-2 bg-white bg-opacity-30 card-container">
+                            <div className="flex flex-col items-center text-center">
+                                <img
+                                    src="assets/images/ke_hdst.jpg"
+                                    alt="Kyle"
+                                    className="rounded-full object-cover w-20 h-20 mb-4"
+                                />
+                                <h3 className="text-lg font-medium text-black">Kyle</h3>
+                                <h3 className="text-sm text-[var(--orange)] italic">Co-Founder Medflow</h3>
+                            </div>
+                        </Card>
+
+                        {/* Andy */}
+                        <Card className="p-2 bg-white bg-opacity-30 card-container">
+                            <div className="flex flex-col items-center text-center">
+                                <img
+                                    src="assets/images/ac_hdst.jpg"
+                                    alt="Andy"
+                                    className="rounded-full object-cover w-20 h-20 mb-4"
+                                />
+                                <h3 className="text-lg font-medium text-black">Andy</h3>
+                                <h3 className="text-sm text-[var(--orange)] italic">Co-Founder Medflow</h3>
+                            </div>
+                        </Card>
+                    </div>
+                </div>
     <div className="min-h-screen">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
             <div className="text-center mb-16">
@@ -179,62 +332,7 @@ export default function aboutPage() {
                 </Card>
             </div>
 
-            <div className="mt-20">
-                <Card className="p-8 bg-white shadow-lg">
-                    <div className="flex flex-col space-y-8">
-                        <h2 className="text-3xl font-bold text-black">Doctor and Triage Coordinator Sign-up Process</h2>
-                        <p>
-                            <li>
-                                Sign up on the registration page.
-                            </li>
-                            <li>provide the following information:</li>
-                        </p>
-                        <div className="grid md:grid-cols-2 gap-8">
-                            <div>
-                                <h3 className="text-xl font-semibold text-black mb-4">Doctors</h3>
-                                <ul className="list-disc list-inside space-y-2 text-darkBlue">
-                                    <ul className="list-disc list-inside ml-4 mt-2">
-                                        <li>Full Name</li>
-                                        <li>Doctor Specialty</li>
-                                        <li>Date of Birth</li>
-                                        <li>Email Address</li>
-                                        <li>Languages Spoken</li>
-                                        <li>Countries Seeing Patients</li>
-                                    </ul>
-                                </ul>
-                            </div>
-                            <div>
-                                <h3 className="text-xl font-semibold text-black mb-4">Triage Coordinators</h3>
-                                <ul className="list-disc list-inside space-y-2 text-darkBlue">
-                                    <ul className="list-disc list-inside ml-4 mt-2">
-                                        <li>Full Name</li>
-                                        <li>Date of Birth</li>
-                                        <li>Email Address</li>
-                                    </ul>
-                                </ul>
-                            </div>
-                        </div>
-                        <div className="bg-gray-100 p-4 rounded-md">
-                            <h3 className="text-lg font-semibold text-black mb-2">Post-Registration Process</h3>
-                            <ol className="list-decimal list-inside space-y-2 text-darkBlue">
-                                <li><b>Await approval from a <u>site administrator</u></b></li>
-                                <ul className="list-disc list-inside pl-6 space-y-2">
-                                    <li>Approved Triage Coordinators can access the Triage Dashboard</li>
-                                </ul>
-                                <ul className="list-disc list-inside pl-6 space-y-2">
-                                    <li>Approved doctors can access the Physician Dashboard</li>
-                                </ul>
-                                <li>
-                                    Triage coordinators analyze patient intake forms and direct patients to the correct doctors based on the doctor specialty required.
-                                </li>
-                                <li>Doctors view patients based on: 1) the specialty entered by triage coordinators. 2) the patient location, language, and doctor gender preference.</li>
-                            </ol>
-                        </div>
-                    </div>
-                </Card>
-            </div>
-
-
+ 
             <div className="mt-20">
                 <Card className="p-8 bg-white">
                     <div className="flex flex-col items-start">
@@ -264,7 +362,7 @@ export default function aboutPage() {
             </div>
         </div>
     </div>
+    </div>
     )
 }
-
 

@@ -2,8 +2,10 @@ import { useSession } from 'next-auth/react';
 import { useState, useCallback, useEffect } from 'react';
 import { useToast } from '@/components/hooks/useToast';
 import { IAdmin } from "@/models/admin";
+import Fuse from 'fuse.js';
 
 export function useAdminManagementViewModel() {
+    const [allAdmins, setAllAdmins] = useState<IAdmin[]>([]);
     const [adminsData, setAdminsData] = useState<IAdmin[]>([]);
     const { data: session } = useSession();
     const token = session?.user.token;
@@ -31,6 +33,7 @@ export function useAdminManagementViewModel() {
             console.log("Raw data fetched from API:", data);
 
             setAdminsData(data.admins || []);
+            setAllAdmins(data.admins || []);
             console.log("Admins data set in state:", data.admins || []);
         } catch (error) {
             console.error('Error fetching admins:', error);
@@ -50,30 +53,37 @@ export function useAdminManagementViewModel() {
         console.log("Admins data in state:", adminsData);
     }, [adminsData]);
 
+    const fuseOptions = {
+        isCaseSensitive: false,
+        includeScore: true,
+        // shouldSort: true,
+        // includeMatches: true,
+        // findAllMatches: false,
+        minMatchCharLength: 2,
+        // location: 0,
+        threshold: 0.3,
+        // distance: 100,
+        // useExtendedSearch: false,
+        // ignoreLocation: false,
+        // ignoreFieldNorm: false,
+        // fieldNormWeight: 1,
+        keys: [
+            "email",
+            "firstName",
+            "lastName"
+        ]
+    };
+    
+    const fuse = new Fuse(allAdmins, fuseOptions);
     const handleSearch = useCallback(async () => {
-        if (!searchQuery) return;
+        if (!searchQuery) {
+            setAdminsData(allAdmins);
+            return;
+        };
 
-        try {
-            const res = await fetch(`/api/admin/GET/admin-mgmt-search?search=${encodeURIComponent(searchQuery)}`, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-
-            if (!res.ok) throw new Error('Failed to search admins');
-
-            const data = await res.json();
-            setSelectedUser(data.admins || []);
-        } catch (error) {
-            console.error('Error searching admins:', error);
-            setToast?.({
-                title: 'Error',
-                description: 'Failed to search admins.',
-                variant: 'destructive',
-            });
-        }
-    }, [searchQuery, token, setToast]);
+        const searchData = fuse.search(searchQuery);
+        setAdminsData(searchData.map((result) => result.item));
+    }, [allAdmins, searchQuery]);
 
     const handleAddAdmin = async (userId: string) => {
         try {

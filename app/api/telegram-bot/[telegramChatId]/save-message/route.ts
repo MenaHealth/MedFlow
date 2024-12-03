@@ -7,9 +7,6 @@ import TelegramThread from "@/models/telegramThread";
 import { validateApiKey } from "@/utils/telegram/validateApiKey";
 
 const CHATBOT_LOGGING_URL = process.env.CHATBOT_LOGGING_URL || "https://chatbot-server.com/api/logs";
-const BASE_URL = process.env.NODE_ENV === "development"
-    ? "http://localhost:3000"
-    : "https://medflow-mena-health.vercel.app";
 
 async function sendLogToChatbot(log: object) {
     try {
@@ -42,7 +39,7 @@ export async function PATCH(
         const { telegramChatId } = params;
         const body = await request.json();
 
-        const { text, sender, timestamp, language = "english" } = body;
+        const { text, sender, timestamp } = body;
         if (!telegramChatId || !text || !sender || !timestamp) {
             await sendLogToChatbot({ event: "Missing required fields", params, body });
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -56,28 +53,7 @@ export async function PATCH(
             console.log(`Thread not found for Chat ID ${telegramChatId}. Creating new thread.`);
             thread = new TelegramThread({ chatId: telegramChatId, messages: [] });
             await thread.save();
-
-            // Call the `/new/telegram` API
-            console.log(`Triggering /new/telegram API for chat ID ${telegramChatId}`);
-            const registrationResponse = await axios.post(
-                `${BASE_URL}/api/patient/new/telegram`,
-                {
-                    telegramChatId, // Pass as part of update data
-                    language,
-                },
-                {
-                    headers: {
-                        Authorization: authHeader,
-                        "Content-Type": "application/json",
-                    },
-                }
-            );
-
-            if (registrationResponse.status !== 200) {
-                console.error("Error triggering /new/telegram API:", registrationResponse.data);
-            } else {
-                console.log("Patient registration handled successfully:", registrationResponse.data);
-            }
+            console.log(`New thread created for Chat ID ${telegramChatId}`);
         }
 
         // Save the incoming message

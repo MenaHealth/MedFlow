@@ -2,37 +2,39 @@
 
 import { NextResponse } from "next/server";
 import dbConnect from "@/utils/database";
-import { createOrGetPatient } from "@/utils/telegram/patientHelpers";
-import { getSubmissionMessage, sendPatientRegistrationMessage } from "@/utils/telegram/signupConfirmation";
+import TelegramThread from "@/models/telegramThread";
 
 export async function POST(request: Request, { params }: { params: { telegramChatId: string } }) {
     try {
         const { telegramChatId } = params;
         await dbConnect();
 
-        const updateData = await request.json();
-
         if (!telegramChatId) {
             return NextResponse.json({ error: "Telegram Chat ID is required" }, { status: 400 });
         }
 
-        // Ensure patient exists or create a new one
-        const patientId = await createOrGetPatient(telegramChatId, updateData.language);
+        const { language } = await request.json();
 
-        // Construct the registration URL
-        const baseUrl = process.env.NODE_ENV === "development"
-            ? "http://localhost:3000"
-            : "https://medflow-mena-health.vercel.app";
-        const registrationUrl = `${baseUrl}/new-patient/telegram/${patientId}`;
+        // Validate language
+        const supportedLanguages = ["en", "ar", "fa", "ps"];
+        const languageKey = supportedLanguages.includes(language) ? language : "en"; // Default to English
 
-        // Generate and send the Telegram message
-        const message = `${getSubmissionMessage(updateData.language || "english")}\n\nComplete your registration here: ${registrationUrl}`;
-        await sendPatientRegistrationMessage(telegramChatId, message);
+        // Find or create Telegram thread
+        let thread = await TelegramThread.findOne({ chatId: telegramChatId });
+        if (!thread) {
+            thread = new TelegramThread({
+                chatId: telegramChatId,
+                language: languageKey,
+            });
+        } else {
+            thread.language = languageKey;
+        }
 
-        // Return the registration URL for debugging or potential future uses
-        return NextResponse.json({ message: "Patient data saved and message sent successfully", registrationUrl });
+        await thread.save();
+
+        return NextResponse.json({ message: "Telegram thread updated successfully", thread });
     } catch (error) {
-        console.error("Error saving patient data and sending message:", error);
+        console.error("Error in Telegram thread POST route:", error);
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 }

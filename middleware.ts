@@ -14,6 +14,7 @@ export async function middleware(req: any) {
         pathname.startsWith('/new-patient') ||
         pathname.match(PUBLIC_FILE) ||
         pathname === '/api/telegram-bot' ||
+        pathname.startsWith('/api/telegram-bot') ||
         pathname === '/overview' ||
         pathname === '/about'
     ) {

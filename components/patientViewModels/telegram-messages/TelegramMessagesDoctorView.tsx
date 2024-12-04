@@ -3,7 +3,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { useTelegramMessagesViewModel, TelegramMessage } from "./TelegramMessagesViewModel";
+import useTelegramMessagesViewModel from "./TelegramMessagesViewModel";
 import { TelegramMessagesView } from "./TelegramMessagesView";
 
 const TelegramMessagesDoctorView: React.FC<{ telegramChatId: string }> = ({ telegramChatId }) => {
@@ -14,25 +14,29 @@ const TelegramMessagesDoctorView: React.FC<{ telegramChatId: string }> = ({ tele
         sendMessage,
         loadMessages,
         isLoading,
-    } = useTelegramMessagesViewModel();
+    } = useTelegramMessagesViewModel(telegramChatId);
 
     useEffect(() => {
         console.log("Loading messages for Telegram Chat ID:", telegramChatId);
         if (telegramChatId) {
-            loadMessages(telegramChatId);
+            loadMessages();
         }
     }, [loadMessages, telegramChatId]);
 
     return (
         <TelegramMessagesView
+            telegramChatId={telegramChatId}
             messages={messages}
             newMessage={newMessage}
             setNewMessage={setNewMessage}
-            sendMessage={() => sendMessage()}
+            sendMessage={sendMessage}
             isLoading={isLoading}
         />
     );
 };
 
 export default TelegramMessagesDoctorView;
+
+
+
 

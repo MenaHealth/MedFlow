@@ -1,3 +1,4 @@
+// app/about/page.jsx
 'use client';
 
 import React, { useEffect } from 'react';

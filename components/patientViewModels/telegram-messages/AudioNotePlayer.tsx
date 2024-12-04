@@ -17,7 +17,7 @@ export function AudioNotePlayer({ audioBuffer, mediaUrl, format }: AudioNotePlay
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null); // Added error state
+    const [error, setError] = useState<string | null>(null);
     const audioContext = useRef<AudioContext | null>(null);
     const sourceNode = useRef<AudioBufferSourceNode | null>(null);
     const startTime = useRef<number>(0);
@@ -58,8 +58,8 @@ export function AudioNotePlayer({ audioBuffer, mediaUrl, format }: AudioNotePlay
 
             const { channelData, sampleRate } = await oggOpusDecoder.current.decodeFile(new Uint8Array(arrayBuffer));
 
-            if (channelData.length === 0) {
-                throw new Error('No audio channels found in the decoded data');
+            if (channelData.length === 0 || channelData[0].length === 0) {
+                throw new Error('Decoded audio has no valid data.');
             }
 
             const newAudioBuffer = audioContext.current!.createBuffer(
@@ -75,10 +75,6 @@ export function AudioNotePlayer({ audioBuffer, mediaUrl, format }: AudioNotePlay
             setAudioBufferState(newAudioBuffer);
         } catch (error) {
             console.error('Error fetching and decoding audio:', error);
-            if (error instanceof Error) {
-                console.error('Error name:', error.name);
-                console.error('Error message:', error.message);
-            }
             setError(`Error loading audio: ${error instanceof Error ? error.message : String(error)}`);
         } finally {
             setIsLoading(false);
@@ -138,9 +134,9 @@ export function AudioNotePlayer({ audioBuffer, mediaUrl, format }: AudioNotePlay
     };
 
     const pauseAudio = () => {
-        if (format === 'ogg' && sourceNode.current && audioContext.current) {
+        if (format === 'ogg' && sourceNode.current && audioContext.current instanceof AudioContext) {
             sourceNode.current.stop();
-            pauseTime.current = audioContext.currentTime - startTime.current;
+            pauseTime.current = audioContext.current.currentTime - startTime.current;
             setIsPlaying(false);
         } else if (format === 'mp3' && audioElement.current) {
             audioElement.current.pause();

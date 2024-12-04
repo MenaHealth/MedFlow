@@ -2,12 +2,14 @@
 
 import { useCallback, useState } from "react";
 
-interface TelegramMessage {
+export interface TelegramMessage {
     _id: string;
     text: string;
     sender: string;
     timestamp: Date;
     isSelf: boolean;
+    type: string;
+    mediaUrl?: string;
 }
 
 export function useTelegramMessagesViewModel() {
@@ -37,6 +39,8 @@ export function useTelegramMessagesViewModel() {
                 sender: message.sender,
                 timestamp: new Date(message.timestamp),
                 isSelf: message.sender === "You",
+                type: message.type,
+                mediaUrl: message.mediaUrl || "",
             }));
 
             setMessages(formattedMessages);
@@ -47,51 +51,46 @@ export function useTelegramMessagesViewModel() {
         }
     }, []);
 
-    const sendMessage = useCallback(
-        async (telegramChatId: string) => {
-            if (!telegramChatId || !newMessage.trim()) {
-                console.error("Telegram chat ID or message is missing");
-                return;
+    const sendMessage = useCallback(async () => {
+        if (!newMessage) {
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            const response = await fetch("/api/telegram-bot/send", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ text: newMessage }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`API responded with status: ${response.status}`);
             }
 
-            setIsLoading(true);
-            try {
-                const response = await fetch(`/api/telegram-bot/${encodeURIComponent(telegramChatId)}/send`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        text: newMessage,
-                    }),
-                });
+            const data = await response.json();
+            setMessages((prevMessages) => [
+                ...prevMessages,
+                {
+                    _id: data.savedMessage._id || `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                    text: newMessage,
+                    sender: "You",
+                    timestamp: new Date(data.savedMessage.timestamp),
+                    isSelf: true,
+                    type: "text",
+                    mediaUrl: "",
+                },
+            ]);
+            setNewMessage("");
+        } catch (error) {
+            console.error("Error sending message:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [newMessage]);
 
-                if (!response.ok) {
-                    throw new Error(`Error sending message: ${response.statusText}`);
-                }
-
-                const data = await response.json();
-                console.log("Message sent and saved successfully", data);
-
-                setMessages((prevMessages) => [
-                    ...prevMessages,
-                    {
-                        _id: data.savedMessage._id || `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-                        text: newMessage,
-                        sender: "You",
-                        timestamp: new Date(data.savedMessage.timestamp),
-                        isSelf: true, // Add this line
-                    },
-                ]);
-                setNewMessage("");
-            } catch (error) {
-                console.error("Error in sendMessage:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        },
-        [newMessage]
-    );
 
     return {
         messages,
@@ -102,6 +101,4 @@ export function useTelegramMessagesViewModel() {
         isLoading,
     };
 }
-
-
 

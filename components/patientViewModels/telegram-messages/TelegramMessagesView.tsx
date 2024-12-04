@@ -11,6 +11,7 @@
     import { AudioNotePlayer } from "./AudioNotePlayer";
     import { decryptPhoto } from "@/utils/encryptPhoto";
     import ReactMarkdown from 'react-markdown';
+    import {VoiceRecorder} from "@/components/patientViewModels/telegram-messages/VoiceRecorder";
 
     export interface TelegramMessage {
         _id: string;
@@ -28,9 +29,11 @@
         messages: TelegramMessage[];
         newMessage: string;
         setNewMessage: (message: string) => void;
-        sendMessage: (telegramChatId: string) => void; // Updated sendMessage type
+        sendMessage: (telegramChatId: string) => void;
+        sendVoiceRecording: (blob: Blob) => void;
+        sendImage: (file: File) => void;
         isLoading: boolean;
-        telegramChatId: string; // Added telegramChatId prop
+        telegramChatId: string;
     }
 
     export const TelegramMessagesView: React.FC<TelegramMessagesViewProps> = ({
@@ -38,12 +41,14 @@
                                                                                   newMessage,
                                                                                   setNewMessage,
                                                                                   sendMessage,
+                                                                                  sendImage,
+                                                                                  sendVoiceRecording,
                                                                                   isLoading,
                                                                                   telegramChatId, // Added telegramChatId to props
                                                                               }) => {
         const scrollAreaRef = useRef<HTMLDivElement>(null);
         const textareaRef = useRef<HTMLTextAreaElement>(null);
-        const [audioBuffers, setAudioBuffers] = useState<{ [key: string]: AudioBuffer }>({});
+        const [audioBuffers, setAudioBuffers] = useState<{ [key: string]: AudioBuffer | null }>({});
         const [decryptedImages, setDecryptedImages] = useState<{ [key: string]: string }>({});
 
         useEffect(() => {
@@ -66,8 +71,16 @@
             });
         }, [messages]);
 
-        const decodeAudio = async (mediaUrl: string, messageId: string) => {
+        const decodeAudio = async (mediaUrl: string, messageId: string, format: 'ogg' | 'mp3') => {
             try {
+                if (format === 'mp3') {
+                    setAudioBuffers((prev) => ({
+                        ...prev,
+                        [messageId]: null, // MP3 does not require an AudioBuffer
+                    }));
+                    return;
+                }
+
                 const response = await fetch(mediaUrl);
                 if (!response.ok) throw new Error("Failed to fetch audio file");
 
@@ -95,12 +108,20 @@
 
         const renderAudioPlayer = (message: TelegramMessage) => {
             const buffer = audioBuffers[message._id];
-            if (!buffer) {
-                decodeAudio(message.mediaUrl || "", message._id);
+            const format = message.mediaUrl?.endsWith('.mp3') ? 'mp3' : 'ogg'; // Determine format from URL
+
+            if (format === 'ogg' && !buffer) {
+                decodeAudio(message.mediaUrl || "", message._id, format);
                 return <p>Loading audio...</p>;
             }
 
-            return <AudioNotePlayer audioBuffer={buffer} />;
+            return (
+                <AudioNotePlayer
+                    audioBuffer={buffer}
+                    mediaUrl={message.mediaUrl || ""}
+                    format={format}
+                />
+            );
         };
 
         const renderImage = (message: TelegramMessage) => {
@@ -236,6 +257,24 @@
                                 <Send className="h-4 w-4" />
                                 <span className="sr-only">Send</span>
                             </Button>
+                        </div>
+                        <div>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                    if (e.target.files?.[0]) {
+                                        sendImage(e.target.files[0]);
+                                    }
+                                }}
+                            />
+
+                            <div>
+                                <VoiceRecorder
+                                    onRecordingComplete={sendVoiceRecording}
+                                    isUploading={isLoading}
+                                />
+                            </div>
                         </div>
                     </form>
                 </CardFooter>

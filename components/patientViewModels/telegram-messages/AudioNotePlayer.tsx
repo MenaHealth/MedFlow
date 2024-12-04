@@ -17,6 +17,7 @@ export function AudioNotePlayer({ audioBuffer, mediaUrl, format }: AudioNotePlay
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null); // Added error state
     const audioContext = useRef<AudioContext | null>(null);
     const sourceNode = useRef<AudioBufferSourceNode | null>(null);
     const startTime = useRef<number>(0);
@@ -45,8 +46,11 @@ export function AudioNotePlayer({ audioBuffer, mediaUrl, format }: AudioNotePlay
 
     const fetchAndDecodeOgg = async () => {
         setIsLoading(true);
+        setError(null);
         try {
-            const response = await fetch(mediaUrl);
+            const response = await fetch(mediaUrl, { mode: 'cors' });
+            if (!response.ok) throw new Error(`Failed to fetch audio file: ${response.statusText}`);
+
             const arrayBuffer = await response.arrayBuffer();
 
             oggOpusDecoder.current = new OggOpusDecoder();
@@ -67,6 +71,7 @@ export function AudioNotePlayer({ audioBuffer, mediaUrl, format }: AudioNotePlay
             setAudioBufferState(newAudioBuffer);
         } catch (error) {
             console.error('Error fetching and decoding audio:', error);
+            setError(`Error loading audio: ${error instanceof Error ? error.message : String(error)}`);
         } finally {
             setIsLoading(false);
         }
@@ -155,6 +160,10 @@ export function AudioNotePlayer({ audioBuffer, mediaUrl, format }: AudioNotePlay
         return <div>Loading audio...</div>;
     }
 
+    if (error) {
+        return <div>{error}</div>; //Added error display
+    }
+
     return (
         <div className="flex items-center space-x-2 w-full max-w-[300px]">
             <Button
@@ -180,4 +189,6 @@ export function AudioNotePlayer({ audioBuffer, mediaUrl, format }: AudioNotePlay
         </div>
     );
 }
+
+
 

@@ -108,7 +108,7 @@
 
         const renderAudioPlayer = (message: TelegramMessage) => {
             const buffer = audioBuffers[message._id];
-            const format = message.mediaUrl?.endsWith('.mp3') ? 'mp3' : 'ogg'; // Determine format from URL
+            const format = message.mediaUrl?.endsWith('.mp3') ? 'mp3' : 'ogg';
 
             if (format === 'ogg' && !buffer) {
                 decodeAudio(message.mediaUrl || "", message._id, format);

@@ -58,6 +58,10 @@ export function AudioNotePlayer({ audioBuffer, mediaUrl, format }: AudioNotePlay
 
             const { channelData, sampleRate } = await oggOpusDecoder.current.decodeFile(new Uint8Array(arrayBuffer));
 
+            if (channelData.length === 0) {
+                throw new Error('No audio channels found in the decoded data');
+            }
+
             const newAudioBuffer = audioContext.current!.createBuffer(
                 channelData.length,
                 channelData[0].length,
@@ -71,6 +75,10 @@ export function AudioNotePlayer({ audioBuffer, mediaUrl, format }: AudioNotePlay
             setAudioBufferState(newAudioBuffer);
         } catch (error) {
             console.error('Error fetching and decoding audio:', error);
+            if (error instanceof Error) {
+                console.error('Error name:', error.name);
+                console.error('Error message:', error.message);
+            }
             setError(`Error loading audio: ${error instanceof Error ? error.message : String(error)}`);
         } finally {
             setIsLoading(false);
@@ -132,7 +140,7 @@ export function AudioNotePlayer({ audioBuffer, mediaUrl, format }: AudioNotePlay
     const pauseAudio = () => {
         if (format === 'ogg' && sourceNode.current && audioContext.current) {
             sourceNode.current.stop();
-            pauseTime.current = audioContext.current.currentTime - startTime.current;
+            pauseTime.current = audioContext.currentTime - startTime.current;
             setIsPlaying(false);
         } else if (format === 'mp3' && audioElement.current) {
             audioElement.current.pause();
@@ -189,6 +197,7 @@ export function AudioNotePlayer({ audioBuffer, mediaUrl, format }: AudioNotePlay
         </div>
     );
 }
+
 
 
 

@@ -1,77 +1,71 @@
-// app/api/telegram-bot/[telegramChatId]/send-image/route.ts
-import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/utils/database";
+// app/api/telegram-bot/[telegramChatId]/send-audio/route.ts
+
+// app/api/telegram-bot/[telegramChatId]/send-audio/route.ts
 import TelegramThread from "@/models/telegramThread";
+import dbConnect from "@/utils/database";
+import { NextResponse } from "next/server";
 
 const TELEGRAM_BOT_API_URL = process.env.TELEGRAM_BOT_API_URL || 'https://api.telegram.org';
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 
-if (!TELEGRAM_BOT_TOKEN) {
-    console.error('TELEGRAM_BOT_TOKEN is not set in the environment variables');
-}
-
 export async function POST(
-    request: NextRequest,
+    req: Request,
     { params }: { params: { telegramChatId: string } }
 ) {
     await dbConnect();
 
     try {
         const { telegramChatId } = params;
-        const { text } = await request.json();
+        const { mediaUrl, caption } = await req.json();
 
-        if (!telegramChatId || !text) {
+        if (!telegramChatId || !mediaUrl) {
             return NextResponse.json(
                 { error: "Missing required fields" },
                 { status: 400 }
             );
         }
 
-        // Send message to Telegram Bot API
-        const telegramResponse = await fetch(`${TELEGRAM_BOT_API_URL}/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-            method: 'POST',
+        // Send audio to Telegram bot
+        const telegramResponse = await fetch(`${TELEGRAM_BOT_API_URL}/bot${TELEGRAM_BOT_TOKEN}/sendAudio`, {
+            method: "POST",
             headers: {
-                'Content-Type': 'application/json',
+                "Content-Type": "application/json",
             },
             body: JSON.stringify({
                 chat_id: telegramChatId,
-                text: text,
+                audio: mediaUrl,
+                caption,
             }),
         });
 
         if (!telegramResponse.ok) {
             const errorData = await telegramResponse.json();
-            console.error('Telegram API error:', errorData);
+            console.error("Telegram API error:", errorData);
             throw new Error(`Telegram API responded with status: ${telegramResponse.status}`);
         }
 
-        const telegramData = await telegramResponse.json();
-
-        // Save message to database
+        // Save the audio message to MongoDB
         let thread = await TelegramThread.findOne({ chatId: telegramChatId });
-
         if (!thread) {
             thread = new TelegramThread({ chatId: telegramChatId, messages: [] });
         }
 
         const newMessage = {
-            text,
+            text: caption || "Audio Note",
             sender: "You",
             timestamp: new Date(),
-            type: 'text'
+            type: "audio",
+            mediaUrl,
         };
         thread.messages.push(newMessage);
         await thread.save();
 
         return NextResponse.json({
-            message: "Message sent to Telegram and saved successfully",
-            telegramResponse: telegramData,
+            message: "Audio sent and saved successfully",
             savedMessage: newMessage,
         });
     } catch (error) {
-        console.error("Error sending message to Telegram or saving to database:", error);
+        console.error("Error handling send-audio request:", error);
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 }
-
-

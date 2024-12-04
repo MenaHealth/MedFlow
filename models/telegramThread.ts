@@ -7,7 +7,7 @@ const messageSchema = new mongoose.Schema({
     timestamp: { type: Date, required: true, default: Date.now },
     type: {
         type: String,
-        enum: ['text', 'image', 'video', 'file', 'reply', 'forward'],
+        enum: ['text', 'image', 'video', 'file', 'reply', 'forward', 'audio'],
         default: 'text',
     },
     mediaUrl: { type: String, default: '' },

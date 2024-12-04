@@ -28,7 +28,7 @@ export default function Nav() {
         <nav className="w-full py-4 px-4 md:px-6 bg-white shadow-md">
             <div className="max-w-7xl mx-auto flex justify-between items-center">
                 <Link href="/" className="flex items-center gap-2">
-                    {pathname === '/new-patient' ? (
+                    {pathname?.startsWith('/new-patient') ? (
                         <>
                             <Image
                                 src="/assets/images/mena_health_logo.jpeg"

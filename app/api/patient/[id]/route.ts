@@ -32,14 +32,6 @@ export async function GET(
             return NextResponse.json({ error: "Patient Not Found" }, { status: 404 });
         }
 
-        // Log patient details for debugging
-        console.log("Patient found:", {
-            firstName: patient.firstName,
-            lastName: patient.lastName,
-            phone: patient.phone,
-            telegramChatId: patient.telegramChatId,
-        });
-
         return NextResponse.json({ patient });
     } catch (error) {
         console.error("Error fetching patient:", error);

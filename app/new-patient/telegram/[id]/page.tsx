@@ -86,7 +86,7 @@ const TelegramPatientForm = ({ params }: TelegramPatientFormProps) => {
         try {
             const response = await fetch(`/api/patient/new/telegram`, {
                 method: "POST",
-                body: JSON.stringify({ patientId: id, ...submittedFormData }),
+                body: JSON.stringify({ patientId: id, ...submittedFormData, hasSubmittedInfo: true }),
                 headers: { "Content-Type": "application/json" },
             });
 
@@ -114,10 +114,10 @@ const TelegramPatientForm = ({ params }: TelegramPatientFormProps) => {
     };
 
     const header = {
-        English: patientData?.hasSubmittedInfo ? "Thank you for submitting" : (patientData ? "Update Patient Information" : "New Patient Form"),
-        Arabic: patientData?.hasSubmittedInfo ? "شكرا لتقديمك" : (patientData ? "تحديث معلومات المريض" : "نموذج مريض جديد"),
-        Farsi: patientData?.hasSubmittedInfo ? "با تشکر از ارسال شما" : (patientData ? "به روز رسانی اطلاعات بیمار" : "فرم بیمار جدید"),
-        Pashto: patientData?.hasSubmittedInfo ? "د سپارلو لپاره مننه" : (patientData ? "د ناروغ معلومات تازه کول" : "د نوي ناروغ فورمه"),
+        English: patientData?.hasSubmittedInfo ? "Thank you for submitting" : "New Patient Form",
+        Arabic: patientData?.hasSubmittedInfo ? "شكرا لتقديمك" : "نموذج مريض جديد",
+        Farsi: patientData?.hasSubmittedInfo ? "با تشکر از ارسال شما" : "فرم بیمار جدید",
+        Pashto: patientData?.hasSubmittedInfo ? "د سپارلو لپاره مننه" : "د نوي ناروغ فورمه",
     };
 
     const submittedMessage = {

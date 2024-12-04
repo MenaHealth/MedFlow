@@ -58,7 +58,7 @@ const ImageGallery = () => {
                     return response.json();
                 })
                 .then(data => {
-                    setPatientFiles(data.files);
+                    setPatientFiles(data?.patient?.files);
                 })
                 .catch(error => {
                     console.error('Error fetching patient data:', error);
@@ -174,7 +174,7 @@ const ImageGallery = () => {
                 throw new Error(`HTTP error! status: ${currentPatient.status} - ${errorText}`);
             }
 
-            const currentPhotos = (await currentPatient.json()).files;
+            const currentPhotos = (await currentPatient.json()).patient?.files;
             const patchResponse = await fetch(`/api/patient/${id}`, {
                 method: 'PATCH',
                 body: JSON.stringify({ ...DEFAULT_FORM_VALUES, files: currentPhotos.length > 0 ? [...currentPhotos, ...encryptedImages] : encryptedImages }),

@@ -5,7 +5,6 @@ export function validateApiKey(authHeader: string | null): boolean {
         return false;
     }
 
-    // Dynamically select the expected key based on the environment
     const envKey =
         process.env.NODE_ENV === 'development'
             ? process.env.DEV_TELEGRAM_BOT_KEY
@@ -18,16 +17,14 @@ export function validateApiKey(authHeader: string | null): boolean {
 
     let providedKey = '';
     try {
-        // Extract and decode the provided key
         providedKey = decodeURIComponent(authHeader.split(' ')[1] || '');
     } catch (error) {
         console.error('Error decoding provided key:', error);
         return false;
     }
 
-    // console.log('Decoded Provided Key:', providedKey);
-    // console.log('Expected Key:', envKey);
+    console.log('Decoded Provided Key:', providedKey);
+    console.log('Expected Key:', envKey);
 
-    // Compare provided key with the expected key
     return providedKey === envKey;
 }

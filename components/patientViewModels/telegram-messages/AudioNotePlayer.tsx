@@ -8,11 +8,12 @@ import { Play, Pause } from 'lucide-react';
 import { OggOpusDecoder } from 'ogg-opus-decoder';
 
 interface AudioNotePlayerProps {
+    audioBuffer?: AudioBuffer | null;
     mediaUrl: string;
     format: 'ogg' | 'mp3';
 }
 
-export function AudioNotePlayer({ mediaUrl, format }: AudioNotePlayerProps) {
+export function AudioNotePlayer({ audioBuffer, mediaUrl, format }: AudioNotePlayerProps) {
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
@@ -21,14 +22,17 @@ export function AudioNotePlayer({ mediaUrl, format }: AudioNotePlayerProps) {
     const startTime = useRef<number>(0);
     const pauseTime = useRef<number>(0);
     const audioElement = useRef<HTMLAudioElement | null>(null);
-    const [audioBuffer, setAudioBuffer] = useState<AudioBuffer | null>(null);
+    const [audioBufferState, setAudioBufferState] = useState<AudioBuffer | null>(null);
     const oggOpusDecoder = useRef<OggOpusDecoder | null>(null);
 
     useEffect(() => {
         audioContext.current = new (window.AudioContext || (window as any).webkitAudioContext)();
 
-        if (format === 'ogg') {
+        if (format === 'ogg' && !audioBuffer) {
             fetchAndDecodeOgg();
+        } else if (format === 'ogg' && audioBuffer) {
+            setAudioBufferState(audioBuffer);
+            setIsLoading(false);
         } else {
             setIsLoading(false);
         }
@@ -37,7 +41,7 @@ export function AudioNotePlayer({ mediaUrl, format }: AudioNotePlayerProps) {
             audioContext.current?.close();
             oggOpusDecoder.current?.free();
         };
-    }, [format, mediaUrl]);
+    }, [format, mediaUrl, audioBuffer]);
 
     const fetchAndDecodeOgg = async () => {
         setIsLoading(true);
@@ -60,7 +64,7 @@ export function AudioNotePlayer({ mediaUrl, format }: AudioNotePlayerProps) {
                 newAudioBuffer.copyToChannel(channelData[i], i);
             }
 
-            setAudioBuffer(newAudioBuffer);
+            setAudioBufferState(newAudioBuffer);
         } catch (error) {
             console.error('Error fetching and decoding audio:', error);
         } finally {
@@ -77,9 +81,9 @@ export function AudioNotePlayer({ mediaUrl, format }: AudioNotePlayerProps) {
     };
 
     const playAudio = () => {
-        if (format === 'ogg' && audioBuffer && audioContext.current) {
+        if (format === 'ogg' && audioBufferState && audioContext.current) {
             sourceNode.current = audioContext.current.createBufferSource();
-            sourceNode.current.buffer = audioBuffer;
+            sourceNode.current.buffer = audioBufferState;
             sourceNode.current.connect(audioContext.current.destination);
 
             const offset = pauseTime.current;
@@ -133,8 +137,8 @@ export function AudioNotePlayer({ mediaUrl, format }: AudioNotePlayerProps) {
 
     const handleSliderChange = (value: number[]) => {
         const newTime = (value[0] / 100);
-        if (format === 'ogg' && audioBuffer) {
-            pauseTime.current = newTime * audioBuffer.duration;
+        if (format === 'ogg' && audioBufferState) {
+            pauseTime.current = newTime * audioBufferState.duration;
             setProgress(value[0]);
 
             if (isPlaying) {
@@ -157,7 +161,7 @@ export function AudioNotePlayer({ mediaUrl, format }: AudioNotePlayerProps) {
                 variant="outline"
                 size="icon"
                 onClick={togglePlayPause}
-                disabled={isLoading || (format === 'ogg' && !audioBuffer)}
+                disabled={isLoading || (format === 'ogg' && !audioBufferState)}
                 aria-label={isPlaying ? 'Pause' : 'Play'}
             >
                 {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}

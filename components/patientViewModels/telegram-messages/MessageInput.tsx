@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+// components/patientViewModels/telegram-messages/MessageInput.tsx
+import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Send, Image, Plus } from "lucide-react";
-import { VoiceRecorder } from "@/components/patientViewModels/telegram-messages/VoiceRecorder";
+import { Send, Image, Plus } from 'lucide-react';
+import VoiceRecorder from "@/components/patientViewModels/telegram-messages/VoiceRecorder";
 import { AutoExpandingInput } from "@/components/ui/auto-expanding-input";
 
 interface MessageInputProps {
@@ -21,12 +22,16 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                                                               sendVoiceRecording,
                                                               isLoading,
                                                           }) => {
-    const [expanded, setExpanded] = useState(false); // State to toggle visibility
+    const [expanded, setExpanded] = React.useState(false);
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files?.[0]) {
             sendImage(e.target.files[0]);
         }
+    };
+
+    const handleRecordingComplete = (blob: Blob) => {
+        sendVoiceRecording(blob);
     };
 
     return (
@@ -38,7 +43,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             className="flex flex-col w-full gap-2"
         >
             <div className="flex items-end gap-2">
-                {/* Input for typing a message */}
                 <AutoExpandingInput
                     placeholder="Type your message..."
                     value={newMessage}
@@ -48,7 +52,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                     className="flex-grow"
                 />
                 <div className="flex gap-2">
-                    {/* Expand/Collapse Button */}
                     <Button
                         type="button"
                         size="icon"
@@ -60,7 +63,6 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                         <span className="sr-only">Toggle Options</span>
                     </Button>
 
-                    {/* Collapsible Content */}
                     {expanded && (
                         <div className="flex gap-2 mt-2 transition-all duration-300">
                             <Button
@@ -81,13 +83,12 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                                 className="hidden"
                             />
                             <VoiceRecorder
-                                onRecordingComplete={sendVoiceRecording}
+                                onRecordingComplete={handleRecordingComplete}
                                 isUploading={isLoading}
                             />
                         </div>
                     )}
 
-                    {/* Send Message Button */}
                     <Button
                         variant="orange"
                         type="submit"
@@ -103,3 +104,4 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         </form>
     );
 };
+

@@ -1,13 +1,13 @@
 // app/api/telegram-bot/upload-photo/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, ObjectCannedACL } from "@aws-sdk/client-s3";
 
 const spacesClient = new S3Client({
-    endpoint: process.env.DO_SPACES_ENDPOINT, // DigitalOcean Spaces endpoint
-    region: process.env.DO_SPACES_REGION, // DigitalOcean Spaces region
+    endpoint: process.env.DO_SPACES_ENDPOINT,
+    region: process.env.DO_SPACES_REGION,
     credentials: {
-        accessKeyId: process.env.DO_SPACES_KEY!, // DO Spaces key
-        secretAccessKey: process.env.DO_SPACES_SECRET!, // DO Spaces secret
+        accessKeyId: process.env.DO_SPACES_KEY!,
+        secretAccessKey: process.env.DO_SPACES_SECRET!,
     },
 });
 
@@ -21,17 +21,17 @@ export async function POST(req: NextRequest) {
         }
 
         const folder = process.env.NODE_ENV === "development" ? "dev" : "prod";
-        const fileName = `${folder}/images/${Date.now()}-${file.name}`; // File path structure
+        const fileName = `${folder}/images/${Date.now()}-${file.name}`;
 
         // Convert the file to a buffer
         const fileBuffer = new Uint8Array(await file.arrayBuffer());
 
         const uploadParams = {
-            Bucket: process.env.DO_SPACES_BUCKET!, // DigitalOcean Spaces bucket name
+            Bucket: process.env.DO_SPACES_BUCKET!,
             Key: fileName,
             Body: fileBuffer,
             ContentType: file.type,
-            ACL: "public-read", // Make it public-readable
+            ACL: ObjectCannedACL.public_read, // Use the enum instead of string
         };
 
         // Upload the file to DigitalOcean Spaces

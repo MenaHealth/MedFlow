@@ -9,17 +9,17 @@
     import { decryptPhoto } from "@/utils/encryptPhoto";
     import ReactMarkdown from 'react-markdown';
     import {MessageInput} from "@/components/patientViewModels/telegram-messages/MessageInput";
+    import {TelegramMessage} from "@/components/patientViewModels/telegram-messages/TelegramMessagesViewModel";
 
-    export interface TelegramMessage {
-        _id: string;
-        text: string;
-        sender: string;
-        timestamp: Date;
-        isSelf: boolean;
-        type: string;
-        mediaUrl?: string;
-        encryptedMedia?: string;
-        encryptionKey?: string;
+    interface TelegramMessagesViewProps {
+        messages: TelegramMessage[];
+        newMessage: string;
+        setNewMessage: (message: string) => void;
+        sendMessage: (telegramChatId: string) => void;
+        sendImage: (file: File) => void;
+        sendVoiceRecording: (blob: Blob) => void;
+        isLoading: boolean;
+        telegramChatId: string;
     }
 
     interface TelegramMessagesViewProps {
@@ -71,6 +71,7 @@
         const decodeAudio = async (mediaUrl: string, messageId: string, format: 'ogg' | 'mp3') => {
             try {
                 if (format === 'mp3') {
+                    // No decoding needed for MP3, use the media URL directly
                     setAudioBuffers((prev) => ({
                         ...prev,
                         [messageId]: null, // MP3 does not require an AudioBuffer
@@ -148,42 +149,6 @@
                 );
             }
             return null;
-        };
-
-        const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-            setNewMessage(e.target.value);
-            adjustTextareaHeight();
-        };
-
-        const insertFormatting = (startChar: string, endChar: string = startChar) => {
-            if (textareaRef.current) {
-                const start = textareaRef.current.selectionStart;
-                const end = textareaRef.current.selectionEnd;
-                const text = newMessage;
-                const before = text.substring(0, start);
-                const selection = text.substring(start, end);
-                const after = text.substring(end);
-                setNewMessage(`${before}${startChar}${selection}${endChar}${after}`);
-            }
-        };
-
-        const handleBold = () => insertFormatting('**');
-        const handleItalic = () => insertFormatting('_');
-        const handleBulletList = () => {
-            if (textareaRef.current) {
-                const start = textareaRef.current.selectionStart;
-                const text = newMessage;
-                const before = text.substring(0, start);
-                const after = text.substring(start);
-                setNewMessage(`${before}\n- ${after}`);
-            }
-        };
-
-        const adjustTextareaHeight = () => {
-            if (textareaRef.current) {
-                textareaRef.current.style.height = 'auto';
-                textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-            }
         };
 
         return (

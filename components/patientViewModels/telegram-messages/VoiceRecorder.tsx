@@ -1,42 +1,49 @@
-// components/patientViewModels/telegram-messages/VoiceRecorder.tsx
-'use client'
-
-import React, { useState, useRef } from 'react'
-import { Button } from "@/components/ui/button"
-import { Mic, Square, Loader } from 'lucide-react'
+import React, { useState, useRef, useCallback } from 'react';
+import { Button } from '@/components/ui/button';
+import { Mic, Square, Loader } from 'lucide-react';
 
 interface VoiceRecorderProps {
-    onRecordingComplete: (blob: Blob) => void
-    isUploading: boolean
+    onRecordingComplete: (blob: Blob) => void;
+    isUploading: boolean;
 }
 
-export function VoiceRecorder({ onRecordingComplete, isUploading }: VoiceRecorderProps) {
-    const [isRecording, setIsRecording] = useState(false)
-    const mediaRecorder = useRef<MediaRecorder | null>(null)
-    const audioChunks = useRef<Blob[]>([])
+const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onRecordingComplete, isUploading }) => {
+    const [isRecording, setIsRecording] = useState(false);
+    const mediaRecorder = useRef<MediaRecorder | null>(null);
+    const audioChunks = useRef<Blob[]>([]);
 
-    const stopRecording = () => {
-        if (mediaRecorder.current && isRecording) {
-            mediaRecorder.current.stop();
-            setIsRecording(false);
-        }
+    const getSupportedMimeType = () => {
+        const types = [
+            'audio/webm',
+            'audio/webm;codecs=opus',
+            'audio/ogg;codecs=opus',
+            'audio/mp4',
+            'audio/mpeg',
+        ];
+        return types.find(type => MediaRecorder.isTypeSupported(type)) || '';
     };
 
-    const startRecording = async () => {
+    const startRecording = useCallback(async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder.current = new MediaRecorder(stream);
+            const mimeType = getSupportedMimeType();
+
+            if (!mimeType) {
+                throw new Error('No supported MIME type found for MediaRecorder');
+            }
+
+            mediaRecorder.current = new MediaRecorder(stream, { mimeType });
 
             mediaRecorder.current.ondataavailable = (event) => {
-                audioChunks.current.push(event.data);
+                if (event.data.size > 0) {
+                    audioChunks.current.push(event.data);
+                }
             };
 
             mediaRecorder.current.onstop = () => {
-                if (audioChunks.current.length) {
-                    const audioBlob = new Blob(audioChunks.current, { type: 'audio/ogg; codecs=opus' });
-                    onRecordingComplete(audioBlob);
-                    audioChunks.current = [];
-                }
+                const audioBlob = new Blob(audioChunks.current, { type: mimeType });
+                onRecordingComplete(audioBlob);
+                audioChunks.current = [];
             };
 
             mediaRecorder.current.start();
@@ -44,7 +51,14 @@ export function VoiceRecorder({ onRecordingComplete, isUploading }: VoiceRecorde
         } catch (error) {
             console.error('Error starting recording:', error);
         }
-    };
+    }, [onRecordingComplete]);
+
+    const stopRecording = useCallback(() => {
+        if (mediaRecorder.current && isRecording) {
+            mediaRecorder.current.stop();
+            setIsRecording(false);
+        }
+    }, [isRecording]);
 
     return (
         <Button
@@ -62,5 +76,8 @@ export function VoiceRecorder({ onRecordingComplete, isUploading }: VoiceRecorde
                 <Mic className="h-4 w-4" />
             )}
         </Button>
-    )
-}
+    );
+};
+
+export default VoiceRecorder;
+

@@ -33,6 +33,7 @@
     "@radix-ui/react-toast": "^1.1.5",
     "@tanstack/react-table": "^8.20.5",
     "@types/jsonwebtoken": "^9.0.7",
+    "@wasm-audio-decoders/ogg-vorbis": "^0.1.16",
     "aws-sdk": "^2.1665.0",
     "axios": "^1.7.7",
     "bcryptjs": "^2.4.3",

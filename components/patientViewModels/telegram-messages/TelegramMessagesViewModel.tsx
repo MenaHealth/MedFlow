@@ -1,8 +1,7 @@
     // components/patientViewModels/telegram-messages/TelegramMessagesViewModel.tsx
 
     import { useCallback, useState } from "react";
-    import { encryptPhoto, generateEncryptionKey, convertToWebP, calculateFileHash } from "@/utils/encryptPhoto";
-    import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+    import { S3Client } from "@aws-sdk/client-s3";
 
 
     export interface TelegramMessage {
@@ -157,9 +156,21 @@
         const sendVoiceRecording = useCallback(async (blob: Blob) => {
             setIsLoading(true);
             try {
-                const file = new File([blob], "voice_message.mp3", { type: "audio/mpeg" }); // Updated format
+                let fileExtension = '.webm'; // Default
+                if (blob.type.includes('ogg')) {
+                    fileExtension = '.ogg';
+                } else if (blob.type.includes('mp4')) {
+                    fileExtension = '.mp4';
+                } else if (blob.type.includes('mpeg') || blob.type.includes('mp3')) {
+                    fileExtension = '.mp3';
+                }
+
+                const fileName = `voice_message${fileExtension}`;
+                const file = new File([blob], fileName, { type: blob.type });
+
                 const formData = new FormData();
                 formData.append("file", file);
+                formData.append("chatId", telegramChatId);
 
                 const uploadResponse = await fetch("/api/telegram-bot/upload-audio", {
                     method: "POST",
@@ -180,14 +191,13 @@
 
                 const data = await response.json();
 
-                // Add the new message object with required properties
                 setMessages((prev) => [
                     ...prev,
                     {
-                        _id: data.savedMessage._id, // Make sure the backend sends _id
+                        _id: data.savedMessage._id,
                         text: "Voice message sent",
                         sender: "You",
-                        timestamp: new Date(), // Use current timestamp or data from the backend
+                        timestamp: new Date(),
                         isSelf: true,
                         type: "voice",
                         mediaUrl: fileUrl,

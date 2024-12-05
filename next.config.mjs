@@ -9,9 +9,29 @@ const nextConfig = {
             'med-flow-telegram-images-dev.s3.us-east-2.amazonaws.com',
             'med-flow-telegram-images-prod.s3.us-east-2.amazonaws.com',
             'med-flow-audio-notes-dev.s3.us-east-2.amazonaws.com',
-            'med-flow-audio-notes-prod.s3.us-east-2.amazonaws.com'
+            'med-flow-audio-notes-prod.s3.us-east-2.amazonaws.com',
+            'medflow-telegram.fra1.digitaloceanspaces.com',
+            'fra1.digitaloceanspaces.com', // Add this line
         ],
         remotePatterns: [
+            {
+                protocol: 'https',
+                hostname: 'medflow-telegram.fra1.digitaloceanspaces.com',
+                port: '',
+                pathname: '/**',
+            },
+            {
+                protocol: 'https',
+                hostname: 'medflow-telegram.fra1.cdn.digitaloceanspaces.com',
+                port: '',
+                pathname: '/**',
+            },
+            {
+                protocol: 'https',
+                hostname: 'fra1.digitaloceanspaces.com', // Add this pattern
+                port: '',
+                pathname: '/medflow-telegram/**', // Adjust the pathname as needed
+            },
             {
                 protocol: 'https',
                 hostname: 'medflow-mena-health.vercel.app',
@@ -97,4 +117,3 @@ const nextConfig = {
 };
 
 export default nextConfig;
-

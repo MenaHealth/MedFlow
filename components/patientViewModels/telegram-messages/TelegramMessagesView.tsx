@@ -4,25 +4,22 @@
     import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
     import { ScrollArea } from "@/components/ui/ScrollArea";
     import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-    import { Textarea } from "@/components/ui/textarea";
-    import { Button } from "@/components/ui/button";
-    import { Send } from 'lucide-react';
     import { OggOpusDecoder } from "ogg-opus-decoder";
     import { AudioNotePlayer } from "./AudioNotePlayer";
     import { decryptPhoto } from "@/utils/encryptPhoto";
     import ReactMarkdown from 'react-markdown';
-    import {VoiceRecorder} from "@/components/patientViewModels/telegram-messages/VoiceRecorder";
+    import {MessageInput} from "@/components/patientViewModels/telegram-messages/MessageInput";
+    import {TelegramMessage} from "@/components/patientViewModels/telegram-messages/TelegramMessagesViewModel";
 
-    export interface TelegramMessage {
-        _id: string;
-        text: string;
-        sender: string;
-        timestamp: Date;
-        isSelf: boolean;
-        type: string;
-        mediaUrl?: string;
-        encryptedMedia?: string;
-        encryptionKey?: string;
+    interface TelegramMessagesViewProps {
+        messages: TelegramMessage[];
+        newMessage: string;
+        setNewMessage: (message: string) => void;
+        sendMessage: (telegramChatId: string) => void;
+        sendImage: (file: File) => void;
+        sendVoiceRecording: (blob: Blob) => void;
+        isLoading: boolean;
+        telegramChatId: string;
     }
 
     interface TelegramMessagesViewProps {
@@ -44,7 +41,7 @@
                                                                                   sendImage,
                                                                                   sendVoiceRecording,
                                                                                   isLoading,
-                                                                                  telegramChatId, // Added telegramChatId to props
+                                                                                  telegramChatId,
                                                                               }) => {
         const scrollAreaRef = useRef<HTMLDivElement>(null);
         const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -74,6 +71,7 @@
         const decodeAudio = async (mediaUrl: string, messageId: string, format: 'ogg' | 'mp3') => {
             try {
                 if (format === 'mp3') {
+                    // No decoding needed for MP3, use the media URL directly
                     setAudioBuffers((prev) => ({
                         ...prev,
                         [messageId]: null, // MP3 does not require an AudioBuffer
@@ -168,42 +166,6 @@
             return null;
         };
 
-        const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-            setNewMessage(e.target.value);
-            adjustTextareaHeight();
-        };
-
-        const insertFormatting = (startChar: string, endChar: string = startChar) => {
-            if (textareaRef.current) {
-                const start = textareaRef.current.selectionStart;
-                const end = textareaRef.current.selectionEnd;
-                const text = newMessage;
-                const before = text.substring(0, start);
-                const selection = text.substring(start, end);
-                const after = text.substring(end);
-                setNewMessage(`${before}${startChar}${selection}${endChar}${after}`);
-            }
-        };
-
-        const handleBold = () => insertFormatting('**');
-        const handleItalic = () => insertFormatting('_');
-        const handleBulletList = () => {
-            if (textareaRef.current) {
-                const start = textareaRef.current.selectionStart;
-                const text = newMessage;
-                const before = text.substring(0, start);
-                const after = text.substring(start);
-                setNewMessage(`${before}\n- ${after}`);
-            }
-        };
-
-        const adjustTextareaHeight = () => {
-            if (textareaRef.current) {
-                textareaRef.current.style.height = 'auto';
-                textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-            }
-        };
-
         return (
             <Card className="w-full max-w-md mx-auto h-[600px] flex flex-col bg-background shadow-lg">
                 <CardHeader className="border-b p-4">
@@ -244,54 +206,14 @@
                     </ScrollArea>
                 </CardContent>
                 <CardFooter className="p-4 border-t">
-                    <form
-                        onSubmit={(e) => {
-                            e.preventDefault();
-                            sendMessage(telegramChatId); // sendMessage now takes telegramChatId
-                        }}
-                        className="flex flex-col w-full gap-2"
-                    >
-                        <div className="flex items-end gap-2">
-                            <div className="flex-grow relative">
-                                <Textarea
-                                    ref={textareaRef}
-                                    placeholder="Type your message..."
-                                    value={newMessage}
-                                    onChange={handleTextareaChange}
-                                    className="resize-none pr-12"
-                                    rows={1}
-                                />
-                            </div>
-                            <Button
-                                variant="orange"
-                                type="submit"
-                                size="icon"
-                                disabled={isLoading || newMessage.trim().length === 0}
-                                className="rounded-full h-10 w-10 transition-colors"
-                            >
-                                <Send className="h-4 w-4" />
-                                <span className="sr-only">Send</span>
-                            </Button>
-                        </div>
-                        <div>
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => {
-                                    if (e.target.files?.[0]) {
-                                        sendImage(e.target.files[0]);
-                                    }
-                                }}
-                            />
-
-                            <div>
-                                <VoiceRecorder
-                                    onRecordingComplete={sendVoiceRecording}
-                                    isUploading={isLoading}
-                                />
-                            </div>
-                        </div>
-                    </form>
+                    <MessageInput
+                        newMessage={newMessage}
+                        setNewMessage={setNewMessage}
+                        sendMessage={() => sendMessage(telegramChatId)}
+                        sendImage={sendImage}
+                        sendVoiceRecording={sendVoiceRecording}
+                        isLoading={isLoading}
+                    />
                 </CardFooter>
             </Card>
         );

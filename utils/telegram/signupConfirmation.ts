@@ -1,12 +1,14 @@
 // utils/telegram/signupConfirmation.ts
 import TelegramBot from "node-telegram-bot-api";
 
-// Configure Telegram Bot
-const botToken = process.env.NODE_ENV === "development"
-    ? process.env.TELEGRAM_BOT_TOKEN_DEV
-    : process.env.TELEGRAM_BOT_TOKEN;
+// Configure Telegram Bot using a single token
+const botToken = process.env.TELEGRAM_BOT_TOKEN;
 
-const bot = new TelegramBot(botToken!, { polling: false });
+if (!botToken) {
+    throw new Error("Telegram bot token is not defined in environment variables.");
+}
+
+const bot = new TelegramBot(botToken, { polling: false });
 
 // Function to send a Telegram message
 export async function sendPatientRegistrationMessage(chatId: string, message: string): Promise<void> {

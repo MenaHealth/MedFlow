@@ -5,26 +5,24 @@ export function validateApiKey(authHeader: string | null): boolean {
         return false;
     }
 
-    const envKey =
-        process.env.NODE_ENV === 'development'
-            ? process.env.DEV_TELEGRAM_BOT_KEY
-            : process.env.PROD_TELEGRAM_BOT_KEY;
+    const expectedKey = process.env.MEDFLOW_KEY;
+    console.log("expected Key: "+expectedKey)
 
-    if (!envKey) {
-        console.error('Expected key is missing in environment variables');
+    if (!expectedKey) {
+        console.error('MEDFLOW_KEY is missing in environment variables');
         return false;
     }
 
     let providedKey = '';
     try {
+        // Extract and decode the provided key
         providedKey = decodeURIComponent(authHeader.split(' ')[1] || '');
+        console.log("provided Key: "+providedKey)
     } catch (error) {
         console.error('Error decoding provided key:', error);
         return false;
     }
 
-    console.log('Decoded Provided Key:', providedKey);
-    console.log('Expected Key:', envKey);
-
-    return providedKey === envKey;
+    // Compare provided key with the expected key
+    return providedKey === expectedKey;
 }

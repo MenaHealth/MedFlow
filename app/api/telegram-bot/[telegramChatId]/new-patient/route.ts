@@ -34,15 +34,11 @@ export async function POST(request: Request, { params }: { params: { telegramCha
         }
 
         // Generate registration URL
-        const baseUrl = process.env.NODE_ENV === "development"
-            ? "http://localhost:3000"
-            : "https://medflow-mena-health.vercel.app";
+        const baseUrl = process.env.NEXTAUTH_URL;
         const registrationUrl = `${baseUrl}/new-patient/telegram/${patient._id}`;
 
         // Validate bot token
-        const botToken = process.env.NODE_ENV === "development"
-            ? process.env.TELEGRAM_BOT_TOKEN_DEV
-            : process.env.TELEGRAM_BOT_TOKEN;
+        const botToken = process.env.TELEGRAM_BOT_TOKEN;
 
         if (!botToken) {
             throw new Error("Telegram bot token is not defined in environment variables.");

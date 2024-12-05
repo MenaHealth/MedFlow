@@ -71,12 +71,12 @@ const nextConfig = {
                 ],
             },
             {
-                // Allow cross-origin access for audio files
-                source: '/:path*.ogg',
+                // Allow cross-origin access for audio files from S3
+                source: '/api/:path*',
                 headers: [
                     {
                         key: 'Access-Control-Allow-Origin',
-                        value: '*',
+                        value: 'https://medflow-mena-health.vercel.app',
                     },
                     {
                         key: 'Access-Control-Allow-Methods',
@@ -84,7 +84,7 @@ const nextConfig = {
                     },
                     {
                         key: 'Access-Control-Allow-Headers',
-                        value: 'Content-Type',
+                        value: 'Content-Type, Authorization',
                     },
                 ],
             },

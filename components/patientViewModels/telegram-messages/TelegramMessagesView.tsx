@@ -87,15 +87,30 @@
                 await decoder.ready;
 
                 const decoded = await decoder.decode(oggData);
+
+                // Add a check to ensure there's valid channel data
+                if (decoded.channelData.length === 0 || decoded.samplesDecoded === 0) {
+                    console.error("No valid audio data found");
+                    return;
+                }
+
                 const audioCtx = new AudioContext();
                 const audioBuffer = audioCtx.createBuffer(
-                    decoded.channelData.length,
+                    // Ensure at least one channel, defaulting to mono if no channels
+                    Math.max(1, decoded.channelData.length),
                     decoded.samplesDecoded,
                     decoded.sampleRate
                 );
 
+                // Copy channel data, defaulting to silent channel if no data
                 decoded.channelData.forEach((channel, index) => {
-                    audioBuffer.copyToChannel(channel, index);
+                    if (channel && channel.length > 0) {
+                        audioBuffer.copyToChannel(channel, index);
+                    } else if (index === 0) {
+                        // Create a silent channel for the first channel if empty
+                        const silentChannel = new Float32Array(decoded.samplesDecoded);
+                        audioBuffer.copyToChannel(silentChannel, 0);
+                    }
                 });
 
                 setAudioBuffers((prev) => ({ ...prev, [messageId]: audioBuffer }));
@@ -106,7 +121,7 @@
 
         const renderAudioPlayer = (message: TelegramMessage) => {
             const buffer = audioBuffers[message._id];
-            const format = message.mediaUrl?.endsWith('.mp3') ? 'mp3' : 'ogg'; // Determine format from URL
+            const format = message.mediaUrl?.endsWith('.mp3') ? 'mp3' : 'ogg';
 
             if (format === 'ogg' && !buffer) {
                 decodeAudio(message.mediaUrl || "", message._id, format);

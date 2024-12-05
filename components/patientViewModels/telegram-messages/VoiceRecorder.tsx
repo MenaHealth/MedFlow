@@ -14,9 +14,9 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onRecordingComplete, isUp
 
     const getSupportedMimeType = () => {
         const types = [
+            'audio/ogg; codecs=opus', // Ensure this is used
+            'audio/webm; codecs=opus',
             'audio/webm',
-            'audio/webm;codecs=opus',
-            'audio/ogg;codecs=opus',
             'audio/mp4',
             'audio/mpeg',
         ];

@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
             Bucket: process.env.DO_SPACES_BUCKET!,
             Key: filePath,
             Body: fileBuffer,
-            ContentType: audioFile.type, // Use the actual MIME type
+            ContentType: 'audio/ogg', // Explicitly set correct MIME type
             ACL: ObjectCannedACL.public_read,
         };
 

@@ -1,7 +1,12 @@
     // components/patientViewModels/telegram-messages/TelegramMessagesViewModel.tsx
 
-    import { useCallback, useState } from "react";
+    import {useCallback, useRef, useState} from "react";
     import { S3Client } from "@aws-sdk/client-s3";
+    import Recorder from 'opus-recorder';
+    import { OpusDecoder } from 'opus-decoder';
+
+
+
 
 
     export interface TelegramMessage {
@@ -153,62 +158,141 @@
             }
         }, [telegramChatId]);
 
-        const sendVoiceRecording = useCallback(async (blob: Blob) => {
+        const opusDecoderRef = useRef<OpusDecoder | null>(null);
+
+
+        const sendVoiceRecording = useCallback(async () => {
             setIsLoading(true);
+
             try {
-                let fileExtension = '.webm'; // Default
-                if (blob.type.includes('ogg')) {
-                    fileExtension = '.ogg';
-                } else if (blob.type.includes('mp4')) {
-                    fileExtension = '.mp4';
-                } else if (blob.type.includes('mpeg') || blob.type.includes('mp3')) {
-                    fileExtension = '.mp3';
-                }
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+                const audioChunks: Blob[] = [];
 
-                const fileName = `voice_message${fileExtension}`;
-                const file = new File([blob], fileName, { type: blob.type });
-
-                const formData = new FormData();
-                formData.append("file", file);
-                formData.append("chatId", telegramChatId);
-
-                const uploadResponse = await fetch("/api/telegram-bot/upload-audio", {
-                    method: "POST",
-                    body: formData,
+                mediaRecorder.addEventListener('dataavailable', (event) => {
+                    audioChunks.push(event.data);
                 });
 
-                if (!uploadResponse.ok) throw new Error("Failed to upload audio file");
+                mediaRecorder.addEventListener('stop', async () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
 
-                const { fileUrl } = await uploadResponse.json();
+                    if (audioBlob.size === 0) {
+                        console.error('No audio recorded');
+                        setIsLoading(false);
+                        return;
+                    }
 
-                const response = await fetch(`/api/telegram-bot/${telegramChatId}/send-audio`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ mediaUrl: fileUrl }),
+                    try {
+                        // Convert WebM to Opus
+                        const arrayBuffer = await audioBlob.arrayBuffer();
+                        const opusData = new Uint8Array(arrayBuffer);
+
+                        // Initialize OpusDecoder if not already done
+                        if (!opusDecoderRef.current) {
+                            opusDecoderRef.current = new OpusDecoder();
+                            await opusDecoderRef.current.ready;
+                        }
+
+                        // Decode Opus data
+                        const { channelData, samplesDecoded, sampleRate } = await opusDecoderRef.current.decodeFrame(opusData);
+
+                        // Convert decoded PCM data to WAV
+                        const wavBlob = await pcmToWav(channelData[0], sampleRate);
+
+                        const formData = new FormData();
+                        formData.append('file', wavBlob, 'audio.wav');
+                        formData.append('chatId', telegramChatId);
+
+                        const uploadResponse = await fetch('/api/telegram-bot/upload-audio', {
+                            method: 'POST',
+                            body: formData,
+                        });
+
+                        if (!uploadResponse.ok) throw new Error('Failed to upload audio file');
+
+                        const { fileUrl } = await uploadResponse.json();
+
+                        const response = await fetch(`/api/telegram-bot/${telegramChatId}/send-audio`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ mediaUrl: fileUrl }),
+                        });
+
+                        if (!response.ok) throw new Error(`API responded with status: ${response.status}`);
+
+                        const data = await response.json();
+
+                        setMessages((prev) => [
+                            ...prev,
+                            {
+                                _id: data.savedMessage._id,
+                                text: 'Voice message sent',
+                                sender: 'You',
+                                timestamp: new Date(),
+                                isSelf: true,
+                                type: 'voice',
+                                mediaUrl: fileUrl,
+                            },
+                        ]);
+                    } catch (error) {
+                        console.error('Error sending voice recording:', error);
+                    } finally {
+                        setIsLoading(false);
+                    }
                 });
 
-                if (!response.ok) throw new Error(`API responded with status: ${response.status}`);
+                mediaRecorder.start();
 
-                const data = await response.json();
-
-                setMessages((prev) => [
-                    ...prev,
-                    {
-                        _id: data.savedMessage._id,
-                        text: "Voice message sent",
-                        sender: "You",
-                        timestamp: new Date(),
-                        isSelf: true,
-                        type: "voice",
-                        mediaUrl: fileUrl,
-                    },
-                ]);
+                setTimeout(() => {
+                    mediaRecorder.stop();
+                    stream.getTracks().forEach(track => track.stop());
+                }, 10000);
             } catch (error) {
-                console.error("Error sending voice recording:", error);
-            } finally {
+                console.error('Error initializing voice recording:', error);
                 setIsLoading(false);
             }
-        }, [telegramChatId]);
+        }, [telegramChatId, setMessages]);
+
+        // Helper function to convert PCM to WAV
+        const pcmToWav = (pcmData: Float32Array, sampleRate: number): Promise<Blob> => {
+            return new Promise((resolve) => {
+                const wavData = new ArrayBuffer(44 + pcmData.length * 2);
+                const view = new DataView(wavData);
+
+                // Write WAV header
+                writeString(view, 0, 'RIFF');
+                view.setUint32(4, 36 + pcmData.length * 2, true);
+                writeString(view, 8, 'WAVE');
+                writeString(view, 12, 'fmt ');
+                view.setUint32(16, 16, true);
+                view.setUint16(20, 1, true);
+                view.setUint16(22, 1, true);
+                view.setUint32(24, sampleRate, true);
+                view.setUint32(28, sampleRate * 2, true);
+                view.setUint16(32, 2, true);
+                view.setUint16(34, 16, true);
+                writeString(view, 36, 'data');
+                view.setUint32(40, pcmData.length * 2, true);
+
+                // Write PCM data
+                floatTo16BitPCM(view, 44, pcmData);
+
+                resolve(new Blob([wavData], { type: 'audio/wav' }));
+            });
+        };
+
+        const writeString = (view: DataView, offset: number, string: string) => {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        };
+
+        const floatTo16BitPCM = (output: DataView, offset: number, input: Float32Array) => {
+            for (let i = 0; i < input.length; i++, offset += 2) {
+                const s = Math.max(-1, Math.min(1, input[i]));
+                output.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+            }
+        };
 
         const sendMessage = useCallback(async () => {
             if (!newMessage || !telegramChatId) {

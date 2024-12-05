@@ -64,17 +64,25 @@
 
                 const data = await response.json();
 
-                const formattedMessages: TelegramMessage[] = data.messages.map((message: any) => ({
-                    _id: message._id,
-                    text: message.text,
-                    sender: message.sender,
-                    timestamp: new Date(message.timestamp),
-                    isSelf: message.sender === "You",
-                    type: message.type,
-                    mediaUrl: message.mediaUrl || "",
-                    encryptedMedia: message.encryptedMedia,
-                    encryptionKey: message.encryptionKey,
-                }));
+                const formattedMessages: TelegramMessage[] = await Promise.all(
+                    data.messages.map(async (message: any) => {
+                        let mediaUrl = message.mediaUrl;
+                        if (message.type === "image" || message.type === "audio") {
+                            mediaUrl = await fetchMedia(message.mediaUrl); // Replace mediaUrl with proxy URL
+                        }
+                        return {
+                            _id: message._id,
+                            text: message.text,
+                            sender: message.sender,
+                            timestamp: new Date(message.timestamp),
+                            isSelf: message.sender === "You",
+                            type: message.type,
+                            mediaUrl,
+                            encryptedMedia: message.encryptedMedia,
+                            encryptionKey: message.encryptionKey,
+                        };
+                    })
+                );
 
                 setMessages(formattedMessages);
             } catch (error) {
@@ -88,7 +96,7 @@
             try {
                 const response = await fetch(`/api/telegram-bot/get-media?filePath=${encodeURIComponent(filePath)}`, {
                     headers: {
-                        Authorization: `Bearer your-verification-token`, // Replace with dynamic logic if necessary
+                        Authorization: `Bearer ${process.env.NEXT_PUBLIC_SECURE_API_KEY}`, // Replace with your secure logic
                     },
                 });
 
@@ -99,7 +107,7 @@
                 const blob = await response.blob();
                 return URL.createObjectURL(blob);
             } catch (error) {
-                console.error('Error fetching media:', error);
+                console.error("Error fetching media:", error);
                 throw error;
             }
         };

@@ -44,7 +44,7 @@
                                                                                   sendImage,
                                                                                   sendVoiceRecording,
                                                                                   isLoading,
-                                                                                  telegramChatId, // Added telegramChatId to props
+                                                                                  telegramChatId,
                                                                               }) => {
         const scrollAreaRef = useRef<HTMLDivElement>(null);
         const textareaRef = useRef<HTMLTextAreaElement>(null);

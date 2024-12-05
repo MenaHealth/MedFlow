@@ -84,6 +84,26 @@
             }
         }, [telegramChatId]);
 
+        const fetchMedia = async (filePath: string): Promise<string> => {
+            try {
+                const response = await fetch(`/api/telegram-bot/get-media?filePath=${encodeURIComponent(filePath)}`, {
+                    headers: {
+                        Authorization: `Bearer your-verification-token`, // Replace with dynamic logic if necessary
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch media: ${response.status}`);
+                }
+
+                const blob = await response.blob();
+                return URL.createObjectURL(blob);
+            } catch (error) {
+                console.error('Error fetching media:', error);
+                throw error;
+            }
+        };
+
         const sendImage = useCallback(async (file: File) => {
             setIsLoading(true);
             try {

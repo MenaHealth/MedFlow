@@ -215,8 +215,8 @@
                         setNewMessage={setNewMessage}
                         sendMessage={() => sendMessage(telegramChatId)}
                         sendImage={sendImage}
-                        sendVoiceMessage={(mediaUrl: string) => {
-                            console.log('Voice message URL:', mediaUrl);
+                        sendAudioMessage={(mediaUrl: string) => {
+                            console.log('audio message URL:', mediaUrl);
                             // Add additional logic if needed
                         }}
                         isLoading={isLoading}

@@ -20,6 +20,14 @@ export async function POST(req: NextRequest) {
         const formData = await req.formData();
         const file = formData.get("file") as File;
 
+        console.log("DO_SPACES_KEY:"+process.env.DO_SPACES_KEY);
+        console.log("DO_SPACES_SECRET:"+process.env.DO_SPACES_SECRET);
+        console.log("DO_SPACES_BUCKET:"+process.env.DO_SPACES_BUCKET);
+        console.log("DO_SPACES_REGION:"+process.env.DO_SPACES_REGION);
+        console.log("DO_SPACES_ENDPOINT:"+process.env.DO_SPACES_ENDPOINT);
+        console.log("NODE_ENV:"+process.env.NODE_ENV);
+
+
         if (!file) {
             console.error("[ERROR] No file provided in the request.");
             return NextResponse.json({ error: "File is missing" }, { status: 400 });

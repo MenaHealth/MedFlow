@@ -180,12 +180,12 @@
             }
         }, [telegramChatId]);
 
-        const sendVoiceMessage = useCallback(async (file: File) => {
+        const sendAudioMessage = useCallback(async (file: File) => {
             setIsLoading(true);
             try {
                 const cdnUrl = await uploadToDigitalOcean(file);
 
-                const response = await fetch(`/api/telegram-bot/${telegramChatId}/send-voice`, {
+                const response = await fetch(`/api/telegram-bot/${telegramChatId}/send-audio`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -205,16 +205,16 @@
                     ...prevMessages,
                     {
                         _id: data.savedMessage._id,
-                        text: 'Voice message sent',
+                        text: 'audio message sent',
                         sender: 'You',
                         timestamp: new Date(data.savedMessage.timestamp),
                         isSelf: true,
-                        type: 'voice',
+                        type: 'audio',
                         mediaUrl: cdnUrl,
                     },
                 ]);
             } catch (error) {
-                console.error('Error sending voice message:', error);
+                console.error('Error sending audio message:', error);
             } finally {
                 setIsLoading(false);
             }
@@ -226,7 +226,7 @@
             setNewMessage,
             sendMessage,
             sendImage,
-            sendVoiceMessage,
+            sendAudioMessage,
             loadMessages,
             isLoading,
             telegramChatId,

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Send, Image, Plus } from 'lucide-react';
-import VoiceRecorder from "@/components/patientViewModels/telegram-messages/VoiceRecorder";
+import AudioRecorder from "@/components/patientViewModels/telegram-messages/AudioRecorder";
 import { AutoExpandingInput } from "@/components/ui/auto-expanding-input";
 
 interface MessageInputProps {
@@ -10,7 +10,7 @@ interface MessageInputProps {
     setNewMessage: (message: string) => void;
     sendMessage: () => void;
     sendImage: (file: File) => void;
-    sendVoiceMessage: (mediaUrl: string) => void;
+    sendAudioMessage: (mediaUrl: string) => void;
     isLoading: boolean;
     telegramChatId: string; // Added this prop
 }
@@ -20,7 +20,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                                                               setNewMessage,
                                                               sendMessage,
                                                               sendImage,
-                                                              sendVoiceMessage,
+                                                              sendAudioMessage,
                                                               isLoading,
                                                               telegramChatId,
                                                           }) => {
@@ -33,7 +33,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
     };
 
     const handleRecordingComplete = (mediaUrl: string) => {
-        sendVoiceMessage(mediaUrl);
+        sendAudioMessage(mediaUrl);
     };
 
     return (
@@ -84,10 +84,10 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                                 onChange={handleImageUpload}
                                 className="hidden"
                             />
-                            <VoiceRecorder
+                            <AudioRecorder
                                 onRecordingComplete={handleRecordingComplete}
                                 isUploading={isLoading}
-                                chatId={telegramChatId} // Pass chatId to VoiceRecorder
+                                chatId={telegramChatId} // Pass chatId to AudioRecorder
                             />
                         </div>
                     )}

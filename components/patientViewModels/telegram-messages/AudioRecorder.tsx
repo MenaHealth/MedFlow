@@ -2,13 +2,13 @@ import React, { useState, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Mic, Square, Loader } from 'lucide-react';
 
-interface VoiceRecorderProps {
+interface AudioRecorderProps {
     onRecordingComplete: (mediaUrl: string) => void;
     isUploading: boolean;
     chatId: string; // New prop for telegramChatId
 }
 
-const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onRecordingComplete, isUploading, chatId }) => {
+const AudioRecorder: React.FC<AudioRecorderProps> = ({ onRecordingComplete, isUploading, chatId }) => {
     const [isRecording, setIsRecording] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const mediaRecorder = useRef<MediaRecorder | null>(null);
@@ -105,7 +105,7 @@ const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onRecordingComplete, isUp
     );
 };
 
-export default VoiceRecorder;
+export default AudioRecorder;
 
 
 // // Helper function to convert PCM to WAV

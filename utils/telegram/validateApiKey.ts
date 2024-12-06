@@ -6,10 +6,10 @@ export function validateApiKey(authHeader: string | null): boolean {
     }
 
     const expectedKey = process.env.MEDFLOW_KEY;
-    console.log("expected Key: "+expectedKey)
+    // console.log("expected Key: "+expectedKey)
 
     if (!expectedKey) {
-        console.error('MEDFLOW_KEY is missing in environment variables');
+        // console.error('MEDFLOW_KEY is missing in environment variables');
         return false;
     }
 
@@ -17,7 +17,7 @@ export function validateApiKey(authHeader: string | null): boolean {
     try {
         // Extract and decode the provided key
         providedKey = decodeURIComponent(authHeader.split(' ')[1] || '');
-        console.log("provided Key: "+providedKey)
+        // console.log("provided Key: "+providedKey)
     } catch (error) {
         console.error('Error decoding provided key:', error);
         return false;

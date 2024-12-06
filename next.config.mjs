@@ -8,6 +8,7 @@ const nextConfig = {
             'localhost',
             'medflow-telegram.fra1.digitaloceanspaces.com',
             'fra1.digitaloceanspaces.com',
+            'medflow-telegram.fra1.cdn.digitaloceanspaces.com',
         ],
         remotePatterns: [
             {
@@ -24,9 +25,9 @@ const nextConfig = {
             },
             {
                 protocol: 'https',
-                hostname: 'fra1.digitaloceanspaces.com', // Add this pattern
+                hostname: 'fra1.digitaloceanspaces.com',
                 port: '',
-                pathname: '/medflow-telegram/**', // Adjust the pathname as needed
+                pathname: '/medflow-telegram/**',
             },
             {
                 protocol: 'https',
@@ -39,7 +40,6 @@ const nextConfig = {
     async headers() {
         return [
             {
-                // Add custom header for the specific image
                 source: '/assets/images/mena_health_logo.jpeg',
                 headers: [
                     {
@@ -49,7 +49,6 @@ const nextConfig = {
                 ],
             },
             {
-                // Allow cross-origin access for font files
                 source: '/:path*.(ttf|woff|woff2|eot|otf)',
                 headers: [
                     {
@@ -67,8 +66,24 @@ const nextConfig = {
                 ],
             },
             {
-                // Allow cross-origin access for audio files
                 source: '/:path*.ogg',
+                headers: [
+                    {
+                        key: 'Access-Control-Allow-Origin',
+                        value: '*',
+                    },
+                    {
+                        key: 'Access-Control-Allow-Methods',
+                        value: 'GET, OPTIONS',
+                    },
+                    {
+                        key: 'Access-Control-Allow-Headers',
+                        value: 'Content-Type',
+                    },
+                ],
+            },
+            {
+                source: '/api/telegram-bot/get-media',
                 headers: [
                     {
                         key: 'Access-Control-Allow-Origin',
@@ -92,7 +107,6 @@ const nextConfig = {
             topLevelAwait: true,
         };
 
-        // Prevent `.ttf` from being treated as a module
         config.module.rules.push({
             test: /\.ttf$/,
             use: [

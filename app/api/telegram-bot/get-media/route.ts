@@ -1,42 +1,65 @@
 // app/api/telegram-bot/get-media/route.ts
-
 import { NextRequest, NextResponse } from "next/server";
-import axios from "axios";
+import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+
+const s3Client = new S3Client({
+    endpoint: `https://${process.env.DO_SPACES_ENDPOINT}`,
+    region: process.env.DO_SPACES_REGION || "fra1",
+    credentials: {
+        accessKeyId: process.env.DO_SPACES_KEY!,
+        secretAccessKey: process.env.DO_SPACES_SECRET!,
+    },
+});
 
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
-    const filePath = searchParams.get("filePath");
+    let mediaUrl = searchParams.get("mediaUrl") || searchParams.get("filePath");
 
-    if (!filePath) {
-        return NextResponse.json({ error: "Missing file path" }, { status: 400 });
+    if (!mediaUrl) {
+        return NextResponse.json({ error: "Missing media URL or file path" }, { status: 400 });
     }
 
     try {
-        // Construct the DigitalOcean Spaces CDN file URL
-        const mediaUrl = `${process.env.DO_SPACES_CDN_ENDPOINT}/${filePath}`;
+        // Decode the URL twice to handle double-encoding
+        mediaUrl = decodeURIComponent(decodeURIComponent(mediaUrl));
 
-        // Print the URL the request will be sent to
-        console.log(`Requesting media from URL: ${mediaUrl}`);
+        // Check if the mediaUrl is actually another API call
+        if (mediaUrl.includes("/api/telegram-bot/get-media")) {
+            const innerParams = new URL(mediaUrl).searchParams;
+            mediaUrl = innerParams.get("mediaUrl") || innerParams.get("filePath") || "";
+            mediaUrl = decodeURIComponent(mediaUrl);
+        }
 
-        // Fetch the file from the CDN
-        const response = await axios.get(mediaUrl, {
-            responseType: "arraybuffer", // Fetch binary data
-        });
+        console.log("Decoded mediaUrl:", mediaUrl);
 
-        // Return the proxied response to the client
-        return new NextResponse(response.data, {
-            headers: {
-                "Content-Type": response.headers["content-type"], // Preserve original Content-Type
-                "Cache-Control": "public, max-age=3600", // Optional caching
-            },
-        });
+        // Extract the key from the full URL
+        const urlParts = new URL(mediaUrl);
+        const key = urlParts.pathname.slice(1); // Remove leading '/'
+
+        console.log("Extracted Key:", key);
+
+        // Generate a signed URL valid for 1 hour
+        const signedUrl = await getSignedUrl(
+            s3Client,
+            new GetObjectCommand({
+                Bucket: process.env.DO_SPACES_BUCKET!,
+                Key: key,
+            }),
+            { expiresIn: 3600 } // URL valid for 1 hour
+        );
+
+        console.log("Generated signed URL:", signedUrl);
+
+        return NextResponse.json({ signedUrl }, { status: 200 });
     } catch (error: any) {
-        // Handle and log the error
-        console.error("Error fetching media from DigitalOcean:", {
+        console.error("Error generating signed URL:", {
             message: error.message,
-            status: error.response?.status || "Unknown",
-            data: error.response?.data || "No data returned",
+            stack: error.stack,
+            mediaUrl: mediaUrl,
         });
-        return NextResponse.json({ error: "Failed to fetch media" }, { status: 500 });
+        return NextResponse.json({ error: "Failed to generate signed URL" }, { status: 500 });
     }
 }
+
+

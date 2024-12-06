@@ -8,19 +8,8 @@
     import { AudioNotePlayer } from "./AudioNotePlayer";
     import { decryptPhoto } from "@/utils/encryptPhoto";
     import ReactMarkdown from 'react-markdown';
-    import {MessageInput} from "@/components/patientViewModels/telegram-messages/MessageInput";
-    import {TelegramMessage} from "@/components/patientViewModels/telegram-messages/TelegramMessagesViewModel";
-
-    // interface TelegramMessagesViewProps {
-    //     messages: TelegramMessage[];
-    //     newMessage: string;
-    //     setNewMessage: (message: string) => void;
-    //     sendMessage: (telegramChatId: string) => void;
-    //     sendImage: (file: File) => void;
-    //     sendVoiceRecording: (blob: Blob) => void;
-    //     isLoading: boolean;
-    //     telegramChatId: string;
-    // }
+    import { MessageInput } from "@/components/patientViewModels/telegram-messages/MessageInput";
+    import { TelegramMessage } from "@/components/patientViewModels/telegram-messages/TelegramMessagesViewModel";
 
     interface TelegramMessagesViewProps {
         messages: TelegramMessage[];
@@ -45,9 +34,9 @@
                                                                                   isLoadingMessages,
                                                                               }) => {
         const scrollAreaRef = useRef<HTMLDivElement>(null);
-        const textareaRef = useRef<HTMLTextAreaElement>(null);
         const [audioBuffers, setAudioBuffers] = useState<{ [key: string]: AudioBuffer | null }>({});
         const [decryptedImages, setDecryptedImages] = useState<{ [key: string]: string }>({});
+        const [signedUrls, setSignedUrls] = useState<{ [key: string]: string }>({});
 
         useEffect(() => {
             if (scrollAreaRef.current) {
@@ -57,13 +46,31 @@
 
         useEffect(() => {
             messages.forEach(async (message) => {
-                if (message.type === "image" && message.encryptedMedia && message.encryptionKey) {
-                    try {
-                        const decryptedBlob = await decryptPhoto(message.encryptedMedia, message.encryptionKey);
-                        const imageUrl = URL.createObjectURL(decryptedBlob);
-                        setDecryptedImages(prev => ({ ...prev, [message._id]: imageUrl }));
-                    } catch (error) {
-                        console.error("Error decrypting image:", error);
+                if (message.type === "image") {
+                    if (message.encryptedMedia && message.encryptionKey) {
+                        try {
+                            const decryptedBlob = await decryptPhoto(message.encryptedMedia, message.encryptionKey);
+                            const imageUrl = URL.createObjectURL(decryptedBlob);
+                            setDecryptedImages(prev => ({ ...prev, [message._id]: imageUrl }));
+                        } catch (error) {
+                            console.error("Error decrypting image:", error);
+                        }
+                    } else if (message.mediaUrl) {
+                        try {
+                            const response = await fetch(`/api/telegram-bot/get-media?filePath=${encodeURIComponent(message.mediaUrl)}`);
+                            if (response.ok) {
+                                const data = await response.json();
+                                if (data.signedUrl) {
+                                    setSignedUrls(prev => ({ ...prev, [message._id]: data.signedUrl }));
+                                } else {
+                                    console.error("No signed URL returned:", data);
+                                }
+                            } else {
+                                console.error("Error fetching signed URL:", await response.text());
+                            }
+                        } catch (error) {
+                            console.error("Error fetching signed URL:", error);
+                        }
                     }
                 }
             });
@@ -123,6 +130,7 @@
             );
         };
 
+
         const renderImage = (message: TelegramMessage) => {
             if (message.encryptedMedia && message.encryptionKey) {
                 const decryptedImageUrl = decryptedImages[message._id];
@@ -139,9 +147,13 @@
                     />
                 );
             } else if (message.mediaUrl) {
+                const signedUrl = signedUrls[message._id];
+                if (!signedUrl) {
+                    return <p>Loading image...</p>;
+                }
                 return (
                     <Image
-                        src={message.mediaUrl}
+                        src={signedUrl}
                         alt={message.text || "Image"}
                         width={300}
                         height={200}

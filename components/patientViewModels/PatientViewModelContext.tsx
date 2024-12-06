@@ -89,7 +89,6 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             telegramChatId: patientData.telegramChatId || "",
         };
 
-        console.log("Setting PatientInfo:", patientInfo);
         setPatientInfo(patientInfo);
         setPatientViewModel(new PatientInfoViewModel(patientData));
     }, []);
@@ -141,9 +140,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             }
             const data = await response.json();
 
-            console.log("Raw patient data from API:", data);
             formatPatientInfo(data.patient, patientId);
-            console.log(formatPatientInfo);
 
             if (data.patient.notes) {
                 formatPreviousNotes(data.patient.notes);
@@ -170,7 +167,6 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             );
             setRxOrders(formattedRxOrders);
 
-            console.log("PatientInfo:", patientInfo);
             console.log("Telegram Chat ID in PatientInfo:", patientInfo?.telegramChatId);
 
             // Handle medOrders

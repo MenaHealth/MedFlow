@@ -42,7 +42,7 @@ const TelegramMessagesDoctorView: React.FC<{ telegramChatId: string }> = ({ tele
                 </div>
             ) : (
                 <TelegramMessagesView
-                    scrollAreaRef={scrollAreaRef} // Pass the scroll area ref here
+                    scrollAreaRef={scrollAreaRef}
                     telegramChatId={telegramChatId}
                     messages={messages}
                     newMessage={newMessage}

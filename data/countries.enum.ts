@@ -4,6 +4,7 @@ export enum Countries {
     PALESTINE_GAZA = 'Palestine - Gaza',
     PALESTINE_WEST_BANK = 'Palestine - West Bank',
     SYRIA = 'Syria',
+    YEMEN = 'Yemen',
     AFGHANISTAN = 'Afghanistan',
     LEBANON = 'Lebanon'
 }
@@ -15,6 +16,7 @@ export enum CountriesArabic {
     PALESTINE_GAZA = 'فلسطين - غزة',
     PALESTINE_WEST_BANK = 'فلسطين - الضفة الغربية',
     SYRIA = 'سوريا',
+    YEMEN = 'اليمن',
     AFGHANISTAN = 'أفغانستان',
     LEBANON = 'لبنان'
 }
@@ -26,6 +28,7 @@ export enum CountriesFarsi {
     PALESTINE_GAZA = 'فلسطین - غزه',
     PALESTINE_WEST_BANK = 'فلسطین - کرانه باختری',
     SYRIA = 'سوریه',
+    YEMEN = 'یمن',
     AFGHANISTAN = 'افغانستان',
     LEBANON = 'لبنان'
 }
@@ -37,6 +40,7 @@ export enum CountriesPashto {
     PALESTINE_GAZA = 'فلسطین – غزه',
     PALESTINE_WEST_BANK = 'فلسطین - لویدیځه غاړه',
     SYRIA = 'سوریه',
+    YEMEN = 'یمن',
     AFGHANISTAN = 'افغانستان',
     LEBANON = 'لبنان'
 }
@@ -50,6 +54,7 @@ export enum CountryCodes {
     LEBANON = '+961',
     JORDAN = '+962',
     SYRIA = '+963',
+    YEMEN = '+967',
     PALESTINE = '+970',
     ISRAEL = '+972',
 }

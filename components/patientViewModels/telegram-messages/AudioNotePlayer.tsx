@@ -1,38 +1,85 @@
 // components/patientViewModels/telegram-messages/AudioNotePlayer.tsx
 'use client'
 
-'use client'
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Play, Pause } from 'lucide-react';
+import { OggOpusDecoder } from 'ogg-opus-decoder';
 
 interface AudioNotePlayerProps {
-    audioBuffer: AudioBuffer | null; // Allow nullable
-    mediaUrl: string; // URL for MP3 or OGG files
-    format: 'ogg' | 'mp3'; // Audio format
+    audioBuffer?: AudioBuffer | null;
+    mediaUrl: string;
+    format: 'ogg' | 'mp3';
 }
 
 export function AudioNotePlayer({ audioBuffer, mediaUrl, format }: AudioNotePlayerProps) {
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const audioContext = useRef<AudioContext | null>(null);
     const sourceNode = useRef<AudioBufferSourceNode | null>(null);
     const startTime = useRef<number>(0);
     const pauseTime = useRef<number>(0);
-    const audioElement = useRef<HTMLAudioElement | null>(null); // For MP3 playback
+    const audioElement = useRef<HTMLAudioElement | null>(null);
+    const [audioBufferState, setAudioBufferState] = useState<AudioBuffer | null>(null);
+    const oggOpusDecoder = useRef<OggOpusDecoder | null>(null);
 
     useEffect(() => {
-        if (format === 'ogg') {
-            audioContext.current = new AudioContext();
+        audioContext.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+
+        if (format === 'ogg' && !audioBuffer) {
+            fetchAndDecodeOgg();
+        } else if (format === 'ogg' && audioBuffer) {
+            setAudioBufferState(audioBuffer);
+            setIsLoading(false);
+        } else {
+            setIsLoading(false);
         }
+
         return () => {
-            if (format === 'ogg') {
-                audioContext.current?.close();
-            }
+            audioContext.current?.close();
+            oggOpusDecoder.current?.free();
         };
-    }, [format]);
+    }, [format, mediaUrl, audioBuffer]);
+
+    const fetchAndDecodeOgg = async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const response = await fetch(mediaUrl, { mode: 'cors' });
+            if (!response.ok) throw new Error(`Failed to fetch audio file: ${response.statusText}`);
+
+            const arrayBuffer = await response.arrayBuffer();
+
+            oggOpusDecoder.current = new OggOpusDecoder();
+            await oggOpusDecoder.current.ready;
+
+            const { channelData, sampleRate } = await oggOpusDecoder.current.decodeFile(new Uint8Array(arrayBuffer));
+
+            if (channelData.length === 0 || channelData[0].length === 0) {
+                throw new Error('Decoded audio has no valid data.');
+            }
+
+            const newAudioBuffer = audioContext.current!.createBuffer(
+                channelData.length,
+                channelData[0].length,
+                sampleRate
+            );
+
+            for (let i = 0; i < channelData.length; i++) {
+                newAudioBuffer.copyToChannel(channelData[i], i);
+            }
+
+            setAudioBufferState(newAudioBuffer);
+        } catch (error) {
+            console.error('Error fetching and decoding audio:', error);
+            setError(`Error loading audio: ${error instanceof Error ? error.message : String(error)}`);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const togglePlayPause = () => {
         if (isPlaying) {
@@ -43,10 +90,9 @@ export function AudioNotePlayer({ audioBuffer, mediaUrl, format }: AudioNotePlay
     };
 
     const playAudio = () => {
-        if (format === 'ogg' && audioBuffer && audioContext.current) {
-            // OGG Playback with AudioContext
+        if (format === 'ogg' && audioBufferState && audioContext.current) {
             sourceNode.current = audioContext.current.createBufferSource();
-            sourceNode.current.buffer = audioBuffer;
+            sourceNode.current.buffer = audioBufferState;
             sourceNode.current.connect(audioContext.current.destination);
 
             const offset = pauseTime.current;
@@ -55,14 +101,15 @@ export function AudioNotePlayer({ audioBuffer, mediaUrl, format }: AudioNotePlay
             setIsPlaying(true);
 
             const updateProgress = () => {
-                if (audioContext.current) {
+                if (audioContext.current && sourceNode.current) {
                     const elapsedTime = audioContext.current.currentTime - startTime.current;
-                    const progress = (elapsedTime / audioBuffer.duration) * 100;
+                    const duration = sourceNode.current.buffer?.duration || 0;
+                    const progress = (elapsedTime / duration) * 100;
                     setProgress(progress);
 
-                    if (progress < 100) {
+                    if (progress < 100 && isPlaying) {
                         requestAnimationFrame(updateProgress);
-                    } else {
+                    } else if (progress >= 100) {
                         setIsPlaying(false);
                         setProgress(0);
                     }
@@ -71,7 +118,6 @@ export function AudioNotePlayer({ audioBuffer, mediaUrl, format }: AudioNotePlay
 
             updateProgress();
         } else if (format === 'mp3' && audioElement.current) {
-            // MP3 Playback with HTMLAudioElement
             audioElement.current.play();
             setIsPlaying(true);
 
@@ -88,7 +134,7 @@ export function AudioNotePlayer({ audioBuffer, mediaUrl, format }: AudioNotePlay
     };
 
     const pauseAudio = () => {
-        if (format === 'ogg' && sourceNode.current && audioContext.current) {
+        if (format === 'ogg' && sourceNode.current && audioContext.current instanceof AudioContext) {
             sourceNode.current.stop();
             pauseTime.current = audioContext.current.currentTime - startTime.current;
             setIsPlaying(false);
@@ -100,8 +146,8 @@ export function AudioNotePlayer({ audioBuffer, mediaUrl, format }: AudioNotePlay
 
     const handleSliderChange = (value: number[]) => {
         const newTime = (value[0] / 100);
-        if (format === 'ogg' && audioBuffer) {
-            pauseTime.current = newTime * audioBuffer.duration;
+        if (format === 'ogg' && audioBufferState) {
+            pauseTime.current = newTime * audioBufferState.duration;
             setProgress(value[0]);
 
             if (isPlaying) {
@@ -114,12 +160,21 @@ export function AudioNotePlayer({ audioBuffer, mediaUrl, format }: AudioNotePlay
         }
     };
 
+    if (isLoading) {
+        return <div>Loading audio...</div>;
+    }
+
+    if (error) {
+        return <div>{error}</div>; //Added error display
+    }
+
     return (
         <div className="flex items-center space-x-2 w-full max-w-[300px]">
             <Button
                 variant="outline"
                 size="icon"
                 onClick={togglePlayPause}
+                disabled={isLoading || (format === 'ogg' && !audioBufferState)}
                 aria-label={isPlaying ? 'Pause' : 'Play'}
             >
                 {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
@@ -138,3 +193,7 @@ export function AudioNotePlayer({ audioBuffer, mediaUrl, format }: AudioNotePlay
         </div>
     );
 }
+
+
+
+

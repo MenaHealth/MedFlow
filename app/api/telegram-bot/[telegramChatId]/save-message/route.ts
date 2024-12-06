@@ -17,6 +17,7 @@ export async function PATCH(
     const authHeader = request.headers.get("Authorization");
     if (!validateApiKey(authHeader)) {
         console.error("Authorization failed");
+        console.log("Received Authorization Header:", authHeader);
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

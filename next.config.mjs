@@ -6,12 +6,8 @@ const nextConfig = {
         domains: [
             'lh3.googleusercontent.com',
             'localhost',
-            'med-flow-telegram-images-dev.s3.us-east-2.amazonaws.com',
-            'med-flow-telegram-images-prod.s3.us-east-2.amazonaws.com',
-            'med-flow-audio-notes-dev.s3.us-east-2.amazonaws.com',
-            'med-flow-audio-notes-prod.s3.us-east-2.amazonaws.com',
             'medflow-telegram.fra1.digitaloceanspaces.com',
-            'fra1.digitaloceanspaces.com', // Add this line
+            'fra1.digitaloceanspaces.com',
         ],
         remotePatterns: [
             {
@@ -71,12 +67,12 @@ const nextConfig = {
                 ],
             },
             {
-                // Allow cross-origin access for audio files from S3
-                source: '/api/:path*',
+                // Allow cross-origin access for audio files
+                source: '/:path*.ogg',
                 headers: [
                     {
                         key: 'Access-Control-Allow-Origin',
-                        value: 'https://medflow-mena-health.vercel.app',
+                        value: '*',
                     },
                     {
                         key: 'Access-Control-Allow-Methods',
@@ -84,7 +80,7 @@ const nextConfig = {
                     },
                     {
                         key: 'Access-Control-Allow-Headers',
-                        value: 'Content-Type, Authorization',
+                        value: 'Content-Type',
                     },
                 ],
             },

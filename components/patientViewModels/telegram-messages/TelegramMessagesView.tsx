@@ -11,26 +11,27 @@
     import {MessageInput} from "@/components/patientViewModels/telegram-messages/MessageInput";
     import {TelegramMessage} from "@/components/patientViewModels/telegram-messages/TelegramMessagesViewModel";
 
-    interface TelegramMessagesViewProps {
-        messages: TelegramMessage[];
-        newMessage: string;
-        setNewMessage: (message: string) => void;
-        sendMessage: (telegramChatId: string) => void;
-        sendImage: (file: File) => void;
-        sendVoiceRecording: (blob: Blob) => void;
-        isLoading: boolean;
-        telegramChatId: string;
-    }
+    // interface TelegramMessagesViewProps {
+    //     messages: TelegramMessage[];
+    //     newMessage: string;
+    //     setNewMessage: (message: string) => void;
+    //     sendMessage: (telegramChatId: string) => void;
+    //     sendImage: (file: File) => void;
+    //     sendVoiceRecording: (blob: Blob) => void;
+    //     isLoading: boolean;
+    //     telegramChatId: string;
+    // }
 
     interface TelegramMessagesViewProps {
         messages: TelegramMessage[];
         newMessage: string;
         setNewMessage: (message: string) => void;
         sendMessage: (telegramChatId: string) => void;
-        sendVoiceRecording: (blob: Blob) => void;
         sendImage: (file: File) => void;
         isLoading: boolean;
         telegramChatId: string;
+        scrollAreaRef: React.RefObject<HTMLDivElement>;
+        isLoadingMessages: boolean;
     }
 
     export const TelegramMessagesView: React.FC<TelegramMessagesViewProps> = ({
@@ -39,9 +40,9 @@
                                                                                   setNewMessage,
                                                                                   sendMessage,
                                                                                   sendImage,
-                                                                                  sendVoiceRecording,
                                                                                   isLoading,
                                                                                   telegramChatId,
+                                                                                  isLoadingMessages,
                                                                               }) => {
         const scrollAreaRef = useRef<HTMLDivElement>(null);
         const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -87,30 +88,15 @@
                 await decoder.ready;
 
                 const decoded = await decoder.decode(oggData);
-
-                // Add a check to ensure there's valid channel data
-                if (decoded.channelData.length === 0 || decoded.samplesDecoded === 0) {
-                    console.error("No valid audio data found");
-                    return;
-                }
-
                 const audioCtx = new AudioContext();
                 const audioBuffer = audioCtx.createBuffer(
-                    // Ensure at least one channel, defaulting to mono if no channels
-                    Math.max(1, decoded.channelData.length),
+                    decoded.channelData.length,
                     decoded.samplesDecoded,
                     decoded.sampleRate
                 );
 
-                // Copy channel data, defaulting to silent channel if no data
                 decoded.channelData.forEach((channel, index) => {
-                    if (channel && channel.length > 0) {
-                        audioBuffer.copyToChannel(channel, index);
-                    } else if (index === 0) {
-                        // Create a silent channel for the first channel if empty
-                        const silentChannel = new Float32Array(decoded.samplesDecoded);
-                        audioBuffer.copyToChannel(silentChannel, 0);
-                    }
+                    audioBuffer.copyToChannel(channel, index);
                 });
 
                 setAudioBuffers((prev) => ({ ...prev, [messageId]: audioBuffer }));
@@ -121,7 +107,7 @@
 
         const renderAudioPlayer = (message: TelegramMessage) => {
             const buffer = audioBuffers[message._id];
-            const format = message.mediaUrl?.endsWith('.mp3') ? 'mp3' : 'ogg';
+            const format = message.mediaUrl?.endsWith('.mp3') ? 'mp3' : 'ogg'; // Determine format from URL
 
             if (format === 'ogg' && !buffer) {
                 decodeAudio(message.mediaUrl || "", message._id, format);
@@ -173,6 +159,11 @@
                 </CardHeader>
                 <CardContent className="flex-grow p-0 overflow-hidden">
                     <ScrollArea className="h-full w-full" ref={scrollAreaRef}>
+                        {isLoadingMessages ? (
+                                <div className="flex justify-center items-center h-full">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                                </div>
+                        ) : (
                         <div className="flex flex-col gap-3 p-4">
                             {messages.map((message) => (
                                 <div
@@ -203,6 +194,7 @@
                                 </div>
                             ))}
                         </div>
+                        )}
                     </ScrollArea>
                 </CardContent>
                 <CardFooter className="p-4 border-t">
@@ -211,8 +203,12 @@
                         setNewMessage={setNewMessage}
                         sendMessage={() => sendMessage(telegramChatId)}
                         sendImage={sendImage}
-                        sendVoiceRecording={sendVoiceRecording}
+                        sendVoiceMessage={(mediaUrl: string) => {
+                            console.log('Voice message URL:', mediaUrl);
+                            // Add additional logic if needed
+                        }}
                         isLoading={isLoading}
+                        telegramChatId={telegramChatId} // Pass chatId to MessageInput
                     />
                 </CardFooter>
             </Card>

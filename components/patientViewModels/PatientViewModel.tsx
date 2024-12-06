@@ -66,12 +66,16 @@ const PatientDashboardContent: React.FC = () => {
         } else if (section === 'images') {
             return <ImageGallery />;
         } else if (section === 'contact') {
-            return patientInfo?.telegramChatId ? (
+            return (
                 <div className="bg-gradient-to-b from-orange-500 to-white h-full">
-                    <TelegramMessagesDoctorView telegramChatId={patientInfo.telegramChatId} />
+                    {patientInfo?.telegramChatId ? (
+                        <TelegramMessagesDoctorView telegramChatId={patientInfo.telegramChatId} />
+                    ) : (
+                        <div className="flex justify-center items-center h-64">
+                            <CircleLoader color="#FF5722" />
+                        </div>
+                    )}
                 </div>
-            ) : (
-                <div className="text-center">Telegram Chat ID is not available.</div>
             );
         } else if (section === 'video') {
             return <AppBuilderWrapper />

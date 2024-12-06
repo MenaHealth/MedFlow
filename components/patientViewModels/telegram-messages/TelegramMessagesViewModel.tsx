@@ -1,6 +1,8 @@
     // components/patientViewModels/telegram-messages/TelegramMessagesViewModel.tsx
 
     import { useCallback, useState } from 'react';
+    import dotenv from "dotenv";
+    dotenv.config();
 
     export interface TelegramMessage {
         _id: string;
@@ -37,11 +39,16 @@
             return cdnUrl;
         };
 
+        const getMediaUrl = (filePath: string) => {
+            return `${process.env.NEXT_PUBLIC_API_URL}/api/telegram-bot/get-media?filePath=${encodeURIComponent(filePath)}`;
+        };
+
         const loadMessages = useCallback(async () => {
             if (!telegramChatId) {
                 console.error("Telegram chat ID is missing");
                 return;
             }
+            console.log("NEXT_PUBLIC_API_URL:"+process.env.NEXT_PUBLIC_API_URL)
 
             setIsLoading(true);
             try {
@@ -59,7 +66,7 @@
                     timestamp: new Date(message.timestamp),
                     isSelf: message.sender === "You",
                     type: message.type,
-                    mediaUrl: message.mediaUrl,
+                    mediaUrl: message.mediaUrl ? getMediaUrl(message.mediaUrl) : undefined,
                     encryptedMedia: message.encryptedMedia,
                     encryptionKey: message.encryptionKey,
                 }));
@@ -138,9 +145,16 @@
                     },
                     body: JSON.stringify({
                         mediaUrl: signedUrl,
-                        caption: file.name,
+                        caption: 'Optional caption for the image',
                     }),
                 });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Image sent and saved successfully:', result);
+                } else {
+                    console.error('Failed to send and save image');
+                }
 
                 if (!response.ok) {
                     throw new Error(`API responded with status: ${response.status}`);

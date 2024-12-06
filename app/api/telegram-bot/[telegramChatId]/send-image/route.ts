@@ -28,7 +28,7 @@ export async function POST(
             chatId: telegramChatId,
             mediaUrl,
             caption,
-            fullUrl: `${TELEGRAM_BOT_API_URL}/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`
+            fullUrl: `${TELEGRAM_BOT_API_URL}/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`,
         });
 
         const telegramResponse = await fetch(`${TELEGRAM_BOT_API_URL}/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
@@ -43,30 +43,51 @@ export async function POST(
             }),
         });
 
-        // Improved error handling
         if (!telegramResponse.ok) {
             const errorText = await telegramResponse.text();
             console.error("Telegram API full response:", {
                 status: telegramResponse.status,
                 statusText: telegramResponse.statusText,
-                body: errorText
+                body: errorText,
             });
 
             return NextResponse.json(
                 {
                     error: "Failed to send photo to Telegram",
-                    details: errorText
+                    details: errorText,
                 },
                 { status: telegramResponse.status }
             );
         }
 
-        // Rest of your existing code...
+        // Telegram API was successful
+        const telegramData = await telegramResponse.json();
+        const publicMediaUrl = mediaUrl.split("?")[0]; // Extract the base URL from the signed URL
+
+        console.log("[INFO] Image sent to Telegram successfully:", telegramData);
+
+        // Save the message in the database
+        let thread = await TelegramThread.findOne({ chatId: telegramChatId });
+        if (!thread) {
+            thread = new TelegramThread({ chatId: telegramChatId, messages: [] });
+        }
+
+        const newMessage = {
+            text: caption || "Image",
+            sender: "You",
+            timestamp: new Date(),
+            type: "image",
+            mediaUrl: publicMediaUrl,
+        };
+
+        thread.messages.push(newMessage);
+        await thread.save();
+
+        console.log("[INFO] Message saved in database successfully.");
+
+        return NextResponse.json({ message: "Image sent and saved successfully" }, { status: 200 });
     } catch (error: any) {
         console.error("Error handling send-image request:", error);
-        return NextResponse.json({
-            error: "Internal server error",
-            message: error.message
-        }, { status: 500 });
+        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 }

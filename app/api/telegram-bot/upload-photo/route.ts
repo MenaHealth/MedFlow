@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
             Key: fileName,
             Body: Buffer.from(fileBuffer),
             ContentType: file.type,
-            ACL: "private" as ObjectCannedACL, // Explicitly cast to ObjectCannedACL
+            ACL: "private" as ObjectCannedACL,
         };
 
         try {

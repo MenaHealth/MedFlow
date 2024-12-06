@@ -1,7 +1,10 @@
 // app/api/telegram-bot/upload-photo/route.ts
 // app/api/telegram-bot/upload-photo/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { ObjectCannedACL } from "@aws-sdk/client-s3";
+
 
 const s3Client = new S3Client({
     endpoint: `https://${process.env.DO_SPACES_ENDPOINT}`,
@@ -39,7 +42,7 @@ export async function POST(req: NextRequest) {
             Key: fileName,
             Body: Buffer.from(fileBuffer),
             ContentType: file.type,
-            ACL: "public-read", // Set to public-read to match saveImage behavior
+            ACL: "private" as ObjectCannedACL, // Explicitly cast to ObjectCannedACL
         };
 
         try {
@@ -49,25 +52,26 @@ export async function POST(req: NextRequest) {
             throw new Error("Failed to upload file to S3");
         }
 
-        // Construct the CDN URL
-        const cdnUrl = `${process.env.DO_SPACES_CDN_ENDPOINT}/${fileName}`;
-        console.log("[INFO] File successfully uploaded to CDN:", cdnUrl);
+        // Generate a signed URL valid for 1 hour
+        const signedUrl = await getSignedUrl(
+            s3Client,
+            new GetObjectCommand({
+                Bucket: process.env.DO_SPACES_BUCKET!,
+                Key: fileName,
+            }),
+            { expiresIn: 3600 } // URL valid for 1 hour
+        );
 
-        return NextResponse.json({ filePath: fileName, cdnUrl: cdnUrl }, { status: 200 });
+        console.log("[INFO] File successfully uploaded and signed URL generated:", signedUrl);
+
+        return NextResponse.json({ filePath: fileName, signedUrl }, { status: 200 });
     } catch (error: any) {
         console.error("[ERROR] Upload-photo route failed:", {
             message: error.message,
             stack: error.stack,
         });
 
-        console.log("NODE_ENV:" + process.env.NODE_ENV);
-        console.log("DO_SPACES_BUCKET:" + process.env.DO_SPACES_BUCKET);
-        console.log("DO_SPACES_ENDPOINT:" + process.env.DO_SPACES_ENDPOINT);
-        console.log("DO_SPACES_REGION:" + process.env.DO_SPACES_REGION);
-        console.log("DO_SPACES_CDN_ENDPOINT:" + process.env.DO_SPACES_CDN_ENDPOINT);
-
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }
-
 

@@ -115,15 +115,29 @@
         const sendImage = useCallback(async (file: File) => {
             setIsLoading(true);
             try {
-                const cdnUrl = await uploadToDigitalOcean(file);
+                // Upload the file and get the signed URL
+                const formData = new FormData();
+                formData.append('file', file);
 
+                const uploadResponse = await fetch('/api/telegram-bot/upload-photo', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!uploadResponse.ok) {
+                    throw new Error('Failed to upload file to Digital Ocean');
+                }
+
+                const { signedUrl } = await uploadResponse.json();
+
+                // Send the signed URL to the Telegram send-image route
                 const response = await fetch(`/api/telegram-bot/${telegramChatId}/send-image`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        mediaUrl: cdnUrl,
+                        mediaUrl: signedUrl,
                         caption: file.name,
                     }),
                 });
@@ -142,7 +156,7 @@
                         timestamp: new Date(data.savedMessage.timestamp),
                         isSelf: true,
                         type: 'image',
-                        mediaUrl: cdnUrl,
+                        mediaUrl: signedUrl,
                     },
                 ]);
             } catch (error) {

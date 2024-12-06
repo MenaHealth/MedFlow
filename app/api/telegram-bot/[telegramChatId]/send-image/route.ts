@@ -17,7 +17,6 @@ export async function POST(
         const { telegramChatId } = params;
         const { mediaUrl, caption } = await request.json();
 
-        // Validate inputs
         if (!telegramChatId || !mediaUrl) {
             return NextResponse.json(
                 { error: "Missing required fields (telegramChatId or mediaUrl)" },
@@ -25,10 +24,13 @@ export async function POST(
             );
         }
 
-        // Log the inputs
-        console.log(`[DEBUG] Sending image to Telegram`, { telegramChatId, mediaUrl, caption });
+        console.log("[DEBUG] Sending signed URL to Telegram:", {
+            chatId: telegramChatId,
+            mediaUrl,
+            caption,
+            fullUrl: `${TELEGRAM_BOT_API_URL}/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`
+        });
 
-        // Send image URL to Telegram
         const telegramResponse = await fetch(`${TELEGRAM_BOT_API_URL}/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
             method: "POST",
             headers: {
@@ -36,40 +38,35 @@ export async function POST(
             },
             body: JSON.stringify({
                 chat_id: telegramChatId,
-                photo: mediaUrl, // Pass the public URL of the uploaded photo
+                photo: mediaUrl,
                 caption,
             }),
         });
 
-        // Handle Telegram API errors
+        // Improved error handling
         if (!telegramResponse.ok) {
-            const errorData = await telegramResponse.json();
-            console.error("Telegram API error:", errorData);
-            throw new Error(`Telegram API responded with status: ${telegramResponse.status}`);
+            const errorText = await telegramResponse.text();
+            console.error("Telegram API full response:", {
+                status: telegramResponse.status,
+                statusText: telegramResponse.statusText,
+                body: errorText
+            });
+
+            return NextResponse.json(
+                {
+                    error: "Failed to send photo to Telegram",
+                    details: errorText
+                },
+                { status: telegramResponse.status }
+            );
         }
 
-        // Save the message in MongoDB
-        let thread = await TelegramThread.findOne({ chatId: telegramChatId });
-        if (!thread) {
-            thread = new TelegramThread({ chatId: telegramChatId, messages: [] });
-        }
-
-        const newMessage = {
-            text: caption || "Image",
-            sender: "You",
-            timestamp: new Date(),
-            type: "image",
-            mediaUrl, // Save the URL in the thread
-        };
-        thread.messages.push(newMessage);
-        await thread.save();
-
-        return NextResponse.json({
-            message: "Image sent and saved successfully",
-            savedMessage: newMessage,
-        });
+        // Rest of your existing code...
     } catch (error: any) {
         console.error("Error handling send-image request:", error);
-        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+        return NextResponse.json({
+            error: "Internal server error",
+            message: error.message
+        }, { status: 500 });
     }
 }

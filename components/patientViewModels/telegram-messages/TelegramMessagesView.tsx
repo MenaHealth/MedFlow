@@ -123,6 +123,7 @@
             );
         };
 
+
         const renderImage = (message: TelegramMessage) => {
             if (message.encryptedMedia && message.encryptionKey) {
                 const decryptedImageUrl = decryptedImages[message._id];
@@ -139,9 +140,13 @@
                     />
                 );
             } else if (message.mediaUrl) {
+                // Ensure the mediaUrl has a protocol
+                const imageUrl = message.mediaUrl.startsWith('http')
+                    ? message.mediaUrl
+                    : `https://${message.mediaUrl}`;
                 return (
                     <Image
-                        src={message.mediaUrl}
+                        src={imageUrl}
                         alt={message.text || "Image"}
                         width={300}
                         height={200}

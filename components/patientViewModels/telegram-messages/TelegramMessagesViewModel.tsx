@@ -1,11 +1,6 @@
     // components/patientViewModels/telegram-messages/TelegramMessagesViewModel.tsx
 
-    import {useCallback, useRef, useState} from "react";
-    import { OpusDecoder } from 'opus-decoder';
-
-
-
-
+    import { useCallback, useState } from 'react';
 
     export interface TelegramMessage {
         _id: string;
@@ -19,14 +14,13 @@
         encryptionKey?: string;
     }
 
-
     const useTelegramMessagesViewModel = (initialTelegramChatId: string) => {
         const [messages, setMessages] = useState<TelegramMessage[]>([]);
         const [newMessage, setNewMessage] = useState('');
         const [isLoading, setIsLoading] = useState(false);
         const [telegramChatId, setTelegramChatId] = useState(initialTelegramChatId);
 
-        const uploadToS3 = async (file: File): Promise<string> => {
+        const uploadToDigitalOcean = async (file: File): Promise<string> => {
             const formData = new FormData();
             formData.append('file', file);
 
@@ -36,11 +30,11 @@
             });
 
             if (!response.ok) {
-                throw new Error('Failed to upload file to S3');
+                throw new Error('Failed to upload file to Digital Ocean');
             }
 
-            const { fileUrl } = await response.json();
-            return fileUrl;
+            const { cdnUrl } = await response.json();
+            return cdnUrl;
         };
 
         const loadMessages = useCallback(async () => {
@@ -58,25 +52,17 @@
 
                 const data = await response.json();
 
-                const formattedMessages: TelegramMessage[] = await Promise.all(
-                    data.messages.map(async (message: any) => {
-                        let mediaUrl = message.mediaUrl;
-                        if (message.type === "image" || message.type === "audio") {
-                            mediaUrl = await fetchMedia(message.mediaUrl); // Replace mediaUrl with proxy URL
-                        }
-                        return {
-                            _id: message._id,
-                            text: message.text,
-                            sender: message.sender,
-                            timestamp: new Date(message.timestamp),
-                            isSelf: message.sender === "You",
-                            type: message.type,
-                            mediaUrl,
-                            encryptedMedia: message.encryptedMedia,
-                            encryptionKey: message.encryptionKey,
-                        };
-                    })
-                );
+                const formattedMessages: TelegramMessage[] = data.messages.map((message: any) => ({
+                    _id: message._id,
+                    text: message.text,
+                    sender: message.sender,
+                    timestamp: new Date(message.timestamp),
+                    isSelf: message.sender === "You",
+                    type: message.type,
+                    mediaUrl: message.mediaUrl,
+                    encryptedMedia: message.encryptedMedia,
+                    encryptionKey: message.encryptionKey,
+                }));
 
                 setMessages(formattedMessages);
             } catch (error) {
@@ -85,86 +71,6 @@
                 setIsLoading(false);
             }
         }, [telegramChatId]);
-
-        const fetchMedia = async (filePath: string): Promise<string> => {
-            try {
-                const response = await fetch(`/api/telegram-bot/get-media?filePath=${encodeURIComponent(filePath)}`, {
-                    headers: {
-                        Authorization: `Bearer ${process.env.NEXT_PUBLIC_SECURE_API_KEY}`,
-                    },
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch media: ${response.status}`);
-                }
-
-                const blob = await response.blob();
-                return URL.createObjectURL(blob);
-            } catch (error) {
-                console.error("Error fetching media:", error);
-                throw error;
-            }
-        };
-
-        const sendImage = useCallback(async (file: File) => {
-            setIsLoading(true);
-            try {
-                // Upload image to server-side API (which handles S3 upload)
-                const s3Url = await uploadToS3(file);
-
-                // Send the image URL to Telegram
-                const response = await fetch(`/api/telegram-bot/${telegramChatId}/send-image`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        mediaUrl: s3Url,
-                        caption: file.name,
-                    }),
-                });
-
-                if (!response.ok) {
-                    throw new Error(`API responded with status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                setMessages((prevMessages) => [
-                    ...prevMessages,
-                    {
-                        _id: data.savedMessage._id,
-                        text: 'Image sent',
-                        sender: 'You',
-                        timestamp: new Date(),
-                        isSelf: true,
-                        type: 'image',
-                        mediaUrl: s3Url,
-                    },
-                ]);
-            } catch (error) {
-                console.error('Error sending image:', error);
-            } finally {
-                setIsLoading(false);
-            }
-        }, [telegramChatId]);
-
-        const opusDecoderRef = useRef<OpusDecoder | null>(null);
-
-
-        const sendVoiceMessage = useCallback((mediaUrl: string) => {
-            setMessages((prev) => [
-                ...prev,
-                {
-                    _id: `${Date.now()}`,
-                    text: 'Voice message sent',
-                    sender: 'You',
-                    timestamp: new Date(),
-                    isSelf: true,
-                    type: 'voice',
-                    mediaUrl,
-                },
-            ]);
-        }, []);
 
         const sendMessage = useCallback(async () => {
             if (!newMessage || !telegramChatId) {
@@ -189,7 +95,7 @@
                 setMessages((prevMessages) => [
                     ...prevMessages,
                     {
-                        _id: data.savedMessage._id || `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                        _id: data.savedMessage._id,
                         text: newMessage,
                         sender: "You",
                         timestamp: new Date(data.savedMessage.timestamp),
@@ -206,6 +112,86 @@
             }
         }, [newMessage, telegramChatId]);
 
+        const sendImage = useCallback(async (file: File) => {
+            setIsLoading(true);
+            try {
+                const cdnUrl = await uploadToDigitalOcean(file);
+
+                const response = await fetch(`/api/telegram-bot/${telegramChatId}/send-image`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        mediaUrl: cdnUrl,
+                        caption: file.name,
+                    }),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API responded with status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                setMessages((prevMessages) => [
+                    ...prevMessages,
+                    {
+                        _id: data.savedMessage._id,
+                        text: 'Image sent',
+                        sender: 'You',
+                        timestamp: new Date(data.savedMessage.timestamp),
+                        isSelf: true,
+                        type: 'image',
+                        mediaUrl: cdnUrl,
+                    },
+                ]);
+            } catch (error) {
+                console.error('Error sending image:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        }, [telegramChatId]);
+
+        const sendVoiceMessage = useCallback(async (file: File) => {
+            setIsLoading(true);
+            try {
+                const cdnUrl = await uploadToDigitalOcean(file);
+
+                const response = await fetch(`/api/telegram-bot/${telegramChatId}/send-voice`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        mediaUrl: cdnUrl,
+                        caption: file.name,
+                    }),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API responded with status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                setMessages((prevMessages) => [
+                    ...prevMessages,
+                    {
+                        _id: data.savedMessage._id,
+                        text: 'Voice message sent',
+                        sender: 'You',
+                        timestamp: new Date(data.savedMessage.timestamp),
+                        isSelf: true,
+                        type: 'voice',
+                        mediaUrl: cdnUrl,
+                    },
+                ]);
+            } catch (error) {
+                console.error('Error sending voice message:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        }, [telegramChatId]);
+
         return {
             messages,
             newMessage,
@@ -220,7 +206,5 @@
     };
 
     export default useTelegramMessagesViewModel;
-
-
 
 

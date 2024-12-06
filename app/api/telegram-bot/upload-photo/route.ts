@@ -1,16 +1,22 @@
 // app/api/telegram-bot/upload-photo/route.ts
 // app/api/telegram-bot/upload-photo/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import axios from "axios";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
+const s3Client = new S3Client({
+    endpoint: `https://${process.env.DO_SPACES_ENDPOINT}`,
+    region: process.env.DO_SPACES_REGION || "fra1",
+    credentials: {
+        accessKeyId: process.env.DO_SPACES_KEY!,
+        secretAccessKey: process.env.DO_SPACES_SECRET!,
+    },
+});
 
 export async function POST(req: NextRequest) {
     try {
-        // Parse the incoming form data
         const formData = await req.formData();
         const file = formData.get("file") as File;
 
-        // Validate that the file exists
         if (!file) {
             console.error("[ERROR] No file provided in the request.");
             return NextResponse.json({ error: "File is missing" }, { status: 400 });
@@ -22,52 +28,46 @@ export async function POST(req: NextRequest) {
             size: file.size,
         });
 
-        // Determine the upload folder based on the environment
         const folder = process.env.NODE_ENV === "development" ? "dev" : "prod";
         const timestamp = new Date().toISOString();
         const fileName = `${folder}/images/${timestamp}-${file.name}`;
 
-        // Convert file to a buffer
-        const fileBuffer = new Uint8Array(await file.arrayBuffer());
+        const fileBuffer = await file.arrayBuffer();
 
-        // Create S3-compatible upload parameters
         const uploadParams = {
             Bucket: process.env.DO_SPACES_BUCKET!,
             Key: fileName,
-            Body: fileBuffer,
-            ContentType: file.type || "application/octet-stream",
-            ACL: "public-read", // Ensure file is publicly accessible
+            Body: Buffer.from(fileBuffer),
+            ContentType: file.type,
+            ACL: "public-read", // Set to public-read to match saveImage behavior
         };
 
-        // Make the PUT request to S3 using Axios
-        const s3Url = `https://${process.env.DO_SPACES_BUCKET!}.${process.env.DO_SPACES_ENDPOINT!}`;
-        const s3UploadEndpoint = `${s3Url}/${fileName}`;
-
         try {
-            await axios.put(s3UploadEndpoint, fileBuffer, {
-                headers: {
-                    "Content-Type": file.type || "application/octet-stream",
-                    "x-amz-acl": "public-read", // Set public read access
-                },
-            });
-        } catch (axiosError: any) {
-            console.error("[ERROR] Axios upload to S3 failed:", axiosError.response || axiosError.message);
+            await s3Client.send(new PutObjectCommand(uploadParams));
+        } catch (s3Error: any) {
+            console.error("[ERROR] S3 upload failed:", s3Error.message);
             throw new Error("Failed to upload file to S3");
         }
 
-        // Generate the public CDN URL for the uploaded file
-        const fileUrl = `${process.env.DO_SPACES_CDN_ENDPOINT}/${fileName}`;
-        console.log("[INFO] File successfully uploaded to:", fileUrl);
+        // Construct the CDN URL
+        const cdnUrl = `${process.env.DO_SPACES_CDN_ENDPOINT}/${fileName}`;
+        console.log("[INFO] File successfully uploaded to CDN:", cdnUrl);
 
-        // Return the CDN URL as a JSON response
-        return NextResponse.json({ fileUrl }, { status: 200 });
+        return NextResponse.json({ filePath: fileName, cdnUrl: cdnUrl }, { status: 200 });
     } catch (error: any) {
         console.error("[ERROR] Upload-photo route failed:", {
             message: error.message,
             stack: error.stack,
         });
 
-        // Return a detailed error response
+        console.log("NODE_ENV:" + process.env.NODE_ENV);
+        console.log("DO_SPACES_BUCKET:" + process.env.DO_SPACES_BUCKET);
+        console.log("DO_SPACES_ENDPOINT:" + process.env.DO_SPACES_ENDPOINT);
+        console.log("DO_SPACES_REGION:" + process.env.DO_SPACES_REGION);
+        console.log("DO_SPACES_CDN_ENDPOINT:" + process.env.DO_SPACES_CDN_ENDPOINT);
+
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }
+
+

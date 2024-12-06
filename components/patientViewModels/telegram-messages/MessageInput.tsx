@@ -10,8 +10,9 @@ interface MessageInputProps {
     setNewMessage: (message: string) => void;
     sendMessage: () => void;
     sendImage: (file: File) => void;
-    sendVoiceRecording: (blob: Blob) => void;
+    sendVoiceMessage: (mediaUrl: string) => void;
     isLoading: boolean;
+    telegramChatId: string; // Added this prop
 }
 
 export const MessageInput: React.FC<MessageInputProps> = ({
@@ -19,8 +20,9 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                                                               setNewMessage,
                                                               sendMessage,
                                                               sendImage,
-                                                              sendVoiceRecording,
+                                                              sendVoiceMessage,
                                                               isLoading,
+                                                              telegramChatId,
                                                           }) => {
     const [expanded, setExpanded] = React.useState(false);
 
@@ -30,8 +32,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         }
     };
 
-    const handleRecordingComplete = (blob: Blob) => {
-        sendVoiceRecording(blob);
+    const handleRecordingComplete = (mediaUrl: string) => {
+        sendVoiceMessage(mediaUrl);
     };
 
     return (
@@ -85,6 +87,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                             <VoiceRecorder
                                 onRecordingComplete={handleRecordingComplete}
                                 isUploading={isLoading}
+                                chatId={telegramChatId} // Pass chatId to VoiceRecorder
                             />
                         </div>
                     )}
@@ -104,4 +107,3 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         </form>
     );
 };
-

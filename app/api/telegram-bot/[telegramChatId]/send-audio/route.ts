@@ -1,6 +1,5 @@
 // app/api/telegram-bot/[telegramChatId]/send-audio/route.ts
 
-// app/api/telegram-bot/[telegramChatId]/send-audio/route.ts
 import TelegramThread from "@/models/telegramThread";
 import dbConnect from "@/utils/database";
 import { NextResponse } from "next/server";

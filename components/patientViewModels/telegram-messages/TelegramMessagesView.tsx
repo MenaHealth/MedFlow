@@ -11,16 +11,16 @@
     import {MessageInput} from "@/components/patientViewModels/telegram-messages/MessageInput";
     import {TelegramMessage} from "@/components/patientViewModels/telegram-messages/TelegramMessagesViewModel";
 
-    interface TelegramMessagesViewProps {
-        messages: TelegramMessage[];
-        newMessage: string;
-        setNewMessage: (message: string) => void;
-        sendMessage: (telegramChatId: string) => void;
-        sendImage: (file: File) => void;
-        sendVoiceRecording: (blob: Blob) => void;
-        isLoading: boolean;
-        telegramChatId: string;
-    }
+    // interface TelegramMessagesViewProps {
+    //     messages: TelegramMessage[];
+    //     newMessage: string;
+    //     setNewMessage: (message: string) => void;
+    //     sendMessage: (telegramChatId: string) => void;
+    //     sendImage: (file: File) => void;
+    //     sendVoiceRecording: (blob: Blob) => void;
+    //     isLoading: boolean;
+    //     telegramChatId: string;
+    // }
 
     interface TelegramMessagesViewProps {
         messages: TelegramMessage[];
@@ -31,6 +31,8 @@
         sendImage: (file: File) => void;
         isLoading: boolean;
         telegramChatId: string;
+        scrollAreaRef: React.RefObject<HTMLDivElement>;
+        isLoadingMessages: boolean;
     }
 
     export const TelegramMessagesView: React.FC<TelegramMessagesViewProps> = ({
@@ -42,6 +44,7 @@
                                                                                   sendVoiceRecording,
                                                                                   isLoading,
                                                                                   telegramChatId,
+                                                                                  isLoadingMessages,
                                                                               }) => {
         const scrollAreaRef = useRef<HTMLDivElement>(null);
         const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -158,6 +161,11 @@
                 </CardHeader>
                 <CardContent className="flex-grow p-0 overflow-hidden">
                     <ScrollArea className="h-full w-full" ref={scrollAreaRef}>
+                        {isLoadingMessages ? (
+                                <div className="flex justify-center items-center h-full">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                                </div>
+                        ) : (
                         <div className="flex flex-col gap-3 p-4">
                             {messages.map((message) => (
                                 <div
@@ -188,6 +196,7 @@
                                 </div>
                             ))}
                         </div>
+                        )}
                     </ScrollArea>
                 </CardContent>
                 <CardFooter className="p-4 border-t">
@@ -196,8 +205,12 @@
                         setNewMessage={setNewMessage}
                         sendMessage={() => sendMessage(telegramChatId)}
                         sendImage={sendImage}
-                        sendVoiceRecording={sendVoiceRecording}
+                        sendVoiceMessage={(mediaUrl: string) => {
+                            console.log('Voice message URL:', mediaUrl);
+                            // Add additional logic if needed
+                        }}
                         isLoading={isLoading}
+                        telegramChatId={telegramChatId} // Pass chatId to MessageInput
                     />
                 </CardFooter>
             </Card>

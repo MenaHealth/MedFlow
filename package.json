@@ -37,7 +37,7 @@
     "@types/jsonwebtoken": "^9.0.7",
     "@wasm-audio-decoders/ogg-vorbis": "^0.1.16",
     "aws-sdk": "^2.1665.0",
-    "axios": "^1.7.7",
+    "axios": "^1.7.9",
     "bcryptjs": "^2.4.3",
     "big-integer": "^1.6.52",
     "class-variance-authority": "^0.7.0",

@@ -6,12 +6,8 @@ const nextConfig = {
         domains: [
             'lh3.googleusercontent.com',
             'localhost',
-            'med-flow-telegram-images-dev.s3.us-east-2.amazonaws.com',
-            'med-flow-telegram-images-prod.s3.us-east-2.amazonaws.com',
-            'med-flow-audio-notes-dev.s3.us-east-2.amazonaws.com',
-            'med-flow-audio-notes-prod.s3.us-east-2.amazonaws.com',
             'medflow-telegram.fra1.digitaloceanspaces.com',
-            'fra1.digitaloceanspaces.com', // Add this line
+            'fra1.digitaloceanspaces.com',
         ],
         remotePatterns: [
             {

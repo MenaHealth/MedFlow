@@ -27,7 +27,6 @@
         newMessage: string;
         setNewMessage: (message: string) => void;
         sendMessage: (telegramChatId: string) => void;
-        sendVoiceRecording: (blob: Blob) => void;
         sendImage: (file: File) => void;
         isLoading: boolean;
         telegramChatId: string;
@@ -41,7 +40,6 @@
                                                                                   setNewMessage,
                                                                                   sendMessage,
                                                                                   sendImage,
-                                                                                  sendVoiceRecording,
                                                                                   isLoading,
                                                                                   telegramChatId,
                                                                                   isLoadingMessages,

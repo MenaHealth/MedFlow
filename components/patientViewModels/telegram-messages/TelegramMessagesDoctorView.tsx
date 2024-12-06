@@ -2,7 +2,7 @@
 
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import useTelegramMessagesViewModel from "./TelegramMessagesViewModel";
 import { TelegramMessagesView } from "./TelegramMessagesView";
 import { CircleLoader } from 'react-spinners';
@@ -14,12 +14,14 @@ const TelegramMessagesDoctorView: React.FC<{ telegramChatId: string }> = ({ tele
         setNewMessage,
         sendMessage,
         sendImage,
-        sendVoiceRecording,
         loadMessages,
         isLoading,
     } = useTelegramMessagesViewModel(telegramChatId);
 
     const [isLoadingMessages, setIsLoadingMessages] = useState(true);
+
+    // Create the scroll area reference
+    const scrollAreaRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (telegramChatId) {
@@ -40,13 +42,13 @@ const TelegramMessagesDoctorView: React.FC<{ telegramChatId: string }> = ({ tele
                 </div>
             ) : (
                 <TelegramMessagesView
+                    scrollAreaRef={scrollAreaRef} // Pass the scroll area ref here
                     telegramChatId={telegramChatId}
                     messages={messages}
                     newMessage={newMessage}
                     setNewMessage={setNewMessage}
                     sendMessage={sendMessage}
                     sendImage={sendImage}
-                    sendVoiceRecording={sendVoiceRecording}
                     isLoading={isLoading}
                     isLoadingMessages={isLoadingMessages}
                 />
@@ -56,6 +58,3 @@ const TelegramMessagesDoctorView: React.FC<{ telegramChatId: string }> = ({ tele
 };
 
 export default TelegramMessagesDoctorView;
-
-
-

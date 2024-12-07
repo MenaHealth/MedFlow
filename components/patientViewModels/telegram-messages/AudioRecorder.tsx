@@ -1,55 +1,131 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Mic, Square, Loader } from 'lucide-react';
+import CircleTimer from './CircleTimer';
+import {convertToOpus} from "@/components/patientViewModels/telegram-messages/audio-conversion";
 
-interface AudioRecorderProps {
-    onRecordingComplete: (mediaUrl: string) => void;
+interface VoiceRecorderProps {
+    onRecordingComplete: (mediaUrl: string, duration: number, waveform: Uint8Array) => void;
     isUploading: boolean;
-    chatId: string; // New prop for telegramChatId
+    chatId: string;
 }
 
-const AudioRecorder: React.FC<AudioRecorderProps> = ({ onRecordingComplete, isUploading, chatId }) => {
+const AudioRecorder: React.FC<VoiceRecorderProps> = ({
+                                                         onRecordingComplete,
+                                                         isUploading,
+                                                         chatId
+                                                     }) => {
     const [isRecording, setIsRecording] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [timeLeft, setTimeLeft] = useState(60);
+    const [stream, setStream] = useState<MediaStream | null>(null);
     const mediaRecorder = useRef<MediaRecorder | null>(null);
     const audioChunks = useRef<Blob[]>([]);
+    const audioContext = useRef<AudioContext | null>(null);
+    const startTimeRef = useRef<number | null>(null);
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+    const generateWaveform = async (audioBuffer: AudioBuffer): Promise<Uint8Array> => {
+        const channelData = audioBuffer.getChannelData(0);
+        const samplesPerWaveformByte = Math.floor(channelData.length / 40);
+        const waveform: number[] = [];
+
+        let maxAmplitude = 0;
+        const amplitudes = Array.from(channelData).map(Math.abs);
+
+        for (let i = 0; i < 40; i++) {
+            const start = i * samplesPerWaveformByte;
+            const end = start + samplesPerWaveformByte;
+            const sectionAmplitudes = amplitudes.slice(start, end);
+            const sectionMax = Math.max(...sectionAmplitudes);
+
+            maxAmplitude = Math.max(maxAmplitude, sectionMax);
+            waveform.push(sectionMax);
+        }
+
+        return new Uint8Array(waveform.map(amplitude => {
+            return Math.min(31, Math.floor((amplitude / maxAmplitude) * 31));
+        }));
+    };
 
     const getSupportedMimeType = () => {
         const types = [
-            'audio/ogg; codecs=opus',
+            'audio/ogg; codecs=opus', // Preferred for Telegram
             'audio/webm; codecs=opus',
         ];
         return types.find(type => MediaRecorder.isTypeSupported(type)) || '';
     };
 
-    const uploadAudio = async (blob: Blob, chatId: string): Promise<string> => {
-        const formData = new FormData();
-        formData.append('file', blob);
-        formData.append('chatId', chatId); // Include chatId in upload
+    const uploadAndSendAudio = async (
+        blob: Blob,
+        chatId: string,
+        duration: number,
+        waveform: Uint8Array
+    ): Promise<void> => {
+        try {
+            // Upload the audio file to the backend
+            const formData = new FormData();
+            formData.append('file', blob, 'audio-recording.wav');
+            formData.append('chatId', chatId);
+            formData.append('duration', duration.toString());
+            formData.append('waveform', JSON.stringify(Array.from(waveform)));
 
-        const response = await fetch('/api/telegram-bot/upload-audio', {
-            method: 'POST',
-            body: formData,
-        });
+            const uploadResponse = await fetch('/api/telegram-bot/upload-audio', {
+                method: 'POST',
+                body: formData,
+            });
 
-        if (!response.ok) {
-            throw new Error('Failed to upload audio file');
+            if (!uploadResponse.ok) {
+                throw new Error('Failed to upload audio file');
+            }
+
+            // Get the signed URL from the response
+            const { signedUrl } = await uploadResponse.json();
+            console.log("Signed URL from upload:", signedUrl);
+
+            // Encode the signed URL before sending it to Telegram
+            const encodedSignedUrl = encodeURIComponent(signedUrl);
+
+            // Call the new send-audio route
+            const sendResponse = await fetch(`/api/telegram-bot/${chatId}/send-audio`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    signedAudioUrl: encodedSignedUrl, // Use encoded URL here
+                    caption: `Audio message (${Math.round(duration)} seconds)`,
+                }),
+            });
+
+            if (!sendResponse.ok) {
+                throw new Error('Failed to send audio message to Telegram');
+            }
+
+            console.log('Audio message successfully sent to Telegram');
+        } catch (error) {
+            console.error('Error in uploadAndSendAudio:', error);
+            throw error;
         }
-
-        const { fileUrl } = await response.json();
-        return fileUrl;
     };
 
     const startRecording = useCallback(async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            setStream(stream);
             const mimeType = getSupportedMimeType();
+            if (!mimeType) {
+                throw new Error('No supported MIME type found for MediaRecorder');
+            }
+            mediaRecorder.current = new MediaRecorder(stream, { mimeType });
 
             if (!mimeType) {
                 throw new Error('No supported MIME type found for MediaRecorder');
             }
-
             mediaRecorder.current = new MediaRecorder(stream, { mimeType });
+
+            audioContext.current = new AudioContext();
+            startTimeRef.current = Date.now();
 
             mediaRecorder.current.ondataavailable = (event) => {
                 if (event.data.size > 0) {
@@ -58,22 +134,39 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ onRecordingComplete, isUp
             };
 
             mediaRecorder.current.onstop = async () => {
-                const audioBlob = new Blob(audioChunks.current, { type: mimeType });
+                const rawAudioBlob = new Blob(audioChunks.current, { type: mimeType });
                 audioChunks.current = [];
+
+                const duration = startTimeRef.current
+                    ? Math.round((Date.now() - startTimeRef.current) / 1000)
+                    : 0;
 
                 setIsProcessing(true);
                 try {
-                    const fileUrl = await uploadAudio(audioBlob, chatId); // Pass chatId here
-                    onRecordingComplete(fileUrl);
+                    const convertedBlob = await convertToOpus(rawAudioBlob);
+
+                    const arrayBuffer = await convertedBlob.arrayBuffer();
+                    const audioBuffer = await audioContext.current!.decodeAudioData(arrayBuffer);
+                    const waveform = await generateWaveform(audioBuffer);
+
+                    // Upload the converted file and send it to Telegram
+                    await uploadAndSendAudio(convertedBlob, chatId, duration, waveform);
+
+                    onRecordingComplete('Audio sent to Telegram', duration, waveform);
                 } catch (error) {
-                    console.error('Error uploading audio:', error);
+                    console.error('Error processing and sending audio:', error);
                 } finally {
                     setIsProcessing(false);
+                    if (audioContext.current) {
+                        audioContext.current.close();
+                        audioContext.current = null;
+                    }
                 }
             };
 
             mediaRecorder.current.start();
             setIsRecording(true);
+            setTimeLeft(60);
         } catch (error) {
             console.error('Error starting recording:', error);
         }
@@ -83,8 +176,38 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ onRecordingComplete, isUp
         if (mediaRecorder.current && isRecording) {
             mediaRecorder.current.stop();
             setIsRecording(false);
+            if (timerRef.current) {
+                clearInterval(timerRef.current);
+            }
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                setStream(null);
+            }
         }
-    }, [isRecording]);
+    }, [isRecording, stream]);
+
+    useEffect(() => {
+        if (isRecording) {
+            timerRef.current = setInterval(() => {
+                setTimeLeft((prevTime) => {
+                    if (prevTime <= 1) {
+                        stopRecording();
+                        return 0;
+                    }
+                    return prevTime - 1;
+                });
+            }, 1000);
+        }
+
+        return () => {
+            if (timerRef.current) {
+                clearInterval(timerRef.current);
+            }
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+        };
+    }, [isRecording, stopRecording, stream]);
 
     return (
         <Button
@@ -97,7 +220,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ onRecordingComplete, isUp
             {isUploading || isProcessing ? (
                 <Loader className="animate-spin h-4 w-4" />
             ) : isRecording ? (
-                <Square className="h-4 w-4" />
+                <CircleTimer progress={1 - timeLeft / 60} />
             ) : (
                 <Mic className="h-4 w-4" />
             )}
@@ -107,44 +230,3 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ onRecordingComplete, isUp
 
 export default AudioRecorder;
 
-
-// // Helper function to convert PCM to WAV
-// const pcmToWav = (pcmData: Float32Array, sampleRate: number): Promise<Blob> => {
-//     return new Promise((resolve) => {
-//         const wavData = new ArrayBuffer(44 + pcmData.length * 2);
-//         const view = new DataView(wavData);
-//
-//         // Write WAV header
-//         writeString(view, 0, 'RIFF');
-//         view.setUint32(4, 36 + pcmData.length * 2, true);
-//         writeString(view, 8, 'WAVE');
-//         writeString(view, 12, 'fmt ');
-//         view.setUint32(16, 16, true);
-//         view.setUint16(20, 1, true);
-//         view.setUint16(22, 1, true);
-//         view.setUint32(24, sampleRate, true);
-//         view.setUint32(28, sampleRate * 2, true);
-//         view.setUint16(32, 2, true);
-//         view.setUint16(34, 16, true);
-//         writeString(view, 36, 'data');
-//         view.setUint32(40, pcmData.length * 2, true);
-//
-//         // Write PCM data
-//         floatTo16BitPCM(view, 44, pcmData);
-//
-//         resolve(new Blob([wavData], { type: 'audio/wav' }));
-//     });
-// };
-//
-// const writeString = (view: DataView, offset: number, string: string) => {
-//     for (let i = 0; i < string.length; i++) {
-//         view.setUint8(offset + i, string.charCodeAt(i));
-//     }
-// };
-//
-// const floatTo16BitPCM = (output: DataView, offset: number, input: Float32Array) => {
-//     for (let i = 0; i < input.length; i++, offset += 2) {
-//         const s = Math.max(-1, Math.min(1, input[i]));
-//         output.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
-//     }
-// };

@@ -17,14 +17,13 @@ export async function GET(req: NextRequest) {
     let mediaUrl = searchParams.get("mediaUrl") || searchParams.get("filePath");
 
     if (!mediaUrl) {
+        console.error("Missing media URL or file path in request.");
         return NextResponse.json({ error: "Missing media URL or file path" }, { status: 400 });
     }
 
     try {
-        // Decode the URL twice to handle double-encoding
         mediaUrl = decodeURIComponent(decodeURIComponent(mediaUrl));
 
-        // Check if the mediaUrl is actually another API call
         if (mediaUrl.includes("/api/telegram-bot/get-media")) {
             const innerParams = new URL(mediaUrl).searchParams;
             mediaUrl = innerParams.get("mediaUrl") || innerParams.get("filePath") || "";
@@ -33,20 +32,18 @@ export async function GET(req: NextRequest) {
 
         console.log("Decoded mediaUrl:", mediaUrl);
 
-        // Extract the key from the full URL
         const urlParts = new URL(mediaUrl);
-        const key = urlParts.pathname.slice(1); // Remove leading '/'
+        const key = urlParts.pathname.slice(1);
 
         console.log("Extracted Key:", key);
 
-        // Generate a signed URL valid for 1 hour
         const signedUrl = await getSignedUrl(
             s3Client,
             new GetObjectCommand({
                 Bucket: process.env.DO_SPACES_BUCKET!,
                 Key: key,
             }),
-            { expiresIn: 3600 } // URL valid for 1 hour
+            { expiresIn: 600 }
         );
 
         console.log("Generated signed URL:", signedUrl);
@@ -61,5 +58,4 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ error: "Failed to generate signed URL" }, { status: 500 });
     }
 }
-
 

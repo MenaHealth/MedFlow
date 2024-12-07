@@ -1,81 +1,99 @@
 // components/patientViewModels/telegram-messages/AudioNotePlayer.tsx
-'use client'
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Play, Pause } from 'lucide-react';
 import { OggOpusDecoder } from 'ogg-opus-decoder';
 
+// AudioNotePlayer.tsx
 interface AudioNotePlayerProps {
-    audioBuffer?: AudioBuffer | null;
-    mediaUrl: string;
-    format: 'ogg' | 'mp3';
+    mediaUrl: string;         // URL of the audio file
+    audioBuffer: AudioBuffer | null; // Optional, decoded audio data
+    format: string;           // Format of the audio file
 }
-
-export function AudioNotePlayer({ audioBuffer, mediaUrl, format }: AudioNotePlayerProps) {
+export function AudioNotePlayer({ mediaUrl }: AudioNotePlayerProps) {
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [audioDuration, setAudioDuration] = useState<number>(0);
     const audioContext = useRef<AudioContext | null>(null);
     const sourceNode = useRef<AudioBufferSourceNode | null>(null);
     const startTime = useRef<number>(0);
     const pauseTime = useRef<number>(0);
-    const audioElement = useRef<HTMLAudioElement | null>(null);
-    const [audioBufferState, setAudioBufferState] = useState<AudioBuffer | null>(null);
+    const [audioBuffer, setAudioBuffer] = useState<AudioBuffer | null>(null);
     const oggOpusDecoder = useRef<OggOpusDecoder | null>(null);
 
     useEffect(() => {
         audioContext.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-
-        if (format === 'ogg' && !audioBuffer) {
-            fetchAndDecodeOgg();
-        } else if (format === 'ogg' && audioBuffer) {
-            setAudioBufferState(audioBuffer);
-            setIsLoading(false);
-        } else {
-            setIsLoading(false);
-        }
+        fetchAndDecodeOgg();
 
         return () => {
             audioContext.current?.close();
             oggOpusDecoder.current?.free();
         };
-    }, [format, mediaUrl, audioBuffer]);
+    }, [mediaUrl]);
 
     const fetchAndDecodeOgg = async () => {
         setIsLoading(true);
         setError(null);
         try {
+            console.log('Fetching audio from:', mediaUrl);
             const response = await fetch(mediaUrl, { mode: 'cors' });
-            if (!response.ok) throw new Error(`Failed to fetch audio file: ${response.statusText}`);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch audio file: ${response.statusText}`);
+            }
 
             const arrayBuffer = await response.arrayBuffer();
+            try {
+                const audioBuffer = await audioContext.current.decodeAudioData(arrayBuffer);
+                setAudioBuffer(audioBuffer);
+                setAudioDuration(audioBuffer.duration);
+            } catch (decodeError) {
+                console.error('Fallback decodeAudioData failed:', decodeError);
+                throw new Error('Audio decoding failed.');
+            }
 
-            oggOpusDecoder.current = new OggOpusDecoder();
-            await oggOpusDecoder.current.ready;
+            try {
+                oggOpusDecoder.current = new OggOpusDecoder();
+                await oggOpusDecoder.current.ready;
+            } catch (decoderError) {
+                console.error('Error initializing OggOpusDecoder:', decoderError);
+                throw new Error('Failed to initialize OggOpusDecoder.');
+            }
 
             const { channelData, sampleRate } = await oggOpusDecoder.current.decodeFile(new Uint8Array(arrayBuffer));
 
-            if (channelData.length === 0 || channelData[0].length === 0) {
-                throw new Error('Decoded audio has no valid data.');
+            console.log('Decoded channel data:', channelData);
+
+            if (!channelData || channelData.length === 0) {
+                throw new Error('Decoded audio has no valid channels.');
+            }
+
+            const numChannels = channelData.length;
+            const bufferLength = channelData[0]?.length || 0;
+
+            if (numChannels < 1 || numChannels > 32 || bufferLength < 1) {
+                throw new Error(`Invalid audio data: channels=${numChannels}, length=${bufferLength}`);
             }
 
             const newAudioBuffer = audioContext.current!.createBuffer(
-                channelData.length,
-                channelData[0].length,
+                numChannels,
+                bufferLength,
                 sampleRate
             );
 
-            for (let i = 0; i < channelData.length; i++) {
-                newAudioBuffer.copyToChannel(channelData[i], i);
+            for (let i = 0; i < numChannels; i++) {
+                if (channelData[i]) {
+                    newAudioBuffer.copyToChannel(channelData[i], i);
+                }
             }
 
-            setAudioBufferState(newAudioBuffer);
+            setAudioBuffer(newAudioBuffer);
+            setAudioDuration(newAudioBuffer.duration);
         } catch (error) {
             console.error('Error fetching and decoding audio:', error);
-            setError(`Error loading audio: ${error instanceof Error ? error.message : String(error)}`);
+            setError(`Error decoding audio file: ${error instanceof Error ? error.message : String(error)}`);
         } finally {
             setIsLoading(false);
         }
@@ -90,9 +108,9 @@ export function AudioNotePlayer({ audioBuffer, mediaUrl, format }: AudioNotePlay
     };
 
     const playAudio = () => {
-        if (format === 'ogg' && audioBufferState && audioContext.current) {
+        if (audioBuffer && audioContext.current) {
             sourceNode.current = audioContext.current.createBufferSource();
-            sourceNode.current.buffer = audioBufferState;
+            sourceNode.current.buffer = audioBuffer;
             sourceNode.current.connect(audioContext.current.destination);
 
             const offset = pauseTime.current;
@@ -103,60 +121,41 @@ export function AudioNotePlayer({ audioBuffer, mediaUrl, format }: AudioNotePlay
             const updateProgress = () => {
                 if (audioContext.current && sourceNode.current) {
                     const elapsedTime = audioContext.current.currentTime - startTime.current;
-                    const duration = sourceNode.current.buffer?.duration || 0;
-                    const progress = (elapsedTime / duration) * 100;
-                    setProgress(progress);
+                    const progressValue = (elapsedTime / audioBuffer.duration) * 100;
+                    setProgress(progressValue);
 
-                    if (progress < 100 && isPlaying) {
+                    if (progressValue < 100 && isPlaying) {
                         requestAnimationFrame(updateProgress);
-                    } else if (progress >= 100) {
+                    } else if (progressValue >= 100) {
                         setIsPlaying(false);
                         setProgress(0);
+                        pauseTime.current = 0;
                     }
                 }
             };
 
             updateProgress();
-        } else if (format === 'mp3' && audioElement.current) {
-            audioElement.current.play();
-            setIsPlaying(true);
-
-            audioElement.current.ontimeupdate = () => {
-                const progress = (audioElement.current!.currentTime / audioElement.current!.duration) * 100;
-                setProgress(progress);
-            };
-
-            audioElement.current.onended = () => {
-                setIsPlaying(false);
-                setProgress(0);
-            };
         }
     };
 
     const pauseAudio = () => {
-        if (format === 'ogg' && sourceNode.current && audioContext.current instanceof AudioContext) {
+        if (sourceNode.current && audioContext.current) {
             sourceNode.current.stop();
             pauseTime.current = audioContext.current.currentTime - startTime.current;
-            setIsPlaying(false);
-        } else if (format === 'mp3' && audioElement.current) {
-            audioElement.current.pause();
             setIsPlaying(false);
         }
     };
 
     const handleSliderChange = (value: number[]) => {
-        const newTime = (value[0] / 100);
-        if (format === 'ogg' && audioBufferState) {
-            pauseTime.current = newTime * audioBufferState.duration;
+        const newTime = (value[0] / 100) * audioDuration;
+        if (audioBuffer) {
+            pauseTime.current = newTime;
             setProgress(value[0]);
 
             if (isPlaying) {
                 pauseAudio();
                 playAudio();
             }
-        } else if (format === 'mp3' && audioElement.current) {
-            audioElement.current.currentTime = newTime * audioElement.current.duration;
-            setProgress(value[0]);
         }
     };
 
@@ -165,7 +164,7 @@ export function AudioNotePlayer({ audioBuffer, mediaUrl, format }: AudioNotePlay
     }
 
     if (error) {
-        return <div>{error}</div>; //Added error display
+        return <div className="text-red-500">{error}</div>;
     }
 
     return (
@@ -174,7 +173,7 @@ export function AudioNotePlayer({ audioBuffer, mediaUrl, format }: AudioNotePlay
                 variant="outline"
                 size="icon"
                 onClick={togglePlayPause}
-                disabled={isLoading || (format === 'ogg' && !audioBufferState)}
+                disabled={isLoading || !audioBuffer}
                 aria-label={isPlaying ? 'Pause' : 'Play'}
             >
                 {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
@@ -187,13 +186,7 @@ export function AudioNotePlayer({ audioBuffer, mediaUrl, format }: AudioNotePlay
                 className="flex-grow"
                 aria-label="Audio progress"
             />
-            {format === 'mp3' && (
-                <audio ref={audioElement} src={mediaUrl} preload="metadata" />
-            )}
         </div>
     );
 }
-
-
-
 

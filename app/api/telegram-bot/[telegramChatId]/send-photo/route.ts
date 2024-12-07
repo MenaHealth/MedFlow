@@ -1,5 +1,4 @@
-// app/api/telegram-bot/[telegramChatId]/send-image/route.ts
-// app/api/telegram-bot/[telegramChatId]/send-image/route.ts
+// app/api/telegram-bot/[telegramChatId]/send-photo/route.ts
 import TelegramThread from "@/models/telegramThread";
 import dbConnect from "@/utils/database";
 import { NextResponse } from "next/server";
@@ -9,8 +8,7 @@ const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 
 export async function POST(
     request: Request,
-    { params }: { params: { telegramChatId: string } }
-) {
+    { params }: { params: { telegramChatId: string } }) {
     await dbConnect();
 
     try {
@@ -87,7 +85,7 @@ export async function POST(
 
         return NextResponse.json({ message: "Image sent and saved successfully" }, { status: 200 });
     } catch (error: any) {
-        console.error("Error handling send-image request:", error);
+        console.error("Error handling send-photo request:", error);
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 }

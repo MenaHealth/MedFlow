@@ -61,12 +61,16 @@ export async function PATCH(
 
         // Save the message to the thread
         thread.messages.push(newMessage);
-        await thread.save();
+        const savedThread = await thread.save();
 
-        console.log(`Message saved for Chat ID ${telegramChatId}:`, newMessage);
+        // Retrieve the saved message (with its generated _id)
+        const savedMessage = savedThread.messages[savedThread.messages.length - 1];
+
+        console.log(`Message saved for Chat ID ${telegramChatId}:`, savedMessage);
+
         return NextResponse.json({
             message: "Message saved successfully",
-            savedMessage: newMessage,
+            savedMessage, // Include the full saved message with _id
         });
     } catch (error) {
         const err = error as Error;

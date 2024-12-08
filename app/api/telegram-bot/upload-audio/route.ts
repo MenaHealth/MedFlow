@@ -1,10 +1,12 @@
 // app/api/telegram-bot/upload-audio/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { S3Client, PutObjectCommand, ObjectCannedACL } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { ObjectCannedACL } from "@aws-sdk/client-s3";
 
-const spacesClient = new S3Client({
-    endpoint: process.env.DO_SPACES_ENDPOINT!,
-    region: process.env.DO_SPACES_REGION!,
+const s3Client = new S3Client({
+    endpoint: `https://${process.env.DO_SPACES_ENDPOINT}`,
+    region: process.env.DO_SPACES_REGION || "fra1",
     credentials: {
         accessKeyId: process.env.DO_SPACES_KEY!,
         secretAccessKey: process.env.DO_SPACES_SECRET!,
@@ -17,42 +19,50 @@ export async function POST(req: NextRequest) {
         const file = formData.get("file") as File;
 
         if (!file) {
-            console.error(`[ERROR] Missing audio file in formData`);
-            return NextResponse.json({ error: "Audio file is missing" }, { status: 400 });
+            return NextResponse.json({ error: "File is missing" }, { status: 400 });
         }
 
         const folder = process.env.NODE_ENV === "development" ? "dev" : "prod";
-        const timestamp = new Date().toISOString();
+        const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
         const fileName = `${folder}/audio/${timestamp}-${file.name}`;
-        const fileBuffer = new Uint8Array(await file.arrayBuffer());
+
+        const fileBuffer = await file.arrayBuffer();
 
         const uploadParams = {
             Bucket: process.env.DO_SPACES_BUCKET!,
             Key: fileName,
-            Body: fileBuffer,
-            ContentType: file.type || "application/octet-stream",
-            ACL: ObjectCannedACL.public_read, // Use the enum value instead of a string
+            Body: Buffer.from(fileBuffer),
+            ContentType: file.type || "audio/ogg",
+            ACL: "private" as ObjectCannedACL,
         };
 
-        const uploadCommand = new PutObjectCommand(uploadParams);
-        await spacesClient.send(uploadCommand);
+        try {
+            await s3Client.send(new PutObjectCommand(uploadParams));
+        } catch (s3Error: any) {
+            throw new Error("Failed to upload file to S3");
+        }
 
-        const fileUrl = `${process.env.DO_SPACES_CDN_ENDPOINT}/${fileName}`;
-        console.log(`[INFO] Audio uploaded to: ${fileUrl}`);
 
-        return NextResponse.json({ fileUrl }, { status: 200 });
+        const signedUrl = await getSignedUrl(
+            s3Client,
+            new GetObjectCommand({
+                Bucket: process.env.DO_SPACES_BUCKET!,
+                Key: fileName,
+            }),
+            { expiresIn: 300 } // 5 min
+        );
+        console.log("Signed URL:", signedUrl);
+
+
+
+        return NextResponse.json({ filePath: fileName, signedUrl }, { status: 200 });
     } catch (error: any) {
-        console.error("Error uploading audio file to DigitalOcean Spaces:", {
+        console.error("[ERROR] Upload-audio route failed:", {
             message: error.message,
             stack: error.stack,
         });
 
-        console.log(`[DEBUG] Environment variables:`, {
-            DO_SPACES_ENDPOINT: process.env.DO_SPACES_ENDPOINT,
-            DO_SPACES_BUCKET: process.env.DO_SPACES_BUCKET,
-            DO_SPACES_CDN_ENDPOINT: process.env.DO_SPACES_CDN_ENDPOINT,
-        });
-
-        return NextResponse.json({ error: "Failed to upload audio file" }, { status: 500 });
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }
+

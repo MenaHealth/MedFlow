@@ -1,5 +1,4 @@
 // app/api/telegram-bot/[telegramChatId]/send-audio/route.ts
-
 import TelegramThread from "@/models/telegramThread";
 import dbConnect from "@/utils/database";
 import { NextResponse } from "next/server";
@@ -8,23 +7,30 @@ const TELEGRAM_BOT_API_URL = process.env.TELEGRAM_BOT_API_URL || 'https://api.te
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 
 export async function POST(
-    req: Request,
+    request: Request,
     { params }: { params: { telegramChatId: string } }
 ) {
+    console.log("[DEBUG] Entering send-audio route with params:", params);
     await dbConnect();
 
     try {
         const { telegramChatId } = params;
-        const { mediaUrl, caption } = await req.json();
+        const { mediaUrl, caption } = await request.json();
 
         if (!telegramChatId || !mediaUrl) {
             return NextResponse.json(
-                { error: "Missing required fields" },
+                { error: "Missing required fields (telegramChatId or mediaUrl)" },
                 { status: 400 }
             );
         }
 
-        // Send audio to Telegram bot
+        console.log("[DEBUG] Sending signed URL to Telegram for audio:", {
+            chatId: telegramChatId,
+            mediaUrl,
+            caption,
+            fullUrl: `${TELEGRAM_BOT_API_URL}/bot${TELEGRAM_BOT_TOKEN}/sendAudio`,
+        });
+
         const telegramResponse = await fetch(`${TELEGRAM_BOT_API_URL}/bot${TELEGRAM_BOT_TOKEN}/sendAudio`, {
             method: "POST",
             headers: {
@@ -38,32 +44,60 @@ export async function POST(
         });
 
         if (!telegramResponse.ok) {
-            const errorData = await telegramResponse.json();
-            console.error("Telegram API error:", errorData);
-            throw new Error(`Telegram API responded with status: ${telegramResponse.status}`);
+            const errorText = await telegramResponse.text();
+            console.error("Telegram API full response:", {
+                status: telegramResponse.status,
+                statusText: telegramResponse.statusText,
+                body: errorText,
+            });
+            console.log(mediaUrl);
+
+            return NextResponse.json(
+                {
+                    error: "Failed to send audio to Telegram",
+                    details: errorText,
+                    mediaURL: mediaUrl,
+                },
+                { status: telegramResponse.status }
+            );
         }
 
-        // Save the audio message to MongoDB
+        // Telegram API was successful
+        const telegramData = await telegramResponse.json();
+        const publicMediaUrl = mediaUrl.split("?")[0]; // Extract the base URL from the signed URL
+
+        console.log("[INFO] Audio sent to Telegram successfully:", telegramData);
+
+        // Save the message in the database
         let thread = await TelegramThread.findOne({ chatId: telegramChatId });
         if (!thread) {
             thread = new TelegramThread({ chatId: telegramChatId, messages: [] });
         }
 
         const newMessage = {
-            text: caption || "Audio Note",
+            text: caption || "Audio message",
             sender: "You",
             timestamp: new Date(),
             type: "audio",
-            mediaUrl,
+            mediaUrl: publicMediaUrl,
         };
+
+// Add message to thread
         thread.messages.push(newMessage);
+
+// Save the thread
         await thread.save();
 
-        return NextResponse.json({
-            message: "Audio sent and saved successfully",
-            savedMessage: newMessage,
-        });
-    } catch (error) {
+// Retrieve the saved message with the generated `_id`
+        const savedMessage = thread.messages[thread.messages.length - 1];
+
+        console.log("[INFO] Audio message saved in database successfully:", savedMessage);
+
+        return NextResponse.json(
+            { message: "Audio sent and saved successfully", savedMessage },
+            { status: 200 }
+        );
+    } catch (error: any) {
         console.error("Error handling send-audio request:", error);
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }

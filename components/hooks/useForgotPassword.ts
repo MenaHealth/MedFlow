@@ -9,7 +9,7 @@ export function useForgotPassword() {
             body: JSON.stringify({ email }),
         });
         if (!response.ok) {
-            throw new Error('Failed to send verification code.');
+            throw new Error('Failed to send-text verification code.');
         }
         return response.json();
     };

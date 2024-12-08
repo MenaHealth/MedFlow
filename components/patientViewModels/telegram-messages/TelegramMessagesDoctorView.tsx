@@ -14,6 +14,7 @@ const TelegramMessagesDoctorView: React.FC<{ telegramChatId: string }> = ({ tele
         setNewMessage,
         sendMessage,
         sendImage,
+        sendAudioMessage,
         loadMessages,
         isLoading,
     } = useTelegramMessagesViewModel(telegramChatId);
@@ -49,6 +50,7 @@ const TelegramMessagesDoctorView: React.FC<{ telegramChatId: string }> = ({ tele
                     setNewMessage={setNewMessage}
                     sendMessage={sendMessage}
                     sendImage={sendImage}
+                    sendAudioMessage={sendAudioMessage}
                     isLoading={isLoading}
                     isLoadingMessages={isLoadingMessages}
                 />

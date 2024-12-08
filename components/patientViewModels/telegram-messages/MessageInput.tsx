@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Send, Image, Plus } from 'lucide-react';
-import VoiceRecorder from "@/components/patientViewModels/telegram-messages/VoiceRecorder";
+import AudioRecorder from "@/components/patientViewModels/telegram-messages/AudioRecorder";
 import { AutoExpandingInput } from "@/components/ui/auto-expanding-input";
 
 interface MessageInputProps {
@@ -10,9 +10,9 @@ interface MessageInputProps {
     setNewMessage: (message: string) => void;
     sendMessage: () => void;
     sendImage: (file: File) => void;
-    sendVoiceMessage: (mediaUrl: string) => void;
+    sendAudioMessage: (file: Blob, duration: number) => void;
     isLoading: boolean;
-    telegramChatId: string; // Added this prop
+    telegramChatId: string;
 }
 
 export const MessageInput: React.FC<MessageInputProps> = ({
@@ -20,7 +20,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                                                               setNewMessage,
                                                               sendMessage,
                                                               sendImage,
-                                                              sendVoiceMessage,
+                                                              sendAudioMessage,
                                                               isLoading,
                                                               telegramChatId,
                                                           }) => {
@@ -32,8 +32,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         }
     };
 
-    const handleRecordingComplete = (mediaUrl: string) => {
-        sendVoiceMessage(mediaUrl);
+    const handleRecordingComplete = (file: Blob, duration: number) => {
+        sendAudioMessage(file, duration); // Pass the Blob and duration
     };
 
     return (
@@ -84,10 +84,10 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                                 onChange={handleImageUpload}
                                 className="hidden"
                             />
-                            <VoiceRecorder
-                                onRecordingComplete={handleRecordingComplete}
+                            <AudioRecorder
+                                chatId={telegramChatId}
                                 isUploading={isLoading}
-                                chatId={telegramChatId} // Pass chatId to VoiceRecorder
+                                onRecordingComplete={(file: Blob, duration: number) => sendAudioMessage(file, duration)}
                             />
                         </div>
                     )}

@@ -1,8 +1,8 @@
+// components/patientViewModels/telegram-messages/AudioRecorder.tsx
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Mic, Square, Loader } from 'lucide-react';
-import CircleTimer from './CircleTimer';
-import {convertToOpus} from "@/components/patientViewModels/telegram-messages/audio-conversion";
+import { convertToOpus } from './audio-conversion';
 
 interface VoiceRecorderProps {
     onRecordingComplete: (file: Blob, duration: number) => void;
@@ -20,16 +20,18 @@ const AudioRecorder: React.FC<VoiceRecorderProps> = ({
     const [timeLeft, setTimeLeft] = useState(60);
     const [stream, setStream] = useState<MediaStream | null>(null);
     const mediaRecorder = useRef<MediaRecorder | null>(null);
+
     const audioChunks = useRef<Blob[]>([]);
     const startTimeRef = useRef<number | null>(null);
-    const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
     const startRecording = useCallback(async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            setStream(stream);
 
+            setStream(stream);
             const mimeType = "audio/webm; codecs=opus";
+
             mediaRecorder.current = new MediaRecorder(stream, { mimeType });
 
             startTimeRef.current = Date.now();
@@ -51,8 +53,21 @@ const AudioRecorder: React.FC<VoiceRecorderProps> = ({
                 setIsProcessing(true);
 
                 try {
-                    // Pass the raw audio to the parent for uploading and sending
-                    onRecordingComplete(rawAudioBlob, duration);
+                    console.log("[DEBUG] Raw audio Blob:", {
+                        type: rawAudioBlob.type,
+                        size: rawAudioBlob.size,
+                    });
+
+                    // Convert the raw audio to Opus format
+                    const convertedAudioBlob = await convertToOpus(rawAudioBlob);
+
+                    console.log("[DEBUG] Converted audio Blob:", {
+                        type: convertedAudioBlob.type,
+                        size: convertedAudioBlob.size,
+                    });
+
+                    // Pass the converted audio to the parent component
+                    onRecordingComplete(convertedAudioBlob, duration);
                 } catch (error) {
                     console.error("Error processing audio:", error);
                 } finally {

@@ -148,7 +148,7 @@
                             {
                                 _id: data.savedMessage._id,
                                 text: 'Image sent',
-                                sender: 'You',
+                                sender: 'MedFlow',
                                 timestamp: new Date(data.savedMessage.timestamp),
                                 isSelf: true,
                                 type: 'image',
@@ -167,6 +167,11 @@
                     async (file, duration) => {
                         setIsLoading(true);
                         try {
+                            console.log("[DEBUG] Sending audio file:", {
+                                type: file.type,
+                                size: file.size,
+                            });
+
                             const formData = new FormData();
                             formData.append("file", file);
                             formData.append("duration", duration.toString());
@@ -181,16 +186,17 @@
                                 throw new Error("Failed to upload audio file to DigitalOcean");
                             }
 
-                            const { signedUrl, publicMediaUrl } = await uploadResponse.json();
+                            const { signedUrl } = await uploadResponse.json();
+                            console.log("[DEBUG] Received signed URL from upload-audio:", signedUrl);
 
-                            // Send the signed URL directly to Telegram
+                            // Send the signed URL to Telegram
                             const response = await fetch(`/api/telegram-bot/${telegramChatId}/send-audio`, {
                                 method: "POST",
                                 headers: {
                                     "Content-Type": "application/json",
                                 },
                                 body: JSON.stringify({
-                                    signedUrl, // Pass as-is, no encoding/decoding here
+                                    mediaUrl: signedUrl,
                                     caption: `Audio message (${Math.round(duration)} seconds)`,
                                 }),
                             });
@@ -200,8 +206,8 @@
                             }
 
                             const data = await response.json();
+                            console.log("[DEBUG] Telegram response:", data);
 
-                            // Save the public URL in messages
                             setMessages((prevMessages) => [
                                 ...prevMessages,
                                 {
@@ -211,7 +217,7 @@
                                     timestamp: new Date(data.savedMessage.timestamp),
                                     isSelf: true,
                                     type: "audio",
-                                    mediaUrl: publicMediaUrl,
+                                    mediaUrl: signedUrl,
                                 },
                             ]);
                         } catch (error) {

@@ -51,6 +51,8 @@ export async function POST(req: NextRequest) {
             }),
             { expiresIn: 300 } // 5 min
         );
+        console.log("Signed URL:", signedUrl);
+
 
 
         return NextResponse.json({ filePath: fileName, signedUrl }, { status: 200 });

@@ -10,6 +10,7 @@ export async function POST(
     request: Request,
     { params }: { params: { telegramChatId: string } }
 ) {
+    console.log("[DEBUG] Entering send-audio route with params:", params);
     await dbConnect();
 
     try {
@@ -49,11 +50,13 @@ export async function POST(
                 statusText: telegramResponse.statusText,
                 body: errorText,
             });
+            console.log(mediaUrl);
 
             return NextResponse.json(
                 {
                     error: "Failed to send audio to Telegram",
                     details: errorText,
+                    mediaURL: mediaUrl,
                 },
                 { status: telegramResponse.status }
             );
@@ -61,7 +64,7 @@ export async function POST(
 
         // Telegram API was successful
         const telegramData = await telegramResponse.json();
-        const publicAudioUrl = mediaUrl.split("?")[0]; // Extract the base URL from the signed URL
+        const publicMediaUrl = mediaUrl.split("?")[0]; // Extract the base URL from the signed URL
 
         console.log("[INFO] Audio sent to Telegram successfully:", telegramData);
 
@@ -76,7 +79,7 @@ export async function POST(
             sender: "You",
             timestamp: new Date(),
             type: "audio",
-            audioUrl: publicAudioUrl,
+            mediaUrl: publicMediaUrl,
         };
 
         thread.messages.push(newMessage);

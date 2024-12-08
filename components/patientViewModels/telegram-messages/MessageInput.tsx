@@ -10,9 +10,9 @@ interface MessageInputProps {
     setNewMessage: (message: string) => void;
     sendMessage: () => void;
     sendImage: (file: File) => void;
-    sendAudioMessage: (mediaUrl: string) => void;
+    sendAudioMessage: (file: Blob, duration: number) => void;
     isLoading: boolean;
-    telegramChatId: string; // Added this prop
+    telegramChatId: string;
 }
 
 export const MessageInput: React.FC<MessageInputProps> = ({
@@ -32,8 +32,8 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         }
     };
 
-    const handleRecordingComplete = (mediaUrl: string) => {
-        sendAudioMessage(mediaUrl);
+    const handleRecordingComplete = (file: Blob, duration: number) => {
+        sendAudioMessage(file, duration); // Pass the Blob and duration
     };
 
     return (
@@ -85,9 +85,9 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                                 className="hidden"
                             />
                             <AudioRecorder
-                                onRecordingComplete={handleRecordingComplete}
+                                chatId={telegramChatId}
                                 isUploading={isLoading}
-                                chatId={telegramChatId} // Pass chatId to AudioRecorder
+                                onRecordingComplete={(file: Blob, duration: number) => sendAudioMessage(file, duration)}
                             />
                         </div>
                     )}

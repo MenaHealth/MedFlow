@@ -1,4 +1,4 @@
-// app/api/telegram-bot/[telegramChatId]/send/route.ts
+// app/api/telegram-bot/[telegramChatId]/send-text/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/utils/database";
 import TelegramThread from "@/models/telegramThread";

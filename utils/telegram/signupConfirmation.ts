@@ -10,7 +10,7 @@ if (!botToken) {
 
 const bot = new TelegramBot(botToken, { polling: false });
 
-// Function to send a Telegram message
+// Function to send-text a Telegram message
 export async function sendPatientRegistrationMessage(chatId: string, message: string): Promise<void> {
     if (!chatId || !message) {
         console.error(`Invalid input: chatId=${chatId}, message=${message}`);

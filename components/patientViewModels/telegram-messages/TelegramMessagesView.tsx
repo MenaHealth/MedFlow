@@ -17,6 +17,7 @@ interface TelegramMessagesViewProps {
     setNewMessage: (message: string) => void;
     sendMessage: (telegramChatId: string) => void;
     sendImage: (file: File) => void;
+    sendAudioMessage: (file: Blob, duration: number) => void;
     isLoading: boolean;
     telegramChatId: string;
     scrollAreaRef: React.RefObject<HTMLDivElement>;
@@ -29,6 +30,7 @@ export const TelegramMessagesView: React.FC<TelegramMessagesViewProps> = ({
                                                                               setNewMessage,
                                                                               sendMessage,
                                                                               sendImage,
+                                                                              sendAudioMessage,
                                                                               isLoading,
                                                                               telegramChatId,
                                                                               isLoadingMessages,
@@ -112,13 +114,13 @@ export const TelegramMessagesView: React.FC<TelegramMessagesViewProps> = ({
             return <p>Loading audio...</p>;
         }
 
-        return (
-            <AudioNotePlayer
-                audioBuffer={buffer}
-                mediaUrl={message.mediaUrl || ""}
-                format={format}
-            />
-        );
+        // return (
+        //     <AudioNotePlayer
+        //         audioBuffer={buffer}
+        //         mediaUrl={message.mediaUrl || ""}
+        //         format={format}
+        //     />
+        // );
     };
 
     const renderImage = (message: TelegramMessage) => {
@@ -185,7 +187,8 @@ export const TelegramMessagesView: React.FC<TelegramMessagesViewProps> = ({
                                         }`}
                                     >
                                         {message.type === "image" ? renderImage(message) :
-                                            message.type === "audio" ? renderAudioPlayer(message) :
+                                            // message.type === "audio" ? renderAudioPlayer(message) :
+                                            message.type === "audio" ? "audio message test" :
                                                 <ReactMarkdown className="text-sm prose prose-sm max-w-none">
                                                     {message.text}
                                                 </ReactMarkdown>}
@@ -205,8 +208,9 @@ export const TelegramMessagesView: React.FC<TelegramMessagesViewProps> = ({
                     setNewMessage={setNewMessage}
                     sendMessage={() => sendMessage(telegramChatId)}
                     sendImage={sendImage}
-                    sendAudioMessage={(mediaUrl: string) => {
-                        console.log('audio message URL:', mediaUrl);
+                    sendAudioMessage={(file: Blob, duration: number) => {
+                        console.log('Sending audio message:', { file, duration });
+                        sendAudioMessage(file, duration); // Properly pass both arguments
                     }}
                     isLoading={isLoading}
                     telegramChatId={telegramChatId}

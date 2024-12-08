@@ -26,7 +26,7 @@ const CreatePatient = () => {
         {
           title: "Send Us a Message on Telegram",
           description:
-              "Once you click the button below, you'll be redirected to our Telegram chat. Simply send us a message to start, and you will receive a link to our patient registration form.",
+              "Once you click the button below, you'll be redirected to our Telegram chat. Simply send-text us a message to start, and you will receive a link to our patient registration form.",
         },
         {
           title: "Complete Your Registration",
@@ -38,7 +38,7 @@ const CreatePatient = () => {
       buttonText: "Chat with Our Team on Telegram",
       helpText: "Need Help?",
       contactInfo:
-          "If you have any issues or need further assistance, feel free to reach out by sending us an email at Contactus@menahealth.org or send us a message on Instagram @themenahealth.",
+          "If you have any issues or need further assistance, feel free to reach out by sending us an email at Contactus@menahealth.org or send-text us a message on Instagram @themenahealth.",
     },
   };
 

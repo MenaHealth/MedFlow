@@ -51,7 +51,7 @@ export async function POST(
 
             return NextResponse.json(
                 {
-                    error: "Failed to send photo to Telegram",
+                    error: "Failed to send-text photo to Telegram",
                     details: errorText,
                 },
                 { status: telegramResponse.status }

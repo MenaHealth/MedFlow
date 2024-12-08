@@ -10,7 +10,7 @@ export default function SignupSuccessPage() {
     const [showCard, setShowCard] = useState(false)
 
     useEffect(() => {
-        // Start the send icon animation immediately
+        // Start the send-text icon animation immediately
         setAnimateFlyOff(true)
 
         // Set a delay to show the card after SendHorizonal animation (2s) ends
@@ -37,7 +37,7 @@ export default function SignupSuccessPage() {
                 <SendHorizonal className="h-10 w-10 text-orange-500" />
             </div>
 
-            {/* Card (Initially hidden and slides up after send animation) */}
+            {/* Card (Initially hidden and slides up after send-text animation) */}
             <div
                 className={`max-w-md w-full space-y-8 p-10 bg-white rounded-xl shadow-lg transition-transform duration-700 ${
                     showCard ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'

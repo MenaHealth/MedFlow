@@ -13,27 +13,19 @@ export async function POST(
     await dbConnect();
 
     try {
-        console.log("[DEBUG] Starting send-audio process");
         const { telegramChatId } = params;
-        const body = await request.json();
-        console.log("[DEBUG] Received body at /send-audio:", body);
+        const { mediaUrl, caption } = await request.json();
 
-        // Decode the signed URL
-        const { signedAudioUrl, caption } = body;
-        const decodedUrl = decodeURIComponent(signedAudioUrl);
-        console.log("Decoded signedAudioUrl:", decodedUrl);
-
-        if (!telegramChatId || !decodedUrl) {
-            console.error("[ERROR] Missing required fields:", { telegramChatId, signedAudioUrl: decodedUrl });
+        if (!telegramChatId || !mediaUrl) {
             return NextResponse.json(
-                { error: "Missing required fields (telegramChatId or signedAudioUrl)" },
+                { error: "Missing required fields (telegramChatId or mediaUrl)" },
                 { status: 400 }
             );
         }
 
         console.log("[DEBUG] Sending signed URL to Telegram for audio:", {
             chatId: telegramChatId,
-            signedAudioUrl: decodedUrl,
+            mediaUrl,
             caption,
             fullUrl: `${TELEGRAM_BOT_API_URL}/bot${TELEGRAM_BOT_TOKEN}/sendAudio`,
         });
@@ -45,12 +37,10 @@ export async function POST(
             },
             body: JSON.stringify({
                 chat_id: telegramChatId,
-                audio: decodedUrl,
+                audio: mediaUrl,
                 caption,
             }),
         });
-
-        console.log("[DEBUG] Telegram API response status:", telegramResponse.status, telegramResponse.statusText);
 
         if (!telegramResponse.ok) {
             const errorText = await telegramResponse.text();
@@ -69,11 +59,13 @@ export async function POST(
             );
         }
 
+        // Telegram API was successful
         const telegramData = await telegramResponse.json();
-        console.log("[INFO] Audio sent to Telegram successfully:", JSON.stringify(telegramData, null, 2));
+        const publicAudioUrl = mediaUrl.split("?")[0]; // Extract the base URL from the signed URL
 
-        const publicAudioUrl = decodedUrl.split("?")[0];
+        console.log("[INFO] Audio sent to Telegram successfully:", telegramData);
 
+        // Save the message in the database
         let thread = await TelegramThread.findOne({ chatId: telegramChatId });
         if (!thread) {
             thread = new TelegramThread({ chatId: telegramChatId, messages: [] });
@@ -92,12 +84,9 @@ export async function POST(
 
         console.log("[INFO] Audio message saved in database successfully.");
 
-        return NextResponse.json({ message: "Audio sent and saved successfully", savedMessage: newMessage }, { status: 200 });
+        return NextResponse.json({ message: "Audio sent and saved successfully" }, { status: 200 });
     } catch (error: any) {
         console.error("Error handling send-audio request:", error);
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 }
-
-
-

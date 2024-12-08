@@ -48,13 +48,15 @@ export const TelegramMessagesView: React.FC<TelegramMessagesViewProps> = ({
 
     useEffect(() => {
         messages.forEach(async (message) => {
-            if (message.type === "image" || message.type === "audio") {
-                if (message.mediaUrl) {
-                    try {
+            try {
+                // Process messages with "image" or "audio" types
+                if (message.type === "image" || message.type === "audio") {
+                    if (message.mediaUrl) {
                         const response = await fetch(`/api/telegram-bot/get-media?filePath=${encodeURIComponent(message.mediaUrl)}`);
                         if (response.ok) {
                             const data = await response.json();
                             if (data.signedUrl) {
+                                // Save signed URLs for images and audio
                                 setSignedUrls(prev => ({ ...prev, [message._id]: data.signedUrl }));
                             } else {
                                 console.error("No signed URL returned:", data);
@@ -62,18 +64,17 @@ export const TelegramMessagesView: React.FC<TelegramMessagesViewProps> = ({
                         } else {
                             console.error("Error fetching signed URL:", await response.text());
                         }
-                    } catch (error) {
-                        console.error("Error fetching signed URL:", error);
                     }
                 }
-            } else if (message.type === "image" && message.encryptedMedia && message.encryptionKey) {
-                try {
+
+                // Handle encrypted images
+                if (message.type === "image" && message.encryptedMedia && message.encryptionKey) {
                     const decryptedBlob = await decryptPhoto(message.encryptedMedia, message.encryptionKey);
                     const imageUrl = URL.createObjectURL(decryptedBlob);
                     setDecryptedImages(prev => ({ ...prev, [message._id]: imageUrl }));
-                } catch (error) {
-                    console.error("Error decrypting image:", error);
                 }
+            } catch (error) {
+                console.error("Error processing message:", error);
             }
         });
     }, [messages]);
@@ -109,18 +110,18 @@ export const TelegramMessagesView: React.FC<TelegramMessagesViewProps> = ({
         const buffer = audioBuffers[message._id];
         const format = 'ogg';
 
-        if (!buffer) {
-            decodeAudio(message.mediaUrl || "", message._id);
+        const signedUrl = signedUrls[message._id];
+        if (!signedUrl) {
             return <p>Loading audio...</p>;
         }
 
-        // return (
-        //     <AudioNotePlayer
-        //         audioBuffer={buffer}
-        //         mediaUrl={message.mediaUrl || ""}
-        //         format={format}
-        //     />
-        // );
+        return (
+            <AudioNotePlayer
+                audioBuffer={buffer}
+                mediaUrl={signedUrl}
+                format={format}
+            />
+        );
     };
 
     const renderImage = (message: TelegramMessage) => {
@@ -187,8 +188,8 @@ export const TelegramMessagesView: React.FC<TelegramMessagesViewProps> = ({
                                         }`}
                                     >
                                         {message.type === "image" ? renderImage(message) :
-                                            // message.type === "audio" ? renderAudioPlayer(message) :
-                                            message.type === "audio" ? "audio message test" :
+                                            message.type === "audio" ? renderAudioPlayer(message) :
+                                            // message.type === "audio" ? "audio message test" :
                                                 <ReactMarkdown className="text-sm prose prose-sm max-w-none">
                                                     {message.text}
                                                 </ReactMarkdown>}

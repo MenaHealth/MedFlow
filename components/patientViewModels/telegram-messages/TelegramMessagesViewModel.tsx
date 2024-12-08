@@ -167,11 +167,6 @@
                     async (file, duration) => {
                         setIsLoading(true);
                         try {
-                            console.log("[DEBUG] Sending audio file:", {
-                                type: file.type,
-                                size: file.size,
-                            });
-
                             const formData = new FormData();
                             formData.append("file", file);
                             formData.append("duration", duration.toString());
@@ -187,7 +182,6 @@
                             }
 
                             const { signedUrl } = await uploadResponse.json();
-                            console.log("[DEBUG] Received signed URL from upload-audio:", signedUrl);
 
                             // Send the signed URL to Telegram
                             const response = await fetch(`/api/telegram-bot/${telegramChatId}/send-audio`, {
@@ -206,18 +200,23 @@
                             }
 
                             const data = await response.json();
-                            console.log("[DEBUG] Telegram response:", data);
 
+                            // Ensure `_id` is present in the savedMessage
+                            if (!data.savedMessage || !data.savedMessage._id) {
+                                throw new Error("Backend did not return a valid _id for the saved message");
+                            }
+
+                            // Update the state with the new message
                             setMessages((prevMessages) => [
                                 ...prevMessages,
                                 {
                                     _id: data.savedMessage._id,
-                                    text: "Audio message sent",
-                                    sender: "You",
+                                    text: data.savedMessage.text,
+                                    sender: data.savedMessage.sender,
                                     timestamp: new Date(data.savedMessage.timestamp),
                                     isSelf: true,
-                                    type: "audio",
-                                    mediaUrl: signedUrl,
+                                    type: data.savedMessage.type,
+                                    mediaUrl: data.savedMessage.mediaUrl,
                                 },
                             ]);
                         } catch (error) {

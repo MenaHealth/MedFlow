@@ -82,12 +82,21 @@ export async function POST(
             mediaUrl: publicMediaUrl,
         };
 
+// Add message to thread
         thread.messages.push(newMessage);
+
+// Save the thread
         await thread.save();
 
-        console.log("[INFO] Audio message saved in database successfully.");
+// Retrieve the saved message with the generated `_id`
+        const savedMessage = thread.messages[thread.messages.length - 1];
 
-        return NextResponse.json({ message: "Audio sent and saved successfully" }, { status: 200 });
+        console.log("[INFO] Audio message saved in database successfully:", savedMessage);
+
+        return NextResponse.json(
+            { message: "Audio sent and saved successfully", savedMessage },
+            { status: 200 }
+        );
     } catch (error: any) {
         console.error("Error handling send-audio request:", error);
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });

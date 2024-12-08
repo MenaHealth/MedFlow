@@ -11,3 +11,17 @@ declare module 'opus-stream-decoder' {
         }>;
     }>;
 }
+
+declare module 'ogg-parser' {
+    import { Readable } from 'stream';
+
+    // OggParser extends Readable to process streams of Ogg data
+    export default class OggParser extends Readable {
+        constructor();
+        write(chunk: Buffer): void; // Writes data to the parser
+        end(): void; // Signals the end of the stream
+        on(event: 'data', listener: (page: { segment: Uint8Array }) => void): this;
+        on(event: 'end', listener: () => void): this;
+        on(event: 'error', listener: (error: Error) => void): this;
+    }
+}

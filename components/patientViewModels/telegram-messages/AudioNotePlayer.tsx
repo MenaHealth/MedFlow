@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Play, Pause } from 'lucide-react';
+import { createWebAssemblyDecoder } from 'opus-stream-decoder';
 
 interface AudioNotePlayerProps {
     mediaUrl: string;
@@ -19,10 +20,9 @@ export function AudioNotePlayer({ mediaUrl }: AudioNotePlayerProps) {
 
     const audioContext = useRef<AudioContext | null>(null);
     const sourceNode = useRef<AudioBufferSourceNode | null>(null);
-    const audioBuffer = useRef<AudioBuffer | null>(null);
+    const decodedBuffer = useRef<AudioBuffer | null>(null); // Renamed to avoid confusion
     const animationFrameId = useRef<number | null>(null);
 
-    // Track current playback state
     const playbackState = useRef({
         startTime: 0,
         pausedAt: 0,
@@ -34,7 +34,6 @@ export function AudioNotePlayer({ mediaUrl }: AudioNotePlayerProps) {
         fetchAndLoadAudio();
 
         return () => {
-            // Cancel any ongoing animation frame
             if (animationFrameId.current) {
                 cancelAnimationFrame(animationFrameId.current);
             }
@@ -53,19 +52,68 @@ export function AudioNotePlayer({ mediaUrl }: AudioNotePlayerProps) {
             }
 
             const arrayBuffer = await response.arrayBuffer();
-            const decodedAudio = await audioContext.current!.decodeAudioData(arrayBuffer);
-            audioBuffer.current = decodedAudio;
 
-            if (decodedAudio.duration > 0) {
-                setAudioDuration(decodedAudio.duration);
+            // Check format or try decoding with opus-stream-decoder if ogg
+            // You could also do something like:
+            // const canPlayOgg = (new Audio()).canPlayType('audio/ogg; codecs="opus"');
+            // if (!canPlayOgg) { ... use opus-stream-decoder } else { ... decodeAudioData }
+
+            // For now, let's attempt to decode with opus-stream-decoder if it's likely .ogg
+            if (mediaUrl.endsWith('.ogg') || mediaUrl.includes('.ogg')) {
+                // Decode using opus-stream-decoder
+                await decodeWithOpusStreamDecoder(arrayBuffer);
             } else {
-                throw new Error("Audio duration is zero or invalid.");
+                // Fallback to native decodeAudioData for formats that are commonly supported (like mp3, wav)
+                await decodeNative(arrayBuffer);
             }
-        } catch (error) {
-            console.error('Error loading audio:', error);
-            setError('Error loading audio file.');
+
+            if (!decodedBuffer.current || decodedBuffer.current.duration <= 0) {
+                throw new Error("Decoded audio duration is zero or invalid.");
+            }
+
+            setAudioDuration(decodedBuffer.current.duration);
+        } catch (err: any) {
+            console.error('Error loading audio:', err);
+            setError(getFriendlyErrorMessage(err));
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const decodeNative = async (arrayBuffer: ArrayBuffer) => {
+        // Try using the native WebAudio decoding
+        try {
+            const audioBuf = await audioContext.current!.decodeAudioData(arrayBuffer);
+            decodedBuffer.current = audioBuf;
+        } catch (e) {
+            console.error("Native decoding failed:", e);
+            throw new Error("Native decoding failed. Possibly unsupported format on this device/browser.");
+        }
+    };
+
+    const decodeWithOpusStreamDecoder = async (arrayBuffer: ArrayBuffer) => {
+        try {
+            const wasmModule = await fetch('/public/opus-stream-decoder.wasm').then(res => res.arrayBuffer());
+            const { decode } = await createWebAssemblyDecoder({ wasmBinary: wasmModule });
+
+            const result = await decode(arrayBuffer);
+
+            // Result typically has { channelData, samples, sampleRate, channelCount }
+            const { channelData, sampleRate, channelCount } = result;
+
+            // channelData is usually an array of Float32Array per channel
+            // Create an AudioBuffer from the channel data
+            const length = channelData[0].length;
+            const audioBuf = audioContext.current!.createBuffer(channelCount, length, sampleRate);
+
+            for (let i = 0; i < channelCount; i++) {
+                audioBuf.getChannelData(i).set(channelData[i]);
+            }
+
+            decodedBuffer.current = audioBuf;
+        } catch (e) {
+            console.error("Opus decoding failed:", e);
+            throw new Error("Opus decoding failed. Possibly unsupported .ogg format or decoding error.");
         }
     };
 
@@ -78,33 +126,27 @@ export function AudioNotePlayer({ mediaUrl }: AudioNotePlayerProps) {
     };
 
     const playAudio = () => {
-        if (audioBuffer.current && audioContext.current) {
-            // Stop any existing source node
+        if (decodedBuffer.current && audioContext.current) {
             if (sourceNode.current) {
                 sourceNode.current.stop();
             }
 
-            // Cancel any existing animation frame
             if (animationFrameId.current) {
                 cancelAnimationFrame(animationFrameId.current);
             }
 
             sourceNode.current = audioContext.current.createBufferSource();
-            sourceNode.current.buffer = audioBuffer.current;
+            sourceNode.current.buffer = decodedBuffer.current;
             sourceNode.current.connect(audioContext.current.destination);
 
-            // Calculate the playback offset
             const currentTime = audioContext.current.currentTime;
             const offset = playbackState.current.pausedAt;
 
-            // Start the audio
             sourceNode.current.start(0, offset);
 
-            // Update playback state
             playbackState.current.startTime = currentTime;
             setIsPlaying(true);
 
-            // Reset state when audio ends
             sourceNode.current.onended = () => {
                 setIsPlaying(false);
                 setProgress(0);
@@ -115,84 +157,81 @@ export function AudioNotePlayer({ mediaUrl }: AudioNotePlayerProps) {
                 };
             };
 
-            // Progress tracking function
             const updateProgress = () => {
-                if (!audioContext.current || !audioBuffer.current) return;
-
+                if (!audioContext.current || !decodedBuffer.current) return;
                 const currentTime = audioContext.current.currentTime;
-                const totalDuration = audioBuffer.current.duration;
+                const totalDuration = decodedBuffer.current.duration;
 
-                // Calculate actual played time
                 const elapsedTime = currentTime - playbackState.current.startTime;
                 const playedTime = playbackState.current.pausedAt + elapsedTime;
 
-                // Calculate progress percentage
                 const progressValue = Math.min(
                     (playedTime / totalDuration) * 100,
                     100
                 );
 
-                // Update progress
                 setProgress((prevProgress) => {
                     return Math.abs(prevProgress - progressValue) > 0.1
                         ? progressValue
                         : prevProgress;
                 });
 
-                // Continue updating until playback ends
                 if (progressValue < 100) {
                     animationFrameId.current = requestAnimationFrame(updateProgress);
                 }
             };
 
-            // Start progress tracking
             updateProgress();
+        } else {
+            console.error("No decoded audio buffer available.");
+            setError("No decoded audio buffer available. Cannot play.");
         }
     };
 
     const pauseAudio = () => {
-        if (sourceNode.current && audioContext.current && audioBuffer.current) {
-            // Stop the source node
+        if (sourceNode.current && audioContext.current && decodedBuffer.current) {
             sourceNode.current.stop();
-
-            // Cancel animation frame
             if (animationFrameId.current) {
                 cancelAnimationFrame(animationFrameId.current);
             }
 
-            // Calculate paused time
             const currentTime = audioContext.current.currentTime;
             const elapsedTime = currentTime - playbackState.current.startTime;
             playbackState.current.pausedAt += elapsedTime;
 
-            // Update progress
             const progressValue = Math.min(
-                (playbackState.current.pausedAt / audioBuffer.current.duration) * 100,
+                (playbackState.current.pausedAt / decodedBuffer.current.duration) * 100,
                 100
             );
             setProgress(progressValue);
-
-            // Update playing state
             setIsPlaying(false);
         }
     };
 
     const handleSliderChange = (value: number[]) => {
-        if (!audioBuffer.current || !audioContext.current) return;
-
+        if (!decodedBuffer.current || !audioContext.current) return;
         const newTime = (value[0] / 100) * audioDuration;
 
-        // Update the paused time
         playbackState.current.pausedAt = newTime;
-
-        // Update progress
         setProgress(value[0]);
 
-        // If currently playing, restart playback from new position
         if (isPlaying) {
             pauseAudio();
             playAudio();
         }
+    };
+
+    const getFriendlyErrorMessage = (error: any) => {
+        if (error.message?.includes('Failed to fetch')) {
+            return 'Audio not retrieved. Check the network or file URL.';
+        }
+        if (error.message?.includes('Native decoding failed')) {
+            return 'Cannot parse audio on this device due to unsupported .ogg format.';
+        }
+        if (error.message?.includes('Opus decoding failed')) {
+            return 'Error decoding .ogg opus file. Browser may not support format.';
+        }
+        return 'An unknown error occurred while loading audio.';
     };
 
     if (isLoading) {
@@ -209,7 +248,7 @@ export function AudioNotePlayer({ mediaUrl }: AudioNotePlayerProps) {
                 variant="ghost"
                 size="icon"
                 onClick={togglePlayPause}
-                disabled={isLoading || !audioBuffer.current}
+                disabled={isLoading || !decodedBuffer.current}
                 aria-label={isPlaying ? 'Pause' : 'Play'}
             >
                 {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}

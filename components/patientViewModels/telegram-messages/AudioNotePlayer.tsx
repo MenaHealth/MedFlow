@@ -7,6 +7,8 @@ import { Play, Pause } from "lucide-react";
 
 interface AudioNotePlayerProps {
     mediaUrl: string;
+    audioBuffer?: AudioBuffer | null; // Make this optional if it's not always passed
+    format?: string; // Make this optional if it's not always passed
 }
 
 export function AudioNotePlayer({ mediaUrl }: AudioNotePlayerProps) {

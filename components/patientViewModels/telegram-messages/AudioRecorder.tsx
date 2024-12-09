@@ -20,20 +20,25 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
     const [timeLeft, setTimeLeft] = useState(60);
     const [stream, setStream] = useState<MediaStream | null>(null);
     const mediaRecorder = useRef<MediaRecorder | null>(null);
-
     const audioChunks = useRef<Blob[]>([]);
     const startTimeRef = useRef<number | null>(null);
-
     const timerRef = useRef<NodeJS.Timeout | null>(null);
 
     const startRecording = useCallback(async () => {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            setStream(stream);
+            const userMediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            setStream(userMediaStream);
 
-            const mimeType = "audio/webm; codecs=opus";
-            mediaRecorder.current = new MediaRecorder(stream, { mimeType });
+            // Safari on iOS typically supports audio/mp4 with AAC for audio recording.
+            const mimeType = 'audio/mp4';
 
+            if (!MediaRecorder.isTypeSupported(mimeType)) {
+                console.warn(`MIME type ${mimeType} not supported. Attempting fallback...`);
+                // If this somehow fails on older versions, you could fallback to a supported MIME type.
+                // But ideally on Safari iOS, audio/mp4 should be available.
+            }
+
+            mediaRecorder.current = new MediaRecorder(userMediaStream, { mimeType });
             startTimeRef.current = Date.now();
 
             mediaRecorder.current.ondataavailable = (event) => {
@@ -58,7 +63,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
                         size: rawAudioBlob.size,
                     });
 
-                    // Convert the raw audio to Opus format
+                    // Convert the MP4 blob from Safari to OGG/Opus
                     const convertedAudioBlob = await convertToOpus(rawAudioBlob);
 
                     console.log("[DEBUG] Converted audio Blob:", {
@@ -66,7 +71,6 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
                         size: convertedAudioBlob.size,
                     });
 
-                    // Pass the converted audio to the parent component
                     onRecordingComplete(convertedAudioBlob, duration);
                 } catch (error) {
                     console.error("Error processing audio:", error);

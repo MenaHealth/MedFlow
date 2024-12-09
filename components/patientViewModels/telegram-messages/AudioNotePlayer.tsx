@@ -335,7 +335,7 @@ export function AudioNotePlayer({ mediaUrl }: AudioNotePlayerProps) {
                     {error}
                 </motion.p>
             )}
-            <motion.div className="z-50 absolute bottom-1 text-center text-sm text-orange-400">
+            <motion.div className="z-50 absolute bottom-0.5 text-center text-sm text-orange-400">
                 {duration !== null && formatTime(duration)}
             </motion.div>
         </div>

@@ -2,6 +2,8 @@
 import TelegramThread from "@/models/telegramThread";
 import dbConnect from "@/utils/database";
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next"; // Import getServerSession
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"; // Ensure the path to authOptions is correct
 
 const TELEGRAM_BOT_API_URL = process.env.TELEGRAM_BOT_API_URL || 'https://api.telegram.org';
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
@@ -24,10 +26,27 @@ export async function POST(
             );
         }
 
+        // Get the user session
+        const session = await getServerSession(authOptions);
+        if (!session || !session.user) {
+            return NextResponse.json(
+                { error: "Unauthorized access. Please log in." },
+                { status: 401 }
+            );
+        }
+
+        const { firstName, lastName } = session.user;
+
+        // Update caption and sender with user information
+        const senderName = `${firstName} ${lastName}`.trim() || "Unknown Sender";
+        const updatedCaption = caption
+            ? `${caption} - Sent by ${senderName}`
+            : `Audio message - Sent by ${senderName}`;
+
         console.log("[DEBUG] Sending signed URL to Telegram for audio:", {
             chatId: telegramChatId,
             mediaUrl,
-            caption,
+            caption: updatedCaption,
             fullUrl: `${TELEGRAM_BOT_API_URL}/bot${TELEGRAM_BOT_TOKEN}/sendAudio`,
         });
 
@@ -39,7 +58,7 @@ export async function POST(
             body: JSON.stringify({
                 chat_id: telegramChatId,
                 audio: mediaUrl,
-                caption,
+                caption: updatedCaption,
             }),
         });
 
@@ -75,20 +94,20 @@ export async function POST(
         }
 
         const newMessage = {
-            text: caption || "Audio message",
-            sender: "You",
+            text: updatedCaption || "Audio message",
+            sender: senderName,
             timestamp: new Date(),
             type: "audio",
             mediaUrl: publicMediaUrl,
         };
 
-// Add message to thread
+        // Add message to thread
         thread.messages.push(newMessage);
 
-// Save the thread
+        // Save the thread
         await thread.save();
 
-// Retrieve the saved message with the generated `_id`
+        // Retrieve the saved message with the generated `_id`
         const savedMessage = thread.messages[thread.messages.length - 1];
 
         console.log("[INFO] Audio message saved in database successfully:", savedMessage);

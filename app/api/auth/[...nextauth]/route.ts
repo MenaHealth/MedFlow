@@ -59,7 +59,7 @@ function createSessionUser(user: any, isAdmin: boolean, accountType: AccountType
     };
 }
 
-const handler = NextAuth({
+export const authOptions: NextAuthOptions = {
     session: {
         strategy: 'jwt',
     },
@@ -169,6 +169,9 @@ const handler = NextAuth({
     pages: {
         signIn: '/auth',
     },
-} as NextAuthOptions);
+};
+
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
+

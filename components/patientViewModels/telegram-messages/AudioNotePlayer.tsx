@@ -235,7 +235,7 @@ export function AudioNotePlayer({ mediaUrl }: AudioNotePlayerProps) {
                         key={index}
                         className={`w-1 rounded-full z-10 ${
                             (index / bars.length) * 100 <= progress
-                                ? 'bg-darkBlue'
+                                ? 'bg-grey-500'
                                 : 'bg-orange-500'
                         }`}
                         style={{
@@ -249,7 +249,7 @@ export function AudioNotePlayer({ mediaUrl }: AudioNotePlayerProps) {
     }
 
     return (
-        <div className="relative flex flex-col items-center space-y-4 w-full max-w-[300px] overflow-hidden">
+        <div className="relative flex flex-col items-center space-y-4 w-full max-w-[200px] overflow-hidden">
             <LoadingModal isVisible={isConverting}/>
 
             <motion.div
@@ -258,15 +258,9 @@ export function AudioNotePlayer({ mediaUrl }: AudioNotePlayerProps) {
                     background: isPlaying ? "" : "transparent",
                 }}
                 transition={{duration: 0.5}}
-                className="w-full p-4 rounded-lg shadow-md relative overflow-hidden bg-white max-h-[200px] md:max-h-[150px]"
+                className="w-[300px] h-[150px] p-4 rounded-lg shadow-md relative overflow-hidden" // Fixed dimensions
                 style={{clipPath: 'inset(0 0 0 0)'}}
             >
-                <motion.div
-                    className="absolute top-0 left-0 h-full bg-grey-100"
-                    initial={{width: '0%'}}
-                    animate={{width: `${progress}%`}}
-                    transition={{duration: 0.1, ease: "linear"}}
-                />
                 <motion.div
                     whileHover={{scale: 1.05}}
                     whileTap={{scale: 0.95}}

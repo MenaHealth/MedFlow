@@ -10,6 +10,7 @@ import { decryptPhoto } from "@/utils/encryptPhoto";
 import ReactMarkdown from 'react-markdown';
 import { MessageInput } from "@/components/patientViewModels/telegram-messages/MessageInput";
 import { TelegramMessage } from "@/components/patientViewModels/telegram-messages/TelegramMessagesViewModel";
+import {Loader2} from "lucide-react";
 
 interface TelegramMessagesViewProps {
     messages: TelegramMessage[];
@@ -107,20 +108,13 @@ export const TelegramMessagesView: React.FC<TelegramMessagesViewProps> = ({
     };
 
     const renderAudioPlayer = (message: TelegramMessage) => {
-        const buffer = audioBuffers[message._id];
-        const format = 'ogg';
-
         const signedUrl = signedUrls[message._id];
         if (!signedUrl) {
-            return <p>Loading audio...</p>;
+            return <p>Loading audio... <Loader2 className="h-4 w-4 animate-spin"/></p>;
         }
 
         return (
-            <AudioNotePlayer
-                audioBuffer={buffer}
-                mediaUrl={signedUrl}
-                format={format}
-            />
+            <AudioNotePlayer mediaUrl={signedUrl} />
         );
     };
 
@@ -128,7 +122,7 @@ export const TelegramMessagesView: React.FC<TelegramMessagesViewProps> = ({
         if (message.encryptedMedia && message.encryptionKey) {
             const decryptedImageUrl = decryptedImages[message._id];
             if (!decryptedImageUrl) {
-                return <p>Decrypting image...</p>;
+                return <p>Decrypting image... <Loader2 className="h-4 w-4 animate-spin"/></p>;
             }
             return (
                 <Image
@@ -142,7 +136,7 @@ export const TelegramMessagesView: React.FC<TelegramMessagesViewProps> = ({
         } else if (message.mediaUrl) {
             const signedUrl = signedUrls[message._id];
             if (!signedUrl) {
-                return <p>Loading image...</p>;
+                return <p>Loading image... <Loader2 className="h-4 w-4 animate-spin"/></p>;
             }
             return (
                 <Image
@@ -183,8 +177,8 @@ export const TelegramMessagesView: React.FC<TelegramMessagesViewProps> = ({
                                     <div
                                         className={`rounded-2xl px-4 py-2 max-w-[80%] ${
                                             message.isSelf
-                                                ? "bg-primary text-primary-foreground"
-                                                : "bg-muted"
+                                                ? "border-2 border-gray-100"
+                                                : "border-2 border-green-900"
                                         }`}
                                     >
                                         {message.type === "image" ? renderImage(message) :

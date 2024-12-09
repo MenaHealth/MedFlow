@@ -1,158 +1,167 @@
 // components/patientViewModels/telegram-messages/AudioNotePlayer.tsx
 import React, { useState, useRef, useEffect } from "react";
-import { OggOpusDecoder } from "ogg-opus-decoder";
+import { FFmpeg } from "@ffmpeg/ffmpeg";
+import { fetchFile } from "@ffmpeg/util";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Play, Pause } from "lucide-react";
+import { Play, Pause, Loader } from "lucide-react";
 
 interface AudioNotePlayerProps {
     mediaUrl: string;
-    audioBuffer?: AudioBuffer | null; // Make this optional if it's not always passed
-    format?: string; // Make this optional if it's not always passed
 }
+
+export const LoadingModal = ({ isVisible }: { isVisible: boolean }) => {
+    if (!isVisible) return null;
+
+    return (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white p-4 rounded shadow-md">
+                <p className="text-sm text-gray-700">Converting audio, please wait...</p>
+                <Loader className="h-6 w-6 animate-spin text-primary mt-2" />
+            </div>
+        </div>
+    );
+};
 
 export function AudioNotePlayer({ mediaUrl }: AudioNotePlayerProps) {
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isConverting, setIsConverting] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [audioDuration, setAudioDuration] = useState<number>(0);
-
-    const audioContext = useRef<AudioContext | null>(null);
-    const sourceNode = useRef<AudioBufferSourceNode | null>(null);
-    const decodedBuffer = useRef<AudioBuffer | null>(null);
-    const progressInterval = useRef<NodeJS.Timeout | null>(null);
+    const [convertedUrl, setConvertedUrl] = useState<string | null>(null);
+    const audioRef = useRef<HTMLAudioElement | null>(null);
+    const ffmpeg = useRef(new FFmpeg());
 
     useEffect(() => {
-        audioContext.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-        fetchAndDecodeAudio();
-
         return () => {
-            if (sourceNode.current) {
-                sourceNode.current.stop();
-            }
-            audioContext.current?.close();
-            if (progressInterval.current) {
-                clearInterval(progressInterval.current);
+            if (audioRef.current) {
+                audioRef.current.pause();
             }
         };
-    }, [mediaUrl]);
+    }, []);
 
-    const fetchAndDecodeAudio = async () => {
-        setIsLoading(true);
-        setError(null);
-
+    const convertToMp4 = async () => {
+        setIsConverting(true);
         try {
-            const response = await fetch(mediaUrl, { mode: "cors" });
-            if (!response.ok) {
-                throw new Error(`Failed to fetch audio file: ${response.statusText}`);
+            const response = await fetch(mediaUrl);
+            const oggFile = await response.blob();
+
+            // Load FFmpeg if not already loaded
+            if (!ffmpeg.current.loaded) {
+                await ffmpeg.current.load();
             }
 
-            const arrayBuffer = await response.arrayBuffer();
-            if (arrayBuffer.byteLength === 0) {
-                throw new Error("Empty audio file.");
-            }
+            const inputFileName = "input.ogg";
+            const outputFileName = "output.mp4";
 
-            const buffer = new Uint8Array(arrayBuffer);
+            await ffmpeg.current.writeFile(inputFileName, await fetchFile(oggFile));
+            await ffmpeg.current.exec([
+                "-i",
+                inputFileName,
+                "-c:a",
+                "aac",
+                "-b:a",
+                "192k",
+                outputFileName,
+            ]);
 
-            // Debugging logs
-            console.log("Fetched buffer:", buffer);
+            const data = await ffmpeg.current.readFile(outputFileName);
+            const mp4Blob = new Blob([data], { type: "video/mp4" });
+            const mp4Url = URL.createObjectURL(mp4Blob);
 
-            const oggDecoder = new OggOpusDecoder();
-            await oggDecoder.ready;
+            setConvertedUrl(mp4Url);
+            setIsConverting(false);
 
-            const decodedOgg = await oggDecoder.decode(buffer);
-
-            if (!decodedOgg || !decodedOgg.channelData) {
-                throw new Error("No valid channel data found.");
-            }
-
-            console.log("Decoded Ogg:", decodedOgg);
-
-            if (!audioContext.current) {
-                throw new Error("Audio context not initialized.");
-            }
-
-            const audioBuffer = audioContext.current.createBuffer(
-                decodedOgg.channelData.length,
-                decodedOgg.channelData[0].length,
-                decodedOgg.sampleRate
-            );
-
-            for (let i = 0; i < decodedOgg.channelData.length; i++) {
-                audioBuffer.getChannelData(i).set(decodedOgg.channelData[i]);
-            }
-
-            decodedBuffer.current = audioBuffer;
-            setAudioDuration(audioBuffer.duration);
-            setIsLoading(false);
+            // Automatically play the converted audio
+            playConvertedAudio(mp4Url);
         } catch (err) {
-            console.error("Error decoding audio:", err);
-            setError(err instanceof Error ? err.message : "Failed to decode the audio file");
-            setIsLoading(false);
+            console.error("Error during conversion:", err);
+            setError("Failed to convert audio.");
+            setIsConverting(false);
         }
     };
 
-    const togglePlayPause = () => {
+    const togglePlayPause = async () => {
+        if (isConverting) return;
+
+        if (!convertedUrl) {
+            await convertToMp4();
+            return;
+        }
+
         if (isPlaying) {
             pauseAudio();
         } else {
-            playAudio();
+            playConvertedAudio(convertedUrl);
         }
     };
 
-    const playAudio = async () => {
-        if (!decodedBuffer.current && !isLoading) {
-            setIsLoading(true);
-            await fetchAndDecodeAudio();
-        }
-
-        if (decodedBuffer.current && audioContext.current) {
-            if (sourceNode.current) {
-                sourceNode.current.stop();
-            }
-
-            sourceNode.current = audioContext.current.createBufferSource();
-            sourceNode.current.buffer = decodedBuffer.current;
-            sourceNode.current.connect(audioContext.current.destination);
-            sourceNode.current.start(0);
-            setIsPlaying(true);
-
-            sourceNode.current.onended = () => {
-                setIsPlaying(false);
-                setProgress(0);
+    const playConvertedAudio = (url: string) => {
+        if (!audioRef.current) {
+            audioRef.current = new Audio(url);
+            audioRef.current.onended = handleAudioEnd;
+            audioRef.current.ontimeupdate = () => {
+                if (audioRef.current) {
+                    setProgress((audioRef.current.currentTime / audioRef.current.duration) * 100);
+                }
             };
         }
+
+        // Set audio device routing to headphones if available
+        audioRef.current.play().then(() => {
+            navigator.mediaDevices.enumerateDevices().then((devices) => {
+                const headphones = devices.find((device) =>
+                    device.label.toLowerCase().includes("headphone")
+                );
+                if (headphones) {
+                    console.log("Routing audio to headphones:", headphones.label);
+                    // Browser handles this automatically, but manual routing APIs are limited.
+                }
+            });
+        });
+
+        setIsPlaying(true);
     };
 
     const pauseAudio = () => {
-        if (sourceNode.current) {
-            sourceNode.current.stop();
+        if (audioRef.current) {
+            audioRef.current.pause();
             setIsPlaying(false);
-            if (progressInterval.current) {
-                clearInterval(progressInterval.current);
-            }
         }
     };
 
-    if (isLoading) {
-        return <div>Loading audio...</div>;
-    }
+    const handleAudioEnd = () => {
+        setIsPlaying(false);
+        setProgress(0);
+        if (audioRef.current) {
+            audioRef.current.currentTime = 0;
 
-    if (error) {
-        return <div className="text-red-500">{error}</div>;
-    }
+            // Reset audio to system default (e.g., background music)
+            navigator.mediaDevices.enumerateDevices().then((devices) => {
+                console.log("Returning control to default audio route.");
+                // Browser handles this automatically
+            });
+        }
+    };
 
     return (
-        <div className="flex items-center space-x-2 w-full max-w-[300px]">
+        <div className="flex flex-col items-center space-y-2 w-full max-w-[300px]">
+            {isConverting && <LoadingModal isVisible />}
             <Button
                 variant="ghost"
                 size="icon"
                 onClick={togglePlayPause}
-                disabled={isLoading || !decodedBuffer.current}
+                disabled={isConverting}
                 aria-label={isPlaying ? "Pause" : "Play"}
             >
-                {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                {isConverting ? (
+                    <Loader className="h-4 w-4 animate-spin" />
+                ) : isPlaying ? (
+                    <Pause className="h-4 w-4" />
+                ) : (
+                    <Play className="h-4 w-4" />
+                )}
             </Button>
             <Slider
                 value={[progress]}

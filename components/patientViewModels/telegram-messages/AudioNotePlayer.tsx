@@ -111,7 +111,7 @@ export function AudioNotePlayer({ mediaUrl }: AudioNotePlayerProps) {
         } else {
             if (audioRef.current) {
                 audioRef.current.play();
-                setIsPlaying(true);
+                setIsPlaying(true);ƒ
             } else {
                 playConvertedAudio(convertedUrl);
             }

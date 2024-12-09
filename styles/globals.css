@@ -556,3 +556,25 @@ button:disabled {
 .bg-gradient-animation:hover::before {
   opacity: 1;
 }
+
+
+/* Audio Note Styling */
+.audio-note {
+  max-width: 300px;
+  max-height: 150px;
+  overflow: hidden;
+}
+
+/* Sent Message Container */
+.sent-message {
+  max-width: 250px;
+  padding: 10px;
+  border-radius: 15px;
+  word-wrap: break-word;
+}
+
+@media (min-width: 768px) {
+  .sent-message {
+    max-width: 300px;
+  }
+}

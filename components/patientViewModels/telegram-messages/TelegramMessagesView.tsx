@@ -110,11 +110,13 @@ export const TelegramMessagesView: React.FC<TelegramMessagesViewProps> = ({
     const renderAudioPlayer = (message: TelegramMessage) => {
         const signedUrl = signedUrls[message._id];
         if (!signedUrl) {
-            return <p>Loading audio... <Loader2 className="h-4 w-4 animate-spin"/></p>;
+            return <p>Loading audio... <Loader2 className="h-4 w-4 animate-spin" /></p>;
         }
 
         return (
-            <AudioNotePlayer mediaUrl={signedUrl} />
+            <div className="w-full p-0">
+                <AudioNotePlayer mediaUrl={signedUrl} />
+            </div>
         );
     };
 
@@ -163,7 +165,7 @@ export const TelegramMessagesView: React.FC<TelegramMessagesViewProps> = ({
                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                         </div>
                     ) : (
-                        <div className="flex flex-col gap-3 p-4">
+                        <div className="flex flex-col gap-3 p-2 md:p-4">
                             {messages.map((message) => (
                                 <div
                                     key={message._id}
@@ -175,19 +177,18 @@ export const TelegramMessagesView: React.FC<TelegramMessagesViewProps> = ({
                                         <AvatarFallback>{message.sender[0]}</AvatarFallback>
                                     </Avatar>
                                     <div
-                                        className={`rounded-2xl px-4 py-2 max-w-[80%] ${
-                                            message.isSelf
-                                                ? "border-2 border-gray-100"
-                                                : "border-2 border-green-900"
-                                        }`}
+                                        className={`rounded-2xl p-3 ${
+                                            message.isSelf ? "bg-darkBlue text-white" : "bg-orange-50 text-black"
+                                        } w-full max-w-xs md:max-w-sm`}
                                     >
-                                        {message.type === "image" ? renderImage(message) :
-                                            message.type === "audio" ? renderAudioPlayer(message) :
-                                            // message.type === "audio" ? "audio message test" :
-                                                <ReactMarkdown className="text-sm prose prose-sm max-w-none">
+                                        {message.type === "image"
+                                            ? renderImage(message)
+                                            : message.type === "audio"
+                                                ? renderAudioPlayer(message)
+                                                : <ReactMarkdown className="text-sm prose prose-sm max-w-none">
                                                     {message.text}
                                                 </ReactMarkdown>}
-                                        <p className="text-xs opacity-70 mt-1">
+                                        <p className="text-xs opacity-70 mt-1 text-center text-orange-500">
                                             {new Date(message.timestamp).toLocaleString()}
                                         </p>
                                     </div>
@@ -204,7 +205,7 @@ export const TelegramMessagesView: React.FC<TelegramMessagesViewProps> = ({
                     sendMessage={() => sendMessage(telegramChatId)}
                     sendImage={sendImage}
                     sendAudioMessage={(file: Blob, duration: number) => {
-                        console.log('Sending audio message:', { file, duration });
+                        console.log('Sending audio message:', {file, duration});
                         sendAudioMessage(file, duration); // Properly pass both arguments
                     }}
                     isLoading={isLoading}

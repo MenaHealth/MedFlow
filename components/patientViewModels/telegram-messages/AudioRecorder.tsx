@@ -4,13 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Mic, Square, Loader } from 'lucide-react';
 import { convertToOpus } from './audio-conversion';
 
-interface VoiceRecorderProps {
+interface AudioRecorderProps {
     onRecordingComplete: (file: Blob, duration: number) => void;
     isUploading: boolean;
     chatId: string;
 }
 
-const AudioRecorder: React.FC<VoiceRecorderProps> = ({
+const AudioRecorder: React.FC<AudioRecorderProps> = ({
                                                          onRecordingComplete,
                                                          isUploading,
                                                          chatId,
@@ -25,13 +25,13 @@ const AudioRecorder: React.FC<VoiceRecorderProps> = ({
     const startTimeRef = useRef<number | null>(null);
 
     const timerRef = useRef<NodeJS.Timeout | null>(null);
+
     const startRecording = useCallback(async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
             setStream(stream);
-            const mimeType = "audio/webm; codecs=opus";
 
+            const mimeType = "audio/webm; codecs=opus";
             mediaRecorder.current = new MediaRecorder(stream, { mimeType });
 
             startTimeRef.current = Date.now();
@@ -87,9 +87,11 @@ const AudioRecorder: React.FC<VoiceRecorderProps> = ({
         if (mediaRecorder.current && isRecording) {
             mediaRecorder.current.stop();
             setIsRecording(false);
+
             if (timerRef.current) {
                 clearInterval(timerRef.current);
             }
+
             if (stream) {
                 stream.getTracks().forEach((track) => track.stop());
                 setStream(null);

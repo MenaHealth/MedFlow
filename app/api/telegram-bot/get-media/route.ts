@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
                 Bucket: process.env.DO_SPACES_BUCKET!,
                 Key: key,
             }),
-            { expiresIn: 600 }
+            { expiresIn: 1800 }
         );
 
         console.log("Generated signed URL:", signedUrl);

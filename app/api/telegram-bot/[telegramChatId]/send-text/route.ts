@@ -2,13 +2,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/utils/database";
 import TelegramThread from "@/models/telegramThread";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
-const TELEGRAM_BOT_API_URL = process.env.TELEGRAM_BOT_API_URL || 'https://api.telegram.org';
+const TELEGRAM_BOT_API_URL = process.env.TELEGRAM_BOT_API_URL || "https://api.telegram.org";
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-
-if (!TELEGRAM_BOT_TOKEN) {
-    console.error('TELEGRAM_BOT_TOKEN is not set in the environment variables');
-}
 
 export async function POST(
     request: NextRequest,
@@ -27,21 +25,34 @@ export async function POST(
             );
         }
 
+        // Get user session
+        const session = await getServerSession(authOptions);
+        if (!session || !session.user) {
+            return NextResponse.json(
+                { error: "Unauthorized access. Please log in." },
+                { status: 401 }
+            );
+        }
+
+        const { firstName, lastName } = session.user;
+        const senderName = `${firstName} ${lastName}`.trim();
+        const updatedText = `${text}\n\n-- ${senderName}`;
+
         // Send message to Telegram Bot API
         const telegramResponse = await fetch(`${TELEGRAM_BOT_API_URL}/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-            method: 'POST',
+            method: "POST",
             headers: {
-                'Content-Type': 'application/json',
+                "Content-Type": "application/json",
             },
             body: JSON.stringify({
                 chat_id: telegramChatId,
-                text: text,
+                text: updatedText,
             }),
         });
 
         if (!telegramResponse.ok) {
             const errorData = await telegramResponse.json();
-            console.error('Telegram API error:', errorData);
+            console.error("Telegram API error:", errorData);
             throw new Error(`Telegram API responded with status: ${telegramResponse.status}`);
         }
 
@@ -55,10 +66,11 @@ export async function POST(
         }
 
         const newMessage = {
-            text,
-            sender: "You",
+            text: updatedText, // Includes signature
+            sender: senderName, // Doctor's name from the session
             timestamp: new Date(),
-            type: 'text'
+            isSelf: true, // Indicates that the sender is the logged-in user
+            type: "text",
         };
         thread.messages.push(newMessage);
         await thread.save();

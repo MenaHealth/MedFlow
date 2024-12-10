@@ -122,8 +122,8 @@ const PatientDashboardContent: React.FC = () => {
             id: 'video',
             icon: VideoIcon,
             label: 'Video',
-            color: 'bg-blue-500',
-            textColor: 'text-white'
+            color: 'bg-orange-300',
+            textColor: 'text-orange-950'
         }
     ];
 

@@ -168,7 +168,7 @@ export const TelegramMessagesView: React.FC<TelegramMessagesViewProps> = ({
                         <div className="flex flex-col gap-3 p-2 md:p-4">
                             {messages.map((message) => (
                                 <div
-                                    key={message._id}
+                                    key={message._id} // Ensure _id is unique for each message
                                     className={`flex items-end gap-2 ${
                                         message.isSelf ? "flex-row-reverse self-end" : "self-start"
                                     }`}

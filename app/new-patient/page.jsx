@@ -1,10 +1,8 @@
 "use client";
 
-"use client";
-
 import { useState } from "react";
 import { FiSend } from "react-icons/fi";
-import { WorldMap } from "@/components/WorldMap";
+import { WorldMap } from "../../components/WorldMap";
 
 const NewPatient = () => {
     const [language, setLanguage] = useState("english");
@@ -12,29 +10,33 @@ const NewPatient = () => {
     const content = {
         english: {
             title: "New Patient Registration",
-            subtitle: "Welcome to MENA Health! Please follow the steps below to register as a new patient.",
+            subtitle: "If you are a patient who needs a medical consultation and would like to register for our free telehealth services, please follow the simple steps below:",
             steps: [
                 {
-                    title: "Fill Out the Registration Form",
-                    description: "Provide your basic information and medical history.",
+                    title: "Click the Button Below to Chat via Our MENA Health Telegram Chat",
+                    description:
+                        "Connect with our team on Telegram. This ensures flexible, quick, and easy communication.",
                 },
                 {
-                    title: "Review and Submit",
-                    description: "Double-check your information before submitting the form.",
+                    title: "Send Us a Message on Telegram",
+                    description:
+                        "Once you click the button, you'll be redirected to our Telegram chat. Simply send us a text message to start, and you will receive a link to our patient registration form.",
                 },
                 {
-                    title: "Await Confirmation",
-                    description: "You'll receive a confirmation message once your registration is processed.",
+                    title: "Complete Your Registration",
+                    description:
+                        "Once you've submitted your registration form, you will receive a confirmation text and a member of our medical team will reach out to you!",
                 },
             ],
-            getStarted: "Ready to Register?",
-            buttonText: "Start Registration",
-            helpText: "Need Assistance?",
-            contactInfo: "Contact us at support@menahealth.org for any questions or concerns.",
+            getStarted: "Ready to Get Started?",
+            buttonText: "Chat with Our Team on Telegram",
+            helpText: "Need Help?",
+            contactInfo: "If you have any issues or need further assistance, feel free to reach out by sending us an email at Contactus@menahealth.org or send-text us a message on Instagram @themenahealth.",
+            telegramLink: "https://t.me/menahealth_bot",
         },
     };
 
-    const { title, subtitle, steps, getStarted, buttonText, helpText, contactInfo } = content[language];
+    const { title, subtitle, steps, getStarted, buttonText, helpText, contactInfo, telegramLink } = content[language];
 
     return (
         <div className="relative min-h-screen bg-white bg-gradient-animation">
@@ -66,10 +68,15 @@ const NewPatient = () => {
 
                 <div className="text-center mt-8">
                     <h2 className="text-xl font-semibold text-gray-800 mb-4">{getStarted}</h2>
-                    <button className="inline-flex items-center bg-[#056E73] text-white font-bold py-2 px-6 rounded hover:bg-[#056E73] transition">
+                    <a
+                        href={telegramLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center bg-[#056E73] text-white font-bold py-2 px-6 rounded hover:bg-[#056E73] transition"
+                    >
                         <FiSend className="mr-2" />
                         <span>{buttonText}</span>
-                    </button>
+                    </a>
                 </div>
 
                 <div className="mt-8 text-center">
@@ -82,4 +89,3 @@ const NewPatient = () => {
 };
 
 export default NewPatient;
-

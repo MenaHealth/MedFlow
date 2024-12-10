@@ -1,13 +1,12 @@
-// app/create-patient/page.tsx
-// this page is for doctors and triage to create patients.
-// this file app/new-patient/page.jsx is for patients to create patients.
-// both views use the same API endpoint: app/api/patient/new/route.ts
+// app/create-patient/page.jsx
+
+// app/create-patient/page.jsx
 
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { FiSend } from "react-icons/fi";
+import { WorldMap } from "../../components/WorldMap";
 
 const CreatePatient = () => {
   const [language, setLanguage] = useState("english");
@@ -46,11 +45,19 @@ const CreatePatient = () => {
 
   return (
       <div className="relative min-h-screen bg-white bg-gradient-animation">
-        <div className="relative z-10 max-w-3xl mx-auto p-6">
+        <div className="relative z-10 max-w-5xl mx-auto p-6">
           <h1 className="text-3xl font-bold text-center mb-4">{title}</h1>
           <p className="text-center text-gray-700 mb-6">{subtitle}</p>
 
-          <div className="space-y-6">
+          <WorldMap
+              dots={[
+                { start: { lat: 34.0522, lng: -118.2437 }, end: { lat: 40.7128, lng: -74.006 } }, // LA to NY
+                { start: { lat: 48.8566, lng: 2.3522 }, end: { lat: 55.7558, lng: 37.6173 } }, // Paris to Moscow
+                { start: { lat: 35.6895, lng: 139.6917 }, end: { lat: -33.8688, lng: 151.2093 } }, // Tokyo to Sydney
+              ]}
+          />
+
+          <div className="space-y-6 mt-12">
             {steps.map((step, index) => (
                 <div key={index} className="flex items-start space-x-4">
                   <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#056E73] text-white flex items-center justify-center font-bold">
@@ -87,5 +94,3 @@ const CreatePatient = () => {
 };
 
 export default CreatePatient;
-
-

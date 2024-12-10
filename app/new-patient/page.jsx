@@ -76,9 +76,9 @@ const NewPatient = () => {
                 </div>
             </div>
 
-            <div className="mt-8 text-center pt-16">
-                <h3 className="text-lg font-semibold text-gray-800">{helpText}</h3>
-                <p className="text-sm text-gray-600">{contactInfo}</p>
+            <div className="mt-8 text-center pt-32">
+                <h3 className="text-lg font-semibold pt-32 text-gray-800">{helpText}</h3>
+                <p className="text-sm text-gray-600 pt-16">{contactInfo}</p>
             </div>
         </div>
     );

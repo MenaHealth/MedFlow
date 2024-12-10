@@ -1,3 +1,4 @@
+// app/new-patient/page.jsx
 "use client";
 
 import { useState } from "react";
@@ -39,53 +40,49 @@ const NewPatient = () => {
     const { title, subtitle, steps, getStarted, buttonText, helpText, contactInfo, telegramLink } = content[language];
 
     return (
-        <div className="relative min-h-screen bg-white bg-gradient-animation">
-            <div className="relative z-10 max-w-5xl mx-auto p-6">
-                <h1 className="text-3xl font-bold text-center mb-4">{title}</h1>
-                <p className="text-center text-gray-700 mb-6">{subtitle}</p>
+        <div className="relative max-w-5xl mx-auto p-6">
+            <h1 className="text-3xl font-bold text-center mb-4">{title}</h1>
+            <p className="text-center text-gray-700 mb-6">{subtitle}</p>
 
-                <WorldMap
-                    dots={[
-                        { start: { lat: 34.0522, lng: -118.2437 }, end: { lat: 40.7128, lng: -74.006 } }, // LA to NY
-                        { start: { lat: 48.8566, lng: 2.3522 }, end: { lat: 55.7558, lng: 37.6173 } }, // Paris to Moscow
-                        { start: { lat: 35.6895, lng: 139.6917 }, end: { lat: -33.8688, lng: 151.2093 } }, // Tokyo to Sydney
-                    ]}
-                />
-
-                <div className="space-y-6 mt-12">
-                    {steps.map((step, index) => (
-                        <div key={index} className="flex items-start space-x-4">
-                            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#056E73] text-white flex items-center justify-center font-bold">
-                                {index + 1}
-                            </div>
-                            <div>
-                                <h3 className="font-semibold text-lg text-gray-800">{step.title}</h3>
-                                <p className="text-sm text-gray-600">{step.description}</p>
-                            </div>
+            <div className="space-y-6 mt-12">
+                {steps.map((step, index) => (
+                    <div key={index} className="flex items-start space-x-4">
+                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#056E73] text-white flex items-center justify-center font-bold">
+                            {index + 1}
                         </div>
-                    ))}
-                </div>
+                        <div>
+                            <h3 className="font-semibold text-lg text-gray-800">{step.title}</h3>
+                            <p className="text-sm text-gray-600">{step.description}</p>
+                        </div>
+                    </div>
+                ))}
+            </div>
 
-                <div className="text-center mt-8">
-                    <h2 className="text-xl font-semibold text-gray-800 mb-4">{getStarted}</h2>
+            <div className="relative mt-8">
+                <div className="absolute inset-0 z-0">
+                    <WorldMap />
+                </div>
+                <div className="relative z-10 text-center">
+                    <h2 className="text-xl font-semibold text-gray-800 mb-16 pb-16">{getStarted}</h2>
                     <a
                         href={telegramLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center bg-[#056E73] text-white font-bold py-2 px-6 rounded hover:bg-[#056E73] transition"
+                        className="inline-flex items-center bg-[#056E73] text-white font-bold py-2 px-6 rounded hover:bg-[#045256] transition"
                     >
                         <FiSend className="mr-2" />
                         <span>{buttonText}</span>
                     </a>
                 </div>
+            </div>
 
-                <div className="mt-8 text-center">
-                    <h3 className="text-lg font-semibold text-gray-800">{helpText}</h3>
-                    <p className="text-sm text-gray-600">{contactInfo}</p>
-                </div>
+            <div className="mt-8 text-center pt-16">
+                <h3 className="text-lg font-semibold text-gray-800">{helpText}</h3>
+                <p className="text-sm text-gray-600">{contactInfo}</p>
             </div>
         </div>
     );
 };
 
 export default NewPatient;
+

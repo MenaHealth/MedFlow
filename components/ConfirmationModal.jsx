@@ -123,7 +123,7 @@ const ConfirmationModal = ({ patientId, patientName, onClose, submittingFromNoSe
                 <>
                     <h2 className="text-2xl font-bold mb-4 text-center">{values.newPatientRequest[language]}</h2>
                     <br />
-                    <p>{values.name[language]}: {patientName.firstName} {patientName.lastName}</p>
+                    {/*<p>{values.name[language]}: {patientName.firstName} {patientName.lastName}</p>*/}
                     <br />
                     <p>{values.declareTrue[language]}</p>
                     <br />

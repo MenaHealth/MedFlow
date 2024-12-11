@@ -13,6 +13,7 @@ export async function POST(request: Request, { params }: { params: { telegramCha
         const { telegramChatId } = params;
         const { language } = await request.json();
 
+
         if (!telegramChatId) {
             return NextResponse.json({ error: "Telegram Chat ID is required" }, { status: 400 });
         }

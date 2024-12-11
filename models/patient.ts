@@ -134,7 +134,6 @@ const PatientSchema = new Schema<IPatient>({
     country: { type: String },
     genderPreference: { type: String },
     previouslyRegistered: { type: String },
-// models/patient.ts
     language: {
         type: String,
         enum: ['English', 'Arabic', 'Farsi', 'Pashto'],
@@ -162,8 +161,16 @@ const PatientSchema = new Schema<IPatient>({
     currentMeds: { type: String },
     notes: { type: [noteSchema], default: [] },
     dashboardNotes: { type: String },
-    rxOrders: { type: [rxOrderSchema]},
-    medOrders: [{ type: Schema.Types.ObjectId, ref: 'MedOrder' }],
+    rxOrders: {
+        type: [rxOrderSchema],
+        required: false, // Make it optional
+        default: undefined, // Prevent default empty array
+    },
+    medOrders: {
+        type: [{ type: Schema.Types.ObjectId, ref: 'MedOrder' }],
+        required: false, // Make it optional
+        default: undefined, // Prevent default empty array
+    },
     visits: [{ type: Schema.Types.ObjectId, ref: 'Visit' }],
     triagedBy: { type: Object },
     doctor: { type: Object },

@@ -15,7 +15,6 @@ export async function middleware(req: any) {
         pathname.match(PUBLIC_FILE) ||
         pathname === '/api/telegram-bot' ||
         pathname.startsWith('/api/telegram-bot') ||
-        pathname === '/overview' ||
         pathname === '/about'
     ) {
         return NextResponse.next();

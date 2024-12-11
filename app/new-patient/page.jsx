@@ -3,7 +3,6 @@
 
 import { useState } from "react";
 import { FiSend } from "react-icons/fi";
-import { WorldMap } from "../../components/WorldMap";
 
 const NewPatient = () => {
     const [language, setLanguage] = useState("english");
@@ -60,7 +59,11 @@ const NewPatient = () => {
 
             <div className="relative mt-8">
                 <div className="absolute inset-0 z-0">
-                    <WorldMap />
+                    <img
+                        src="/images/yes.png"
+                        alt="Map of Egypt and Afghanistan"
+                        className="w-full h-full object-contain"
+                    />
                 </div>
                 <div className="relative z-10 text-center">
                     <h2 className="text-xl font-semibold text-gray-800 mb-16 pb-16">{getStarted}</h2>

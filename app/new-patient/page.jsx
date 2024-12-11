@@ -58,15 +58,15 @@ const NewPatient = () => {
             </div>
 
             <div className="relative mt-8">
-                <div className="absolute inset-0 z-0">
+                <div className="absolute inset-0 z-0 flex justify-center items-center">
                     <img
-                        src="/assets/images/yes.jpg"
-                        alt="Map"
-                        className="w-full h-full object-contain"
+                        src="/images/yes.png"
+                        alt="Map of Egypt and Afghanistan"
+                        className="w-2/3 opacity-20"
                     />
                 </div>
                 <div className="relative z-10 text-center">
-                    <h2 className="text-xl font-semibold text-gray-800 mb-16 pb-16">{getStarted}</h2>
+                    <h2 className="text-xl font-semibold text-gray-800 mb-4">{getStarted}</h2>
                     <a
                         href={telegramLink}
                         target="_blank"
@@ -79,9 +79,9 @@ const NewPatient = () => {
                 </div>
             </div>
 
-            <div className="mt-8 text-center pt-32">
-                <h3 className="text-lg font-semibold pt-32 text-gray-800">{helpText}</h3>
-                <p className="text-sm text-gray-600 pt-16">{contactInfo}</p>
+            <div className="mt-8 text-center">
+                <h3 className="text-lg font-semibold text-gray-800">{helpText}</h3>
+                <p className="text-sm text-gray-600">{contactInfo}</p>
             </div>
         </div>
     );

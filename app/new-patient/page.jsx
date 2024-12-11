@@ -60,7 +60,7 @@ const NewPatient = () => {
             <div className="relative mt-8">
                 <div className="absolute inset-0 z-0">
                     <img
-                        src="/images/yes.jpg"
+                        src="/assets/images/yes.jpg"
                         alt="Map"
                         className="w-full h-full object-contain"
                     />

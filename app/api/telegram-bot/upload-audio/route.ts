@@ -2,7 +2,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { ObjectCannedACL } from "@aws-sdk/client-s3";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 const s3Client = new S3Client({
     endpoint: `https://${process.env.DO_SPACES_ENDPOINT}`,
@@ -16,53 +17,57 @@ const s3Client = new S3Client({
 export async function POST(req: NextRequest) {
     try {
         const formData = await req.formData();
-        const file = formData.get("file") as File;
+        const file = formData.get("file") as File | null;
+        const telegramChatId = formData.get("telegramChatId") as string;
 
-        if (!file) {
-            return NextResponse.json({ error: "File is missing" }, { status: 400 });
+        if (!file || !telegramChatId) {
+            return NextResponse.json(
+                { error: "File or Telegram Chat ID is missing" },
+                { status: 400 }
+            );
         }
+
+        const session = await getServerSession(authOptions);
+        if (!session || !session.user) {
+            return NextResponse.json(
+                { error: "Unauthorized access. Please log in." },
+                { status: 401 }
+            );
+        }
+
+        const { firstName, lastName, accountType } = session.user;
+        const senderInfo = `${accountType}-${firstName}-${lastName}`.trim().replace(/\s+/g, "_");
 
         const folder = process.env.NODE_ENV === "development" ? "dev" : "prod";
         const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-        const fileName = `${folder}/audio/${timestamp}-${file.name}`;
+        const sanitizedChatId = telegramChatId.replace(/[^a-zA-Z0-9_-]/g, "");
+        const fileName = `${timestamp}-${senderInfo}-${file.name}`;
+        const filePath = `${folder}/audio/${sanitizedChatId}/${fileName}`;
 
         const fileBuffer = await file.arrayBuffer();
 
-        const uploadParams = {
-            Bucket: process.env.DO_SPACES_BUCKET!,
-            Key: fileName,
-            Body: Buffer.from(fileBuffer),
-            ContentType: file.type || "audio/ogg",
-            ACL: "private" as ObjectCannedACL,
-        };
-
-        try {
-            await s3Client.send(new PutObjectCommand(uploadParams));
-        } catch (s3Error: any) {
-            throw new Error("Failed to upload file to S3");
-        }
-
+        await s3Client.send(
+            new PutObjectCommand({
+                Bucket: process.env.DO_SPACES_BUCKET!,
+                Key: filePath,
+                Body: Buffer.from(fileBuffer),
+                ContentType: file.type || "audio/ogg",
+                ACL: "private",
+            })
+        );
 
         const signedUrl = await getSignedUrl(
             s3Client,
             new GetObjectCommand({
                 Bucket: process.env.DO_SPACES_BUCKET!,
-                Key: fileName,
+                Key: filePath,
             }),
-            { expiresIn: 300 } // 5 min
+            { expiresIn: 3600 }
         );
-        console.log("Signed URL:", signedUrl);
 
-
-
-        return NextResponse.json({ filePath: fileName, signedUrl }, { status: 200 });
+        return NextResponse.json({ filePath, signedUrl }, { status: 200 });
     } catch (error: any) {
-        console.error("[ERROR] Upload-audio route failed:", {
-            message: error.message,
-            stack: error.stack,
-        });
-
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        console.error("Error in upload-audio route:", error.message);
+        return NextResponse.json({ error: "Failed to upload audio" }, { status: 500 });
     }
 }
-

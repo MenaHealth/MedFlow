@@ -10,6 +10,7 @@ export async function POST(
     { params }: { params: { telegramChatId: string } }
 ) {
     await dbConnect();
+    console.log("[DEBUG] send-photo route hit with params:", params);
 
     try {
         const { telegramChatId } = params;

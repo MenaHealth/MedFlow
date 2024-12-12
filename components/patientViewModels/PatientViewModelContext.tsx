@@ -89,7 +89,7 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
             telegramChatId: patientData.telegramChatId || "",
         };
 
-        setPatientInfo(patientInfo);
+        setPatientInfo(patientInfo); // Update patientInfo in context
         setPatientViewModel(new PatientInfoViewModel(patientData));
     }, []);
 

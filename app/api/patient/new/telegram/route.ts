@@ -1,8 +1,8 @@
 // app/api/patient/new/telegram/route.ts
-
 import { NextResponse } from "next/server";
 import dbConnect from "@/utils/database";
 import Patient from "@/models/patient";
+import TelegramThread from "@/models/telegramThread"; // Import the model
 import { getRegistrationMessage } from "@/utils/telegram/postRegistrationConfirmation";
 
 export async function POST(request: Request) {
@@ -37,10 +37,20 @@ export async function POST(request: Request) {
             await patient.save();
         }
 
+        // At this point, we have `patient._id` and `patient.telegramChatId`.
+        // Update the TelegramThread with the patientId.
+        if (patient.telegramChatId) {
+            await TelegramThread.findOneAndUpdate(
+                { chatId: patient.telegramChatId },
+                { $set: { patientId: patient._id } },
+                { new: true }
+            );
+        }
+
         // Generate the language-based message
         const message = getRegistrationMessage(patientLanguage);
 
-        // Send the confirmation message to the Telegram bot API
+        // Send the confirmation message
         const confirmationMessageResponse = await fetch(
             `${process.env.NEXTAUTH_URL}/api/telegram-bot/send-confirmation`,
             {
@@ -48,7 +58,7 @@ export async function POST(request: Request) {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     telegramChatId: patient.telegramChatId,
-                    message, // Translated message based on the patient's language
+                    message, // Translated message based on patient's language
                 }),
             }
         );

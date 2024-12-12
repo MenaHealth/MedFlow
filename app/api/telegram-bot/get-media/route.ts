@@ -13,30 +13,26 @@ const s3Client = new S3Client({
 });
 
 export async function GET(req: NextRequest) {
-    const { searchParams } = new URL(req.url);
-    let mediaUrl = searchParams.get("mediaUrl") || searchParams.get("filePath");
-
-    if (!mediaUrl) {
-        console.error("Missing media URL or file path in request.");
-        return NextResponse.json({ error: "Missing media URL or file path" }, { status: 400 });
-    }
-
     try {
-        mediaUrl = decodeURIComponent(decodeURIComponent(mediaUrl));
+        const { searchParams } = new URL(req.url);
+        const filePath = searchParams.get("filePath");
 
-        if (mediaUrl.includes("/api/telegram-bot/get-media")) {
-            const innerParams = new URL(mediaUrl).searchParams;
-            mediaUrl = innerParams.get("mediaUrl") || innerParams.get("filePath") || "";
-            mediaUrl = decodeURIComponent(mediaUrl);
+        if (!filePath) {
+            return NextResponse.json({ error: "Missing filePath parameter" }, { status: 400 });
         }
 
-        console.log("Decoded mediaUrl:", mediaUrl);
+        // Determine if `filePath` is relative or a full URL
+        let key: string;
+        if (filePath.startsWith("http")) {
+            // Full URL: Extract path after the bucket name
+            const url = new URL(filePath);
+            key = decodeURIComponent(url.pathname.substring(1)); // Remove leading "/"
+        } else {
+            // Relative path: Use as-is
+            key = decodeURIComponent(filePath);
+        }
 
-        const urlParts = new URL(mediaUrl);
-        const key = urlParts.pathname.slice(1);
-
-        console.log("Extracted Key:", key);
-
+        // Generate presigned URL
         const signedUrl = await getSignedUrl(
             s3Client,
             new GetObjectCommand({
@@ -46,16 +42,12 @@ export async function GET(req: NextRequest) {
             { expiresIn: 1800 }
         );
 
-        console.log("Generated signed URL:", signedUrl);
-
         return NextResponse.json({ signedUrl }, { status: 200 });
     } catch (error: any) {
-        console.error("Error generating signed URL:", {
-            message: error.message,
-            stack: error.stack,
-            mediaUrl: mediaUrl,
-        });
-        return NextResponse.json({ error: "Failed to generate signed URL" }, { status: 500 });
+        console.error("Error generating signed URL:", error.message);
+        return NextResponse.json(
+            { error: "Failed to generate signed URL", details: error.message },
+            { status: 500 }
+        );
     }
 }
-

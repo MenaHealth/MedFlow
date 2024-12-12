@@ -9,10 +9,8 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { Table, TableColumn } from "@/components/ui/table"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -28,6 +26,10 @@ const PharmacyView = ({ uuid }: { uuid: string }) => {
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [patientId, setPatientId] = useState<string | null>(null);
+    const [initialStatus, setInitialStatus] = useState<string | null>(null);
+
+    const isEditable = initialStatus !== 'completed';
+    const isSaveDisabled = !isEditable && rxOrder?.rxStatus !== 'completed';
 
     useEffect(() => {
         const fetchRxOrder = async () => {
@@ -41,7 +43,8 @@ const PharmacyView = ({ uuid }: { uuid: string }) => {
                 }
                 const data = await response.json();
                 setRxOrder(data.rxOrder);
-                setPatientId(data.patientId); // Store patientId from response
+                setInitialStatus(data.rxOrder.rxStatus);
+                setPatientId(data.patientId);
             } catch (err: any) {
                 setError(err.message || 'An unexpected error occurred');
             } finally {
@@ -52,7 +55,18 @@ const PharmacyView = ({ uuid }: { uuid: string }) => {
         fetchRxOrder();
     }, [uuid]);
 
+    useEffect(() => {
+        if (rxOrder?.rxStatus === 'completed') {
+            setSuccessMessage(null);
+        }
+    }, [rxOrder?.rxStatus]);
+
     const handleSave = async () => {
+        if (initialStatus === 'completed') {
+            setError('This RX order has already been completed and cannot be modified.');
+            return;
+        }
+
         if (!rxOrder?.RxDispenserName || !rxOrder.RxDispenserContact) {
             setError('RX dispenser name and contact information are required.');
             return;
@@ -76,6 +90,7 @@ const PharmacyView = ({ uuid }: { uuid: string }) => {
 
             const data = await response.json();
             setRxOrder(data.rxOrder);
+            setInitialStatus(data.rxOrder.rxStatus);
             setSuccessMessage('RX order updated successfully');
         } catch (err: any) {
             setError(err.message || 'An unexpected error occurred');
@@ -179,8 +194,6 @@ const PharmacyView = ({ uuid }: { uuid: string }) => {
                     </AccordionItem>
                 </Accordion>
 
-                {/* Status and Save Section */}
-                {/* Status and Save Section */}
                 <div className="space-y-4">
                     <div>
                         <Label>RX Status</Label>
@@ -189,6 +202,7 @@ const PharmacyView = ({ uuid }: { uuid: string }) => {
                             onValueChange={(value) =>
                                 setRxOrder({ ...rxOrder, rxStatus: value as IRxOrder['rxStatus'] })
                             }
+                            disabled={!isEditable}
                         >
                             <SelectTrigger>
                                 <SelectValue placeholder="Select RX Status" />
@@ -208,7 +222,10 @@ const PharmacyView = ({ uuid }: { uuid: string }) => {
                             multiline
                             rows={3}
                             value={rxOrder?.partialRxNotes || ''}
-                            onChange={(e) => setRxOrder({ ...rxOrder, partialRxNotes: e.target.value })}
+                            onChange={(e) =>
+                                setRxOrder({ ...rxOrder, partialRxNotes: e.target.value })
+                            }
+                            disabled={!isEditable}
                         />
                     )}
                     <div>
@@ -224,9 +241,8 @@ const PharmacyView = ({ uuid }: { uuid: string }) => {
                                     ? 'RX Dispenser Name is required.'
                                     : undefined
                             }
+                            readOnly={!isEditable}
                         />
-                    </div>
-                    <div>
                         <TextFormField
                             fieldName="RxDispenserContact"
                             fieldLabel="RX Dispenser Contact Info"
@@ -239,20 +255,17 @@ const PharmacyView = ({ uuid }: { uuid: string }) => {
                                     ? 'RX Dispenser Contact Info is required.'
                                     : undefined
                             }
+                            readOnly={!isEditable}
                         />
                     </div>
                     <Button
                         onClick={handleSave}
                         className="w-full"
                         variant="submit"
-                        disabled={
-                            rxOrder?.submitted ||
-                            !rxOrder?.RxDispenserName ||
-                            !rxOrder?.RxDispenserContact
-                        }
+                        disabled={isSaveDisabled || !rxOrder?.RxDispenserName || !rxOrder?.RxDispenserContact}
                         title={
-                            rxOrder?.submitted
-                                ? 'RX order has been submitted and cannot be edited.'
+                            isSaveDisabled
+                                ? 'RX order has been completed and cannot be edited.'
                                 : 'Complete all required fields to save.'
                         }
                     >
@@ -277,3 +290,4 @@ const PharmacyView = ({ uuid }: { uuid: string }) => {
 };
 
 export default PharmacyView;
+

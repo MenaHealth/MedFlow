@@ -28,11 +28,11 @@ const NewPatient = () => {
                         "Once you've submitted your registration form, you will receive a confirmation text and a member of our medical team will reach out to you!",
                 },
             ],
-            getStarted: "Ready to Get Started?",
-            buttonText: "Chat with Our Team on Telegram",
-            helpText: "Need Help?",
-            contactInfo: "If you have any issues or need further assistance send us an email at Contactus@menahealth.org or send us a message on Instagram @themenahealth.",
-            telegramLink: "https://t.me/menahealth_bot",
+        getStarted: "Ready to Get Started?",
+        buttonText: "Chat with Our Team on Telegram",
+        helpText: "Need Help?",
+        contactInfo: "If you have any issues or need further assistance, send us an email at Contactus@menahealth.org or send us a message on Instagram @themenahealth.",
+        telegramLink: "https://t.me/menahealth_bot",
         },
     };
 
@@ -58,9 +58,9 @@ const NewPatient = () => {
             </div>
 
             <div className="relative mt-8">
-                <div className="absolute inset-0 z-0 flex justify-center items-center">
+                <div className="absolute inset-0 z-0 flex justify-center items-center translate-y-16">
                     <img
-                        src="assets/images/yes.jpg"
+                        src="assets/images/map.png"
                         alt="Map"
                         className="w-2/3 opacity-20"
                     />

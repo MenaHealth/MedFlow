@@ -66,10 +66,10 @@ export function NewPatientFormTelegramView({
         dob: { English: "Date of Birth", Arabic: "العمر", Farsi: "سن:", Pashto: "عمر:" },
         phone: { English: "Phone Number", Arabic: "رقم الهاتف", Farsi: "شماره تلفن:", Pashto: "د تلیفون شمیره:" },
         country: {
-            English: { label: "Country", options: CountriesList.filter((country) => country !== "Yemen") },
-            Arabic: { label: "بلد", options: CountriesListArabic.filter((country) => country !== "اليمن") },
-            Farsi: { label: "کشور:", options: CountriesListFarsi.filter((country) => country !== "یمن") },
-            Pashto: { label: "هیواد:", options: CountriesListPashto.filter((country) => country !== "یمن") },
+            English: { label: "Country", options: CountriesList.filter((country) => (country !== "Yemen" && country !== "Syria")) },
+            Arabic: { label: "بلد", options: CountriesListArabic.filter((country) => (country !== "اليمن" && country !== "سوريا")) },
+            Farsi: { label: "کشور:", options: CountriesListFarsi.filter((country) => (country !== "یمن" && country !== "سوریه")) },
+            Pashto: { label: "هیواد:", options: CountriesListPashto.filter((country) => (country !== "یمن" && country !== "سوریه")) },
         },
         city: { English: "City", Arabic: "مدينة", Farsi: "شهر:", Pashto: "ښار:" },
         language: {

@@ -11,10 +11,7 @@ const messageSchema = new mongoose.Schema({
         default: 'text',
     },
     mediaUrl: { type: String, default: '' },
-    replyTo: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'TelegramThread.messages',
-    },
+    replyTo: { type: mongoose.Schema.Types.ObjectId, ref: 'TelegramThread.messages' },
     forwardedFrom: { type: String, default: '' },
     deletedAt: { type: Date, default: null },
     updatedAt: { type: Date, default: null },
@@ -23,6 +20,7 @@ const messageSchema = new mongoose.Schema({
 const threadSchema = new mongoose.Schema(
     {
         chatId: { type: String, required: true, unique: true },
+        patientId: { type: mongoose.Schema.Types.ObjectId, ref: 'Patient', default: null },
         participants: { type: [String], default: [] },
         unreadCount: { type: Number, default: 0 },
         status: { type: String, enum: ['active', 'archived'], default: 'active' },
@@ -34,7 +32,5 @@ const threadSchema = new mongoose.Schema(
 threadSchema.index({ chatId: 1 });
 threadSchema.index({ status: 1 });
 
-const TelegramThread =
-    mongoose.models.TelegramThread || mongoose.model('TelegramThread', threadSchema);
-
+const TelegramThread = mongoose.models.TelegramThread || mongoose.model('TelegramThread', threadSchema);
 export default TelegramThread;

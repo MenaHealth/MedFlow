@@ -58,7 +58,7 @@ const NewPatient = () => {
             </div>
 
             <div className="relative mt-8">
-                <div className="absolute inset-0 z-0 flex justify-center items-center" translate-y-16">
+                <div className="absolute inset-0 z-0 flex justify-center items-center translate-y-16">
                     <img
                         src="assets/images/map.png"
                         alt="Map"

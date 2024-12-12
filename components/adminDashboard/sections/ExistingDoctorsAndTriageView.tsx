@@ -101,14 +101,15 @@ export default function ExistingDoctorsAndTriageView() {
         }
     ];
 
-    const exportToCSV = () => {
+    const exportToCSV = async () => {
         // Include all columns except the 'actions' column
         const visibleColumns = columns.filter(column => column.key !== 'actions');
         const headers = visibleColumns.map(column => column.header);
+        const authorizedUsers = await fetch('/api/user/authorized').then(res => res.json());
 
         const csvContent = [
             headers.join(','),
-            ...filteredUsers.map(user =>
+            ...authorizedUsers.map((user: User) =>
                 visibleColumns.map(column => {
                     // Check if a render function is defined
                     if (column.render) {

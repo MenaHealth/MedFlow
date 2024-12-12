@@ -23,6 +23,7 @@ export interface IRxOrder {
     RxDispenserName?: string;
     RxDispenserContact?: string;
     rxStatus?: 'not reviewed' | 'partially filled' | 'declined' | 'completed';
+    submitted?: boolean;
     partialRxNotes?: string;
 }
 
@@ -49,9 +50,10 @@ const rxOrderSchema = new Schema({
     RxDispenserContact: { type: String},
     rxStatus: {
         type: String,
-        default: 'not reviewed',
         enum: ['not reviewed', 'partially filled', 'declined', 'completed'],
+        default: undefined, // Avoid overwriting updates with default
     },
+    submitted: { type: Boolean, default: false },
     partialRxNotes: { type: String},
 });
 

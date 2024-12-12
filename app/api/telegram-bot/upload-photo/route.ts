@@ -2,8 +2,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { ObjectCannedACL } from "@aws-sdk/client-s3";
-
+import heic2any from "heic2any";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 const s3Client = new S3Client({
     endpoint: `https://${process.env.DO_SPACES_ENDPOINT}`,
@@ -17,51 +18,91 @@ const s3Client = new S3Client({
 export async function POST(req: NextRequest) {
     try {
         const formData = await req.formData();
-        const file = formData.get("file") as File;
+        const file = formData.get("file") as File | null;
+        const telegramChatId = formData.get("telegramChatId") as string;
 
-
-        if (!file) {
-            return NextResponse.json({ error: "File is missing" }, { status: 400 });
+        if (!file || !telegramChatId) {
+            return NextResponse.json(
+                { error: "File or Telegram Chat ID is missing" },
+                { status: 400 }
+            );
         }
 
+        if (!(file instanceof Blob)) {
+            return NextResponse.json(
+                { error: "Uploaded file is not valid" },
+                { status: 400 }
+            );
+        }
 
-        const folder = process.env.NODE_ENV === "development" ? "dev" : "prod";
-        const timestamp = new Date().toISOString();
-        const fileName = `${folder}/images/${timestamp}-${file.name}`;
-
+        // Retrieve file buffer and content type
         const fileBuffer = await file.arrayBuffer();
+        let convertedBuffer = Buffer.from(fileBuffer);
+        let fileType = file.type;
 
-        const uploadParams = {
-            Bucket: process.env.DO_SPACES_BUCKET!,
-            Key: fileName,
-            Body: Buffer.from(fileBuffer),
-            ContentType: file.type,
-            ACL: "private" as ObjectCannedACL,
-        };
-
-        try {
-            await s3Client.send(new PutObjectCommand(uploadParams));
-        } catch (s3Error: any) {
-            throw new Error("Failed to upload file to S3");
+        // Check if the file is an HEIC image and convert to JPG
+        if (fileType === "image/heic" || fileType === "image/heif") {
+            try {
+                console.log("[INFO] Converting HEIC to JPG...");
+                const converted = await heic2any({
+                    blob: new Blob([fileBuffer]),
+                    toType: "image/jpeg",
+                });
+                convertedBuffer = Buffer.from(await (converted as Blob).arrayBuffer());
+                fileType = "image/jpeg";
+                console.log("[INFO] HEIC conversion successful!");
+            } catch (conversionError) {
+                console.error("[ERROR] Failed to convert HEIC to JPG:", conversionError);
+                return NextResponse.json(
+                    { error: "Failed to convert HEIC to JPG" },
+                    { status: 500 }
+                );
+            }
         }
 
+        // Retrieve user session
+        const session = await getServerSession(authOptions);
+        if (!session || !session.user) {
+            return NextResponse.json(
+                { error: "Unauthorized access. Please log in." },
+                { status: 401 }
+            );
+        }
+
+        const { firstName, lastName, accountType } = session.user;
+        const senderInfo = `${accountType}-${firstName}-${lastName}`.trim().replace(/\s+/g, "_");
+
+        // Generate file path: images/{TelegramID}/{timestamp}-{accountType}-{firstName}-{lastName}.jpg
+        const folder = process.env.NODE_ENV === "development" ? "dev" : "prod";
+        const timestamp = new Date().toISOString().replace(/:/g, "-");
+        const sanitizedChatId = telegramChatId.replace(/[^a-zA-Z0-9_-]/g, "");
+        const fileName = `${timestamp}-${senderInfo}.jpg`; // Use JPG extension
+        const filePath = `${folder}/images/${sanitizedChatId}/${fileName}`;
+
+        // Upload the converted or original image
+        await s3Client.send(
+            new PutObjectCommand({
+                Bucket: process.env.DO_SPACES_BUCKET!,
+                Key: filePath,
+                Body: convertedBuffer,
+                ContentType: fileType,
+                ACL: "private",
+            })
+        );
+
+        // Generate a signed URL
         const signedUrl = await getSignedUrl(
             s3Client,
             new GetObjectCommand({
                 Bucket: process.env.DO_SPACES_BUCKET!,
-                Key: fileName,
+                Key: filePath,
             }),
-            { expiresIn: 300 } // 5 min
+            { expiresIn: 3600 }
         );
 
-        return NextResponse.json({ filePath: fileName, signedUrl }, { status: 200 });
+        return NextResponse.json({ filePath, signedUrl }, { status: 200 });
     } catch (error: any) {
-        console.error("[ERROR] Upload-photo route failed:", {
-            message: error.message,
-            stack: error.stack,
-        });
-
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        console.error("Error in upload-photo route:", error.message);
+        return NextResponse.json({ error: "Failed to upload photo" }, { status: 500 });
     }
 }
-

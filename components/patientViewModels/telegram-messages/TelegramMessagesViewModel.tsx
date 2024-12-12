@@ -16,7 +16,6 @@ mediaUrl?: string;
 encryptedMedia?: string;
 encryptionKey?: string;
 }
-
 const useTelegramMessagesViewModel = (initialTelegramChatId: string) => {
 const [messages, setMessages] = useState<TelegramMessage[]>([]);
 const [newMessage, setNewMessage] = useState('');
@@ -24,9 +23,10 @@ const [isLoading, setIsLoading] = useState(false);
 const [telegramChatId] = useState(initialTelegramChatId);
 const { data: session } = useSession();
 
-const getMediaUrl = (filePath: string) => {
-    return `${process.env.NEXT_PUBLIC_API_URL}/api/telegram-bot/get-media?filePath=${encodeURIComponent(filePath)}`;
-};
+
+    const getMediaUrl = (filePath: string) => {
+        return `${process.env.NEXT_PUBLIC_API_URL}/api/telegram-bot/get-media?filePath=${encodeURIComponent(filePath)}`;
+    };
 
 const loadMessages = useCallback(async () => {
     if (!telegramChatId) {
@@ -50,7 +50,11 @@ const loadMessages = useCallback(async () => {
             timestamp: new Date(message.timestamp),
             isSelf: message.sender === `${session?.user?.firstName} ${session?.user?.lastName}`,
             type: message.type,
-            mediaUrl: message.mediaUrl ? getMediaUrl(message.mediaUrl) : undefined,
+            // If message.mediaUrl is already a full URL (http/https), use it directly;
+            // else call getMediaUrl to generate a signed link
+            mediaUrl: (message.mediaUrl && message.mediaUrl.startsWith("http"))
+                ? message.mediaUrl
+                : (message.mediaUrl ? getMediaUrl(message.mediaUrl) : undefined),
             encryptedMedia: message.encryptedMedia,
             encryptionKey: message.encryptionKey,
         }));
@@ -113,57 +117,61 @@ const sendMessage = useCallback(async () => {
     }
 }, [newMessage, telegramChatId]);
 
-const sendImage = useCallback(async (file: File) => {
-    setIsLoading(true);
-    try {
-        // Upload the file and get the signed URL
-        const formData = new FormData();
-        formData.append('file', file);
-
-        const uploadResponse = await fetch('/api/telegram-bot/upload-photo', {
-            method: 'POST',
-            body: formData,
-        });
-
-        if (!uploadResponse.ok) {
-            throw new Error('Failed to upload photo file to Digital Ocean');
+    const sendImage = useCallback(async (file: File) => {
+        if (!telegramChatId) {
+            console.error("Telegram Chat ID is missing.");
+            return;
         }
 
-        const { signedUrl } = await uploadResponse.json();
+        setIsLoading(true);
+        try {
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("telegramChatId", telegramChatId);
 
-        // Send the signed URL to the Telegram send-photo route
-        const response = await fetch(`/api/telegram-bot/${telegramChatId}/send-photo`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                mediaUrl: signedUrl,
-                caption: 'Optional caption for the image',
-            }),
-        });
+            const uploadResponse = await fetch("/api/telegram-bot/upload-photo", {
+                method: "POST",
+                body: formData,
+            });
 
-        const data = await response.json();
+            if (!uploadResponse.ok) {
+                throw new Error("Failed to upload photo file to Digital Ocean");
+            }
 
-        setMessages((prevMessages) => [
-            ...prevMessages,
-            {
-                _id: data.savedMessage._id,
-                text: 'Image sent',
-                sender: 'MedFlow',
-                timestamp: new Date(data.savedMessage.timestamp),
-                isSelf: true,
-                type: 'image',
-                mediaUrl: signedUrl,
-            },
-        ]);
+            const { signedUrl, filePath } = await uploadResponse.json();
 
-    } catch (error) {
-        console.error('Error sending image:', error);
-    } finally {
-        setIsLoading(false);
-    }
-}, [telegramChatId]);
+            const response = await fetch(`/api/telegram-bot/${telegramChatId}/send-photo`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    mediaUrl: signedUrl, // Use the signed URL for Telegram
+                    caption: "Optional caption for the image",
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to send photo to Telegram");
+            }
+
+            const data = await response.json();
+            setMessages((prevMessages) => [
+                ...prevMessages,
+                {
+                    _id: data.savedMessage._id,
+                    text: "Image sent",
+                    sender: "You",
+                    timestamp: new Date(data.savedMessage.timestamp),
+                    isSelf: true,
+                    type: "image",
+                    mediaUrl: filePath, // Use the file path for local reference
+                },
+            ]);
+        } catch (error) {
+            console.error("Error sending image:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [telegramChatId]);
 
 const sendAudioMessage: (file: Blob, duration: number) => Promise<void> = useCallback(
     async (file, duration) => {

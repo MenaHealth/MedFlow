@@ -1,12 +1,13 @@
 // components/patientViewModels/image-gallery/ImageGalleryView.tsx
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Box, IconButton, Button } from '@mui/material';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
 import { ClipLoader } from 'react-spinners';
 import Image from 'next/image';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { FiMinus, FiPlus } from 'react-icons/fi';
 import { useImageGalleryViewModel, ImageGalleryViewModelProps } from './ImageGalleryViewModel';
+import FullScreenImageView from './FullScreenImageView';
 
 const ImageGalleryView: React.FC<ImageGalleryViewModelProps> = ({ patientId }) => {
     const {
@@ -26,6 +27,9 @@ const ImageGalleryView: React.FC<ImageGalleryViewModelProps> = ({ patientId }) =
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [clickZoomIn, setClickZoomIn] = React.useState(false);
     const [clickZoomOut, setClickZoomOut] = React.useState(false);
+    const [isFullScreen, setIsFullScreen] = useState(false);
+
+    const toggleFullScreen = () => setIsFullScreen(!isFullScreen);
 
     return (
         <div className="bg-grey-100">
@@ -76,6 +80,12 @@ const ImageGalleryView: React.FC<ImageGalleryViewModelProps> = ({ patientId }) =
                                                                 onAnimationEnd={() => setClickZoomIn(false)}
                                                             >
                                                                 <FiPlus />
+                                                            </button>
+                                                            <button
+                                                                className="border-none bg-transparent text-white"
+                                                                onClick={toggleFullScreen}
+                                                            >
+                                                                <Maximize2 />
                                                             </button>
                                                         </div>
                                                     </div>
@@ -139,6 +149,14 @@ const ImageGalleryView: React.FC<ImageGalleryViewModelProps> = ({ patientId }) =
                     </div>
                 )}
             </div>
+            {isFullScreen && (
+                <FullScreenImageView
+                    photo={photos[currentPhotoIndex]}
+                    onClose={toggleFullScreen}
+                    onPrev={handlePrevClick}
+                    onNext={handleNextClick}
+                />
+            )}
         </div>
     );
 };

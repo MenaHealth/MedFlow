@@ -1,8 +1,10 @@
-import React, { useRef, useEffect } from "react";
+"use client"
+
+import React, { useRef, useEffect, useState } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/ScrollArea";
 import { Button } from "@/components/ui/button";
-import { Minimize2 } from 'lucide-react';
+import { Minimize2, ZoomIn, ZoomOut } from 'lucide-react';
 import { MessageInput } from "./MessageInput";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import ReactMarkdown from 'react-markdown';
@@ -36,6 +38,11 @@ export const FullScreenTelegramMessages: React.FC<FullScreenTelegramMessagesProp
                                                                                           toggleFullScreen,
                                                                                       }) => {
     const scrollAreaRef = useRef<HTMLDivElement>(null);
+    const [messageScale, setMessageScale] = useState(1);
+
+    // Zoom functions
+    const zoomIn = () => setMessageScale(prev => Math.min(prev + 0.1, 1.5));
+    const zoomOut = () => setMessageScale(prev => Math.max(prev - 0.1, 0.5));
 
     useEffect(() => {
         if (scrollAreaRef.current) {
@@ -101,42 +108,84 @@ export const FullScreenTelegramMessages: React.FC<FullScreenTelegramMessagesProp
         <div className="fixed inset-0 z-50 bg-background flex items-center justify-center p-4">
             <Card className="w-full h-full max-w-4xl mx-auto flex flex-col bg-background shadow-lg">
                 <CardHeader className="border-b p-4 flex flex-row justify-between items-center">
-                    <CardTitle className="text-xl font-bold">Telegram Messages</CardTitle>
-                    <Button variant="ghost" size="icon" onClick={toggleFullScreen}>
-                        <Minimize2 className="h-4 w-4" />
-                    </Button>
+                    <CardTitle className="text-xl font-bold">Telegram Messages
+                            <Button variant="orangeOutline" size="icon" onClick={toggleFullScreen}>
+                                <Minimize2 className="h-4 w-4" />
+                            </Button>
+                    </CardTitle>
+                    <div className="flex items-center gap-4">
+                        <Button variant="darkBlueOutline" size="icon" onClick={zoomOut}>
+                            <ZoomOut className="h-4 w-4" />
+                        </Button>
+                        <Button variant="darkBlueOutline" size="icon" onClick={zoomIn}>
+                            <ZoomIn className="h-4 w-4" />
+                        </Button>
+                    </div>
                 </CardHeader>
                 <CardContent className="flex-grow p-0 overflow-hidden">
-                    <ScrollArea className="h-full w-full p-4" ref={scrollAreaRef}>
+                    <ScrollArea
+                        className="h-full w-full p-4"
+                        ref={scrollAreaRef}
+                        style={{
+                            transform: `scale(${messageScale})`,
+                            transformOrigin: "center top",
+                        }}
+                    >
                         {isLoadingMessages ? (
                             <div className="flex justify-center items-center h-full">
                                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                             </div>
                         ) : (
-                            <div className="flex flex-col gap-6">
+                            <div
+                                className="flex flex-col gap-6"
+                                style={{
+                                    paddingLeft: `${20 * messageScale}px`,
+                                    paddingRight: `${20 * messageScale}px`,
+                                }}
+                            >
                                 {messages.map((message) => (
                                     <div
                                         key={message._id}
-                                        className={`flex items-end gap-4 ${
-                                            message.isSelf ? "flex-row-reverse" : "flex-row"
-                                        }`}
+                                        className={`flex ${
+                                            message.isSelf ? "justify-end" : "justify-start"
+                                        } gap-2`}
+                                        style={{
+                                            transformOrigin: message.isSelf
+                                                ? "right center"
+                                                : "left center",
+                                        }}
                                     >
-                                        <Avatar className="h-8 w-8 flex-shrink-0">
-                                            <AvatarFallback>{message.sender[0]}</AvatarFallback>
-                                        </Avatar>
+                                        {!message.isSelf && (
+                                            <Avatar className="h-8 w-8 flex-shrink-0">
+                                                <AvatarFallback>{message.sender[0]}</AvatarFallback>
+                                            </Avatar>
+                                        )}
                                         <div
                                             className={`rounded-2xl p-3 ${
-                                                message.isSelf ? "bg-darkBlue text-white" : "bg-orange-50 text-black"
-                                            } w-full max-w-2xl`}
+                                                message.isSelf
+                                                    ? "bg-darkBlue text-white"
+                                                    : "bg-orange-50 text-black"
+                                            } inline-block max-w-[70%]`}
+                                            style={{
+                                                marginLeft: message.isSelf ? "auto" : "0",
+                                                marginRight: message.isSelf ? "0" : "auto",
+                                                wordBreak: "break-word",
+                                                marginBottom: `${5 * messageScale}px`,
+                                            }}
                                         >
                                             {message.type === "image"
                                                 ? renderImage(message)
                                                 : message.type === "audio"
                                                     ? renderAudioPlayer(message)
-                                                    : <ReactMarkdown className="text-sm prose prose-sm max-w-none">
-                                                        {message.text}
-                                                    </ReactMarkdown>}
-                                            <p className="text-xs opacity-70 mt-1 text-center text-orange-500">
+                                                    : (
+                                                        <ReactMarkdown className="text-sm prose prose-sm max-w-none break-words">
+                                                            {message.text}
+                                                        </ReactMarkdown>
+                                                    )}
+                                            <p
+                                                className="text-xs opacity-70 mt-1 text-center text-orange-500"
+                                                style={{ marginTop: `${4 * messageScale}px` }}
+                                            >
                                                 {new Date(message.timestamp).toLocaleString()}
                                             </p>
                                         </div>
@@ -161,3 +210,4 @@ export const FullScreenTelegramMessages: React.FC<FullScreenTelegramMessagesProp
         </div>
     );
 };
+

@@ -42,7 +42,7 @@ const useTelegramMessagesViewModel = (initialTelegramChatId: string) => {
     const loadMessages = useCallback(async () => {
         if (!telegramChatId) {
             console.error("Telegram Chat ID is missing.");
-            return;
+            return [];
         }
 
         setIsLoading(true);
@@ -75,8 +75,10 @@ const useTelegramMessagesViewModel = (initialTelegramChatId: string) => {
             }));
 
             setMessages(formattedMessages);
+            return formattedMessages; // Explicitly return messages
         } catch (error) {
             console.error("Error loading messages:", error);
+            return [];
         } finally {
             setIsLoading(false);
         }

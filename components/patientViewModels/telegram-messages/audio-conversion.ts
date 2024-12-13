@@ -1,47 +1,65 @@
 // components/patientViewModels/telegram-messages/audio-conversion.ts
 
-import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { fetchFile } from '@ffmpeg/util';
+import { FFmpeg } from "@ffmpeg/ffmpeg";
+import { fetchFile } from "@ffmpeg/util";
+
+interface AudioConversionOptions {
+    outputFormat: "ogg" | "mp4";
+    bitrate?: string; // Default: "192k"
+    sampleRate?: string; // Default: "48000"
+}
 
 /**
- * Converts the recorded audio (which may be in MP4 or WebM format)
- * into OGG (Opus) format.
- * @param inputBlob - The raw audio Blob from the browser MediaRecorder.
- * @returns A Promise resolving to a converted Blob in OGG/Opus format.
+ * Converts an input audio file (e.g., WebM, MP4, OGG) to the desired format.
+ * @param inputBlob - The raw audio Blob.
+ * @param options - Conversion options (output format, bitrate, sample rate).
+ * @returns A Promise resolving to a converted Blob.
  */
-export async function convertToOpus(inputBlob: Blob): Promise<Blob> {
-    console.log("[DEBUG] Converting audio file:", {
-        type: inputBlob.type,
+export async function convertAudio(
+    inputBlob: Blob,
+    options: AudioConversionOptions
+): Promise<Blob> {
+    console.log("[DEBUG] Starting audio conversion with options:", {
+        inputType: inputBlob.type,
         size: inputBlob.size,
+        ...options,
     });
+
+    const { outputFormat, bitrate = "192k", sampleRate = "48000" } = options;
 
     const ffmpeg = new FFmpeg();
     await ffmpeg.load();
 
-    // Determine input file extension based on MIME type
-    let inputFileName = 'input.webm';
-    if (inputBlob.type.includes('mp4')) {
-        inputFileName = 'input.mp4';
-    } else if (inputBlob.type.includes('ogg')) {
-        inputFileName = 'input.ogg';
+    // Determine input file extension
+    let inputFileName = "input.webm";
+    if (inputBlob.type.includes("mp4")) {
+        inputFileName = "input.mp4";
+    } else if (inputBlob.type.includes("ogg")) {
+        inputFileName = "input.ogg";
     }
 
-    const outputFileName = 'output.ogg';
+    const outputFileName = `output.${outputFormat}`;
 
     await ffmpeg.writeFile(inputFileName, await fetchFile(inputBlob));
 
-    // Convert to OGG (Opus)
-    await ffmpeg.exec([
-        '-i', inputFileName,
-        '-c:a', 'libopus',
-        '-b:a', '160k',    // or another desired bitrate
-        '-ar', '48000',
+    // Configure the conversion command
+    const command = [
+        "-i",
+        inputFileName,
+        "-c:a",
+        outputFormat === "ogg" ? "libopus" : "aac",
+        "-b:a",
+        bitrate,
+        "-ar",
+        sampleRate,
         outputFileName,
-    ]);
+    ];
+
+    await ffmpeg.exec(command);
 
     const data = (await ffmpeg.readFile(outputFileName)) as Uint8Array;
 
     console.log("[DEBUG] Conversion successful. Output file size:", data.byteLength);
 
-    return new Blob([data], { type: 'audio/ogg' });
+    return new Blob([data], { type: `audio/${outputFormat}` });
 }

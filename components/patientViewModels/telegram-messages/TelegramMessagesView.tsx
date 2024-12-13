@@ -234,7 +234,7 @@ export const TelegramMessagesView: React.FC<TelegramMessagesViewProps> = ({
                 <Card className="w-full max-w-md mx-auto h-[600px] flex flex-col bg-background shadow-lg">
                     <CardHeader className="border-b p-4 flex flex-row items-center justify-between">
                         <CardTitle className="text-xl font-bold">
-                            <Button onClick={convertAllAudioNotes} disabled={isBatchConverting} className="p-2">
+                            <Button variant={'darkBlueOutline'} onClick={convertAllAudioNotes} disabled={isBatchConverting} className="p-2">
                                 {isBatchConverting ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />
                                 ) : (

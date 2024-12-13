@@ -1,3 +1,4 @@
+// components/patientViewModels/image-gallery/ImageGalleryView.tsx
 import React, { useRef } from 'react';
 import { Box, IconButton, Button } from '@mui/material';
 import { ChevronLeft, ChevronRight } from 'lucide-react';

@@ -1,3 +1,4 @@
+// components/patientViewModels/image-gallery/ImageGallery.tsx
 import React from 'react';
 import { useParams } from 'next/navigation';
 import ImageGalleryView from './ImageGalleryView';

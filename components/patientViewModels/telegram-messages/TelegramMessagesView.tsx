@@ -121,6 +121,7 @@ export const TelegramMessagesView: React.FC<TelegramMessagesViewProps> = ({
                     updatedMessages[messageIndex] = {
                         ...updatedMessages[messageIndex],
                         signedUrl: convertedUrl,
+                        format: "mp4", // new field to indicate it's now MP4
                     };
                 }
 
@@ -158,7 +159,7 @@ export const TelegramMessagesView: React.FC<TelegramMessagesViewProps> = ({
 
         return (
             <div className="w-full p-0">
-                <AudioNotePlayer mediaUrl={message.signedUrl} />
+                <AudioNotePlayer mediaUrl={message.signedUrl} format={message.format} />
             </div>
         );
     };

@@ -15,7 +15,9 @@ type: string;
 mediaUrl?: string;
 encryptedMedia?: string;
 encryptionKey?: string;
-signedUrl?: string; // Add this property
+signedUrl?: string;
+format?: string;
+
 
 }
 const useTelegramMessagesViewModel = (initialTelegramChatId: string) => {

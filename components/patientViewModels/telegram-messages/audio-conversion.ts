@@ -44,14 +44,10 @@ export async function convertAudio(
 
     // Configure the conversion command
     const command = [
-        "-i",
-        inputFileName,
-        "-c:a",
-        outputFormat === "ogg" ? "libopus" : "aac",
-        "-b:a",
-        bitrate,
-        "-ar",
-        sampleRate,
+        "-i", inputFileName,
+        "-c:a", outputFormat === "ogg" ? "libopus" : "aac",
+        "-b:a", bitrate,
+        "-ar", sampleRate,
         outputFileName,
     ];
 
@@ -62,4 +58,14 @@ export async function convertAudio(
     console.log("[DEBUG] Conversion successful. Output file size:", data.byteLength);
 
     return new Blob([data], { type: `audio/${outputFormat}` });
+}
+
+/**
+ * Converts a given audio Blob (e.g., MP4) to OGG/Opus format specifically.
+ * This is a convenience wrapper around convertAudio.
+ * @param inputBlob - The raw MP4 audio Blob.
+ * @returns OGG/Opus audio Blob.
+ */
+export async function convertToOpus(inputBlob: Blob): Promise<Blob> {
+    return await convertAudio(inputBlob, { outputFormat: "ogg" });
 }

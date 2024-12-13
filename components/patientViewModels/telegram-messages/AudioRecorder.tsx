@@ -1,8 +1,9 @@
 // components/patientViewModels/telegram-messages/AudioRecorder.tsx
+// components/patientViewModels/telegram-messages/AudioRecorder.tsx
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Mic, Square, Loader } from 'lucide-react';
-import { convertToOpus } from './audio-conversion';
+import { convertToOpus } from './audio-conversion'; // Ensure this is now defined in audio-conversion.ts
 
 interface AudioRecorderProps {
     onRecordingComplete: (file: Blob, duration: number) => void;
@@ -29,13 +30,9 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
             const userMediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
             setStream(userMediaStream);
 
-            // Safari on iOS typically supports audio/mp4 with AAC for audio recording.
             const mimeType = 'audio/mp4';
-
             if (!MediaRecorder.isTypeSupported(mimeType)) {
-                console.warn(`MIME type ${mimeType} not supported. Attempting fallback...`);
-                // If this somehow fails on older versions, you could fallback to a supported MIME type.
-                // But ideally on Safari iOS, audio/mp4 should be available.
+                console.warn(`MIME type ${mimeType} not supported. Using default settings.`);
             }
 
             mediaRecorder.current = new MediaRecorder(userMediaStream, { mimeType });
@@ -63,7 +60,7 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({
                         size: rawAudioBlob.size,
                     });
 
-                    // Convert the MP4 blob from Safari to OGG/Opus
+                    // Convert the MP4 blob to OGG/Opus before sending
                     const convertedAudioBlob = await convertToOpus(rawAudioBlob);
 
                     console.log("[DEBUG] Converted audio Blob:", {

@@ -11,6 +11,7 @@ import TelegramMessagesDoctorView from '@/components/patientViewModels/telegram-
 import { CircleLoader } from 'react-spinners';
 
 import dynamic from 'next/dynamic';
+import {TelegramIcon} from "@/public/assets/icons/Telegram";
 
 const AppBuilderWrapper = dynamic(
     () => import('@/components/patientViewModels/videocall/AppBuilderWrapper'),
@@ -67,7 +68,7 @@ const PatientDashboardContent: React.FC = () => {
             return <ImageGallery />;
         } else if (section === 'contact') {
             return (
-                <div className="bg-gradient-to-b from-orange-500 to-white h-full">
+                <div className="bg-gradient-to-b from-darkBlue to-white h-full">
                     {patientInfo?.telegramChatId ? (
                         <TelegramMessagesDoctorView telegramChatId={patientInfo.telegramChatId} />
                     ) : (
@@ -113,9 +114,9 @@ const PatientDashboardContent: React.FC = () => {
         },
         {
             id: 'contact',
-            icon: MessageCircle,
-            label: 'Contact',
-            color: 'bg-orange-500',
+            icon: TelegramIcon,
+            label: 'Messaging',
+            color: 'bg-darkBlue',
             textColor: 'text-white'
         },
         {

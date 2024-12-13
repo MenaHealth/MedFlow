@@ -15,10 +15,12 @@ type: string;
 mediaUrl?: string;
 encryptedMedia?: string;
 encryptionKey?: string;
-signedUrl?: string; // Add this property
+signedUrl?: string;
+format?: string;
+
 
 }
-const useTelegramMessagesViewModel = (initialTelegramChatId: string) => {
+    const useTelegramMessagesViewModel = (initialTelegramChatId: string) => {
     const [messages, setMessages] = useState<TelegramMessage[]>([]);
     const [newMessage, setNewMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -42,7 +44,7 @@ const useTelegramMessagesViewModel = (initialTelegramChatId: string) => {
     const loadMessages = useCallback(async () => {
         if (!telegramChatId) {
             console.error("Telegram Chat ID is missing.");
-            return;
+            return [];
         }
 
         setIsLoading(true);
@@ -75,8 +77,10 @@ const useTelegramMessagesViewModel = (initialTelegramChatId: string) => {
             }));
 
             setMessages(formattedMessages);
+            return formattedMessages; // Explicitly return messages
         } catch (error) {
             console.error("Error loading messages:", error);
+            return [];
         } finally {
             setIsLoading(false);
         }
@@ -199,7 +203,7 @@ const sendMessage = useCallback(async () => {
         setIsLoading(true);
         try {
             const formData = new FormData();
-            formData.append("file", blob); // Use blob here
+            formData.append("file", blob);
             formData.append("telegramChatId", telegramChatId);
             formData.append("duration", duration.toString());
 
@@ -209,7 +213,7 @@ const sendMessage = useCallback(async () => {
             });
 
             if (!uploadResponse.ok) {
-                throw new Error("Failed to upload audio file to Digital Ocean");
+                throw new Error("Failed to upload audio file");
             }
 
             const { signedUrl, filePath } = await uploadResponse.json();
@@ -228,6 +232,8 @@ const sendMessage = useCallback(async () => {
             }
 
             const data = await response.json();
+
+            // Add the message to local state with the signedUrl so it appears immediately
             setMessages((prevMessages) => [
                 ...prevMessages,
                 {
@@ -238,6 +244,8 @@ const sendMessage = useCallback(async () => {
                     isSelf: true,
                     type: "audio",
                     mediaUrl: filePath,
+                    signedUrl: signedUrl,     // Include signedUrl immediately
+                    format: "mp4"             // Indicate it's in mp4 format if appropriate
                 },
             ]);
         } catch (error) {
@@ -254,6 +262,7 @@ const sendMessage = useCallback(async () => {
         messages,
         newMessage,
         setNewMessage,
+        setMessages, // Add this
         sendMessage,
         sendImage,
         sendAudioMessage,

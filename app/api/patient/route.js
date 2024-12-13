@@ -26,7 +26,6 @@ export const PATCH = async (request, { params }) => {
 
         const {
             _id,
-            files,
             firstName,
             lastName,
             phone,
@@ -63,13 +62,12 @@ export const PATCH = async (request, { params }) => {
 
         console.log("[Debug] Existing patient before update:", JSON.stringify(existingPatient, null, 2));
 
-        existingPatient.files = files ?? existingPatient.files;
         existingPatient.firstName = firstName ?? existingPatient.firstName;
         existingPatient.lastName = lastName ?? existingPatient.lastName;
         existingPatient.phone = phone ?? existingPatient.phone;
         existingPatient.telegramAccessHash = telegramAccessHash ?? existingPatient.telegramAccessHash;
-        existingPatient.telegramChatId = telegramChatId ?? existingPatient.telegramChatId;
         existingPatient.dob = dob ?? existingPatient.dob;
+        existingPatient.telegramChatId = telegramChatId ?? existingPatient.telegramChatId;
         existingPatient.country = country ?? existingPatient.country;
         existingPatient.city = city ?? existingPatient.city;
         existingPatient.language = language ?? existingPatient.language;

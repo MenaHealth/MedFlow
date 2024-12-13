@@ -58,7 +58,6 @@ const rxOrderSchema = new Schema({
 });
 
 export interface IPatient extends Document {
-    files?: any[];
     firstName: string;
     lastName: string;
     phone?: {
@@ -121,7 +120,6 @@ export interface IPatient extends Document {
 
 
 const PatientSchema = new Schema<IPatient>({
-    files: [{ type: Object }],
     firstName: { type: String },
     lastName: { type: String },
     bmi: { type: String },

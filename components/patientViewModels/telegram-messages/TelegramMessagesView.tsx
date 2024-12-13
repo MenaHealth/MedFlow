@@ -92,6 +92,12 @@ export const TelegramMessagesView: React.FC<TelegramMessagesViewProps> = ({
         });
     }, [messages]);
 
+    useEffect(() => {
+        if (scrollAreaRef.current) {
+            scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+        }
+    }, [messages]);
+
     const convertAllAudioNotes = async () => {
         setIsBatchConverting(true);
 

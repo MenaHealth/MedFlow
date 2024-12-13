@@ -57,7 +57,7 @@ export const FullScreenTelegramMessages: React.FC<FullScreenTelegramMessagesProp
 
         return (
             <div className="w-full p-0">
-                <AudioNotePlayer mediaUrl={message.signedUrl} />
+                <AudioNotePlayer mediaUrl={message.signedUrl} format={message.format}/>
             </div>
         );
     };

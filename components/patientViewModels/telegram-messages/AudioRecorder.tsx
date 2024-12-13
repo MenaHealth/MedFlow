@@ -1,9 +1,8 @@
 // components/patientViewModels/telegram-messages/AudioRecorder.tsx
-// components/patientViewModels/telegram-messages/AudioRecorder.tsx
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Mic, Square, Loader } from 'lucide-react';
-import { convertToOpus } from './audio-conversion'; // Ensure this is now defined in audio-conversion.ts
+import { convertToOpus } from './audio-conversion';
 
 interface AudioRecorderProps {
     onRecordingComplete: (file: Blob, duration: number) => void;

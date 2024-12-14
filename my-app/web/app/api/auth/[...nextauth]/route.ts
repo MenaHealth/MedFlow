@@ -7,12 +7,12 @@ import jwt from 'jsonwebtoken';
 import { Session } from "next-auth";
 import { JWT } from "next-auth/jwt";
 
-import User from '@/models/user';
-import Admin from '@/models/admin';
-import dbConnect from '@/utils/database';
-import {Languages} from "@/data/languages.enum";
-import {Countries} from "@/data/countries.enum";
-import { DoctorSpecialtyList } from "@/data/doctorSpecialty.enum";
+import User from '../../../../../shared/models//user';
+import Admin from '../../../../../shared/models/admin';
+import dbConnect from './../../../../../shared/utils/database';
+import {Languages} from "../../../../../shared/data/languages.enum";
+import {Countries} from "../../../../../shared/data/countries.enum";
+import { DoctorSpecialtyList } from "../../../../../shared/data/doctorSpecialty.enum";
 
 interface Credentials {
     email: string;

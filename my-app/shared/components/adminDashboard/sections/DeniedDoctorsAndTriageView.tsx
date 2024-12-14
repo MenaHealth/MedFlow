@@ -1,16 +1,23 @@
 // components/auth/adminDashboard/sections/DeniedDoctorsAndTriageView.tsx
-
+// my-app/shared/components/adminDashboard/sections/DeniedDoctorsAndTriageView.tsx
 'use client';
 
-import React, { useEffect } from 'react';
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from 'react';
 import { Loader2, CheckSquare, UserRoundPlus } from "lucide-react";
-import InfiniteScroll from '@/components/ui/infiniteScroll';
-import { Table, TableColumn } from "@/components/ui/table";
+import InfiniteScroll from './../../../../shared/components/ui/infiniteScroll';
+import { Button } from "../../ui/button";
+import { Table, TableColumn } from "../../ui/table";
 import { useDeniedDoctorsAndTriageViewModel, User } from './DeniedDoctorsAndTriageViewModel';
-import { useSession } from 'next-auth/react';
+import dynamic from 'next/dynamic';
+
+const useSession = dynamic(
+    () => import('next-auth/react').then((mod) => mod.useSession),
+    { ssr: false }
+);
 
 export default function DeniedDoctorsAndTriageView() {
+    const [session, setSession] = useState(null);
+
     const {
         deniedUsers,
         loadingDeniedUsers,
@@ -82,7 +89,14 @@ export default function DeniedDoctorsAndTriageView() {
         }
     ];
 
-    const { data: session } = useSession();
+    useEffect(() => {
+        const getSession = async () => {
+            const { data } = await useSession();
+            setSession(data);
+        };
+        getSession();
+    }, []);
+
     useEffect(() => {
         if (session) {
             console.log("Session Data:", session);

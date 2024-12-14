@@ -1,11 +1,11 @@
     // models/user.ts
     import { Schema, model, models, Document, CallbackError } from 'mongoose';
     import bcrypt from 'bcryptjs';
-    import { SecurityQuestion } from '@/data/securityQuestions.enum';
-    import { Countries } from '@/data/countries.enum';
-    import { Languages } from '@/data/languages.enum';
-    import { DoctorSpecialties, DoctorSpecialtyList } from '@/data/doctorSpecialty.enum';
-    import type { IUser as User } from '@/models/user';
+    import { SecurityQuestion } from '../data/securityQuestions.enum';
+    import { Countries } from '../data/countries.enum';
+    import { Languages } from '../data/languages.enum';
+    import { DoctorSpecialties, DoctorSpecialtyList } from '../data/doctorSpecialty.enum';
+    import type { IUser as User } from '../models/user';
 
     interface IUser extends Document {
       lastLogin: Date;

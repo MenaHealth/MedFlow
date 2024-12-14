@@ -8,11 +8,11 @@ import NewSignupsView from './sections/NewSignupsView';
 import DeniedDoctorsAndTriage from './sections/DeniedDoctorsAndTriageView';
 import ExistingDoctorsAndTriageView from './sections/ExistingDoctorsAndTriageView';
 import MedOrdersView from './sections/MedOrdersView';
-import ForgotPasswordView from "@/components/adminDashboard/sections/ForgotPasswordView";
-import AdminManagement from "@/components/adminDashboard/sections/AdminManagementView";
+import ForgotPasswordView from "./..//adminDashboard/sections/ForgotPasswordView";
+import AdminManagement from "./sections/AdminManagementView";
 import ChangeAccountTypeView from "./sections/ChangeAccountTypeView";
 import {Loader2, RefreshCw, Users, UserCheck, UserX, BriefcaseMedical, ShieldCheck, RotateCcw, ArrowRightLeft } from 'lucide-react';
-import { Button } from "@/components/ui/button";
+import { Button } from "../ui/button";
 
 const sections = [
     { id: 'newSignups', title: 'New Signups', icon: Users, color: 'bg-orange-50 text-orange-800', component: NewSignupsView },

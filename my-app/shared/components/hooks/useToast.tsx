@@ -1,9 +1,9 @@
 // components/hooks/useToast.ts
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback } from 'react';
 import * as ToastPrimitives from "@radix-ui/react-toast"
 import { X } from "lucide-react"
-import { cn } from "@/utils/classNames"
-import {createApiWrapper} from "@/utils/apiWrapper";
+import { cn } from "../../utils/classNames"
+import {createApiWrapper} from "../../utils/apiWrapper";
 
 export type ToastProps = {
     title: string;

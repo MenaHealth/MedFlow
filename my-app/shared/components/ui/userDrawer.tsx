@@ -10,10 +10,10 @@ import {
     DrawerHeader,
     DrawerTitle,
     DrawerDescription,
-} from "../../components/ui/drawer";
-import { Button } from "@/components/ui/button";
+} from "./drawer";
+import { Button } from "./button";
 import ChangeAccountTypeView from "./../adminDashboard/sections/ChangeAccountTypeView"; // Ensure this path is correct
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "./card";
 
 interface UserDrawerProps {
     isOpen: boolean;

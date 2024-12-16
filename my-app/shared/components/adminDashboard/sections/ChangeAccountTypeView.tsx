@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState} from 'react';
-import { Button } from "@/components/ui/button";
+import { Button } from "../../../../shared/components/ui/button";
 import { useSession } from 'next-auth/react';
 
 export default function ChangeAccountTypeView() {

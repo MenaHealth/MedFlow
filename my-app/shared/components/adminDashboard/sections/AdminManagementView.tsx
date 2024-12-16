@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { Table, TableColumn } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+// my-app/shared/components/adminDashboard/sections/AdminManagementView.tsx
+import { Table, TableColumn } from "../../ui/table";
+import { Button } from "../../ui/button";
 import { Loader2, ChevronDown, ChevronRight } from "lucide-react";
 import { useAdminManagementViewModel } from './AdminManagementViewModel';
-import type { IAdmin } from '@/models/admin';
+import type { IAdmin } from '../../../models/admin';
 
 export default function AdminManagementView() {
     const {

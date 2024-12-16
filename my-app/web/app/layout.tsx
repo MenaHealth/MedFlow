@@ -1,11 +1,11 @@
 'use client';
 
-import "@/styles/globals.css";
-import "@/styles/fonts.css";
-import LayoutWrapper from "@/components/LayoutWrapper";
-import { Providers } from "@/components/Providers";
-import { ToastContext, useToastState, ToastComponent } from '@/components/hooks/useToast';
-import { createApiWrapper } from '@/utils/apiWrapper';
+import "./../../shared/styles/globals.css";
+import "./../../shared//styles/fonts.css";
+import LayoutWrapper from "./../../shared/components/LayoutWrapper";
+import { Providers } from "../../shared/components/Providers";
+import { ToastContext, useToastState, ToastComponent } from '../../shared/components/hooks/useToast';
+import { createApiWrapper } from '../../shared/utils/apiWrapper';
 
 export default function RootLayout({
                                        children,

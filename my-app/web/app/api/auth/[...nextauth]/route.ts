@@ -1,4 +1,4 @@
-// app/api/auth/[...nextauth]/route.ts
+// my-app/web/app/api/auth/[...nextauth]/route.ts
 
 import NextAuth, { NextAuthOptions, User as NextAuthUser } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';

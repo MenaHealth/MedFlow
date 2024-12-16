@@ -1,8 +1,10 @@
+// my-app/shared/components/adminDashboard/sections/AdminManagementViewModel.tsx
 import { useSession } from 'next-auth/react';
 import { useState, useCallback, useEffect } from 'react';
-import { useToast } from '@/components/hooks/useToast';
-import { IAdmin } from "@/models/admin";
+import { useToast } from '../../hooks/useToast';
+import { IAdmin } from "../../../models/admin";
 import Fuse from 'fuse.js';
+
 
 export function useAdminManagementViewModel() {
     const [allAdmins, setAllAdmins] = useState<IAdmin[]>([]);

@@ -1,8 +1,8 @@
-// types/next-auth.d.ts
+// my-app/shared/types/next-auth.d.ts
 import { DefaultSession } from "next-auth";
-import { Countries } from "@/data/countries.enum";
-import { Languages } from "@/data/languages.enum";
-import { DoctorSpecialtyList } from "@/data/doctorSpecialty.enum";
+import { Countries } from "../data/countries.enum";
+import { Languages } from "../data/languages.enum";
+import { DoctorSpecialtyList } from "../data/doctorSpecialty.enum";
 
 declare module "next-auth" {
     interface Session {

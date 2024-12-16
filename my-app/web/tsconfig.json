@@ -1,3 +1,4 @@
+//my-app/web/tsconfig.json
 {
   "compilerOptions": {
     "types": ["next-auth"],
@@ -34,6 +35,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
+    "types/**/*.d.ts",
+    "shared/types/**/*.d.ts",
     "app/api/auth/[...nextauth]/session.d.ts"
   ],
   "exclude": ["node_modules"]

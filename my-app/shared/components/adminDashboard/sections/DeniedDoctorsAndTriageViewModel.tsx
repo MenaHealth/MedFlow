@@ -3,7 +3,9 @@
 import { useState } from 'react';
 import { useQueryClient, useInfiniteQuery, useMutation } from 'react-query';
 import { useSession } from 'next-auth/react';
-import { useToast } from '@/components/hooks/useToast';
+import type { Session } from 'next-auth';
+
+import { useToast } from '../../hooks/useToast';
 
 export interface User {
     _id: string;
@@ -18,6 +20,7 @@ export interface User {
 
 export function useDeniedDoctorsAndTriageViewModel() {
     const { data: session } = useSession();
+    const token = session?.user.token; // Now recognized by TypeScript
     const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
     const [isCountryVisible, setIsCountryVisible] = useState(false);
     const [isDoctorSpecialtyVisible, setIsDoctorSpecialtyVisible] = useState(false);

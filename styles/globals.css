@@ -1,0 +1,580 @@
+/*styles/globals.css*/
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --darkOrange: #59200F;
+  --lightOrange: #ffa270;
+  /* The logo orange and doctor user type color*/
+  --orange: #FF5722;
+  --lightYellow: #fbf9c1;
+  /* yellow triage user type color*/
+  --yellow: #F7F065;
+  --blue: #66c1f8;
+  --lightBlue: #94d1f7;
+  --purple: #9150e8;
+  --lightPurple: #9e66e8;
+  /* The primary color (darkBlue) used for body/<p> text */
+  --darkBlue: #120f0b;
+  --lightGray: #d2d1d1;
+  --gray: #a8a8a8;
+  --darkGrey: #7a7a7a;
+  --white: #ffffff;
+}
+
+.text-muted-foreground {
+  color: #6b7280; /* You can change this to any muted color you like */
+}
+
+.text-white {
+  color: #ffffff;
+}
+
+body {
+  height: 100vh;
+}
+
+.main {
+  width: 100vw;
+  min-height: 100vh;
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  padding: 120px 24px 160px 24px;
+  pointer-events: none;
+}
+
+.main:before {
+  background: radial-gradient(circle, rgba(2, 0, 36, 0) 0, #fafafa 100%);
+  position: absolute;
+  content: "";
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  top: 0;
+}
+
+.main:after {
+  content: "";
+  background-image: url("/assets/images/grid.svg");
+  z-index: 0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  opacity: 0.4;
+  filter: invert(1);
+}
+
+/* Tailwind Styles */
+
+.app {
+  @apply relative z-10 justify-between items-center flex-col max-w-7xl mx-auto sm:px-16 px-6;
+}
+
+.app:not(.dashboard-page) {
+  padding: 1rem;
+  max-width: max-content;
+}
+
+.black_btn {
+  @apply rounded-full border border-black bg-black py-1.5 px-5 text-white transition-all hover:bg-white hover:text-black text-center text-sm  flex items-center justify-center;
+}
+
+.login_btn {
+  @apply rounded-3xl w-[15rem] h-20 text-xl border border-black bg-black py-1.5 px-5 text-white transition-all hover:bg-white hover:text-black text-center flex items-center justify-center;
+}
+
+.outline_btn {
+  @apply rounded-full border border-black bg-transparent py-1.5 px-5 text-black transition-all hover:bg-black hover:text-white text-center text-sm  flex items-center justify-center;
+}
+
+.head_text {
+  @apply mt-5 text-5xl font-extrabold leading-[1.15] text-black sm:text-6xl;
+}
+
+.head_text_2 {
+  @apply mt-1 mb-1 text-lg font-extrabold leading-[1.15] text-black sm:text-3xl;
+}
+
+
+.orange_gradient {
+  @apply bg-gradient-to-r from-amber-500 via-orange-600 to-yellow-500 bg-clip-text text-transparent;
+}
+
+.green_gradient {
+  @apply bg-gradient-to-r from-green-400 to-green-500 bg-clip-text text-transparent;
+}
+
+.blue_gradient {
+  @apply bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent;
+}
+
+.desc {
+  @apply mt-5 text-lg text-gray-600 sm:text-xl max-w-2xl;
+}
+
+.search_input {
+  @apply block w-full rounded-md border border-gray-200 bg-white py-2.5  pl-5 pr-12 text-sm shadow-lg font-medium focus:border-black focus:outline-none focus:ring-0;
+}
+
+.copy_btn {
+  @apply w-7 h-7 rounded-full bg-white/10 shadow-[inset_10px_-50px_94px_0_rgb(199,199,199,0.2)] backdrop-blur flex justify-center items-center cursor-pointer;
+}
+
+.glassmorphism {
+  @apply rounded-xl border border-gray-200 bg-white/20 shadow-[inset_10px_-50px_94px_0_rgb(199,199,199,0.2)] backdrop-blur p-5;
+}
+
+
+/* Feed Component */
+.feed {
+  @apply mt-16 mx-auto w-full max-w-xl flex justify-center items-center flex-col gap-2;
+}
+
+/* Form Component */
+.form_textarea {
+  @apply w-full flex rounded-lg h-[200px] mt-2 p-3 text-sm text-gray-500 outline-0;
+}
+
+.form_input {
+  @apply w-full flex rounded-lg mt-2 p-3 text-sm text-gray-500 outline-0;
+}
+
+/* Nav Component */
+.logo_text {
+  @apply font-semibold text-lg text-black tracking-wide;
+}
+
+.dropdown {
+  @apply absolute right-0 border-black top-full mt-3 w-full p-5 rounded-lg bg-white min-w-[210px] flex flex-col gap-2 justify-center items-center;
+}
+
+.dropdown_link {
+  @apply text-sm  text-gray-700 hover:text-gray-500 font-medium text-center;
+}
+
+/* PromptCard Component */
+.prompt_card {
+  @apply flex-1 break-inside-avoid rounded-lg border border-gray-300 bg-white/20 bg-clip-padding p-6 pb-4 backdrop-blur-lg backdrop-filter md:w-[360px] w-full h-fit;
+}
+
+.flex-center {
+  @apply flex justify-center items-center;
+}
+
+.flex-start {
+  @apply flex justify-start items-start;
+}
+
+.flex-end {
+  @apply flex justify-end items-center;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+ul {
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+  color: black;
+  font-size: 18px;
+}
+
+/* logo  */
+.logo {
+  font-size: 30px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+
+/* ul  */
+.navMenu {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 60px;
+}
+
+/* media queries */
+
+@media screen and (max-width: 780px){
+  
+  /* hamburger */
+  .hamburger {
+    display: block;
+    cursor: pointer;
+  }
+
+  .bar {
+          background-color: #120f0b;
+        width: 20px;
+        height: 3px;
+        display: block;
+        margin: 5px;
+        -webkit-transition: 0.3s ease-in-out;
+        transition: 0.3s ease-in-out;
+    }
+
+  /* adding active class to the bars  */
+  .hamburger.active .bar:nth-child(2){
+    opacity: 0;
+  }
+  .hamburger.active .bar:nth-child(1){
+    transform: translateY(8px) rotate(45deg);
+  }
+  .hamburger.active .bar:nth-child(3){
+    transform: translateY(-8px) rotate(-45deg);
+  }
+
+
+  /* navMenu */
+
+  .navMenu{
+    position: absolute;
+    flex-direction: column;
+    gap: 0;
+    top: 70px;
+    left: -100%;
+    text-align: start;
+    width: 100%;
+    transition: 0.7s ease-in-out;
+    background-color: aliceblue;
+    padding: 10px;
+  }
+
+  .navMenu.active{
+    left: 0;
+  }
+
+  .navMenu li {
+    margin: 16px 0;
+  }
+}
+
+ 
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+ 
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+ 
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+ 
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+ 
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+ 
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+ 
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+ 
+    --radius: 0.5rem;
+  }
+ 
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+ 
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+ 
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+ 
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+ 
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+ 
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+ 
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+ 
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+ 
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+  }
+}
+ 
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+
+/* components/ui/form.css */
+.form-item .relative {
+  position: relative;
+}
+
+.form-item .relative input:focus + label,
+.form-item .relative input:not(:placeholder-shown) + label {
+  font-size: 0.75rem;
+  top: -0.5rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.form-item .relative input {
+  padding-top: 1rem;
+}
+
+.avatar{
+  background: #FF5722;
+  width: 34px;
+  height: 34px;
+  -webkit-border-radius: 50%;
+  -moz-border-radius: 50%;
+  -ms-border-radius: 50%;
+  border-radius: 50%;
+  display: inline-block;
+  text-align: center;
+  line-height: 34px;
+  font-weight: 400;
+  margin-right: 5px;
+  color: #FFFFFF;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-in-out;
+}
+
+.gsi-material-button {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  -webkit-appearance: none;
+  background-color: #131314;
+  background-image: none;
+  border: 1px solid #747775;
+  -webkit-border-radius: 20px;
+  border-radius: 20px;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  color: #e3e3e3;
+  cursor: pointer;
+  font-family: 'Roboto', arial, sans-serif;
+  font-size: 14px;
+  height: 40px;
+  letter-spacing: 0.25px;
+  outline: none;
+  overflow: hidden;
+  padding: 0 12px;
+  position: relative;
+  text-align: center;
+  -webkit-transition: background-color .218s, border-color .218s, box-shadow .218s;
+  transition: background-color .218s, border-color .218s, box-shadow .218s;
+  vertical-align: middle;
+  white-space: nowrap;
+  width: auto;
+  max-width: 400px;
+  min-width: min-content;
+  border-color: #8e918f;
+}
+
+.gsi-material-button .gsi-material-button-icon {
+  height: 20px;
+  margin-right: 12px;
+  min-width: 20px;
+  width: 20px;
+}
+
+.gsi-material-button .gsi-material-button-content-wrapper {
+  -webkit-align-items: center;
+  align-items: center;
+  display: flex;
+  -webkit-flex-direction: row;
+  flex-direction: row;
+  -webkit-flex-wrap: nowrap;
+  flex-wrap: nowrap;
+  height: 100%;
+  justify-content: space-between;
+  position: relative;
+  width: 100%;
+}
+
+.gsi-material-button .gsi-material-button-contents {
+  -webkit-flex-grow: 1;
+  flex-grow: 1;
+  font-family: 'Roboto', arial, sans-serif;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: top;
+}
+
+.gsi-material-button .gsi-material-button-state {
+  -webkit-transition: opacity .218s;
+  transition: opacity .218s;
+  bottom: 0;
+  left: 0;
+  opacity: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.gsi-material-button:disabled {
+  cursor: default;
+  background-color: #13131461;
+  border-color: #8e918f1f;
+}
+
+.gsi-material-button:disabled .gsi-material-button-state {
+  background-color: #e3e3e31f;
+}
+
+.gsi-material-button:disabled .gsi-material-button-contents {
+  opacity: 38%;
+}
+
+.gsi-material-button:disabled .gsi-material-button-icon {
+  opacity: 38%;
+}
+
+.gsi-material-button:not(:disabled):active .gsi-material-button-state, 
+.gsi-material-button:not(:disabled):focus .gsi-material-button-state {
+  background-color: white;
+  opacity: 12%;
+}
+
+.gsi-material-button:not(:disabled):hover {
+  -webkit-box-shadow: 0 1px 2px 0 rgba(60, 64, 67, .30), 0 1px 3px 1px rgba(60, 64, 67, .15);
+  box-shadow: 0 1px 2px 0 rgba(60, 64, 67, .30), 0 1px 3px 1px rgba(60, 64, 67, .15);
+}
+
+.gsi-material-button:not(:disabled):hover .gsi-material-button-state {
+  background-color: white;
+  opacity: 8%;
+}
+
+/* In your global CSS or the specific component styles */
+.text-container {
+  white-space: pre-wrap; /* Preserve line breaks, wrap long text */
+  overflow-wrap: break-word; /* Break words if too long */
+}
+
+.scrollable-text {
+  max-height: 100px; /* Set a maximum height for long content */
+  overflow-y: auto; /* Enable vertical scrolling for overflow */
+}
+
+@keyframes gradientAnimation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.bg-gradient-animation {
+  position: relative;
+  overflow: hidden;
+}
+
+.bg-gradient-animation::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(-45deg, #ffffff, #bebebb, #f1f5f9, #e5e7eb);
+  background-size: 400% 400%;
+  animation: gradientAnimation 15s ease infinite;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.bg-gradient-animation::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom,
+  rgba(255, 255, 255, 1) 0%,
+  rgba(255, 255, 255, 0.8) 20%,
+  rgba(255, 255, 255, 0.4) 40%,
+  rgba(255, 255, 255, 0.2) 60%,
+  rgba(255, 255, 255, 0) 100%
+  );
+  pointer-events: none;
+}
+
+.bg-gradient-animation:hover::before {
+  opacity: 1;
+}
+
+
+/* Audio Note Styling */
+.audio-note {
+  max-width: 300px;
+  max-height: 150px;
+  overflow: hidden;
+}
+
+/* Sent Message Container */
+.sent-message {
+  max-width: 250px;
+  padding: 10px;
+  border-radius: 15px;
+  word-wrap: break-word;
+}
+
+@media (min-width: 768px) {
+  .sent-message {
+    max-width: 300px;
+  }
+}

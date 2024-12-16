@@ -1,10 +1,9 @@
 //my-app/web/tsconfig.json
 {
   "compilerOptions": {
-    "types": ["next-auth"],
+    "typeRoots": ["./node_modules/@types", "./types"],
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
-    "typeRoots": ["./node_modules/@types", "./types"],
     "skipLibCheck": true,
     "strict": true,
     "noImplicitAny": true,

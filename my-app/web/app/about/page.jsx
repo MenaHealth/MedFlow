@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { Card } from '@/components/ui/card';
+import { Card } from '../../../shared/components/ui/card';
 import './aboutPage.css';
 import { ClipboardList, ClipboardPlus, Calendar, Image, Stethoscope, FileText } from 'lucide-react';
 

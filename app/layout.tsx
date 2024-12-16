@@ -2,8 +2,8 @@
 
 import "@/styles/globals.css";
 import "@/styles/fonts.css";
-import LayoutWrapper from "@/components/LayoutWrapper";
-import { Providers } from "@/components/Providers";
+import LayoutWrapper from "@/components/nav/LayoutWrapper";
+import { Providers } from "@/components/hooks/Providers";
 import { ToastContext, useToastState, ToastComponent } from '@/components/hooks/useToast';
 import { createApiWrapper } from '@/utils/apiWrapper';
 

@@ -19,13 +19,13 @@ import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 import InfoIcon from '@mui/icons-material/Info';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '../../../components/ui/button';
 import Tooltip from '../../../components/form/Tooltip';
 import './dashboard.css';
-import TableCellWithTooltip from '@/components/TableCellWithTooltip';
+import TableCellWithTooltip from './../../../components/triageDashboard/TableCellWithTooltip';
 import * as Toast from '@radix-ui/react-toast';
 
-import NotesCell from '@/components/NotesCell';
+import NotesCell from './../../../components/triageDashboard/NotesCell';
 
 
 import {

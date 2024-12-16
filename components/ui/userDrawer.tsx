@@ -10,7 +10,7 @@ import {
     DrawerHeader,
     DrawerTitle,
     DrawerDescription,
-} from "../../components/ui/drawer";
+} from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import ChangeAccountTypeView from "./../adminDashboard/sections/ChangeAccountTypeView"; // Ensure this path is correct
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";

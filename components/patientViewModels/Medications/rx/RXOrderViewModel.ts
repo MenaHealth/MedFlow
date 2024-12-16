@@ -1,18 +1,10 @@
-<<<<<<< HEAD:components/PatientViewModels/Medications/rx/RXOrderViewModel.ts
-// components/PatientViewModels/Medications/rx/RXOrderViewModel.ts
-import { useContext, useCallback, useState, useMemo } from 'react';
-=======
 // components/patientViewModels/Medications/rx/RXOrderViewModel.ts
 import {useCallback, useState, useMemo, useContext} from 'react';
 import { useSession } from 'next-auth/react'; // Import the session hook
->>>>>>> main:components/patientViewModels/Medications/rx/RXOrderViewModel.ts
 import { ToastContext } from '@/components/hooks/useToast';
 import { IRxOrder } from "@/models/patient";
 import { Types } from "mongoose";
-<<<<<<< HEAD:components/PatientViewModels/Medications/rx/RXOrderViewModel.ts
-=======
 import {usePatientDashboard} from "@/components/patientViewModels/PatientViewModelContext";
->>>>>>> main:components/patientViewModels/Medications/rx/RXOrderViewModel.ts
 
 interface Prescription {
     diagnosis: string;
@@ -27,7 +19,7 @@ export function useRXOrderViewModel(
     patientName: string
 ) {
     const { data: session } = useSession();
-    const { addRxOrder, refreshMedications } = usePatientDashboard(); 
+    const { addRxOrder, refreshMedications } = usePatientDashboard();
     const { api } = useContext(ToastContext);
 
     const initialRxOrder = useMemo(() => ({
@@ -39,14 +31,9 @@ export function useRXOrderViewModel(
         validTill: new Date(new Date().setMonth(new Date().getMonth() + 1)),
         city,
         prescriptions: [{ diagnosis: '', medication: '', dosage: '', frequency: '' }],
-<<<<<<< HEAD:components/PatientViewModels/Medications/rx/RXOrderViewModel.ts
-        rxStatus: 'not reviewed',
-    });
-=======
     }), [session, city]);
 
     const [rxOrder, setRxOrder] = useState<IRxOrder>(initialRxOrder);
->>>>>>> main:components/patientViewModels/Medications/rx/RXOrderViewModel.ts
     const [isLoading, setIsLoading] = useState(false);
 
     const isFormComplete = useMemo(() => {
@@ -95,39 +82,13 @@ export function useRXOrderViewModel(
     };
 
     const submitRxOrder = useCallback(async () => {
-        if (!isFormComplete || !patientId) {
-            console.error('Patient ID is undefined or form is incomplete');
+        if (!isFormComplete) {
             return;
         }
 
         setIsLoading(true);
 
         try {
-<<<<<<< HEAD:components/PatientViewModels/Medications/rx/RXOrderViewModel.ts
-            // Send RX order to the backend
-            const response = await api.post(`/api/patient/${patientId}/medications/rx-order`, rxOrder);
-            const savedRxOrder = response.data;
-
-            // Extract the UUID from the saved RX order
-            const uuid = savedRxOrder.rxOrderId;
-
-            // Generate URLs using the UUID only
-            const PatientRxUrl = `${window.location.origin}/rx-order-qr-code/${uuid}`;
-            const PharmacyQrUrl = `${window.location.origin}/rx-order-qr-code/pharmacy/${uuid}`;
-
-            // Update state with new URLs and QR code
-            setRxOrder(prevOrder => ({
-                ...prevOrder,
-                PatientRxUrl,
-                PharmacyQrUrl,
-                qrCode: savedRxOrder.qrCode,
-            }));
-
-            // Add RX order to the state and refresh medications
-            addRxOrder(savedRxOrder);
-            await refreshMedications();
-            onNewRxOrderSaved(savedRxOrder);
-=======
             const updatedRxOrder = {
                 ...rxOrder,
                 city,
@@ -140,7 +101,6 @@ export function useRXOrderViewModel(
 
             addRxOrder(savedRxOrder); // Update the context
             await refreshMedications(); // Refresh medications after adding
->>>>>>> main:components/patientViewModels/Medications/rx/RXOrderViewModel.ts
 
             // Reset form after saving
             setRxOrder({
@@ -148,9 +108,6 @@ export function useRXOrderViewModel(
                 prescribedDate: new Date(),
                 validTill: new Date(new Date().setMonth(new Date().getMonth() + 1)),
                 prescriptions: [{ diagnosis: '', medication: '', dosage: '', frequency: '' }],
-                PatientRxUrl: undefined,
-                PharmacyQrUrl: undefined,
-                qrCode: undefined,
             });
         } catch (error) {
             console.error('Failed to save RX order:', error);

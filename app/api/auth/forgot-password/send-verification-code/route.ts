@@ -1,4 +1,4 @@
-/// app/api/auth/forgot-password/send-verification-code/route.ts
+/// app/api/auth/forgot-password/send-text-verification-code/route.ts
 
 import { NextResponse } from 'next/server';
 import { sendVerificationEmail } from '@/utils/emails/forgot-password';

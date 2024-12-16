@@ -5,21 +5,21 @@ import { getToken } from 'next-auth/jwt';
 const PUBLIC_FILE = /\.(.*)$/;
 
 export async function middleware(req: any) {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-    const { pathname, searchParams } = req.nextUrl;
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });    const { pathname, searchParams } = req.nextUrl;
 
-    // Allow requests to public files, API routes, '/auth', and '/rx-order-qr-code'
     if (
         pathname.startsWith('/api') ||
         pathname.startsWith('/auth') ||
-        pathname.startsWith('/rx-order-qr-code') ||
+        pathname.startsWith('/rx-order') ||
+        pathname.startsWith('/new-patient') ||
         pathname.match(PUBLIC_FILE) ||
-        pathname === '/new-patient' ||
-        pathname === '/overview' ||
+        pathname === '/api/telegram-bot' ||
+        pathname.startsWith('/api/telegram-bot') ||
         pathname === '/about'
     ) {
         return NextResponse.next();
     }
+    // Allow requests to public files, API routes, '/auth', and '/rx-order'
 
     // Redirect reset-password requests to the login page with the reset code
     if (pathname === '/reset-password' && searchParams.has('code')) {

@@ -2,10 +2,6 @@
 import { Schema, model, models, Document, Types } from 'mongoose';
 import { DoctorSpecialties as SPECIALTIES } from './../data/doctorSpecialty.enum';
 import { INote, noteSchema } from './note';
-
-
-// models/patient.ts
-
 export interface IRxOrder {
     _id?: string;
     doctorSpecialty: string;
@@ -21,11 +17,14 @@ export interface IRxOrder {
         dosage: string;
         frequency: string;
     }>;
-    qrCode?: string;
     PatientRxUrl?: string;
+    PharmacyQrCode?: string;
     PharmacyQrUrl?: string;
-    RxProvider?: string;
-    rxStatus: 'not reviewed' | 'partially filled' | 'declined' | 'completed';
+    RxDispenserName?: string;
+    RxDispenserContact?: string;
+    rxStatus?: 'not reviewed' | 'partially filled' | 'declined' | 'completed';
+    submitted?: boolean;
+    partialRxNotes?: string;
 }
 
 const rxOrderSchema = new Schema({
@@ -44,19 +43,21 @@ const rxOrderSchema = new Schema({
             frequency: { type: String, required: true },
         },
     ],
-    qrCode: { type: String },
     PatientRxUrl: { type: String},
+    PharmacyQrCode: { type: String },
     PharmacyQrUrl: { type: String},
-    RxProvider: { type: String},
+    RxDispenserName: { type: String},
+    RxDispenserContact: { type: String},
     rxStatus: {
         type: String,
-        default: 'not reviewed',
         enum: ['not reviewed', 'partially filled', 'declined', 'completed'],
+        default: undefined, // Avoid overwriting updates with default
     },
+    submitted: { type: Boolean, default: false },
+    partialRxNotes: { type: String},
 });
 
 export interface IPatient extends Document {
-    files?: any[];
     firstName: string;
     lastName: string;
     phone?: {
@@ -68,6 +69,8 @@ export interface IPatient extends Document {
     country?: string;
     city?: string;
     language?: string;
+    telegramChatId?: string;
+    telegramAccessHash?: string;
     genderPreference?: string;
     previouslyRegistered?: string;
     chiefComplaint?: string;
@@ -108,26 +111,33 @@ export interface IPatient extends Document {
         lastName?: string;
         email?: string;
     };
+    isPatient?: boolean;
+    patientRelation?: string;
     createdAt?: Date;
     updatedAt?: Date;
+    hasSubmittedInfo?: boolean;
 }
 
 
 const PatientSchema = new Schema<IPatient>({
-    files: [{ type: Object }],
-    firstName: { type: String, required: true },
+    firstName: { type: String },
     lastName: { type: String },
     bmi: { type: String },
     phone: {
         countryCode: { type: String },
         phoneNumber: { type: String },
     },
+    telegramChatId: { type: String },
+    telegramAccessHash: { type: String },
     dob: { type: Date },
     city: { type: String },
     country: { type: String },
     genderPreference: { type: String },
     previouslyRegistered: { type: String },
-    language: { type: String },
+    language: {
+        type: String,
+        enum: ['English', 'Arabic', 'Farsi', 'Pashto'],
+    },
     chiefComplaint: { type: String },
     email: { type: String },
     diagnosis: { type: String },
@@ -151,13 +161,24 @@ const PatientSchema = new Schema<IPatient>({
     currentMeds: { type: String },
     notes: { type: [noteSchema], default: [] },
     dashboardNotes: { type: String },
-    rxOrders: { type: [rxOrderSchema], required: false },
-    medOrders: [{ type: Schema.Types.ObjectId, ref: 'MedOrder', required: false }],
+    rxOrders: {
+        type: [rxOrderSchema],
+        required: false, // Make it optional
+        default: undefined, // Prevent default empty array
+    },
+    medOrders: {
+        type: [{ type: Schema.Types.ObjectId, ref: 'MedOrder' }],
+        required: false, // Make it optional
+        default: undefined, // Prevent default empty array
+    },
     visits: [{ type: Schema.Types.ObjectId, ref: 'Visit' }],
     triagedBy: { type: Object },
     doctor: { type: Object },
+    isPatient: { type: Boolean, default: undefined },
+    patientRelation: { type: String },
     createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date }
+    updatedAt: { type: Date },
+    hasSubmittedInfo: { type: Boolean, default: false }
 });
 
 const Patient = models.Patient || model<IPatient>('Patient', PatientSchema);

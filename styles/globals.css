@@ -504,3 +504,77 @@ button:disabled {
   max-height: 100px; /* Set a maximum height for long content */
   overflow-y: auto; /* Enable vertical scrolling for overflow */
 }
+
+@keyframes gradientAnimation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.bg-gradient-animation {
+  position: relative;
+  overflow: hidden;
+}
+
+.bg-gradient-animation::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(-45deg, #ffffff, #bebebb, #f1f5f9, #e5e7eb);
+  background-size: 400% 400%;
+  animation: gradientAnimation 15s ease infinite;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.bg-gradient-animation::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom,
+  rgba(255, 255, 255, 1) 0%,
+  rgba(255, 255, 255, 0.8) 20%,
+  rgba(255, 255, 255, 0.4) 40%,
+  rgba(255, 255, 255, 0.2) 60%,
+  rgba(255, 255, 255, 0) 100%
+  );
+  pointer-events: none;
+}
+
+.bg-gradient-animation:hover::before {
+  opacity: 1;
+}
+
+
+/* Audio Note Styling */
+.audio-note {
+  max-width: 300px;
+  max-height: 150px;
+  overflow: hidden;
+}
+
+/* Sent Message Container */
+.sent-message {
+  max-width: 250px;
+  padding: 10px;
+  border-radius: 15px;
+  word-wrap: break-word;
+}
+
+@media (min-width: 768px) {
+  .sent-message {
+    max-width: 300px;
+  }
+}

@@ -3,8 +3,32 @@ const nextConfig = {
     reactStrictMode: true,
     swcMinify: true,
     images: {
-        domains: ['lh3.googleusercontent.com', 'localhost'],
+        domains: [
+            'lh3.googleusercontent.com',
+            'localhost',
+            'medflow-telegram.fra1.digitaloceanspaces.com',
+            'fra1.digitaloceanspaces.com',
+            'medflow-telegram.fra1.cdn.digitaloceanspaces.com',
+        ],
         remotePatterns: [
+            {
+                protocol: 'https',
+                hostname: 'medflow-telegram.fra1.digitaloceanspaces.com',
+                port: '',
+                pathname: '/**',
+            },
+            {
+                protocol: 'https',
+                hostname: 'medflow-telegram.fra1.cdn.digitaloceanspaces.com',
+                port: '',
+                pathname: '/**',
+            },
+            {
+                protocol: 'https',
+                hostname: 'fra1.digitaloceanspaces.com',
+                port: '',
+                pathname: '/medflow-telegram/**',
+            },
             {
                 protocol: 'https',
                 hostname: 'medflow-mena-health.vercel.app',
@@ -16,7 +40,6 @@ const nextConfig = {
     async headers() {
         return [
             {
-                // Add custom header for the specific image
                 source: '/assets/images/mena_health_logo.jpeg',
                 headers: [
                     {
@@ -26,8 +49,41 @@ const nextConfig = {
                 ],
             },
             {
-                // Allow cross-origin access for font files
                 source: '/:path*.(ttf|woff|woff2|eot|otf)',
+                headers: [
+                    {
+                        key: 'Access-Control-Allow-Origin',
+                        value: '*',
+                    },
+                    {
+                        key: 'Access-Control-Allow-Methods',
+                        value: 'GET, OPTIONS',
+                    },
+                    {
+                        key: 'Access-Control-Allow-Headers',
+                        value: 'Content-Type',
+                    },
+                ],
+            },
+            {
+                source: '/:path*.ogg',
+                headers: [
+                    {
+                        key: 'Access-Control-Allow-Origin',
+                        value: '*',
+                    },
+                    {
+                        key: 'Access-Control-Allow-Methods',
+                        value: 'GET, OPTIONS',
+                    },
+                    {
+                        key: 'Access-Control-Allow-Headers',
+                        value: 'Content-Type',
+                    },
+                ],
+            },
+            {
+                source: '/api/telegram-bot/get-media',
                 headers: [
                     {
                         key: 'Access-Control-Allow-Origin',
@@ -51,17 +107,16 @@ const nextConfig = {
             topLevelAwait: true,
         };
 
-         // Prevent `.ttf` from being treated as a module
         config.module.rules.push({
             test: /\.ttf$/,
             use: [
                 {
                     loader: 'file-loader',
                     options: {
-                        publicPath: '/_next/static/chunks', // Default handling
-                        outputPath: 'static/fonts', // Where Webpack outputs it
+                        publicPath: '/_next/static/chunks',
+                        outputPath: 'static/fonts',
                         name: '[name].[hash].[ext]',
-                        emitFile: false, // Avoid duplication for `public` files
+                        emitFile: false,
                     },
                 },
             ],

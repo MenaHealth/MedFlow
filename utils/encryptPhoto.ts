@@ -1,3 +1,4 @@
+// utils/encryptPhoto.ts
 import CryptoJS from 'crypto-js';
 
 export const encryptPhoto = (file: File, encryptionKey: string): Promise<string> => {

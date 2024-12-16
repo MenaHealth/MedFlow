@@ -7,7 +7,6 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { UserRoundPlus } from "lucide-react"
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -20,13 +19,13 @@ import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 import InfoIcon from '@mui/icons-material/Info';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '../../../components/ui/button';
 import Tooltip from '../../../components/form/Tooltip';
 import './dashboard.css';
-import TableCellWithTooltip from '@/components/TableCellWithTooltip';
+import TableCellWithTooltip from './../../../components/triageDashboard/TableCellWithTooltip';
 import * as Toast from '@radix-ui/react-toast';
 
-import NotesCell from '@/components/NotesCell';
+import NotesCell from './../../../components/triageDashboard/NotesCell';
 
 
 import {
@@ -135,7 +134,7 @@ export default function PatientTriage() {
         (row) => row.doctor?.email 
                 ? row.doctor?.email === session.user.email 
                 : row.triagedBy
-                  && Object.keys(row.triagedBy).length !== 0 
+                  && Object.keys(row.triagedBy).length !== 0
                   && session.user.languages?.includes(row.language) 
                   && session.user.doctorSpecialty === row.specialty
       );
@@ -165,6 +164,12 @@ export default function PatientTriage() {
         return;
       }
       triagedBy = { firstName: session.user?.firstName, lastName: session.user?.lastName, email: session.user?.email };
+    } else if (value === 'In-Progress') {
+      if (session.user.accountType === 'Triage') {
+        triggerToast('You must be a doctor to take this patient.');
+        return;
+      }
+      doctor = { firstName: session.user?.firstName, lastName: session.user?.lastName, email: session.user?.email };
     }
 
     try {
@@ -258,6 +263,17 @@ export default function PatientTriage() {
     }
   }
 
+  const dobToAge = (dob) => {
+    const today = new Date();
+    const birthDate = new Date(dob);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age.toString();
+  }
+
 
 
 
@@ -274,27 +290,13 @@ export default function PatientTriage() {
   return (
     <>
       <div className="w-full relative dashboard-page">
-        <div className="flex justify-between items-center py-3">
-          <Link
-            href="/create-patient"
-            className="flex items-center justify-center no-underline"
-          >
-            <div className="relative group ml-4 bg-darkBlue p-2">
-              <UserRoundPlus color={"white"} bsize={22} />
-              <span className="absolute left-full ml-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap bg-white px-2 py-1 rounded shadow-lg">
-                Add New Patient
-              </span>
-            </div>
-          </Link>
+        <div className="flex items-center py-3">
           <h2
             className="flex-1 text-center font-bold"
             style={{ fontSize: "24px" }}
           >
             <span className="blue_gradient">Patient List</span>
           </h2>
-          <div style={{ width: 48 }}>
-            {" "}
-          </div>
         </div>  
         <div className="flex flex-wrap gap-2 mb-4">
           {priorityFilter !== "all" && (
@@ -352,7 +354,7 @@ export default function PatientTriage() {
             </div>
           )}
         </div>
-        <TableContainer component={Paper} style={{ maxHeight: '80vh', overflow: 'visible', zIndex: 1 }}>
+        <TableContainer component={Paper} style={{ maxHeight: '80vh', zIndex: 1 }}>
           <Table sx={{ minWidth: 650 }} aria-label="simple table">
             <TableHead className="MuiTableHead-root">
               <TableRow>
@@ -505,7 +507,7 @@ export default function PatientTriage() {
                         </div>
                       </TableCellWithTooltip>
                       <TableCell align="center" style={{ minWidth: '150px' }}>{row.lastName}</TableCell>
-                      <TableCell align="center">{row.age || ''}</TableCell>
+                      <TableCell align="center">{row.age || (row.dob ? dobToAge(row.dob) : '')}</TableCell>
                       <TableCell align="center" style={{ minWidth: '150px' }}>{formatLocation(row.city, row.country)}</TableCell>
                       <TableCell align="center">{row.language}</TableCell>
                       <TableCellWithTooltip tooltipText={row.chiefComplaint} maxWidth='175px'>
@@ -544,8 +546,7 @@ export default function PatientTriage() {
                                   },
                                   body: JSON.stringify({
                                     _id: rows[index]["_id"],
-                                    status: "In-Progress",
-                                    priority: value, // New priority value
+                                    priority: value,
                                   }),
                                 });
                                 const updatedRows = [...rows];

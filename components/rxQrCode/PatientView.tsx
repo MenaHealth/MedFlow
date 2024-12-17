@@ -100,7 +100,17 @@ const PatientView: React.FC<QRCodeDisplayProps> = ({ uuid }) => {
                 </div>
             </CardHeader>
             <CardContent className="space-y-6">
-                <div className="flex justify-center">
+
+                {/* Display message if RX order is completed */}
+                {rxOrder.rxStatus === 'completed' ? (
+                    <div className="text-center bg-orange-100 text-orange-800 p-4 rounded-md border border-orange-300">
+                        <p className="font-semibold">RX Order Completed</p>
+                        <p>Please contact your doctor to refill your prescription.</p>
+                    </div>
+                ) : (
+                    <>
+                    {/* QR Code Display */}
+                    <div className="flex justify-center">
                     <div className="relative inline-block">
                         <Dialog>
                             <DialogTrigger asChild>
@@ -238,6 +248,8 @@ const PatientView: React.FC<QRCodeDisplayProps> = ({ uuid }) => {
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>
+                    </>
+                )}
             </CardContent>
         </Card>
     );

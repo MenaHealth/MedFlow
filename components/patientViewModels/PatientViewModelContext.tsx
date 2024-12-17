@@ -153,9 +153,10 @@ export const PatientDashboardProvider: React.FC<{ children: ReactNode }> = ({ ch
                 typeof order === 'string'
                     ? {
                         id: order,
+                        rxOrderId:'',
                         doctorSpecialty: 'General',
                         prescribingDr: 'Unknown',
-                        drEmail: 'unknown@example.com',
+                        drEmail: 'unknown@unknown.com',
                         drId: 'unknown',
                         prescribedDate: new Date(),
                         validTill: new Date(),

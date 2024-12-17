@@ -2,8 +2,11 @@
 import { Schema, model, models, Document, Types } from 'mongoose';
 import { DoctorSpecialties as SPECIALTIES } from './../data/doctorSpecialty.enum';
 import { INote, noteSchema } from './note';
+
+
 export interface IRxOrder {
-    _id?: string;
+    _id?: Types.ObjectId; // Use Types.ObjectId for proper typing
+    rxOrderId: string;
     doctorSpecialty: string;
     prescribingDr: string;
     drEmail: string;
@@ -27,7 +30,9 @@ export interface IRxOrder {
     partialRxNotes?: string;
 }
 
+// rxOrderSchema
 const rxOrderSchema = new Schema({
+    rxOrderId: { type: String, required: true },
     doctorSpecialty: { type: String, required: true },
     prescribingDr: { type: String, required: true },
     drEmail: { type: String, required: true },
@@ -43,18 +48,17 @@ const rxOrderSchema = new Schema({
             frequency: { type: String, required: true },
         },
     ],
-    PatientRxUrl: { type: String},
+    PatientRxUrl: { type: String },
     PharmacyQrCode: { type: String },
-    PharmacyQrUrl: { type: String},
-    RxDispenserName: { type: String},
-    RxDispenserContact: { type: String},
+    PharmacyQrUrl: { type: String },
+    RxDispenserName: { type: String },
+    RxDispenserContact: { type: String },
     rxStatus: {
         type: String,
         enum: ['not reviewed', 'partially filled', 'declined', 'completed'],
-        default: undefined, // Avoid overwriting updates with default
     },
     submitted: { type: Boolean, default: false },
-    partialRxNotes: { type: String},
+    partialRxNotes: { type: String },
 });
 
 export interface IPatient extends Document {
@@ -96,7 +100,7 @@ export interface IPatient extends Document {
     allergies?: string;
     dashboardNotes?: string;
     notes?: Types.DocumentArray<INote>;
-    rxOrders?: string[];
+    rxOrders?: IRxOrder[];
     medOrders?: Types.ObjectId[];
     visits?: any[];
     prevMeds?: string;
@@ -163,8 +167,8 @@ const PatientSchema = new Schema<IPatient>({
     dashboardNotes: { type: String },
     rxOrders: {
         type: [rxOrderSchema],
-        required: false, // Make it optional
-        default: undefined, // Prevent default empty array
+        required: false,
+        default: undefined,
     },
     medOrders: {
         type: [{ type: Schema.Types.ObjectId, ref: 'MedOrder' }],

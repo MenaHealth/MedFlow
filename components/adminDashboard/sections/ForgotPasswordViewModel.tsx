@@ -1,8 +1,9 @@
 // components/auth/adminDashboard/sections/ForgotPasswordViewModel.tsx
 
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { useState, useCallback } from 'react';
 import { useToast } from '@/components/hooks/useToast';
+import { useQueryClient, useMutation } from 'react-query';
 
 interface User {
     _id: string;
@@ -23,6 +24,7 @@ export function useForgotPasswordViewModel() {
     const { data: session } = useSession();
     const token = session?.user.token;
     const { setToast } = useToast();
+    const queryClient = useQueryClient();
 
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -45,7 +47,7 @@ export function useForgotPasswordViewModel() {
             setSelectedUser(data.user || null);
         } catch (error) {
             console.error('Error searching user:', error);
-            setToast?.({
+            setToast({
                 title: 'Error',
                 description: 'Failed to search user.',
                 variant: 'destructive',
@@ -53,14 +55,12 @@ export function useForgotPasswordViewModel() {
         } finally {
             setLoading(false);
         }
-        return;
     }, [searchQuery, token, setToast]);
 
     // Generate a temporary reset link for the user
-    const generateResetLink = async () => {
-        if (!selectedUser) return;
-
-        try {
+    const generateResetLink = useMutation(
+        async () => {
+            if (!selectedUser) throw new Error('No user selected');
             const response = await fetch('/api/admin/POST/forgot-password-link', {
                 method: 'POST',
                 headers: {
@@ -69,26 +69,80 @@ export function useForgotPasswordViewModel() {
                 },
                 body: JSON.stringify({ userId: selectedUser._id }),
             });
-
             if (!response.ok) throw new Error('Failed to generate reset link');
-            const data = await response.json();
-
-            // Update selectedUser with the reset link and expiration
-            setSelectedUser((prev) => (prev ? { ...prev, resetLink: data.resetLink, resetLinkExpiration: data.resetLinkExpiration } : null));
-
-            setToast?.({
-                title: 'Success',
-                description: 'Password reset link generated.',
-                variant: 'default',
-            });
-        } catch (error) {
-            console.error('Error generating reset link:', error);
-            setToast?.({
-                title: 'Error',
-                description: 'Failed to generate reset link.',
-                variant: 'destructive',
-            });
+            return response.json();
+        },
+        {
+            onSuccess: (data) => {
+                setSelectedUser((prev) => (prev ? { ...prev, resetLink: data.resetLink, resetLinkExpiration: data.resetLinkExpiration } : null));
+                setToast({
+                    title: 'Success',
+                    description: 'Password reset link generated.',
+                    variant: 'default',
+                });
+            },
+            onError: (error: any) => {
+                setToast({
+                    title: 'Error',
+                    description: error.message || 'Failed to generate reset link.',
+                    variant: 'destructive',
+                });
+            },
         }
+    );
+
+    const clearExpiredLinks = useMutation(
+        async () => {
+            const response = await fetch('/api/admin/POST/clear-expired-password-links', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (!response.ok) {
+                if (response.status === 403) {
+                    throw new Error('JWT_EXPIRED');
+                }
+                throw new Error('Failed to clear expired links');
+            }
+            return response.json();
+        },
+        {
+            onSuccess: (data) => {
+                setToast({
+                    title: 'Success',
+                    description: `Cleared ${data.modifiedCount} expired link(s).`,
+                    variant: 'default',
+                });
+
+                // If the current user's link was expired, update the UI
+                if (selectedUser?.resetLinkExpiration && new Date(selectedUser.resetLinkExpiration) < new Date()) {
+                    setSelectedUser(prev => prev ? { ...prev, resetLink: undefined, resetLinkExpiration: undefined } : null);
+                }
+
+                queryClient.invalidateQueries('newSignups');
+            },
+            onError: (error: any) => {
+                if (error.message === 'JWT_EXPIRED') {
+                    setToast({
+                        title: 'Session Expired',
+                        description: 'Please log out and log back in to refresh your session.',
+                        variant: 'destructive',
+                    });
+                } else {
+                    setToast({
+                        title: 'Error',
+                        description: error.message || 'Failed to clear expired links.',
+                        variant: 'destructive',
+                    });
+                }
+            },
+        }
+    );
+
+    const handleLogout = async () => {
+        await signOut({ callbackUrl: '/login' });
     };
 
     return {
@@ -96,7 +150,10 @@ export function useForgotPasswordViewModel() {
         setSearchQuery,
         selectedUser,
         handleSearch,
-        generateResetLink,
-        loading,
+        generateResetLink: generateResetLink.mutate,
+        clearExpiredLinks: clearExpiredLinks.mutate,
+        loading: loading || generateResetLink.isLoading || clearExpiredLinks.isLoading,
+        handleLogout,
     };
 }
+

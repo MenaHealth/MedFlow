@@ -14,6 +14,7 @@ import { MultiChoiceFormField } from '@/components/form/MultiChoiceFormField';
 import { FormProvider } from 'react-hook-form';
 import { CountriesList } from '@/data/countries.enum';
 import { LanguagesList } from '@/data/languages.enum';
+import {SingleChoiceFormField} from "@/components/form/SingleChoiceFormField";
 
 interface EditUserModalProps {
     user: User;
@@ -49,7 +50,7 @@ export function EditUserModal({ user, onClose }: EditUserModalProps) {
                             <Label htmlFor="gender">Gender</Label>
                             <Select onValueChange={(value) => form.setValue('gender', value as 'male' | 'female')}>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select gender" />
+                                    <SelectValue placeholder="Select gender"/>
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="male">Male</SelectItem>
@@ -67,6 +68,11 @@ export function EditUserModal({ user, onClose }: EditUserModalProps) {
                                 <p className="text-red-500">{form.formState.errors.dob.message}</p>
                             )}
                         </div>
+                        <SingleChoiceFormField
+                            fieldName="accountType"
+                            fieldLabel="Account Type"
+                            choices={['Doctor' , 'Triage']}
+                        />
                         <MultiChoiceFormField
                             fieldName="countries"
                             fieldLabel="Countries"

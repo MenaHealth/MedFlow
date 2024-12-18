@@ -9,6 +9,7 @@ import { useSession } from 'next-auth/react';
 import { useToast } from '@/components/hooks/useToast';
 
 const userSchema = z.object({
+    accountType: z.string().min(1, "Account type is required"),
     firstName: z.string().min(1, "First name is required"),
     lastName: z.string().min(1, "Last name is required"),
     gender: z.enum(['male', 'female']),
@@ -34,6 +35,7 @@ export function useEditUserModalViewModel(user: User, onClose: () => void) {
     const form = useForm<UserFormData>({
         resolver: zodResolver(userSchema),
         defaultValues: {
+            accountType: user.accountType,
             firstName: user.firstName,
             lastName: user.lastName,
             gender: user.gender,

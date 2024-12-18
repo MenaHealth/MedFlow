@@ -62,12 +62,12 @@ const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
         <div className="relative flex-grow overflow-hidden">
             <div
                 ref={containerRef}
-                className={`h-full overflow-auto scrollbar-thin scrollbar-thumb-orange-500 scrollbar-track-orange-200 ${className}`}
+                className={`h-full overflow-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 ${className}`}
             >
                 {children}
                 {isLoading && (
                     <div className="flex justify-center items-center py-4">
-                        <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+                        <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
                     </div>
                 )}
                 <motion.div
@@ -75,12 +75,10 @@ const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
                     className={`h-16 ${showBounceAnimation ? 'opacity-100' : 'opacity-0'}`}
                 />
             </div>
-            <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-orange-100 to-transparent pointer-events-none" />
+            <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-gray-100/50 to-transparent pointer-events-none" />
         </div>
     );
 };
 
 export default InfiniteScroll;
-
-
 

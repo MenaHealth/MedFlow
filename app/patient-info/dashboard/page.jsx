@@ -39,7 +39,6 @@ import {
 
 import { PRIORITIES, STATUS } from '@/data/data';
 import { DoctorSpecialties as DOCTOR_SPECIALTIES } from '@/data/doctorSpecialty.enum';
-import Link from 'next/link';
 
 export default function PatientTriage() {
   const { data: session } = useSession();
@@ -131,9 +130,7 @@ export default function PatientTriage() {
 
     if (session?.user?.accountType === "Doctor") {
       filteredRows = filteredRows.filter(
-        (row) => row.doctor?.email 
-                ? row.doctor?.email === session.user.email 
-                : row.triagedBy
+        (row) => row.triagedBy
                   && Object.keys(row.triagedBy).length !== 0
                   && session.user.languages?.includes(row.language) 
                   && session.user.doctorSpecialty === row.specialty
@@ -164,6 +161,7 @@ export default function PatientTriage() {
         return;
       }
       triagedBy = { firstName: session.user?.firstName, lastName: session.user?.lastName, email: session.user?.email };
+      doctor = {};
     } else if (value === 'In-Progress') {
       if (session.user.accountType === 'Triage') {
         triggerToast('You must be a doctor to take this patient.');
@@ -281,7 +279,13 @@ export default function PatientTriage() {
     // This ensures the component has mounted before using the router
   }, [router]);
 
-  const handlePatientClick = (patientId) => {
+  const handlePatientClick = (patientId, doctor) => {
+    console.log(doctor)
+    if (doctor && Object.keys(doctor).length > 0) {
+      if (doctor.email !== session.user.email) {
+        return;
+      }
+    }
     if (router) {
       router.push(`/patient/${patientId}`);
     }
@@ -499,9 +503,9 @@ export default function PatientTriage() {
                         sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                       <TableCellWithTooltip tooltipText={row._id} maxWidth="100px">
                         <div
-                            onClick={() => handlePatientClick(row._id)}
-                            className="block overflow-hidden text-ellipsis text-sm cursor-pointer"
-                            style={{ maxWidth: '100px', whiteSpace: 'nowrap' }}
+                            onClick={() => handlePatientClick(row._id, row.doctor)}
+                            className="block overflow-hidden text-ellipsis text-sm"
+                            style={{ maxWidth: '100px', whiteSpace: 'nowrap', cursor: (session?.user?.accountType === 'Doctor' && (row.doctor && Object.keys(row.doctor).length > 0 && row.doctor?.email !== session.user.email)) ? 'default' : 'pointer' }}
                         >
                           {row._id}
                         </div>

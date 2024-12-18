@@ -1,6 +1,8 @@
 // components/ui/InfiniteScroll.tsx
 
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, useState } from 'react';
+import { Loader2 } from 'lucide-react';
+import { motion, useAnimation } from 'framer-motion';
 
 interface InfiniteScrollProps {
     children: React.ReactNode;
@@ -9,9 +11,7 @@ interface InfiniteScrollProps {
     next: () => void;
     dataLength: number;
     threshold?: number;
-    height?: string | number;
     className?: string;
-    loader?: React.ReactNode;
 }
 
 const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
@@ -20,75 +20,67 @@ const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
                                                            isLoading,
                                                            next,
                                                            threshold = 300,
-                                                           height,
                                                            className = '',
-                                                           loader,
                                                        }) => {
-    const loaderRef = useRef<HTMLDivElement | null>(null);
+    const containerRef = useRef<HTMLDivElement | null>(null);
+    const [showBounceAnimation, setShowBounceAnimation] = useState(false);
+    const bounceControls = useAnimation();
 
-    const handleObserver = useCallback(
-        (entries: IntersectionObserverEntry[]) => {
-            const target = entries[0];
-            if (target.isIntersecting && hasMore && !isLoading) {
-                next();
-            }
-        },
-        [hasMore, isLoading, next]
-    );
+    const handleScroll = useCallback(() => {
+        if (!containerRef.current) return;
+
+        const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+        if (scrollHeight - scrollTop - clientHeight < threshold && hasMore && !isLoading) {
+            next();
+        }
+
+        // Show bounce animation when reaching the bottom
+        if (scrollHeight - scrollTop - clientHeight < 1) {
+            setShowBounceAnimation(true);
+            bounceControls.start({
+                y: [0, -20, 0],
+                transition: { duration: 0.5, ease: "easeInOut" }
+            });
+            setTimeout(() => setShowBounceAnimation(false), 500);
+        }
+    }, [hasMore, isLoading, next, threshold, bounceControls]);
 
     useEffect(() => {
-        const observer = new IntersectionObserver(handleObserver, {
-            rootMargin: `${threshold}px`,
-        });
-
-        if (loaderRef.current) {
-            observer.observe(loaderRef.current);
+        const currentContainer = containerRef.current;
+        if (currentContainer) {
+            currentContainer.addEventListener('scroll', handleScroll);
         }
 
         return () => {
-            if (loaderRef.current) {
-                observer.unobserve(loaderRef.current);
+            if (currentContainer) {
+                currentContainer.removeEventListener('scroll', handleScroll);
             }
         };
-    }, [handleObserver, threshold]);
-
-    const containerStyle: React.CSSProperties = {
-        height: height ? height : 'auto',
-        overflowY: height ? 'auto' : 'visible',
-    };
+    }, [handleScroll]);
 
     return (
-        <div style={containerStyle} className={className}>
-            {children}
-            <div ref={loaderRef}>
-                {isLoading && (loader || (
-                    <div className="flex justify-center my-4">
-                        <svg
-                            className="animate-spin h-8 w-8 text-gray-500"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                        >
-                            <circle
-                                className="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                            ></circle>
-                            <path
-                                className="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8v8H4z"
-                            ></path>
-                        </svg>
+        <div className="relative flex-grow overflow-hidden">
+            <div
+                ref={containerRef}
+                className={`h-full overflow-auto scrollbar-thin scrollbar-thumb-orange-500 scrollbar-track-orange-200 ${className}`}
+            >
+                {children}
+                {isLoading && (
+                    <div className="flex justify-center items-center py-4">
+                        <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
                     </div>
-                ))}
+                )}
+                <motion.div
+                    animate={bounceControls}
+                    className={`h-16 ${showBounceAnimation ? 'opacity-100' : 'opacity-0'}`}
+                />
             </div>
+            <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-orange-100 to-transparent pointer-events-none" />
         </div>
     );
 };
 
 export default InfiniteScroll;
+
+
 

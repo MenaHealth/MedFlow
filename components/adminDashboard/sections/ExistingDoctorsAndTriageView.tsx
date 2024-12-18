@@ -206,63 +206,37 @@ export default function ExistingDoctorsAndTriageView() {
                 </div>
             </div>
 
-            <div className="flex-grow overflow-hidden">
-                <ScrollArea className="w-full h-full rounded-md border border-orange-300">
-                    <div className="w-max min-w-full h-full">
-                        <InfiniteScroll
-                            dataLength={filteredUsers.length}
-                            next={nextExistingUsers}
-                            hasMore={!!hasMoreExistingUsers}
-                            isLoading={loadingExistingUsers}
-                            height="100vh"
-                            className="overflow-auto"
-                            loader={
-                                <div className="flex justify-center items-center py-4">
-                                    <Loader2 className="h-8 w-8 animate-spin"/>
-                                </div>
-                            }
-                        >
-                            <Table
-                                data={filteredUsers}
-                                columns={columns}
-                                backgroundColor="bg-orange-100"
-                                textColor="text-orange-950"
-                                borderColor="border-orange-500"
-                                headerBackgroundColor="bg-orange-200"
-                                headerTextColor="text-orange-950"
-                                hoverBackgroundColor="hover:bg-white"
-                                hoverTextColor="hover:text-darkBlue"
-                            />
-                            {!hasMoreExistingUsers && filteredUsers.length > 0 && (
-                                <div
-                                    className="text-center py-4 text-orange-950 bg-orange-100 border-t border-orange-300">
-                                    No more existing users to load.
-                                </div>
-                            )}
-                            {filteredUsers.length === 0 && !loadingExistingUsers && (
-                                <div className="text-center py-4 text-orange-950 bg-orange-100">
-                                    No existing users found.
-                                </div>
-                            )}
-                        </InfiniteScroll>
-                    </div>
-                    <ScrollBar orientation="horizontal"/>
-                </ScrollArea>
-            </div>
-
-
-            <div className="space-y-4 pb-8">
-                {loadingExistingUsers && (
-                    <div className="flex justify-center items-center py-4">
-                        <Loader2 className="h-8 w-8 animate-spin"/>
+            <InfiniteScroll
+                dataLength={filteredUsers.length}
+                next={nextExistingUsers}
+                hasMore={!!hasMoreExistingUsers}
+                isLoading={loadingExistingUsers}
+                className="bg-white rounded-md border border-orange-300"
+            >
+                <div className="w-full overflow-x-auto">
+                    <Table
+                        data={filteredUsers}
+                        columns={columns}
+                        backgroundColor="bg-orange-100"
+                        textColor="text-orange-950"
+                        borderColor="border-orange-500"
+                        headerBackgroundColor="bg-orange-200"
+                        headerTextColor="text-orange-950"
+                        hoverBackgroundColor="hover:bg-white"
+                        hoverTextColor="hover:text-darkBlue"
+                    />
+                </div>
+                {!hasMoreExistingUsers && filteredUsers.length > 0 && (
+                    <div className="text-center py-4 text-orange-950 bg-orange-100 border-t border-orange-300">
+                        No more existing users to load.
                     </div>
                 )}
                 {filteredUsers.length === 0 && !loadingExistingUsers && (
-                    <p className="text-center py-4 text-orange-950">
+                    <div className="text-center py-4 text-orange-950 bg-orange-100">
                         No existing users found.
-                    </p>
+                    </div>
                 )}
-            </div>
+            </InfiniteScroll>
 
             {editingUser && (
                 <EditUserModal
@@ -273,3 +247,5 @@ export default function ExistingDoctorsAndTriageView() {
         </div>
     );
 }
+
+

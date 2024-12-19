@@ -11,7 +11,7 @@ const LayoutWrapper = ({ children }) => {
 
     return (
         <div className="flex-grow flex flex-col">
-        <main className={`w-full ${isFullWidth ? 'px-2' : 'max-w-6xl mx-auto'} flex-grow`}>
+        <main className={`z-50 w-full ${isFullWidth ? 'px-2' : 'z-50 max-w-6xl mx-auto'} flex-grow`}>
             <Nav />
             <div className="flex-grow">{children}</div>
         </main>

@@ -20,6 +20,7 @@ const buttonVariants = cva(
                 orange: "bg-orange-500 border-orange-500 border-1 text-white hover:bg-darkBlue hover:text-white",
                 orangeOutline: "text-orange-500 hover:border-orange-500 hover:border-2 border-2",
                 darkBlueOutline: "text-darkBlue hover:border-darkBlue hover:border-2 border-2 border-white",
+                lightOrangeOutline: "text-orange-50 hover:border-orange-50 hover:bg-orange-50 hover:text-darkBlue hover:border-2 border-2 border-orange-50 transition-colors",
                 submit: "border border-darkBlue text-darkBlue bg-white shadow-sm hover:bg-darkBlue hover:text-white hover:border-white hover:border-2"
             },
             size: {

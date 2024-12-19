@@ -156,6 +156,60 @@ export function useExistingDoctorsAndTriageViewModel() {
         editUserMutation.mutate({ userId, data });
     };
 
+
+    const exportToCSV = async () => {
+        try {
+            const response = await fetch('/api/admin/user/retrieve-all', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${session?.user.token}`,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error fetching users: ${response.statusText}`);
+            }
+
+            const authorizedUsers: User[] = await response.json();
+
+            if (!Array.isArray(authorizedUsers)) {
+                throw new Error('Invalid data format received from the server.');
+            }
+
+            const headers = ['Name', 'Email', 'User Type', 'Approval Date', 'Doctor Specialty', 'Country'];
+
+            const csvContent = [
+                headers.join(','),
+                ...authorizedUsers.map((user: User) => [
+                    `${user.firstName} ${user.lastName}`,
+                    user.email,
+                    user.accountType,
+                    user.approvalDate ? new Date(user.approvalDate).toLocaleDateString() : 'N/A',
+                    user.doctorSpecialty || 'N/A',
+                    user.countries?.join(', ') || 'N/A'
+                ].map(value => `"${value.replace(/"/g, '""')}"`).join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'existing_users.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (error: any) {
+            console.error('Error exporting CSV:', error);
+            setToast({
+                title: 'Error',
+                description: error.message || 'Failed to export CSV.',
+                variant: 'destructive',
+            });
+        }
+    };
+
     return {
         existingUsers: filteredUsers,
         loadingExistingUsers,
@@ -169,5 +223,6 @@ export function useExistingDoctorsAndTriageViewModel() {
         handleEditUser,
         searchTerm,
         setSearchTerm,
+        exportToCSV
     };
 }

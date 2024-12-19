@@ -3,11 +3,11 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { useForm } from 'react-hook-form';
+import { useForm, UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
-const userProfileSchema = z.object({
+export const userProfileSchema = z.object({
     _id: z.string(),
     firstName: z.string().min(1, "First name is required"),
     lastName: z.string().min(1, "Last name is required"),
@@ -28,9 +28,22 @@ const userProfileSchema = z.object({
 
 export type UserProfileFormValues = z.infer<typeof userProfileSchema>;
 
-export function useUserProfileViewModel() {
+export interface UserProfileViewModel {
+    profile: UserProfileFormValues | null;
+    isEditing: boolean;
+    isLoading: boolean;
+    isCopied: boolean;
+    methods: UseFormReturn<UserProfileFormValues>;
+    handleEdit: () => void;
+    handleCancelEdit: () => void;
+    handleSubmit: (data: UserProfileFormValues) => void;
+    copyToClipboard: () => void;
+    status: string;
+}
+
+export function useUserProfileViewModel(): UserProfileViewModel {
     const { data: session, status } = useSession();
-    const [myProfile, setMyProfile] = useState<UserProfileFormValues | null>(null);
+    const [profile, setProfile] = useState<UserProfileFormValues | null>(null);
     const [isEditing, setIsEditing] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isCopied, setIsCopied] = useState(false);
@@ -41,11 +54,17 @@ export function useUserProfileViewModel() {
 
     useEffect(() => {
         if (status === 'authenticated' && session?.user) {
-            fetch(`/api/user/${session.user?._id}`)
+            setIsLoading(true);
+            fetch(`/api/user/${session.user._id}`)
                 .then(res => res.json())
                 .then(data => {
-                    setMyProfile(data);
+                    setProfile(data);
                     methods.reset(data);
+                    setIsLoading(false);
+                })
+                .catch(error => {
+                    console.error('Error fetching profile:', error);
+                    setIsLoading(false);
                 });
         }
     }, [status, session?.user, methods]);
@@ -54,7 +73,7 @@ export function useUserProfileViewModel() {
 
     const handleCancelEdit = () => {
         setIsEditing(false);
-        methods.reset(myProfile || undefined);
+        methods.reset(profile || undefined);
     };
 
     const handleSubmit = async (data: UserProfileFormValues) => {
@@ -66,8 +85,8 @@ export function useUserProfileViewModel() {
                 body: JSON.stringify(data),
             });
             if (response.ok) {
-                const updatedUser = await response.json();
-                setMyProfile(updatedUser);
+                const updatedProfile = await response.json();
+                setProfile(updatedProfile);
             } else {
                 console.error('Failed to update user');
             }
@@ -79,8 +98,8 @@ export function useUserProfileViewModel() {
     };
 
     const copyToClipboard = () => {
-        if (myProfile) {
-            navigator.clipboard.writeText(myProfile._id).then(() => {
+        if (profile) {
+            navigator.clipboard.writeText(profile._id).then(() => {
                 setIsCopied(true);
                 setTimeout(() => setIsCopied(false), 2000);
             });
@@ -88,7 +107,7 @@ export function useUserProfileViewModel() {
     };
 
     return {
-        myProfile,
+        profile,
         isEditing,
         isLoading,
         isCopied,
@@ -100,4 +119,3 @@ export function useUserProfileViewModel() {
         status,
     };
 }
-

@@ -15,18 +15,27 @@ import { DoctorSpecialties } from "@/data/doctorSpecialty.enum";
 import { MultiChoiceFormField } from "@/components/form/MultiChoiceFormField";
 import { SingleChoiceFormField } from "@/components/form/SingleChoiceFormField";
 import { DatePickerFormField } from "@/components/form/DatePickerFormField";
-import { useUserProfileViewModel, UserProfileFormValues } from './UserProfileViewModel';
+import { useUserProfileViewModel, UserProfileFormValues, UserProfileViewModel } from './UserProfileViewModel';
+import { useUserProfileAdminViewModel } from '@/components/adminDashboard/sections/userProfileAdminViewModel';
 import { UserProfileSkeleton } from '@/components/user-profile/userProfileSkeleton';
 import Tooltip from '@/components/form/Tooltip';
+
+interface UserProfileViewProps {
+    isAdmin?: boolean;
+    userId?: string;
+}
 
 const formatTooltipMessage = (email: string) => {
     return `If you need to update your account type, please contact an admin with the email address you signed up with: (${email})`;
 };
 
-export function UserProfileView() {
-    const vm = useUserProfileViewModel();
+export function UserProfileView({ isAdmin = false, userId }: UserProfileViewProps) {
+    const vmUser: UserProfileViewModel = useUserProfileViewModel();
+    const vmAdmin: UserProfileViewModel = useUserProfileAdminViewModel(userId);
 
-    if (vm.status === 'loading' || !vm.myProfile) {
+    const vm: UserProfileViewModel = isAdmin ? vmAdmin : vmUser;
+
+    if (vm.status === 'loading' || !vm.profile) {
         return <UserProfileSkeleton />;
     }
 
@@ -34,14 +43,18 @@ export function UserProfileView() {
         return <div>Access Denied</div>;
     }
 
-    const initials = `${vm.myProfile.firstName?.[0] || ''}${vm.myProfile.lastName?.[0] || ''}`;
+    if (vm.status === 'error') {
+        return <div>Error loading profile.</div>;
+    }
+
+    const initials = `${vm.profile.firstName?.[0] || ''}${vm.profile.lastName?.[0] || ''}`;
 
     return (
         <FormProvider {...vm.methods}>
             <form onSubmit={vm.methods.handleSubmit(vm.handleSubmit)}>
                 <Card className="w-full max-w-3xl mx-auto mt-8">
                     <CardHeader className="relative">
-                        <CardTitle className="text-center">My Profile</CardTitle>
+                        <CardTitle className="text-center">{isAdmin ? 'User Profile' : 'My Profile'}</CardTitle>
                         {!vm.isEditing ? (
                             <Button
                                 type="button"
@@ -67,16 +80,16 @@ export function UserProfileView() {
                     <CardContent>
                         <div className="flex flex-col items-center space-y-4">
                             <Avatar
-                                src={vm.myProfile.image}
-                                alt={`${vm.myProfile.firstName} ${vm.myProfile.lastName}`}
+                                src={vm.profile.image}
+                                alt={`${vm.profile.firstName} ${vm.profile.lastName}`}
                                 initials={initials}
                                 className="w-24 h-24 text-2xl"
                             />
                             <div className="text-center">
-                                <h2 className="text-xl font-semibold">{vm.myProfile.firstName} {vm.myProfile.lastName}</h2>
-                                <p className="text-sm text-gray-500">{vm.myProfile.email}</p>
+                                <h2 className="text-xl font-semibold">{vm.profile.firstName} {vm.profile.lastName}</h2>
+                                <p className="text-sm text-gray-500">{vm.profile.email}</p>
                                 <div className="flex items-center justify-center mt-2">
-                                    <p className="text-sm bg-darkBlue text-white px-2 py-1 rounded">ID: {vm.myProfile._id}</p>
+                                    <p className="text-sm bg-darkBlue text-white px-2 py-1 rounded">ID: {vm.profile._id}</p>
                                     <Button
                                         variant="ghost"
                                         size="icon"
@@ -91,27 +104,42 @@ export function UserProfileView() {
                         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
                             <ProfileField
                                 label="First Name"
-                                value={vm.myProfile.firstName}
+                                value={vm.profile.firstName}
                                 isEditing={vm.isEditing}
                                 fieldName="firstName"
                                 register={vm.methods.register}
-                                email={vm.myProfile.email}
+                                email={vm.profile.email}
                             />
                             <ProfileField
                                 label="Last Name"
-                                value={vm.myProfile.lastName}
+                                value={vm.profile.lastName}
                                 isEditing={vm.isEditing}
                                 fieldName="lastName"
                                 register={vm.methods.register}
-                                email={vm.myProfile.email}
+                                email={vm.profile.email}
                             />
                             <div className="flex items-center">
-                                <ProfileField label="Account Type" value={vm.myProfile.accountType} isEditing={false} email={vm.myProfile.email} />
-                                <Tooltip tooltipText={formatTooltipMessage(vm.myProfile.email || '')} showTooltip={true}>
-                                    <Info className="h-4 w-4 ml-2 text-gray-500 cursor-help" />
-                                </Tooltip>
+                                {vm.isEditing ? (
+                                    <SingleChoiceFormField
+                                        fieldName="accountType"
+                                        fieldLabel="Account Type"
+                                        choices={["Doctor", "Triage"]}
+                                    />
+                                ) : (
+                                    <ProfileField
+                                        label="Account Type"
+                                        value={vm.profile.accountType}
+                                        isEditing={false}
+                                        email={vm.profile.email}
+                                    />
+                                )}
+                                {isAdmin && (
+                                    <Tooltip tooltipText={formatTooltipMessage(vm.profile.email || '')} showTooltip={true}>
+                                        <Info className="h-4 w-4 ml-2 text-gray-500 cursor-help" />
+                                    </Tooltip>
+                                )}
                             </div>
-                            {vm.myProfile.accountType === 'Doctor' && (
+                            {vm.profile.accountType === 'Doctor' && (
                                 <>
                                     {vm.isEditing ? (
                                         <SingleChoiceFormField
@@ -120,7 +148,7 @@ export function UserProfileView() {
                                             choices={DoctorSpecialties}
                                         />
                                     ) : (
-                                        <ProfileField label="Specialty" value={vm.myProfile.doctorSpecialty} isEditing={vm.isEditing} email={vm.myProfile.email}/>
+                                        <ProfileField label="Specialty" value={vm.profile.doctorSpecialty} isEditing={vm.isEditing} email={vm.profile.email}/>
                                     )}
                                     <div className="col-span-2">
                                         {vm.isEditing ? (
@@ -130,7 +158,7 @@ export function UserProfileView() {
                                                 choices={LanguagesList}
                                             />
                                         ) : (
-                                            <ProfileField label="Languages" value={vm.myProfile.languages?.join(', ')} isEditing={false} email={vm.myProfile.email} />
+                                            <ProfileField label="Languages" value={vm.profile.languages?.join(', ')} isEditing={false} email={vm.profile.email} />
                                         )}
                                     </div>
                                 </>
@@ -143,7 +171,7 @@ export function UserProfileView() {
                                         choices={CountriesList}
                                     />
                                 ) : (
-                                    <ProfileField label="Countries" value={vm.myProfile.countries?.join(', ')} isEditing={false} email={vm.myProfile.email} />
+                                    <ProfileField label="Countries" value={vm.profile.countries?.join(', ')} isEditing={false} email={vm.profile.email} />
                                 )}
                             </div>
                             {vm.isEditing ? (
@@ -153,7 +181,7 @@ export function UserProfileView() {
                                     choices={["male", "female"]}
                                 />
                             ) : (
-                                <ProfileField label="Gender" value={vm.myProfile.gender} isEditing={false} email={vm.myProfile.email} />
+                                <ProfileField label="Gender" value={vm.profile.gender} isEditing={false} email={vm.profile.email} />
                             )}
                             {vm.isEditing ? (
                                 <DatePickerFormField
@@ -164,9 +192,9 @@ export function UserProfileView() {
                             ) : (
                                 <ProfileField
                                     label="Date of Birth"
-                                    value={vm.myProfile.dob ? new Date(vm.myProfile.dob).toLocaleDateString() : 'N/A'}
+                                    value={vm.profile.dob ? new Date(vm.profile.dob).toLocaleDateString() : 'N/A'}
                                     isEditing={false}
-                                    email={vm.myProfile.email}
+                                    email={vm.profile.email}
                                 />
                             )}
                         </div>

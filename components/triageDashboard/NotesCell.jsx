@@ -14,7 +14,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { styled } from '@mui/material/styles';
 import DescriptionIcon from '@mui/icons-material/Description';
 import { useForm, FormProvider } from 'react-hook-form';
-import { TextFormField } from '../form/TextFormField';
+import { TextFormField } from '../ui/TextFormField';
 
 const CellWrapper = styled('div')({
     position: 'relative',

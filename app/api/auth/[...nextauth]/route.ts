@@ -6,6 +6,10 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { Session } from "next-auth";
 import { JWT } from "next-auth/jwt";
+import GoogleProvider from 'next-auth/providers/google';
+import type { Profile as NextAuthProfile } from 'next-auth';
+
+
 
 import User from '@/models/user';
 import Admin from '@/models/admin';
@@ -37,6 +41,13 @@ interface SessionUser extends NextAuthUser {
     dob?: string | Date;
     gender?: 'male' | 'female';
     token?: string;
+}
+
+
+interface GoogleProfile extends NextAuthProfile {
+    given_name?: string;
+    family_name?: string;
+    picture?: string;
 }
 
 function createSessionUser(user: any, isAdmin: boolean, accountType: AccountType): SessionUser {
@@ -103,6 +114,10 @@ export const authOptions: NextAuthOptions = {
                 return createSessionUser(user, isAdmin, accountType);
             },
         }),
+        GoogleProvider({
+            clientId: process.env.GOOGLE_CLIENT_ID!,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+        }),
     ],
     callbacks: {
         async jwt({ token, user, trigger }) {
@@ -163,6 +178,29 @@ export const authOptions: NextAuthOptions = {
                 session.user.token = token.accessToken as string;
             }
             return session;
+        },
+        async signIn({ account, profile }) {
+            const googleProfile = profile as GoogleProfile;
+            if (account?.provider === 'google' && googleProfile) {
+                await dbConnect();
+
+                let user = await User.findOne({ googleId: googleProfile.sub });
+
+                if (!user) {
+                    user = new User({
+                        googleId: googleProfile.sub,
+                        googleEmail: googleProfile.email,
+                        googleImage: googleProfile.picture,
+                        firstName: googleProfile.given_name,
+                        lastName: googleProfile.family_name,
+                        accountType: 'Doctor',
+                        authorized: true,
+                    });
+                    await user.save();
+                }
+                return true;
+            }
+            return true;
         },
     },
 

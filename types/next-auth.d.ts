@@ -21,6 +21,10 @@ declare module "next-auth" {
             token?: string;
             gender?: 'male' | 'female';
             dob?: Date | string;
+            googleId?: string;
+            googleEmail?: string;
+            googleImage?: string;
+            [key: string]: any;
         } & DefaultSession["user"]
     }
 }

@@ -96,10 +96,18 @@ export function UserProfileView({ isAdmin = false, userId }: UserProfileViewProp
                                         onClick={vm.copyToClipboard}
                                         className="ml-2"
                                     >
-                                        {vm.isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                                        {vm.isCopied ? <Check className="h-4 w-4"/> : <Copy className="h-4 w-4"/>}
                                     </Button>
                                 </div>
                             </div>
+                        </div>
+                        <div className="flex justify-center mt-4">
+                            <Button
+                                variant={'darkBlueOutline'}
+                                onClick={() => window.location.href = '/api/auth/google'}
+                            >
+                                Link Google Account
+                            </Button>
                         </div>
                         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
                             <ProfileField
@@ -134,8 +142,9 @@ export function UserProfileView({ isAdmin = false, userId }: UserProfileViewProp
                                     />
                                 )}
                                 {isAdmin && (
-                                    <Tooltip tooltipText={formatTooltipMessage(vm.profile.email || '')} showTooltip={true}>
-                                        <Info className="h-4 w-4 ml-2 text-gray-500 cursor-help" />
+                                    <Tooltip tooltipText={formatTooltipMessage(vm.profile.email || '')}
+                                             showTooltip={true}>
+                                        <Info className="h-4 w-4 ml-2 text-gray-500 cursor-help"/>
                                     </Tooltip>
                                 )}
                             </div>
@@ -148,7 +157,8 @@ export function UserProfileView({ isAdmin = false, userId }: UserProfileViewProp
                                             choices={DoctorSpecialties}
                                         />
                                     ) : (
-                                        <ProfileField label="Specialty" value={vm.profile.doctorSpecialty} isEditing={vm.isEditing} email={vm.profile.email}/>
+                                        <ProfileField label="Specialty" value={vm.profile.doctorSpecialty}
+                                                      isEditing={vm.isEditing} email={vm.profile.email}/>
                                     )}
                                     <div className="col-span-2">
                                         {vm.isEditing ? (
@@ -158,7 +168,8 @@ export function UserProfileView({ isAdmin = false, userId }: UserProfileViewProp
                                                 choices={LanguagesList}
                                             />
                                         ) : (
-                                            <ProfileField label="Languages" value={vm.profile.languages?.join(', ')} isEditing={false} email={vm.profile.email} />
+                                            <ProfileField label="Languages" value={vm.profile.languages?.join(', ')}
+                                                          isEditing={false} email={vm.profile.email}/>
                                         )}
                                     </div>
                                 </>
@@ -171,7 +182,8 @@ export function UserProfileView({ isAdmin = false, userId }: UserProfileViewProp
                                         choices={CountriesList}
                                     />
                                 ) : (
-                                    <ProfileField label="Countries" value={vm.profile.countries?.join(', ')} isEditing={false} email={vm.profile.email} />
+                                    <ProfileField label="Countries" value={vm.profile.countries?.join(', ')}
+                                                  isEditing={false} email={vm.profile.email}/>
                                 )}
                             </div>
                             {vm.isEditing ? (
@@ -181,7 +193,8 @@ export function UserProfileView({ isAdmin = false, userId }: UserProfileViewProp
                                     choices={["male", "female"]}
                                 />
                             ) : (
-                                <ProfileField label="Gender" value={vm.profile.gender} isEditing={false} email={vm.profile.email} />
+                                <ProfileField label="Gender" value={vm.profile.gender} isEditing={false}
+                                              email={vm.profile.email}/>
                             )}
                             {vm.isEditing ? (
                                 <DatePickerFormField

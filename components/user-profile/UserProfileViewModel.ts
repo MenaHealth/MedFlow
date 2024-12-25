@@ -38,6 +38,7 @@ export interface UserProfileViewModel {
     handleCancelEdit: () => void;
     handleSubmit: (data: UserProfileFormValues) => void;
     copyToClipboard: () => void;
+    handleLinkGoogleAccount: () => void;
     status: string;
 }
 
@@ -106,6 +107,41 @@ export function useUserProfileViewModel(): UserProfileViewModel {
         }
     };
 
+    const handleLinkGoogleAccount = async () => {
+        setIsLoading(true);
+
+        try {
+            const response = await fetch('/api/auth/session');
+            const session = await response.json();
+
+            if (session?.user?.googleId) {
+                const googleId = session.user.googleId;
+                const googleEmail = session.user.googleEmail;
+                const googleImage = session.user.googleImage;
+
+                const patchResponse = await fetch(`/api/user/link-google/${profile?._id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ googleId, googleEmail, googleImage }),
+                });
+
+                if (patchResponse.ok) {
+                    const updatedProfile = await patchResponse.json();
+                    setProfile(updatedProfile);
+                    console.log('Google account linked successfully.');
+                } else {
+                    console.error('Failed to link Google account.');
+                }
+            } else {
+                console.error('No Google profile available in the session.');
+            }
+        } catch (error) {
+            console.error('Error linking Google account:', error);
+        }
+
+        setIsLoading(false);
+    };
+
     return {
         profile,
         isEditing,
@@ -116,6 +152,7 @@ export function useUserProfileViewModel(): UserProfileViewModel {
         handleCancelEdit,
         handleSubmit,
         copyToClipboard,
+        handleLinkGoogleAccount,
         status,
     };
 }

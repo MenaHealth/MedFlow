@@ -274,32 +274,35 @@ export default function AboutPage() {
 
             <div className="mt-20">
                 <Card className="w-full max-w-3xl mx-auto p-10">
-                    <h2 className="text-2xl font-bold mb-4">Patient Submission Process</h2>
-                    <p className="text-gray-600 mb-8">How patients interact with MedFlow for remote health
-                        consultations</p>
+                    <h2 className="text-2xl font-bold mb-4">Virtual Patient Care</h2>
+                    <p className="text-gray-600 mb-8">Currently, the only way patients can receive MedFlow care is if they message the Telegram bot.</p>
 
                     <div className="space-y-8">
                         <div className="space-y-6">
                             {[
                                 {
-                                    title: "Access the Intake Form",
-                                    description: "Patients visit our secure online platform to access the multilingual intake form."
+                                    title: "To begin, patients message the bot /start",
+                                    description: "and the bot will prompt them for their language"
                                 },
                                 {
-                                    title: "Provide Essential Information",
-                                    description: "Patients submit key details including personal information, medical concerns, and preferences."
+                                    title: "Once the patient language is provided the bot responds with a individualized intake URL; ",
+                                    description: "and the patient is saved in our database, however, their will be no info attached to the patient until they complete the intake URL "
                                 },
                                 {
-                                    title: "Language Selection",
-                                    description: "The form is available in multiple languages including English, Arabic, Farsi, and Pashto."
+                                    title: "Triage coordinator analyze patient information provided.",
+                                    description: "To match patients with doctors in the correct medical specialty based on the patient-provided doctor-gender preferences, language spoken, and location."
                                 },
                                 {
-                                    title: "Triage Process",
-                                    description: "Our Coordinators review submissions to direct patients to appropriate care."
+                                    title: "Doctors will see a modular spreadsheet individualized to them with patient's that match their specialty / language / locations",
+                                    description: "Doctors select patients and once selected the patient is not viewable by other doctors"
                                 },
                                 {
-                                    title: "Doctor Assignment",
-                                    description: "Based on the patient's needs, a suitable doctor is assigned for the consultation."
+                                    title: "Doctors can speak with the patient through the Telegram Bot and prescribe medications",
+                                    description: "Patients and Dcotors can exchange voice notes and photo's. Doctors can send Rx orders to patients with individualized QR codes that patients can take to pharmacies to fulfill their order."
+                                },
+                                {
+                                    title: "Pharmacists scan the QR codes on the Doctor Provided Rx Orders",
+                                    description: "They enter in their contact information and if they provided the full perscription, some of it, and if it was completed the Rx Order will no longer be accessible to scan again till the Doctor provides a new script"
                                 }
                             ].map((step, index) => (
                                 <div key={index} className="flex items-start space-x-6">

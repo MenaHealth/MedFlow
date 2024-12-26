@@ -2,7 +2,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import Image from "next/image";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/ScrollArea";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { OggOpusDecoder } from "ogg-opus-decoder";
 import { AudioNotePlayer } from "./AudioNotePlayer";

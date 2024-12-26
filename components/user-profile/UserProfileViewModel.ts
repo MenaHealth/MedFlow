@@ -24,12 +24,16 @@ export const userProfileSchema = z.object({
     email: z.string().optional(),
     accountType: z.enum(['Doctor', 'Triage'], { errorMap: () => ({ message: "Account type is required" }) }),
     doctorSpecialty: z.string().optional(),
+    googleId: z.string().optional(),
+    googleEmail: z.string().optional(),
+    googleImage: z.string().optional(),
 });
 
 export type UserProfileFormValues = z.infer<typeof userProfileSchema>;
 
 export interface UserProfileViewModel {
     profile: UserProfileFormValues | null;
+    setProfile: (profile: UserProfileFormValues) => void; // Add this line
     isEditing: boolean;
     isLoading: boolean;
     isCopied: boolean;
@@ -39,7 +43,11 @@ export interface UserProfileViewModel {
     handleSubmit: (data: UserProfileFormValues) => void;
     copyToClipboard: () => void;
     handleLinkGoogleAccount: () => void;
+    handleUnlinkGoogleAccount: () => void;
     status: string;
+    googleImage: string;
+    googleEmail: string;
+    googleId: string;
 }
 
 export function useUserProfileViewModel(): UserProfileViewModel {
@@ -142,8 +150,28 @@ export function useUserProfileViewModel(): UserProfileViewModel {
         setIsLoading(false);
     };
 
+    const handleUnlinkGoogleAccount = async () => {
+        setIsLoading(true);
+        try {
+            const response = await fetch(`/api/user/unlink-google/${profile?._id}`, {
+                method: 'POST', // Updated method to POST
+            });
+            if (response.ok) {
+                const updatedProfile = await response.json();
+                setProfile(updatedProfile);
+                methods.reset(updatedProfile);
+            } else {
+                console.error('Failed to unlink Google account');
+            }
+        } catch (error) {
+            console.error('Error unlinking Google account:', error);
+        }
+        setIsLoading(false);
+    };
+
     return {
         profile,
+        setProfile,
         isEditing,
         isLoading,
         isCopied,
@@ -153,6 +181,10 @@ export function useUserProfileViewModel(): UserProfileViewModel {
         handleSubmit,
         copyToClipboard,
         handleLinkGoogleAccount,
+        handleUnlinkGoogleAccount,
         status,
+        googleImage: session?.user?.googleImage || '',
+        googleEmail: session?.user?.googleEmail || '',
+        googleId: session?.user?.googleId || '',
     };
 }

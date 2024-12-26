@@ -46,5 +46,8 @@ declare module "next-auth/jwt" {
         gender?: 'male' | 'female';
         dob?: string | Date;
         accessToken?: string;
+        googleId?: string;
+        googleEmail?: string;
+        googleImage?: string;
     }
 }

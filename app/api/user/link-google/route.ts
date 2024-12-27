@@ -1,32 +1,27 @@
-// components/user-profile/UserProfileViewModel.ts
-import User from '@/models/user';
+// app/api/user/link-google/route.ts
+import { NextResponse } from 'next/server';
 import dbConnect from '@/utils/database';
-import { NextRequest, NextResponse } from 'next/server';
+import User from '@/models/user';
 
-interface Params {
-    id: string;
-}
-
-export const PATCH = async (request: NextRequest, { params }: { params: Params }) => {
-    console.log('Request received:', request.body);
-    const { googleId, googleEmail, googleImage } = await request.json();
-
+export async function POST(req: Request) {
     try {
         await dbConnect();
-        const user = await User.findById(params.id);
+        const { userId, googleId, googleEmail, googleImage } = await req.json();
 
+        const user = await User.findById(userId);
         if (!user) {
-            return NextResponse.json({ message: "User not found" }, { status: 404 });
+            return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
-        if (googleId) user.googleId = googleId;
-        if (googleEmail) user.googleEmail = googleEmail;
-        if (googleImage) user.googleImage = googleImage;
-
+        user.googleId = googleId;
+        user.googleEmail = googleEmail;
+        user.googleImage = googleImage;
         await user.save();
 
-        return NextResponse.json(user, { status: 200 });
+        return NextResponse.json({ message: 'Google account linked successfully', user });
     } catch (error) {
-        return NextResponse.json({ message: `Error linking Google account: ${error}` }, { status: 500 });
+        console.error('Error linking Google account:', error);
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
-};
+}
+

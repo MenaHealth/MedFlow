@@ -9,6 +9,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } f
 import { Button } from '@/components/ui/button'
 import { Avatar } from '@/components/ui/avatar'
 import { X } from 'lucide-react'
+import { signIn, useSession } from 'next-auth/react'
 
 interface LinkGoogleAccountProps {
     isOpen: boolean
@@ -30,46 +31,46 @@ export function LinkGoogleAccount({
                                       googleImage
                                   }: LinkGoogleAccountProps) {
     const [error, setError] = useState<string | null>(null)
+    const { data: session, update } = useSession()
 
-    const handleGoogleSuccess = async (credentialResponse: any) => {
-        if (credentialResponse.credential) {
-            try {
-                const decoded: any = jwtDecode(credentialResponse.credential)
-                const { sub, email, picture, name } = decoded
+    const handleGoogleSuccess = async () => {
+        try {
+            const result = await signIn('google', { redirect: false });
+            if (result?.error) {
+                setError(result.error);
+            } else {
+                // Update the session to get the latest Google account information
+                await update();
 
-                const response = await fetch('/api/user/link-google', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        userId,
-                        name: name || '',
-                        email: email || '',
-                        googleId: sub,
-                        googleEmail: email,
-                        googleImage: picture,
-                    }),
-                })
+                if (session?.user) {
+                    const response = await fetch('/api/user/link-google', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            userId,
+                            googleId: session.user.googleId,
+                            googleEmail: session.user.googleEmail,
+                            googleImage: session.user.googleImage,
+                        }),
+                    });
 
-                if (response.ok) {
-                    const updatedUser = await response.json()
-                    onLinkSuccess(updatedUser)
-                    onClose()
+                    if (response.ok) {
+                        const updatedUser = await response.json();
+                        onLinkSuccess(updatedUser);
+                        onClose();
+                    } else {
+                        setError('Failed to link Google account.');
+                    }
                 } else {
-                    setError('Failed to link Google account.')
+                    setError('Failed to retrieve Google account information.');
                 }
-            } catch (error) {
-                console.error('Error decoding Google credential:', error)
-                setError('Error decoding Google credential')
             }
-        } else {
-            setError('No credential received from Google.')
+        } catch (error) {
+            console.error('Error linking Google account:', error);
+            setError('Error linking Google account');
         }
-    }
-
-    const handleGoogleError = () => {
-        setError('Google login failed')
     }
 
     const handleUnlinkGoogle = async () => {
@@ -109,11 +110,9 @@ export function LinkGoogleAccount({
                             </Button>
                         </div>
                     ) : (
-                        <GoogleLogin
-                            onSuccess={handleGoogleSuccess}
-                            onError={handleGoogleError}
-                            useOneTap
-                        />
+                        <Button onClick={handleGoogleSuccess}>
+                            Link Google Account
+                        </Button>
                     )}
                     {error && <p className="text-red-500 mt-2">{error}</p>}
                 </div>

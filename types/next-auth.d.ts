@@ -1,11 +1,12 @@
 // types/next-auth.d.ts
-import { DefaultSession } from "next-auth";
 import { Countries } from "@/data/countries.enum";
 import { Languages } from "@/data/languages.enum";
 import { DoctorSpecialtyList } from "@/data/doctorSpecialty.enum";
+import { DefaultSession, DefaultJWT } from "next-auth"
+
 
 declare module "next-auth" {
-    interface Session {
+    interface Session extends DefaultSession {
         user: {
             _id: string;
             email: string;
@@ -30,7 +31,7 @@ declare module "next-auth" {
 }
 
 declare module "next-auth/jwt" {
-    interface JWT {
+    interface JWT extends DefaultJWT {
         id: string;
         email: string;
         accountType: 'Doctor' | 'Triage';

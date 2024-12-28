@@ -1,24 +1,18 @@
-// components/user-profile/LinkGoogleAccount.tsx
-
-'use client'
-
-import React, { useState } from 'react'
-import { GoogleLogin } from '@react-oauth/google'
-import { jwtDecode } from 'jwt-decode'
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from '@/components/ui/drawer'
-import { Button } from '@/components/ui/button'
-import { Avatar } from '@/components/ui/avatar'
-import { X } from 'lucide-react'
-import { signIn, useSession } from 'next-auth/react'
+import React, { useState } from 'react';
+import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from '@/components/ui/drawer';
+import { Button } from '@/components/ui/button';
+import { Avatar } from '@/components/ui/avatar';
+import {jwtDecode} from "jwt-decode";
 
 interface LinkGoogleAccountProps {
-    isOpen: boolean
-    onClose: () => void
-    onLinkSuccess: (googleData: any) => void
-    onUnlinkSuccess: () => void
-    userId: string
-    isLinked: boolean
-    googleImage?: string
+    isOpen: boolean;
+    onClose: () => void;
+    onLinkSuccess: (googleData: any) => void;
+    onUnlinkSuccess: () => void;
+    userId: string;
+    isLinked: boolean;
+    googleImage?: string;
 }
 
 export function LinkGoogleAccount({
@@ -28,67 +22,52 @@ export function LinkGoogleAccount({
                                       onUnlinkSuccess,
                                       userId,
                                       isLinked,
-                                      googleImage
+                                      googleImage,
                                   }: LinkGoogleAccountProps) {
-    const [error, setError] = useState<string | null>(null)
-    const { data: session, update } = useSession()
+    const [error, setError] = useState<string | null>(null);
 
-    const handleGoogleSuccess = async () => {
-        try {
-            const result = await signIn('google', { redirect: false });
-            if (result?.error) {
-                setError(result.error);
-            } else {
-                // Update the session to get the latest Google account information
-                await update();
+    const handleGoogleSuccess = async (response: CredentialResponse) => {
+        if (response.credential) {
+            try {
+                // Decode the JWT to get Google profile info
+                const googleProfile = jwtDecode(response.credential) as {
+                    sub: string; // Google ID
+                    email: string;
+                    given_name: string;
+                    family_name: string;
+                    picture: string;
+                };
 
-                if (session?.user) {
-                    const response = await fetch('/api/user/link-google', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            userId,
-                            googleId: session.user.googleId,
-                            googleEmail: session.user.googleEmail,
-                            googleImage: session.user.googleImage,
-                        }),
-                    });
+                // Send Google profile data to the backend to link the account
+                const res = await fetch('/api/user/link-google', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userId,
+                        googleId: googleProfile.sub,
+                        googleEmail: googleProfile.email,
+                        googleImage: googleProfile.picture,
+                    }),
+                });
 
-                    if (response.ok) {
-                        const updatedUser = await response.json();
-                        onLinkSuccess(updatedUser);
-                        onClose();
-                    } else {
-                        setError('Failed to link Google account.');
-                    }
+                if (res.ok) {
+                    const updatedUser = await res.json();
+                    onLinkSuccess(updatedUser);
+                    onClose();
                 } else {
-                    setError('Failed to retrieve Google account information.');
+                    const errorData = await res.json();
+                    setError(errorData.error || 'Failed to link Google account.');
                 }
+            } catch (err) {
+                console.error('Error linking Google account:', err);
+                setError('Error linking Google account.');
             }
-        } catch (error) {
-            console.error('Error linking Google account:', error);
-            setError('Error linking Google account');
+        } else {
+            setError('Google login failed. Please try again.');
         }
-    }
-
-    const handleUnlinkGoogle = async () => {
-        try {
-            const response = await fetch(`/api/user/unlink-google/${userId}`, {
-                method: 'POST',
-            })
-            if (response.ok) {
-                onUnlinkSuccess()
-                onClose()
-            } else {
-                setError('Failed to unlink Google account')
-            }
-        } catch (error) {
-            console.error('Error unlinking Google account:', error)
-            setError('Error unlinking Google account')
-        }
-    }
+    };
 
     return (
         <Drawer isOpen={isOpen} onClose={onClose}>
@@ -98,26 +77,26 @@ export function LinkGoogleAccount({
                     <DrawerDescription>
                         {isLinked
                             ? 'Your Google account is currently linked. You can unlink it here.'
-                            : 'Connect your Google account to enable easy login.'}
+                            : 'Connect your Google account to enable easy login in the future.'}
                     </DrawerDescription>
                 </DrawerHeader>
                 <div className="p-4 flex flex-col items-center">
                     {isLinked ? (
                         <div className="flex flex-col items-center space-y-4">
-                            <Avatar src={googleImage} alt="Google Profile" className="w-16 h-16"/>
-                            <Button onClick={handleUnlinkGoogle} variant="destructive">
+                            <Avatar src={googleImage} alt="Google Profile" className="w-16 h-16" />
+                            <Button onClick={onUnlinkSuccess} variant="destructive">
                                 Unlink Google Account
                             </Button>
                         </div>
                     ) : (
-                        <Button onClick={handleGoogleSuccess}>
-                            Link Google Account
-                        </Button>
+                        <GoogleLogin
+                            onSuccess={handleGoogleSuccess}
+                            onError={() => setError('Google login failed. Please try again.')}
+                        />
                     )}
                     {error && <p className="text-red-500 mt-2">{error}</p>}
                 </div>
             </DrawerContent>
         </Drawer>
-    )
+    );
 }
-

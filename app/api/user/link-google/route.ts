@@ -8,6 +8,13 @@ export async function POST(req: Request) {
         await dbConnect();
         const { userId, googleId, googleEmail, googleImage } = await req.json();
 
+        // Check if the Google ID is already linked to another user
+        const existingGoogleUser = await User.findOne({ googleId });
+        if (existingGoogleUser && existingGoogleUser._id.toString() !== userId) {
+            return NextResponse.json({ error: 'Google account already linked to another user' }, { status: 400 });
+        }
+
+        // Update the user with Google details
         const user = await User.findById(userId);
         if (!user) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
@@ -24,4 +31,3 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
-

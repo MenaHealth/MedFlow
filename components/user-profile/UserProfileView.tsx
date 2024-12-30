@@ -1,7 +1,7 @@
 // components/user-profile/UserProfileView.tsx
 'use client'
 
-import React, {useState} from "react";
+import React, { useState } from "react";
 import { FormProvider } from "react-hook-form";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar } from '@/components/ui/avatar';
@@ -19,8 +19,8 @@ import { useUserProfileViewModel, UserProfileFormValues, UserProfileViewModel } 
 import { useUserProfileAdminViewModel } from '@/components/adminDashboard/sections/userProfileAdminViewModel';
 import { UserProfileSkeleton } from '@/components/user-profile/userProfileSkeleton';
 import Tooltip from '@/components/form/Tooltip';
-import {GoogleLogin, googleLogout} from "@react-oauth/google";
-import {LinkGoogleAccount} from "@/components/user-profile/LinkGoogleAccount";
+import { LinkGoogleAccount } from "@/components/user-profile/LinkGoogleAccount";
+import Image from "next/image";
 
 interface UserProfileViewProps {
     isAdmin?: boolean;
@@ -67,6 +67,9 @@ export function UserProfileView({ isAdmin = false, userId }: UserProfileViewProp
         }
     };
 
+    // Use Google profile image if available, otherwise use the default image
+    const avatarSrc = vm.profile.googleImage || vm.profile.image;
+
     return (
         <FormProvider {...vm.methods}>
             <form onSubmit={vm.methods.handleSubmit(vm.handleSubmit)}>
@@ -96,10 +99,9 @@ export function UserProfileView({ isAdmin = false, userId }: UserProfileViewProp
                         )}
                     </CardHeader>
                     <CardContent>
-
                         <div className="flex flex-col items-center space-y-4">
                             <Avatar
-                                src={vm.profile.image}
+                                src={avatarSrc}
                                 alt={`${vm.profile.firstName} ${vm.profile.lastName}`}
                                 initials={initials}
                                 className="w-24 h-24 text-2xl"
@@ -107,6 +109,9 @@ export function UserProfileView({ isAdmin = false, userId }: UserProfileViewProp
                             <div className="text-center">
                                 <h2 className="text-xl font-semibold">{vm.profile.firstName} {vm.profile.lastName}</h2>
                                 <p className="text-sm text-gray-500">{vm.profile.email}</p>
+                                {vm.profile.googleEmail && (
+                                    <p className="text-sm text-gray-500">Google Email: {vm.profile.googleEmail}</p>
+                                )}
                                 <div className="flex items-center mt-2">
                                     <p className="text-sm bg-darkBlue text-white px-2 py-1 rounded">ID: {vm.profile._id}</p>
                                     <Button
@@ -118,13 +123,28 @@ export function UserProfileView({ isAdmin = false, userId }: UserProfileViewProp
                                         {vm.isCopied ? <Check className="h-4 w-4"/> : <Copy className="h-4 w-4"/>}
                                     </Button>
                                 </div>
-                                <div className="flex mt-4">
-                                    <Button
-                                        variant={'orangeOutline'}
-                                        onClick={() => setIsGoogleDrawerOpen(true)}>
-                                        {vm.profile.googleId ? 'Manage Google Account' : 'Link Google Account'}
-                                    </Button>
-                                </div>
+                                {isAdmin ? (
+                                    <div className="mt-4">
+                                        {vm.profile.googleId ? (
+                                            <div className="text-sm">
+                                                <p><strong>Google Account:</strong> {vm.profile.googleEmail}</p>
+                                                {vm.profile.googleImage && (
+                                                    <Image src={vm.profile.googleImage} alt="Google Profile" className="w-8 h-8 rounded-full mt-2 mx-auto" />
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <p className="text-sm">No linked Google account</p>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div className="flex mt-4 justify-center">
+                                        <Button
+                                            variant="orangeOutline"
+                                            onClick={() => setIsGoogleDrawerOpen(true)}>
+                                            {vm.profile.googleId ? 'Manage Google Account' : 'Link Google Account'}
+                                        </Button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -239,15 +259,18 @@ export function UserProfileView({ isAdmin = false, userId }: UserProfileViewProp
                     </CardContent>
                 </Card>
             </form>
-            <LinkGoogleAccount
-                isOpen={isGoogleDrawerOpen}
-                onClose={() => setIsGoogleDrawerOpen(false)}
-                onLinkSuccess={handleGoogleLinkSuccess}
-                onUnlinkSuccess={handleGoogleUnlinkSuccess}
-                userId={vm.profile._id}
-                isLinked={!!vm.profile.googleId}
-                googleImage={vm.profile.googleImage}
-            />
+            {!isAdmin && (
+                <LinkGoogleAccount
+                    isOpen={isGoogleDrawerOpen}
+                    onClose={() => setIsGoogleDrawerOpen(false)}
+                    onLinkSuccess={handleGoogleLinkSuccess}
+                    onUnlinkSuccess={handleGoogleUnlinkSuccess}
+                    userId={vm.profile._id}
+                    googleId={vm.profile.googleId}
+                    googleEmail={vm.profile.googleEmail}
+                    googleImage={vm.profile.googleImage}
+                />
+            )}
         </FormProvider>
     );
 }
@@ -293,3 +316,4 @@ function ProfileField({label, value, isEditing, fieldName, register, email}: Pro
 
     return null;
 }
+

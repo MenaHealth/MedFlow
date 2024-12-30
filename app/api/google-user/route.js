@@ -1,9 +1,9 @@
 // app/api/google-user/route.ts
 import GoogleUser from '@/models/googleUser';
 import dbConnect from '@/utils/database';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
-export const POST = async (request: NextRequest) => {
+export const POST = async (request) => {
     const { userID, name, email, accountType, image, googleId, googleEmail, googleImage } = await request.json();
 
     try {

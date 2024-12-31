@@ -5,7 +5,7 @@ import { Dispatch, SetStateAction, useState } from "react"
 import { signOut } from "next-auth/react"
 import { LogOut, Settings, ClipboardList, Grid3X3, ArrowRightLeft } from 'lucide-react'
 import Link from "next/link"
-import { ScrollArea } from "@/components/ui/ScrollArea"
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
     Sheet,
     SheetContent,

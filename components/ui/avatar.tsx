@@ -1,6 +1,24 @@
-import * as React from "react";
+import React from "react";
 import Image from "next/image";
 import { cn } from "../../utils/classNames";
+
+const AvatarFallback = React.forwardRef<
+    HTMLSpanElement,
+    React.HTMLAttributes<HTMLSpanElement> & { children?: React.ReactNode }
+>(({ className, children, ...props }, ref) => (
+    <span
+        ref={ref}
+        className={cn(
+            "flex items-center justify-center h-full w-full text-sm font-medium text-gray-400",
+            className
+        )}
+        {...props}
+    >
+    {children}
+  </span>
+));
+
+AvatarFallback.displayName = "AvatarFallback";
 
 const Avatar = React.forwardRef<
     HTMLSpanElement,
@@ -8,8 +26,12 @@ const Avatar = React.forwardRef<
     src?: string;
     alt?: string;
     initials?: string;
+    user?: any;
 }
->(({ className, src, alt, initials, ...props }, ref) => {
+>(({ className, src, alt, initials, user, ...props }, ref) => {
+    const imageSrc = user?.image || user?.googleImage || src;
+    const userInitials = initials || (user?.firstName?.[0] + user?.lastName?.[0]) || '';
+
     return (
         <span
             ref={ref}
@@ -19,14 +41,15 @@ const Avatar = React.forwardRef<
             )}
             {...props}
         >
-            {src ? (
-                <AvatarImage src={src} alt={alt || "Avatar"} />
-            ) : (
-                <AvatarFallback>{initials}</AvatarFallback>
-            )}
-        </span>
+      {imageSrc ? (
+          <AvatarImage src={imageSrc} alt={alt || user?.name || "Avatar"} />
+      ) : (
+          <AvatarFallback>{userInitials}</AvatarFallback>
+      )}
+    </span>
     );
 });
+
 Avatar.displayName = "Avatar";
 
 const AvatarImage = React.forwardRef<
@@ -36,44 +59,31 @@ const AvatarImage = React.forwardRef<
     alt?: string;
 }
 >(({ className, src = "", alt = "Avatar", ...props }, ref) => {
-    if (!src) {
-        console.warn("AvatarImage requires a valid src");
+    const [imageError, setImageError] = React.useState(false);
+
+    if (!src || imageError) {
+        return <AvatarFallback>{alt[0]}</AvatarFallback>;
     }
+
     return (
         <div
             ref={ref}
-            className={cn("relative h-full w-full", className)} // Ensures it matches the parent size
+            className={cn("relative h-full w-full", className)}
             {...props}
         >
             <Image
                 src={src}
-                alt={alt || "Avatar"}
-                layout="fill" // Ensures the image covers the parent container
-                objectFit="cover" // Keeps the aspect ratio intact
-                className="rounded-full" // Ensures the circular shape
+                alt={alt}
+                layout="fill"
+                objectFit="cover"
+                className="rounded-full"
+                onError={() => setImageError(true)}
             />
         </div>
     );
 });
+
 AvatarImage.displayName = "AvatarImage";
 
-const AvatarFallback = React.forwardRef<
-    HTMLSpanElement,
-    React.HTMLAttributes<HTMLSpanElement>
->(({ className, children, ...props }, ref) => {
-    return (
-        <span
-            ref={ref}
-            className={cn(
-                "flex h-full w-full items-center justify-center bg-gray-300 text-gray-600 font-medium text-sm rounded-full",
-                className
-            )}
-            {...props}
-        >
-            {children || "?"}
-        </span>
-    );
-});
-AvatarFallback.displayName = "AvatarFallback";
-
 export { Avatar, AvatarImage, AvatarFallback };
+

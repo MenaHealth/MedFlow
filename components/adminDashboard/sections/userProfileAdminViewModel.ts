@@ -1,23 +1,11 @@
 // components/adminDashboard/sections/userProfileAdminViewModel.ts
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { UserProfileFormValues, userProfileSchema, UserProfileViewModel } from "@/components/user-profile/UserProfileViewModel";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSession } from "next-auth/react";
 import { useToast } from '@/components/hooks/useToast';
-// import { z } from "zod";
-// import { useQuery, useMutation, UseMutationResult } from "@tanstack/react-query";
-// import { AxiosError } from "axios";
-// import { toast } from "react-hot-toast";
-// import {
-//   UserProfileFormValues,
-//   userProfileSchema,
-//   UserProfileViewModel,
-// } from "@/components/user-profile/UserProfileViewModel";
-// import { useUser } from "@/context/AuthContext";
-import { useRouter } from "next/router";
-// import { useCallback, useState } from "react";
 
 export function useUserProfileAdminViewModel(userId?: string): UserProfileViewModel {
     const { data: session } = useSession();
@@ -32,13 +20,13 @@ export function useUserProfileAdminViewModel(userId?: string): UserProfileViewMo
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
     const fetchProfile = useCallback(async () => {
-        if (userId) {
+        if (userId && session?.user?.token) {
             setIsLoading(true);
             setStatus('loading');
             try {
                 const res = await fetch(`/api/admin/user/${userId}`, {
                     headers: {
-                        'Authorization': `Bearer ${session?.user.token}`,
+                        'Authorization': `Bearer ${session.user.token}`,
                     }
                 });
                 if (!res.ok) {
@@ -57,7 +45,12 @@ export function useUserProfileAdminViewModel(userId?: string): UserProfileViewMo
         } else {
             setStatus('error');
         }
-    }, [userId, session?.user.token, methods]);
+    }, [userId, session?.user?.token, methods]);
+
+    // Add useEffect to call fetchProfile when component mounts or userId/session changes
+    useEffect(() => {
+        fetchProfile();
+    }, [fetchProfile, userId, session?.user?.token]);
 
     const handleEdit = useCallback(() => setIsEditing(true), []);
 
@@ -67,19 +60,29 @@ export function useUserProfileAdminViewModel(userId?: string): UserProfileViewMo
     }, [methods, profile]);
 
     const handleSubmit = useCallback(async (data: UserProfileFormValues) => {
+        if (!session?.user?.token) {
+            setToast({
+                title: 'Error',
+                description: 'No authorization token available.',
+                variant: 'destructive',
+            });
+            return;
+        }
+
         setIsLoading(true);
         try {
             const response = await fetch(`/api/admin/user/${data._id}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session?.user.token}`,
+                    'Authorization': `Bearer ${session.user.token}`,
                 },
                 body: JSON.stringify(data),
             });
             if (response.ok) {
                 const updatedProfile = await response.json();
                 setProfile(updatedProfile);
+                methods.reset(updatedProfile);
                 setToast({
                     title: 'Success',
                     description: 'User updated successfully.',
@@ -102,7 +105,7 @@ export function useUserProfileAdminViewModel(userId?: string): UserProfileViewMo
             });
         }
         setIsLoading(false);
-    }, [session?.user.token, setToast]);
+    }, [session?.user?.token, setToast, methods]);
 
     const copyToClipboard = useCallback(() => {
         if (profile) {
@@ -140,4 +143,6 @@ export function useUserProfileAdminViewModel(userId?: string): UserProfileViewMo
         handleUnlinkGoogleAccount,
     };
 }
+
+
 

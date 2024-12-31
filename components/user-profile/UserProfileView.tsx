@@ -68,8 +68,7 @@ export function UserProfileView({ isAdmin = false, userId }: UserProfileViewProp
     };
 
     // Use Google profile image if available, otherwise use the default image
-    const avatarSrc = vm.profile.googleImage || vm.profile.image;
-
+    const avatarSrc = vm.profile.image || vm.profile.googleImage;
     return (
         <FormProvider {...vm.methods}>
             <form onSubmit={vm.methods.handleSubmit(vm.handleSubmit)}>
@@ -104,7 +103,7 @@ export function UserProfileView({ isAdmin = false, userId }: UserProfileViewProp
                                 src={avatarSrc}
                                 alt={`${vm.profile.firstName} ${vm.profile.lastName}`}
                                 initials={initials}
-                                className="w-24 h-24 text-2xl"
+                                className="w-24 h-24 text-2xl" // Use className for sizing
                             />
                             <div className="text-center">
                                 <h2 className="text-xl font-semibold">{vm.profile.firstName} {vm.profile.lastName}</h2>
@@ -129,7 +128,13 @@ export function UserProfileView({ isAdmin = false, userId }: UserProfileViewProp
                                             <div className="text-sm">
                                                 <p><strong>Google Account:</strong> {vm.profile.googleEmail}</p>
                                                 {vm.profile.googleImage && (
-                                                    <Image src={vm.profile.googleImage} alt="Google Profile" className="w-8 h-8 rounded-full mt-2 mx-auto" />
+                                                    <Image
+                                                        src={vm.profile.googleImage}
+                                                        alt="Google Profile"
+                                                        className="object-cover"
+                                                        width={40}
+                                                        height={40}
+                                                    />
                                                 )}
                                             </div>
                                         ) : (

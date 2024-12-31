@@ -14,23 +14,23 @@ const Avatar = React.forwardRef<
         <span
             ref={ref}
             className={cn(
-                "inline-block h-10 w-10 overflow-hidden rounded-full bg-gray-100",
+                "inline-block h-24 w-24 overflow-hidden rounded-full bg-gray-100",
                 className
             )}
             {...props}
         >
-      {src ? (
-          <AvatarImage src={src} alt={alt || "Avatar"} />
-      ) : (
-          <AvatarFallback>{initials}</AvatarFallback>
-      )}
-    </span>
+            {src ? (
+                <AvatarImage src={src} alt={alt || "Avatar"} />
+            ) : (
+                <AvatarFallback>{initials}</AvatarFallback>
+            )}
+        </span>
     );
 });
 Avatar.displayName = "Avatar";
 
 const AvatarImage = React.forwardRef<
-    HTMLDivElement, // Change this to match the parent container (not the `Image` component).
+    HTMLDivElement,
     React.HTMLAttributes<HTMLDivElement> & {
     src?: string;
     alt?: string;
@@ -42,15 +42,15 @@ const AvatarImage = React.forwardRef<
     return (
         <div
             ref={ref}
-            className={cn("object-cover w-full h-full", className)}
+            className={cn("relative h-full w-full", className)} // Ensures it matches the parent size
             {...props}
         >
             <Image
-                src={src} // Ensure `src` is a valid string
-                alt={alt}
-                className="object-cover"
-                width={40}
-                height={40}
+                src={src}
+                alt={alt || "Avatar"}
+                layout="fill" // Ensures the image covers the parent container
+                objectFit="cover" // Keeps the aspect ratio intact
+                className="rounded-full" // Ensures the circular shape
             />
         </div>
     );
@@ -65,13 +65,13 @@ const AvatarFallback = React.forwardRef<
         <span
             ref={ref}
             className={cn(
-                "flex h-full w-full items-center justify-center bg-gray-300 text-gray-600 font-medium text-sm",
+                "flex h-full w-full items-center justify-center bg-gray-300 text-gray-600 font-medium text-sm rounded-full",
                 className
             )}
             {...props}
         >
-      {children || "?"}
-    </span>
+            {children || "?"}
+        </span>
     );
 });
 AvatarFallback.displayName = "AvatarFallback";

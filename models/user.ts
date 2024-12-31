@@ -32,6 +32,9 @@
       adminResetPasswordLink?: string;
       adminResetLinkExpiry?: Date;
       passwordResetCount?: number;
+      googleId?: string;
+      googleEmail?: string;
+      googleImage?: string;
     }
 
     const UserSchema = new Schema<IUser>({
@@ -121,6 +124,18 @@
       passwordResetCount: {
         type: Number,
         default: 0, // Initialize to zero if not already set
+      },
+      googleId: {
+        type: String,
+        required: false,
+      },
+      googleEmail: {
+        type: String,
+        required: false,
+      },
+      googleImage: {
+        type: String,
+        required: false,
       },
     });
 

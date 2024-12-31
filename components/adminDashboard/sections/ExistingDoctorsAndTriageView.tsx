@@ -188,12 +188,21 @@ export default function ExistingDoctorsAndTriageView() {
             </InfiniteScroll>
 
             {editingUser && (
-                <Dialog open={true} onOpenChange={() => setEditingUser(null)}>
+                <Dialog
+                    open={!!editingUser}
+                    onOpenChange={(open) => {
+                        if (!open) setEditingUser(null);
+                    }}
+                >
                     <DialogContent className={'bg-gradient-to-t from-white to-orange-100'}>
                         <DialogTitle className={'text-center text-darkBlue'}>
-                            {'Admin Edit'}
+                            {`Admin Edit: ${editingUser.firstName} ${editingUser.lastName}`}
                         </DialogTitle>
-                        <UserProfileView isAdmin={true} userId={editingUser._id} />
+                        <UserProfileView
+                            isAdmin={true}
+                            userId={editingUser._id}
+                            key={editingUser._id}
+                        />
                     </DialogContent>
                 </Dialog>
             )}

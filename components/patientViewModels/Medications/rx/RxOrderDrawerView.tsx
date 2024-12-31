@@ -23,7 +23,7 @@ import {
     View,
 } from 'lucide-react';
 import { Drawer, DrawerContent, DrawerHeader } from "@/components/ui/drawer";
-import { ScrollArea } from "@/components/ui/ScrollArea";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { usePatientDashboard } from "@/components/patientViewModels/PatientViewModelContext";
 import { IRxOrder } from "@/models/patient";
 import { useRxOrderDrawerViewModel } from "./RxOrderDrawerViewModel";

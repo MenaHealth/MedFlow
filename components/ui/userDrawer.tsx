@@ -183,6 +183,3 @@ export function UserDrawer({ isOpen, setIsOpen, user }: UserDrawerProps) {
         </Sheet>
     )
 }
-
-
-

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronDown, ChevronUp, Share, ChevronsDown, ChevronsUp } from 'lucide-react';
-import { ScrollArea } from '../../../ui/ScrollArea';
+import { ScrollArea } from '../../../ui/scroll-area';
 import RxOrderDrawerView from '../rx/RxOrderDrawerView';
 import { IRxOrder } from '../../../../models/patient';
 import { IMedOrder } from '../../../../models/medOrder';

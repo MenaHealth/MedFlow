@@ -21,6 +21,7 @@ interface UserDrawerProps {
     user: {
         name?: string | null;
         email?: string | null;
+        accountType?: string | null;
         image?: string | null;
         firstName?: string;
         lastName?: string;
@@ -78,6 +79,7 @@ export function UserDrawer({ isOpen, setIsOpen, user }: UserDrawerProps) {
                                 </div>
                             )}
                             <div>
+                                <p className="text-sm text-darkBlue/70">{user.accountType}</p>
                                 <p className="font-semibold text-lg">{user.name}</p>
                                 <p className="text-sm text-darkBlue/70">{user.email}</p>
                             </div>

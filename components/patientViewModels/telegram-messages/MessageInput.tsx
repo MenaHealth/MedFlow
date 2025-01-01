@@ -1,4 +1,4 @@
-// components/patientViewModels/telegram-messages/MessageInput.tsx
+// Medflow/components/patientViewModels/telegram-messages/MessageInput.tsx
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Send, Image, Plus } from 'lucide-react';

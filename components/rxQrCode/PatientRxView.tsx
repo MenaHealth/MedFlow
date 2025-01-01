@@ -1,9 +1,10 @@
-// components/rxQrCode/PatientView.tsx
+// components/rxQrCode/PatientRxView.tsx
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
-import { usePatientViewModel, prescriptionColumns } from './PatientViewModel';
+import { usePatientViewModel, prescriptionColumns } from './PatientRxViewModel';
+import { Language, translations, TranslationKey } from './PatientRxTranslations';
 import {
     Card,
     CardContent,
@@ -14,20 +15,32 @@ import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Table } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogTrigger, DialogTitle, DialogHeader } from "@/components/ui/dialog";
-import { Expand } from 'lucide-react';
+import { Expand, ChevronDown } from 'lucide-react';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdownMenu"
+import {cn} from "@/lib/utils";
 
 interface QRCodeDisplayProps {
     uuid: string;
 }
 
-const PatientView: React.FC<QRCodeDisplayProps> = ({ uuid }) => {
+const PatientRxView: React.FC<QRCodeDisplayProps> = ({ uuid }) => {
     const { rxOrder, loading, error } = usePatientViewModel(uuid);
+    const [language, setLanguage] = useState<Language>(Language.English);
+    const [isAccordionOpen, setIsAccordionOpen] = useState(false);
+
+
+    const t = (key: TranslationKey) => translations[language][key];
 
     if (loading) {
         return (
             <Card className="w-full max-w-4xl mx-auto">
                 <CardHeader>
-                    <CardTitle>Loading...</CardTitle>
+                    <CardTitle>{t('loading')}</CardTitle>
                 </CardHeader>
             </Card>
         );
@@ -35,9 +48,15 @@ const PatientView: React.FC<QRCodeDisplayProps> = ({ uuid }) => {
 
     if (error) {
         return (
-            <Card className="w-full max-w-4xl mx-auto">
+            <Card
+                className="w-full max-w-4xl mx-auto"
+                backgroundColor=""
+                borderColor="border-orange-500"
+                borderSize={1}
+                shadowSize="md"
+            >
                 <CardHeader>
-                    <CardTitle>Error</CardTitle>
+                    <CardTitle>{t('error')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <p className="text-red-500">{error}</p>
@@ -48,17 +67,52 @@ const PatientView: React.FC<QRCodeDisplayProps> = ({ uuid }) => {
 
     if (!rxOrder) {
         return (
-            <Card className="w-full max-w-4xl mx-auto">
+            <Card
+                className="w-full max-w-4xl mx-auto"
+                backgroundColor=""
+                borderColor="border-orange-500"
+                borderSize={1}
+                shadowSize="md"
+            >
                 <CardHeader>
-                    <CardTitle>No prescription found</CardTitle>
+                    <CardTitle>{t('noPrescriptionFound')}</CardTitle>
                 </CardHeader>
             </Card>
         );
     }
 
     return (
-        <Card className="w-full max-w-4xl mx-auto">
+        <Card
+            className={cn(
+                "w-full max-w-4xl mx-auto relative z-10",
+                isAccordionOpen ? "mb-72" : "mb-8 mt-16"
+            )}
+            backgroundOpacity={0}
+            borderSize={1}
+            shadowSize="md"
+        >
             <CardHeader className="flex flex-row items-center justify-between">
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="default">
+                            {t('selectLanguage')} <ChevronDown className="ml-2 h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                        <DropdownMenuItem onClick={() => setLanguage(Language.English)}>
+                            {t('english')}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setLanguage(Language.Arabic)}>
+                            {t('arabic')}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setLanguage(Language.Pashto)}>
+                            {t('pashto')}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setLanguage(Language.Farsi)}>
+                            {t('farsi')}
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
                 <div className="flex items-center space-x-4">
                     <Image
                         src="/assets/images/mena_health_logo.jpeg"
@@ -67,14 +121,14 @@ const PatientView: React.FC<QRCodeDisplayProps> = ({ uuid }) => {
                         height={80}
                         className="rounded-full"
                     />
-                    <CardTitle>Prescription Details</CardTitle>
+                    <CardTitle>{t('prescriptionDetails')}</CardTitle>
                 </div>
             </CardHeader>
             <CardContent className="space-y-6">
                 {rxOrder.rxStatus === 'completed' ? (
                     <div className="text-center bg-orange-100 text-orange-800 p-4 rounded-md border border-orange-300">
-                        <p className="font-semibold">RX Order Completed</p>
-                        <p>Please contact your doctor to refill your prescription.</p>
+                        <p className="font-semibold">{t('rxOrderCompleted')}</p>
+                        <p>{t('contactDoctorRefill')}</p>
                     </div>
                 ) : (
                     <>
@@ -87,26 +141,26 @@ const PatientView: React.FC<QRCodeDisplayProps> = ({ uuid }) => {
                                             className="absolute -top-4 -right-4 bg-white text-orange-500 hover:bg-orange-500 hover:text-white shadow-md rounded-full p-1 z-10"
                                         >
                                             <Expand className="h-4 w-4"/>
-                                            <span className="sr-only">Expand QR Code</span>
+                                            <span className="sr-only">{t('expandQrCode')}</span>
                                         </Button>
                                     </DialogTrigger>
                                     <DialogContent className="sm:max-w-md">
                                         <DialogHeader>
-                                            <DialogTitle>QR Code</DialogTitle>
-                                            <DialogDescription>Scan this QR code for your RX Order</DialogDescription>
+                                            <DialogTitle>{t('qrCode')}</DialogTitle>
+                                            <DialogDescription>{t('scanQrCode')}</DialogDescription>
                                         </DialogHeader>
                                         <div className="flex items-center justify-center p-6">
                                             {rxOrder.PharmacyQrCode ? (
                                                 <Image
                                                     src={rxOrder.PharmacyQrCode}
-                                                    alt="QR Code for RX Order"
+                                                    alt={t('qrCode')}
                                                     width={300}
                                                     height={300}
                                                     className="max-w-full h-auto"
                                                 />
                                             ) : (
                                                 <div className="flex items-center justify-center w-[300px] h-[300px] bg-gray-200 text-gray-500">
-                                                    QR Code not available
+                                                    {t('qrCodeNotAvailable')}
                                                 </div>
                                             )}
                                         </div>
@@ -116,14 +170,14 @@ const PatientView: React.FC<QRCodeDisplayProps> = ({ uuid }) => {
                                 {rxOrder.PharmacyQrCode ? (
                                     <Image
                                         src={rxOrder.PharmacyQrCode}
-                                        alt="QR Code for RX Order"
+                                        alt={t('qrCode')}
                                         width={200}
                                         height={200}
                                         className="border rounded-lg shadow-md"
                                     />
                                 ) : (
                                     <div className="w-[200px] h-[200px] flex items-center justify-center bg-gray-200 text-gray-500 border rounded-lg shadow-md">
-                                        QR Code not available
+                                        {t('qrCodeNotAvailable')}
                                     </div>
                                 )}
                             </div>
@@ -132,13 +186,13 @@ const PatientView: React.FC<QRCodeDisplayProps> = ({ uuid }) => {
                         <div className="space-y-4">
                             {rxOrder.prescriptions.length > 0 && (
                                 <div>
-                                    <h3 className="text-lg font-semibold mb-2">Diagnosis</h3>
+                                    <h3 className="text-lg font-semibold mb-2">{t('diagnosis')}</h3>
                                     <div className="border-gray-300 p-2 rounded-md border">
                                         <p>{rxOrder.prescriptions[0].diagnosis}</p>
                                     </div>
                                 </div>
                             )}
-                            <h3 className="text-lg font-semibold mb-2">Prescriptions</h3>
+                            <h3 className="text-lg font-semibold mb-2">{t('prescriptions')}</h3>
                             <Table
                                 data={rxOrder.prescriptions.map(({diagnosis, ...rest}) => rest)}
                                 columns={prescriptionColumns}
@@ -152,58 +206,65 @@ const PatientView: React.FC<QRCodeDisplayProps> = ({ uuid }) => {
                             />
                         </div>
 
-                        <Accordion type="single" collapsible className="w-full bg-darkBlue text-white rounded-2xl px-4">
+                        <Accordion
+                            type="single"
+                            collapsible
+                            className="w-full bg-darkBlue text-white rounded-2xl px-4"
+                            onValueChange={(value) => setIsAccordionOpen(!!value)}
+                        >
                             <AccordionItem value="order-details">
-                                <AccordionTrigger className="justify-center text-center">Order Details</AccordionTrigger>
+                                <AccordionTrigger className="justify-center text-center">
+                                    {t('orderDetails')}
+                                </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="space-y-4">
-                                            <h4 className="font-semibold text-lg">Patient Information</h4>
+                                            <h4 className="font-semibold text-lg">{t('patientInformation')}</h4>
                                             <div className="grid grid-cols-2 gap-2">
                                                 <div>
-                                                    <h5 className="font-semibold border-b pb-1">Name</h5>
-                                                    <p>{rxOrder.patientName || 'Not specified'}</p>
+                                                    <h5 className="font-semibold border-b pb-1">{t('name')}</h5>
+                                                    <p>{rxOrder.patientName || t('notSpecified')}</p>
                                                 </div>
                                                 <div>
-                                                    <h5 className="font-semibold border-b pb-1">Date of Birth</h5>
-                                                    <p>{rxOrder.patientDob ? new Date(rxOrder.patientDob).toLocaleDateString() : 'Not specified'}</p>
+                                                    <h5 className="font-semibold border-b pb-1">{t('dateOfBirth')}</h5>
+                                                    <p>{rxOrder.patientDob ? new Date(rxOrder.patientDob).toLocaleDateString() : t('notSpecified')}</p>
                                                 </div>
                                                 <div>
-                                                    <h5 className="font-semibold border-b pb-1">Country</h5>
-                                                    <p>{rxOrder.patientCountry || 'Not specified'}</p>
+                                                    <h5 className="font-semibold border-b pb-1">{t('country')}</h5>
+                                                    <p>{rxOrder.patientCountry || t('notSpecified')}</p>
                                                 </div>
                                                 <div>
-                                                    <h5 className="font-semibold border-b pb-1">City</h5>
-                                                    <p>{rxOrder.patientCity || 'Not specified'}</p>
+                                                    <h5 className="font-semibold border-b pb-1">{t('city')}</h5>
+                                                    <p>{rxOrder.patientCity || t('notSpecified')}</p>
                                                 </div>
                                             </div>
                                         </div>
                                         <div className="space-y-4">
-                                            <h4 className="font-semibold text-lg">Doctor Information</h4>
+                                            <h4 className="font-semibold text-lg">{t('doctorInformation')}</h4>
                                             <div className="grid grid-cols-2 gap-2">
                                                 <div>
-                                                    <h5 className="font-semibold border-b pb-1">Doctor Specialty</h5>
-                                                    <p>{rxOrder.doctorSpecialty || 'Not specified'}</p>
+                                                    <h5 className="font-semibold border-b pb-1">{t('doctorSpecialty')}</h5>
+                                                    <p>{rxOrder.doctorSpecialty || t('notSpecified')}</p>
                                                 </div>
                                                 <div>
-                                                    <h5 className="font-semibold border-b pb-1">Prescribing Doctor</h5>
-                                                    <p>{rxOrder.prescribingDr || 'Not specified'}</p>
+                                                    <h5 className="font-semibold border-b pb-1">{t('prescribingDoctor')}</h5>
+                                                    <p>{rxOrder.prescribingDr || t('notSpecified')}</p>
                                                 </div>
                                                 <div>
-                                                    <h5 className="font-semibold border-b pb-1">Prescribed Date</h5>
-                                                    <p>{rxOrder.prescribedDate ? new Date(rxOrder.prescribedDate).toLocaleDateString() : 'Not specified'}</p>
+                                                    <h5 className="font-semibold border-b pb-1">{t('prescribedDate')}</h5>
+                                                    <p>{rxOrder.prescribedDate ? new Date(rxOrder.prescribedDate).toLocaleDateString() : t('notSpecified')}</p>
                                                 </div>
                                                 <div>
-                                                    <h5 className="font-semibold border-b pb-1">Valid Till</h5>
-                                                    <p>{rxOrder.validTill ? new Date(rxOrder.validTill).toLocaleDateString() : 'Not specified'}</p>
+                                                    <h5 className="font-semibold border-b pb-1">{t('validTill')}</h5>
+                                                    <p>{rxOrder.validTill ? new Date(rxOrder.validTill).toLocaleDateString() : t('notSpecified')}</p>
                                                 </div>
                                                 <div>
-                                                    <h5 className="font-semibold border-b pb-1">City</h5>
-                                                    <p>{rxOrder.city || 'Not specified'}</p>
+                                                    <h5 className="font-semibold border-b pb-1">{t('city')}</h5>
+                                                    <p>{rxOrder.city || t('notSpecified')}</p>
                                                 </div>
                                                 <div>
-                                                    <h5 className="font-semibold border-b pb-1">RX Status</h5>
-                                                    <p>{rxOrder.rxStatus || 'Not specified'}</p>
+                                                    <h5 className="font-semibold border-b pb-1">{t('rxStatus')}</h5>
+                                                    <p>{rxOrder.rxStatus || t('notSpecified')}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -218,5 +279,6 @@ const PatientView: React.FC<QRCodeDisplayProps> = ({ uuid }) => {
     );
 };
 
-export default PatientView;
+export default PatientRxView;
+
 

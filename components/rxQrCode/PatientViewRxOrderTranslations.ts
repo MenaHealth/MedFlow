@@ -1,1 +1,0 @@
-// components/rxQrCode/PatientViewRxOrderTranslations.ts

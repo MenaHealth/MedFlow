@@ -1,4 +1,4 @@
-// components/rxQrCode/PatientViewModel.ts
+// components/rxQrCode/PatientRxViewModel.ts
 
 import { useState, useEffect } from 'react';
 import { IRxOrder } from '@/models/patient';

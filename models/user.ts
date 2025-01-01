@@ -12,7 +12,7 @@
       firstName: string;
       lastName: string;
       email: string;
-      accountType: 'Doctor' | 'Triage';
+      accountType: 'Doctor' | 'Triage' | 'Evac';
       password: string;
       doctorSpecialty?: DoctorSpecialtyList;
       languages?: string[];
@@ -58,7 +58,7 @@
       accountType: {
         type: String,
         required: [true, 'Account type is required!'],
-        enum: ['Doctor', 'Triage'],
+        enum: ['Doctor','Triage','Evac'],
       },
       doctorSpecialty: {
         type: String,

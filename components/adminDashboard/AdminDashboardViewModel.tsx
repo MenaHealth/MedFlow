@@ -9,7 +9,7 @@ interface User {
     firstName: string;
     lastName: string;
     email: string;
-    accountType: 'Doctor' | 'Triage';
+    accountType: 'Doctor' | 'Triage' | 'Evac';
     countries?: string[];
     denialDate?: string;
 }

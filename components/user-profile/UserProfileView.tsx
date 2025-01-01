@@ -174,7 +174,7 @@ export function UserProfileView({ isAdmin = false, userId }: UserProfileViewProp
                                     <SingleChoiceFormField
                                         fieldName="accountType"
                                         fieldLabel="Account Type"
-                                        choices={["Doctor", "Triage"]}
+                                        choices={["Doctor", "Triage","Evac"]}
                                     />
                                 ) : (
                                     <ProfileField

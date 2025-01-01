@@ -141,6 +141,8 @@ export default function MedicationsView({ patientId }: MedicationsViewProps) {
 
     const isDoctor = session?.user?.accountType === 'Doctor';
     const isTriage = session?.user?.accountType === 'Triage';
+    const isEvac = session?.user?.accountType === 'Evac'; 
+
 
     return (
         <FormProvider {...methods}>

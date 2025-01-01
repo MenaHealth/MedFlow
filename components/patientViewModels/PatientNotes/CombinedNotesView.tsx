@@ -21,6 +21,7 @@ interface NotesViewProps {
 export function CombinedNotesView({ patientId }: NotesViewProps) {
     const { data: session, status } = useSession();
     const [isExpanded, setIsExpanded] = useState(session?.user.accountType === 'Triage' ? true : false);
+    const isEvac = session?.user?.accountType === 'Evac';
     const [previousNotesWidth, setPreviousNotesWidth] = useState(400);
     const [isMobile, setIsMobile] = useState(false);
 
@@ -88,7 +89,7 @@ export function CombinedNotesView({ patientId }: NotesViewProps) {
         <div className="flex flex-col md:flex-row h-full bg-darkBlue overflow-hidden">
 
             {
-                (isMobile || session?.user?.accountType === "Triage") ?
+                (isMobile || session?.user?.accountType === "Triage" || isEvac) ?
                 (
                     <Card className="w-full">
                         {

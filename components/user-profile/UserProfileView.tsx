@@ -72,7 +72,11 @@ export function UserProfileView({ isAdmin = false, userId }: UserProfileViewProp
     return (
         <FormProvider {...vm.methods}>
             <form onSubmit={vm.methods.handleSubmit(vm.handleSubmit)}>
-                <Card className="w-full max-w-3xl mx-auto mt-8">
+                <Card
+                    className="w-full max-w-3xl mx-auto mt-8"
+                    backgroundColor="bg-white"
+                    shadowSize="lg"
+                >
                     <CardHeader className="relative">
                         <CardTitle className="text-center">{isAdmin ? 'User Profile' : 'My Profile'}</CardTitle>
                         {!vm.isEditing ? (

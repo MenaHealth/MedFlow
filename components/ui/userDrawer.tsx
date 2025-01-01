@@ -76,7 +76,14 @@ export function UserDrawer({ isOpen, setIsOpen, user }: UserDrawerProps) {
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetContent className="sm:max-w-md">
                 <ScrollArea className="h-full pr-4">
-                    <Card className="mb-4">
+                    <Card
+                        className="w-full max-w-4xl mx-auto relative z-10"
+                        backgroundOpacity={25}
+                        blurAmount={5}
+                        borderColor="border-orange-500"
+                        borderSize={1}
+                        shadowSize="md"
+                    >
                         <CardContent className="p-4">
                             <div className="flex items-center space-x-4 mb-4">
                                 <Avatar user={user} className="w-12 h-12" />

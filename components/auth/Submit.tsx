@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 
 export default function Submit() {
     const router = useRouter();
-    const { formData, accountType, doctorSignupFormCompleted, triageSignupFormCompleted } = useSignupContext();
+    const { formData, accountType, doctorSignupFormCompleted, triageSignupFormCompleted, evacSignupFormCompleted } = useSignupContext();
     const [isLoading, setIsLoading] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [animateFlyOff, setAnimateFlyOff] = useState(false);
@@ -51,16 +51,19 @@ export default function Submit() {
                         countries: formData.countries,
                         gender: formData.gender,
                     }),
+                    ...(accountType === 'Evac' && {
+                        languages: formData.languages,
+                        countries: formData.countries,
+                    }),
                 }),
             });
-
+    
             const result = await response.json();
-
+    
             if (response.ok) {
                 setIsSuccess(true);
                 setTimeout(() => {
                     setAnimateFlyOff(true);
-                    // Replace the current page in the history stack
                     window.history.pushState(null, '', window.location.pathname);
                     window.addEventListener('popstate', () => {
                         router.replace('/auth/signup-success');
@@ -69,7 +72,7 @@ export default function Submit() {
                         router.replace('/auth/signup-success');
                     }, 2000);
                 }, 100);
-            }  else {
+            } else {
                 console.error('Signup failed:', result.message);
             }
         } catch (error) {
@@ -77,9 +80,14 @@ export default function Submit() {
         } finally {
             setIsLoading(false);
         }
-    };
+    };    
 
-    const isFormComplete = accountType === 'Doctor' ? doctorSignupFormCompleted : triageSignupFormCompleted;
+    const isFormComplete = accountType === 'Doctor' 
+    ? doctorSignupFormCompleted 
+    : accountType === 'Triage' 
+        ? triageSignupFormCompleted 
+        : evacSignupFormCompleted;
+
 
     return (
         <div className="relative flex items-center justify-center">

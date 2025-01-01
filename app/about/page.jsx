@@ -1,4 +1,4 @@
-// app/about/page.jsx
+// Medflow/app/about/page.jsx
 'use client';
 
 import React, { useEffect } from 'react';

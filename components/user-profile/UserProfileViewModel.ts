@@ -22,7 +22,7 @@ export const userProfileSchema = z.object({
     gender: z.enum(['male', 'female'], { errorMap: () => ({ message: "Gender is required" }) }),
     image: z.string().optional(),
     email: z.string().optional(),
-    accountType: z.enum(['Doctor', 'Triage'], { errorMap: () => ({ message: "Account type is required" }) }),
+    accountType: z.enum(['Doctor', 'Triage', 'Evac'], { errorMap: () => ({ message: "Account type is required" }) }),
     doctorSpecialty: z.string().optional(),
     googleId: z.string().optional(),
     googleEmail: z.string().optional(),

@@ -97,6 +97,13 @@ export default function PatientTriage() {
 
     let filteredRows = [...allData];
 
+        // For Gaza Evac Coordinators
+        if (session?.user?.accountType === "Evac") {
+          filteredRows = filteredRows.filter(
+              (row) => row.specialty === DoctorSpecialtyList.GAZA_MED_EVACUATIONS
+          );
+      }
+
     // Apply filters
     if (priorityFilter !== "all") {
       filteredRows = filteredRows.filter(
@@ -156,14 +163,14 @@ export default function PatientTriage() {
       doctor = {};
       triagedBy = {};
     } else if (value === 'Triaged') {
-      if (session.user.accountType !== 'Triage') {
+      if (session.user.accountType !== 'Triage' || session.user.accountType === 'Evac') {
         triggerToast('You do not have the correct permissions to triage patients');
         return;
       }
       triagedBy = { firstName: session.user?.firstName, lastName: session.user?.lastName, email: session.user?.email };
       doctor = {};
     } else if (value === 'In-Progress') {
-      if (session.user.accountType === 'Triage') {
+      if (session.user.accountType === 'Triage' || session.user.accountType === 'Evac') {
         triggerToast('You must be a doctor to take this patient.');
         return;
       }
@@ -471,7 +478,7 @@ export default function PatientTriage() {
                   <TableCell align="center">Dr. Pref</TableCell>
                   <TableCell align="center">
                     {
-                      session?.user?.accountType === 'Triage' ? 'Doctor' : (
+                      (session?.user?.accountType === 'Triage' || session?.user?.accountType === 'Evac') ? 'Doctor' : (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button

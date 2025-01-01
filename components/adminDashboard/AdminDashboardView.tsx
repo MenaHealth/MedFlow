@@ -16,8 +16,8 @@ import { Button } from "@/components/ui/button";
 
 const sections = [
     { id: 'newSignups', title: 'New Signups', icon: Users, color: 'bg-orange-50 text-orange-800', component: NewSignupsView },
-    { id: 'existing', title: 'Existing Doctors and Triage', icon: UserCheck, color: 'bg-orange-100 text-orange-500', component: ExistingDoctorsAndTriageView },
-    { id: 'denied', title: 'Denied Doctors and Triage', icon: UserX, color: 'bg-gray-100 text-gray-800', component: DeniedDoctorsAndTriage },
+    { id: 'existing', title: 'Existing Doctors, Triage and Evac', icon: UserCheck, color: 'bg-orange-100 text-orange-500', component: ExistingDoctorsAndTriageView },
+    { id: 'denied', title: 'Denied Doctors, Triage and Evac', icon: UserX, color: 'bg-gray-100 text-gray-800', component: DeniedDoctorsAndTriage },
     { id: 'addAdmin', title: 'Admin Management', icon: ShieldCheck, color: 'bg-darkBlue text-orange-100', component: AdminManagement },
     { id: 'pwReset', title: 'Password Reset', icon: RotateCcw, color: 'bg-orange-800 text-white', component: ForgotPasswordView },
     { id: 'medOrder', title: 'Medical Orders', icon: BriefcaseMedical, color: 'bg-orange-950 text-white', component: MedOrdersView },

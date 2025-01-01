@@ -20,17 +20,17 @@ export default function Component() {
 
     useEffect(() => {
         if (userSession) {
-            const userAccountType = userSession.accountType as 'Doctor' | 'Triage' | 'Pending' | undefined;
-
-            if (userAccountType === 'Pending') {
-                router.replace('/complete-signup');
-            } else if (userAccountType === 'Doctor' || userAccountType === 'Triage') {
-                router.replace('/patient-info/dashboard');
+            const userAccountType = userSession.accountType as "Doctor" | "Triage" | "Evac" | "Pending" | undefined;
+    
+            if (userAccountType === "Pending") {
+                router.replace("/complete-signup");
+            } else if (userAccountType === "Doctor" || userAccountType === "Triage" || userAccountType === "Evac") {
+                router.replace("/patient-info/dashboard");
             } else {
-                router.replace('/complete-signup');
+                router.replace("/complete-signup");
             }
         }
-    }, [router, userSession]);
+    }, [router, userSession]);    
 
     return null;
 }

@@ -15,7 +15,7 @@ declare module "next-auth" {
             city: string;
             countries: Countries[];
             languages?: Languages[];
-            accountType: 'Doctor' | 'Triage';
+            accountType: 'Doctor' | 'Triage' | 'Evac';
             isAdmin: boolean;
             image?: string;
             doctorSpecialty?: DoctorSpecialtyList;
@@ -34,7 +34,7 @@ declare module "next-auth/jwt" {
     interface JWT extends DefaultJWT {
         id: string;
         email: string;
-        accountType: 'Doctor' | 'Triage';
+        accountType: "Doctor" | "Triage" | "Evac";
         firstName: string;
         lastName: string;
         city?: string;

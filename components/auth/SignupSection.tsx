@@ -5,6 +5,7 @@ import PasswordEmailForm from './PasswordEmailForm';
 import SecurityQuestionsForm from './SecurityQuestionsForm';
 import DoctorSignupForm from './DoctorSignupForm';
 import TriageSignupForm from './TriageSignupForm';
+import EvacSignupForm from './EvacSignupForm';
 import NextButton from '@/components/auth/NextButton';
 import Submit from '@/components/auth/Submit';
 import ProgressBar from './progressBar';
@@ -21,8 +22,15 @@ const SignupSection = () => {
                 return <PasswordEmailForm />;
             case 2:
                 return <SecurityQuestionsForm />;
-            case 3:
-                return accountType === "Doctor" ? <DoctorSignupForm /> : <TriageSignupForm />;
+                case 3:
+                    if (accountType === "Doctor") {
+                        return <DoctorSignupForm />;
+                    } else if (accountType === "Triage") {
+                        return <TriageSignupForm />;
+                    } else if (accountType === "Evac") {
+                        return <EvacSignupForm />;
+                    }
+                return null;
             default:
                 return null;
         }

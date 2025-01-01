@@ -16,18 +16,25 @@ import { Languages } from "@/data/languages.enum";
 import { Countries } from "@/data/countries.enum";
 import { DoctorSpecialtyList } from '@/data/doctorSpecialty.enum';
 
+declare module "next-auth" {
+  interface Session {
+    user: SessionUser;
+  }
+}
+
+
 interface Credentials {
     email: string;
     password: string;
 }
 
-type AccountType = "Doctor" | "Triage";
+type AccountType = "Doctor" | "Triage" | "Evac" ;
 
 interface SessionUser extends NextAuthUser {
     id: string;
     _id: string;
     email: string;
-    accountType: 'Doctor' | 'Triage';
+    accountType: "Doctor" | "Triage" | "Evac";
     firstName: string;
     lastName: string;
     city: string;
@@ -39,6 +46,9 @@ interface SessionUser extends NextAuthUser {
     dob?: string | Date;
     gender?: 'male' | 'female';
     token?: string;
+    googleImage?: string; 
+    googleEmail?: string;
+    googleId?: string;
 }
 
 interface GoogleProfile extends NextAuthProfile {
@@ -104,9 +114,11 @@ export const authOptions: NextAuthOptions = {
 
                 const isAdmin = !!(await Admin.findOne({ userId: user._id }));
 
-                const accountType: AccountType = user.accountType === "Doctor" || user.accountType === "Triage"
-                    ? user.accountType
-                    : "Triage"; // Fallback value
+                const accountType: AccountType = 
+                        user.accountType === "Doctor" || user.accountType === "Triage" || user.accountType === "Evac"
+                        ? user.accountType
+        : "Triage"; // Fallback value
+
 
                 return createSessionUser(user, isAdmin, accountType);
             },
@@ -226,6 +238,7 @@ export const authOptions: NextAuthOptions = {
 
                 session.user = createSessionUser(updatedUser, !!token.isAdmin, token.accountType as AccountType);
                 session.user.token = token.accessToken as string;
+
             }
             return session;
         },

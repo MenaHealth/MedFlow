@@ -13,12 +13,12 @@ import { Button } from "./../../components/ui/button";
 const SignupSuccess = () => {
     const { data: session, update } = useSession();
     const router = useRouter();
-    const [accountType, setAccountType] = useState<'Doctor' | 'Triage'>('Doctor');
+    const [accountType, setAccountType] = useState<'Doctor' | 'Triage' | 'Evac'>('Doctor');
     const [submitting, setSubmitting] = useState(false);
 
-    const handleAccountTypeChange = (value: 'Doctor' | 'Triage') => {
+    const handleAccountTypeChange = (value: 'Doctor' | 'Triage' | 'Evac') => {
         setAccountType(value);
-    };
+    };    
 
     const heartRateOpacity = accountType === 'Doctor' ? 'opacity-80' : 'opacity-20';
     const ballsOpacity = accountType === 'Doctor' ? 'opacity-20' : 'opacity-80';
@@ -84,6 +84,11 @@ const SignupSuccess = () => {
                                     <RadioCard.Item value="Triage" className="w-1/2 p-2">
                                         <Flex direction="column" width="100%" className="justify-center items-center h-full">
                                             <Text size="sm" weight="normal">Triage Coordinator</Text>
+                                        </Flex>
+                                        </RadioCard.Item>
+                                    <RadioCard.Item value="Evac" className="w-1/3 p-2">
+                                       <Flex direction="column" width="100%" className="justify-center items-center h-full">
+                                            <Text size="sm" weight="normal">Evac Coordinator</Text>
                                         </Flex>
                                     </RadioCard.Item>
                                 </RadioCard.Root>

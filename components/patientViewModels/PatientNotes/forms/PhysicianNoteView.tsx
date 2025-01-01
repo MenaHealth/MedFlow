@@ -1,7 +1,7 @@
 import React from 'react';
 import { TextFormField } from "../../../ui/TextFormField";
 import { PhysicianNote } from '../CombinedNotesViewModel';
-import {ScrollArea} from "../../../ui/ScrollArea";
+import {ScrollArea} from "../../../ui/scroll-area";
 
 interface PhysicianNoteViewProps {
     note: PhysicianNote;

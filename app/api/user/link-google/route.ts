@@ -20,9 +20,16 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
+        // Update user fields
         user.googleId = googleId;
         user.googleEmail = googleEmail;
         user.googleImage = googleImage;
+
+        // If the user doesn't already have an image, set the Google image as their profile picture
+        if (!user.image) {
+            user.image = googleImage;
+        }
+
         await user.save();
 
         return NextResponse.json({ message: 'Google account linked successfully', user });

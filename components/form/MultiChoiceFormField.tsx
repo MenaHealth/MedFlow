@@ -12,7 +12,7 @@ import {
     MultiSelectorList,
     MultiSelectorItem,
 } from "./MultiSelector"
-import { ScrollArea } from "./../ui/ScrollArea"
+import { ScrollArea } from "../ui/scroll-area"
 
 interface MultiChoiceFormFieldProps {
     fieldName: string

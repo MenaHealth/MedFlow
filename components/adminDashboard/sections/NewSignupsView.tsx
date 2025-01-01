@@ -4,7 +4,7 @@
 import React from 'react';
 import { UserRoundCheck, UserRoundMinus, Loader2 } from 'lucide-react';
 import InfiniteScroll from '@/components/ui/infiniteScroll';
-import { ScrollArea, ScrollBar } from "@/components/ui/ScrollArea";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Table } from "@/components/ui/table";

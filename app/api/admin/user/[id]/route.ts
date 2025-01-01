@@ -5,7 +5,10 @@ import User from '@/models/user';
 import dbConnect from "@/utils/database";
 import { getToken } from 'next-auth/jwt';
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(
+    request: NextRequest,
+    { params }: { params: { id: string } }
+) {
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
 
     if (!token || !token.isAdmin) {
@@ -24,14 +27,29 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     }
 }
 
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(
+    request: NextRequest,
+    { params }: { params: { id: string } }
+) {
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
 
     if (!token || !token.isAdmin) {
         return NextResponse.redirect(new URL('/', request.url));
     }
 
-    const { firstName, lastName, gender, dob, countries, languages, doctorSpecialty, accountType } = await request.json();
+    const {
+        firstName,
+        lastName,
+        gender,
+        dob,
+        countries,
+        languages,
+        doctorSpecialty,
+        accountType,
+        googleId,
+        googleEmail,
+        googleImage
+    } = await request.json();
 
     try {
         await dbConnect();
@@ -52,6 +70,11 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
         if (doctorSpecialty) existingUser.doctorSpecialty = doctorSpecialty;
         if (accountType) existingUser.accountType = accountType;
 
+        // Update Google-related fields
+        if (googleId !== undefined) existingUser.googleId = googleId;
+        if (googleEmail !== undefined) existingUser.googleEmail = googleEmail;
+        if (googleImage !== undefined) existingUser.googleImage = googleImage;
+
         await existingUser.save();
 
         const updatedUser = existingUser.toObject();
@@ -62,3 +85,4 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
         return NextResponse.json({ message: `Error updating user: ${error.message}` }, { status: 500 });
     }
 }
+

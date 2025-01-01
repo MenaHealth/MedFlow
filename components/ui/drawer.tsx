@@ -33,7 +33,7 @@ const Drawer = React.forwardRef<
         setActiveSnapPoint,
     } = props;
 
-    const { fadeFromIndex, ...restProps } = props; // Explicitly destructure `fadeFromIndex` to remove it
+    const { fadeFromIndex, ...restProps } = props;
 
     return (
         <DrawerPrimitive.Root

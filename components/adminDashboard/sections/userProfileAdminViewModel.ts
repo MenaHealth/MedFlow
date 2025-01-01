@@ -1,7 +1,7 @@
 // components/adminDashboard/sections/userProfileAdminViewModel.ts
 
-import { useEffect, useState } from "react";
-import { useForm, UseFormReturn } from "react-hook-form";
+import { useState, useCallback, useEffect } from "react";
+import { useForm } from "react-hook-form";
 import { UserProfileFormValues, userProfileSchema, UserProfileViewModel } from "@/components/user-profile/UserProfileViewModel";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSession } from "next-auth/react";
@@ -17,60 +17,72 @@ export function useUserProfileAdminViewModel(userId?: string): UserProfileViewMo
     const [isLoading, setIsLoading] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [isCopied, setIsCopied] = useState(false);
-    const [status, setStatus] = useState<string>('loading');
+    const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
-    useEffect(() => {
-        if (userId) {
+    const fetchProfile = useCallback(async () => {
+        if (userId && session?.user?.token) {
             setIsLoading(true);
             setStatus('loading');
-            fetch(`/api/admin/user/${userId}`, {
-                headers: {
-                    'Authorization': `Bearer ${session?.user.token}`,
-                }
-            })
-                .then(res => {
-                    if (!res.ok) {
-                        throw new Error('Failed to fetch user');
+            try {
+                const res = await fetch(`/api/admin/user/${userId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${session.user.token}`,
                     }
-                    return res.json();
-                })
-                .then(data => {
-                    setProfile(data);
-                    methods.reset(data);
-                    setIsLoading(false);
-                    setStatus('authenticated');
-                })
-                .catch(error => {
-                    console.error('Error fetching user:', error);
-                    setIsLoading(false);
-                    setStatus('error');
                 });
+                if (!res.ok) {
+                    throw new Error('Failed to fetch user');
+                }
+                const data = await res.json();
+                setProfile(data);
+                methods.reset(data);
+                setStatus('success');
+            } catch (error) {
+                console.error('Error fetching user:', error);
+                setStatus('error');
+            } finally {
+                setIsLoading(false);
+            }
         } else {
-            setStatus('unauthenticated');
+            setStatus('error');
         }
-    }, [userId, methods, session?.user.token]);
+    }, [userId, session?.user?.token, methods]);
 
-    const handleEdit = () => setIsEditing(true);
+    // Add useEffect to call fetchProfile when component mounts or userId/session changes
+    useEffect(() => {
+        fetchProfile();
+    }, [fetchProfile, userId, session?.user?.token]);
 
-    const handleCancelEdit = () => {
+    const handleEdit = useCallback(() => setIsEditing(true), []);
+
+    const handleCancelEdit = useCallback(() => {
         setIsEditing(false);
         methods.reset(profile || undefined);
-    };
+    }, [methods, profile]);
 
-    const handleSubmit = async (data: UserProfileFormValues) => {
+    const handleSubmit = useCallback(async (data: UserProfileFormValues) => {
+        if (!session?.user?.token) {
+            setToast({
+                title: 'Error',
+                description: 'No authorization token available.',
+                variant: 'destructive',
+            });
+            return;
+        }
+
         setIsLoading(true);
         try {
             const response = await fetch(`/api/admin/user/${data._id}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session?.user.token}`,
+                    'Authorization': `Bearer ${session.user.token}`,
                 },
                 body: JSON.stringify(data),
             });
             if (response.ok) {
                 const updatedProfile = await response.json();
                 setProfile(updatedProfile);
+                methods.reset(updatedProfile);
                 setToast({
                     title: 'Success',
                     description: 'User updated successfully.',
@@ -93,18 +105,27 @@ export function useUserProfileAdminViewModel(userId?: string): UserProfileViewMo
             });
         }
         setIsLoading(false);
-    };
+    }, [session?.user?.token, setToast, methods]);
 
-    const copyToClipboard = () => {
+    const copyToClipboard = useCallback(() => {
         if (profile) {
             navigator.clipboard.writeText(profile._id).then(() => {
                 setIsCopied(true);
                 setTimeout(() => setIsCopied(false), 2000);
             });
         }
-    };
+    }, [profile]);
+
+    const handleLinkGoogleAccount = useCallback(() => {
+        console.warn('Linking Google account is not available in admin view');
+    }, []);
+
+    const handleUnlinkGoogleAccount = useCallback(() => {
+        console.warn('Unlinking Google account is not available in admin view');
+    }, []);
 
     return {
+        setProfile,
         profile,
         isEditing,
         isLoading,
@@ -115,5 +136,13 @@ export function useUserProfileAdminViewModel(userId?: string): UserProfileViewMo
         handleSubmit,
         copyToClipboard,
         status,
+        googleImage: profile?.googleImage || '',
+        googleEmail: profile?.googleEmail || '',
+        googleId: profile?.googleId || '',
+        handleLinkGoogleAccount,
+        handleUnlinkGoogleAccount,
     };
 }
+
+
+

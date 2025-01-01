@@ -1,7 +1,7 @@
 // components/user-profile/UserProfileView.tsx
 'use client'
 
-import React from "react";
+import React, { useState } from "react";
 import { FormProvider } from "react-hook-form";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar } from '@/components/ui/avatar';
@@ -19,6 +19,8 @@ import { useUserProfileViewModel, UserProfileFormValues, UserProfileViewModel } 
 import { useUserProfileAdminViewModel } from '@/components/adminDashboard/sections/userProfileAdminViewModel';
 import { UserProfileSkeleton } from '@/components/user-profile/userProfileSkeleton';
 import Tooltip from '@/components/form/Tooltip';
+import { LinkGoogleAccount } from "@/components/user-profile/LinkGoogleAccount";
+import Image from "next/image";
 
 interface UserProfileViewProps {
     isAdmin?: boolean;
@@ -32,8 +34,8 @@ const formatTooltipMessage = (email: string) => {
 export function UserProfileView({ isAdmin = false, userId }: UserProfileViewProps) {
     const vmUser: UserProfileViewModel = useUserProfileViewModel();
     const vmAdmin: UserProfileViewModel = useUserProfileAdminViewModel(userId);
-
     const vm: UserProfileViewModel = isAdmin ? vmAdmin : vmUser;
+    const [isGoogleDrawerOpen, setIsGoogleDrawerOpen] = useState(false);
 
     if (vm.status === 'loading' || !vm.profile) {
         return <UserProfileSkeleton />;
@@ -49,6 +51,24 @@ export function UserProfileView({ isAdmin = false, userId }: UserProfileViewProp
 
     const initials = `${vm.profile.firstName?.[0] || ''}${vm.profile.lastName?.[0] || ''}`;
 
+    const handleGoogleLinkSuccess = (updatedUser: UserProfileFormValues) => {
+        vm.setProfile(updatedUser);
+        setIsGoogleDrawerOpen(false);
+    };
+
+    const handleGoogleUnlinkSuccess = () => {
+        if (vm.profile) {
+            vm.setProfile({
+                ...vm.profile,
+                googleId: undefined,
+                googleEmail: undefined,
+                googleImage: undefined,
+            });
+        }
+    };
+
+    // Use Google profile image if available, otherwise use the default image
+    const avatarSrc = vm.profile.image || vm.profile.googleImage;
     return (
         <FormProvider {...vm.methods}>
             <form onSubmit={vm.methods.handleSubmit(vm.handleSubmit)}>
@@ -80,15 +100,18 @@ export function UserProfileView({ isAdmin = false, userId }: UserProfileViewProp
                     <CardContent>
                         <div className="flex flex-col items-center space-y-4">
                             <Avatar
-                                src={vm.profile.image}
+                                src={avatarSrc}
                                 alt={`${vm.profile.firstName} ${vm.profile.lastName}`}
                                 initials={initials}
-                                className="w-24 h-24 text-2xl"
+                                className="w-24 h-24 text-2xl" // Use className for sizing
                             />
                             <div className="text-center">
                                 <h2 className="text-xl font-semibold">{vm.profile.firstName} {vm.profile.lastName}</h2>
                                 <p className="text-sm text-gray-500">{vm.profile.email}</p>
-                                <div className="flex items-center justify-center mt-2">
+                                {vm.profile.googleEmail && (
+                                    <p className="text-sm text-gray-500">Google Email: {vm.profile.googleEmail}</p>
+                                )}
+                                <div className="flex items-center mt-2">
                                     <p className="text-sm bg-darkBlue text-white px-2 py-1 rounded">ID: {vm.profile._id}</p>
                                     <Button
                                         variant="ghost"
@@ -96,9 +119,37 @@ export function UserProfileView({ isAdmin = false, userId }: UserProfileViewProp
                                         onClick={vm.copyToClipboard}
                                         className="ml-2"
                                     >
-                                        {vm.isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                                        {vm.isCopied ? <Check className="h-4 w-4"/> : <Copy className="h-4 w-4"/>}
                                     </Button>
                                 </div>
+                                {isAdmin ? (
+                                    <div className="mt-4">
+                                        {vm.profile.googleId ? (
+                                            <div className="text-sm">
+                                                <p><strong>Google Account:</strong> {vm.profile.googleEmail}</p>
+                                                {vm.profile.googleImage && (
+                                                    <Image
+                                                        src={vm.profile.googleImage}
+                                                        alt="Google Profile"
+                                                        className="object-cover"
+                                                        width={40}
+                                                        height={40}
+                                                    />
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <p className="text-sm">No linked Google account</p>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div className="flex mt-4 justify-center">
+                                        <Button
+                                            variant="orangeOutline"
+                                            onClick={() => setIsGoogleDrawerOpen(true)}>
+                                            {vm.profile.googleId ? 'Manage Google Account' : 'Link Google Account'}
+                                        </Button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -134,8 +185,9 @@ export function UserProfileView({ isAdmin = false, userId }: UserProfileViewProp
                                     />
                                 )}
                                 {isAdmin && (
-                                    <Tooltip tooltipText={formatTooltipMessage(vm.profile.email || '')} showTooltip={true}>
-                                        <Info className="h-4 w-4 ml-2 text-gray-500 cursor-help" />
+                                    <Tooltip tooltipText={formatTooltipMessage(vm.profile.email || '')}
+                                             showTooltip={true}>
+                                        <Info className="h-4 w-4 ml-2 text-gray-500 cursor-help"/>
                                     </Tooltip>
                                 )}
                             </div>
@@ -148,7 +200,8 @@ export function UserProfileView({ isAdmin = false, userId }: UserProfileViewProp
                                             choices={DoctorSpecialties}
                                         />
                                     ) : (
-                                        <ProfileField label="Specialty" value={vm.profile.doctorSpecialty} isEditing={vm.isEditing} email={vm.profile.email}/>
+                                        <ProfileField label="Specialty" value={vm.profile.doctorSpecialty}
+                                                      isEditing={vm.isEditing} email={vm.profile.email}/>
                                     )}
                                     <div className="col-span-2">
                                         {vm.isEditing ? (
@@ -158,7 +211,8 @@ export function UserProfileView({ isAdmin = false, userId }: UserProfileViewProp
                                                 choices={LanguagesList}
                                             />
                                         ) : (
-                                            <ProfileField label="Languages" value={vm.profile.languages?.join(', ')} isEditing={false} email={vm.profile.email} />
+                                            <ProfileField label="Languages" value={vm.profile.languages?.join(', ')}
+                                                          isEditing={false} email={vm.profile.email}/>
                                         )}
                                     </div>
                                 </>
@@ -171,7 +225,8 @@ export function UserProfileView({ isAdmin = false, userId }: UserProfileViewProp
                                         choices={CountriesList}
                                     />
                                 ) : (
-                                    <ProfileField label="Countries" value={vm.profile.countries?.join(', ')} isEditing={false} email={vm.profile.email} />
+                                    <ProfileField label="Countries" value={vm.profile.countries?.join(', ')}
+                                                  isEditing={false} email={vm.profile.email}/>
                                 )}
                             </div>
                             {vm.isEditing ? (
@@ -181,7 +236,8 @@ export function UserProfileView({ isAdmin = false, userId }: UserProfileViewProp
                                     choices={["male", "female"]}
                                 />
                             ) : (
-                                <ProfileField label="Gender" value={vm.profile.gender} isEditing={false} email={vm.profile.email} />
+                                <ProfileField label="Gender" value={vm.profile.gender} isEditing={false}
+                                              email={vm.profile.email}/>
                             )}
                             {vm.isEditing ? (
                                 <DatePickerFormField
@@ -208,6 +264,18 @@ export function UserProfileView({ isAdmin = false, userId }: UserProfileViewProp
                     </CardContent>
                 </Card>
             </form>
+            {!isAdmin && (
+                <LinkGoogleAccount
+                    isOpen={isGoogleDrawerOpen}
+                    onClose={() => setIsGoogleDrawerOpen(false)}
+                    onLinkSuccess={handleGoogleLinkSuccess}
+                    onUnlinkSuccess={handleGoogleUnlinkSuccess}
+                    userId={vm.profile._id}
+                    googleId={vm.profile.googleId}
+                    googleEmail={vm.profile.googleEmail}
+                    googleImage={vm.profile.googleImage}
+                />
+            )}
         </FormProvider>
     );
 }
@@ -221,7 +289,7 @@ interface ProfileFieldProps {
     email?: string;
 }
 
-function ProfileField({ label, value, isEditing, fieldName, register, email }: ProfileFieldProps) {
+function ProfileField({label, value, isEditing, fieldName, register, email}: ProfileFieldProps) {
     const tooltipMessage = label === "Account Type" ? formatTooltipMessage(email || '') : "";
 
     if (!isEditing) {
@@ -253,3 +321,4 @@ function ProfileField({ label, value, isEditing, fieldName, register, email }: P
 
     return null;
 }
+

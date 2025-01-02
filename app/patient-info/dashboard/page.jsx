@@ -320,15 +320,6 @@ export default function PatientTriage() {
       </Button>
     )}
   </div>
-      <div className="w-full relative dashboard-page mt-16">
-        <div className="flex items-center py-3">
-          <h2
-            className="flex-1 text-center font-bold"
-            style={{ fontSize: "24px" }}
-          >
-            <span className="blue_gradient">Patient List</span>
-          </h2>
-        </div>  
         <div className="flex flex-wrap gap-2 mb-4">
           {priorityFilter !== "all" && (
             <div className="bg-green-100 text-green-800 px-2 py-1 rounded flex items-center">

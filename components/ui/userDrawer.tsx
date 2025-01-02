@@ -33,6 +33,7 @@ interface UserDrawerProps {
     user: {
         name?: string | null
         email?: string | null
+        googleEmail?: string | null
         accountType?: string | null
         languages?: string[] | null
         countries?: string[] | null
@@ -78,21 +79,21 @@ export function UserDrawer({ isOpen, setIsOpen, user }: UserDrawerProps) {
                 <ScrollArea className="h-full pr-4">
                     <Card
                         className="w-full max-w-4xl mx-auto relative z-10"
-                        backgroundOpacity={25}
-                        blurAmount={5}
+                        backgroundOpacity={0}
                         borderColor="border-orange-500"
                         borderSize={1}
                         shadowSize="md"
                     >
                         <CardContent className="p-4">
                             <div className="flex items-center space-x-4 mb-4">
-                                <Avatar user={user} className="w-12 h-12" />
+                                <Avatar user={user} className="w-12 h-12"/>
                                 <div className="space-y-1 flex-1 min-w-0">
-                                    <h2 className="text-sm font-semibold truncate">
-                                        {formatName(user.firstName, user.lastName)}
+                                    <h2 className="text-sm font-semibold truncate text-darkBlue">
+                                        {user.accountType}
                                     </h2>
-                                    <p className="text-xs text-orange-500 truncate">{user.email}</p>
-                                    <p className="text-xs text-orange-500">{user.accountType}</p>
+                                    <p className="text-xs text-orange-950 truncate">{formatName(user.firstName, user.lastName)}</p>
+                                    <p className="text-xs text-orange-800">{user.email}</p>
+                                    <p className="text-xs text-orange-700">{user.googleEmail}</p>
                                 </div>
                             </div>
                             <Accordion type="single" collapsible className="w-full">
@@ -130,16 +131,16 @@ export function UserDrawer({ isOpen, setIsOpen, user }: UserDrawerProps) {
                         </CardContent>
                     </Card>
 
-                    <nav className="space-y-2 mb-4">
+                    <nav className="space-y-2 mb-4 mt-4">
                         {menuItems.map((item) => (
                             <Link
                                 key={item.href}
                                 href={item.href}
                                 onClick={handleItemClick}
-                                className="w-full flex items-center p-2 text-sm rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+                                className="w-full flex items-center justify-start p-2 text-sm rounded-md hover:bg-white hover:text-orange-500 transition-colors border-white border-2"
                             >
-                                <item.icon className="mr-2 h-4 w-4" />
-                                <span>{item.label}</span>
+                                <item.icon className="mr-2 h-5 w-5 flex-shrink-0"/>
+                                <span className="flex-grow text-center">{item.label}</span>
                             </Link>
                         ))}
                     </nav>
@@ -151,7 +152,7 @@ export function UserDrawer({ isOpen, setIsOpen, user }: UserDrawerProps) {
                             className="w-full justify-start text-sm mb-4"
                             onClick={() => setIsDialogOpen(true)}
                         >
-                            <ArrowRightLeft className="mr-2 h-4 w-4" />
+                            <ArrowRightLeft className="mr-2 h-4 w-4"/>
                             Change Account Type
                         </Button>
                     )}
@@ -165,7 +166,7 @@ export function UserDrawer({ isOpen, setIsOpen, user }: UserDrawerProps) {
                             handleItemClick()
                         }}
                     >
-                        <LogOut className="mr-2 h-4 w-4" />
+                        <LogOut className="mr-2 h-4 w-4"/>
                         Sign Out
                     </Button>
                 </ScrollArea>
@@ -179,7 +180,7 @@ export function UserDrawer({ isOpen, setIsOpen, user }: UserDrawerProps) {
                             Update the account type for this user.
                         </DialogDescription>
                     </DialogHeader>
-                    <ChangeAccountTypeView />
+                    <ChangeAccountTypeView/>
                     <DialogClose asChild>
                         <Button type="button" variant="secondary">
                             Close

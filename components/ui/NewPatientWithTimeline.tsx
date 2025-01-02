@@ -156,7 +156,7 @@ export default function NewPatientWithTimeline() {
             {/* Get Started Section with Spotlight */}
             <div className="my-16 relative" ref={getStartedRef}>
                 {/* Spotlight */}
-                <div className="z-0 top-[-50%] right-[-10%] w-full h-full absolute">
+                <div className="z-0 top-[-50%] right-[-30%] w-full h-full absolute">
                     <Spotlight fill="#008387"/>
                 </div>
 

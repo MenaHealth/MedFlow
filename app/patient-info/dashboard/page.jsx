@@ -302,7 +302,7 @@ export default function PatientTriage() {
 
   return (
     <>
-<div className="w-full relative dashboard-page" style={{ paddingTop: "3rem" }}>
+<div className="w-full relative dashboard-page" style={{ paddingTop: "4rem" }}>
   <div className="flex items-center justify-between py-3">
     <h2
       className="flex-1 text-center font-bold"

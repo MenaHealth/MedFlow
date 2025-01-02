@@ -1,138 +1,193 @@
-import { Dispatch, SetStateAction, useState } from "react";
-import { signOut } from "next-auth/react";
-import { LogOut, Settings, ClipboardList, Grid3X3, ArrowRightLeft } from "lucide-react";
-import Link from "next/link";
-import Image from "next/image";
-import { ScrollArea } from './ScrollArea';
+// components/ui/userDrawer.tsx
+'use client'
+
+import { Dispatch, SetStateAction, useState } from "react"
+import { signOut } from "next-auth/react"
+import { LogOut, Settings, ClipboardList, Grid3X3, ArrowRightLeft } from 'lucide-react'
+import Link from "next/link"
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
-    Drawer,
-    DrawerContent,
-    DrawerHeader,
-    DrawerTitle,
-    DrawerDescription,
-} from "../../components/ui/drawer";
-import { Button } from "@/components/ui/button";
-import ChangeAccountTypeView from "./../adminDashboard/sections/ChangeAccountTypeView"; // Ensure this path is correct
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+    Sheet,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+    SheetDescription,
+} from "@/components/ui/sheet"
+import { Button } from "@/components/ui/button"
+import { Avatar } from "@/components/ui/avatar"
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogClose,
+} from "@/components/ui/dialog"
+import { Card, CardContent } from "@/components/ui/card"
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion"
+import ChangeAccountTypeView from "@/components/adminDashboard/sections/ChangeAccountTypeView"
 
 interface UserDrawerProps {
-    isOpen: boolean;
-    setIsOpen: Dispatch<SetStateAction<boolean>>;
+    isOpen: boolean
+    setIsOpen: Dispatch<SetStateAction<boolean>>
     user: {
-        name?: string | null;
-        email?: string | null;
-        image?: string | null;
-        firstName?: string;
-        lastName?: string;
-        isAdmin?: boolean;
-    };
+        name?: string | null
+        email?: string | null
+        googleEmail?: string | null
+        accountType?: string | null
+        languages?: string[] | null
+        countries?: string[] | null
+        image?: string | null
+        firstName?: string
+        lastName?: string
+        isAdmin?: boolean
+    }
 }
 
 export function UserDrawer({ isOpen, setIsOpen, user }: UserDrawerProps) {
-    const [isCardVisible, setIsCardVisible] = useState(false); // State to toggle card visibility
-
-    const getInitials = (firstName: string | undefined, lastName: string | undefined) => {
-        return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`;
-    };
+    const [isDialogOpen, setIsDialogOpen] = useState(false)
 
     const handleItemClick = () => {
-        setIsOpen(false);
-    };
+        setIsOpen(false)
+    }
+
+    const menuItems = [
+        { href: "/patient-info/dashboard", icon: Grid3X3, label: "Patient Dashboard" },
+        { href: "/my-profile", icon: Settings, label: "My Profile" },
+        ...(user.isAdmin ? [{ href: "/admin", icon: ClipboardList, label: "Admin Dashboard" }] : []),
+    ]
+
+    const formatName = (firstName: string = '', lastName: string = '') => {
+        const fullName = `${firstName} ${lastName}`.trim()
+        if (fullName.length <= 20) return fullName
+        return (
+            <>
+                {firstName}
+                {lastName && (
+                    <>
+                        <wbr />-<br />
+                        {lastName}
+                    </>
+                )}
+            </>
+        )
+    }
 
     return (
-        <Drawer isOpen={isOpen} onClose={() => setIsOpen(false)}>
-            <DrawerContent className="bg-orange-50 text-orange-950 fixed right-0 top-0 bottom-0 w-70 z-40" direction="right" size="70%">
-                <DrawerHeader className="flex justify-between items-start p-4">
+        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+            <SheetContent className="sm:max-w-md">
+                <ScrollArea className="h-full pr-4">
+                    <Card
+                        className="w-full max-w-4xl mx-auto relative z-10"
+                        backgroundOpacity={0}
+                        borderColor="border-orange-500"
+                        borderSize={1}
+                        shadowSize="md"
+                    >
+                        <CardContent className="p-4">
+                            <div className="flex items-center space-x-4 mb-4">
+                                <Avatar user={user} className="w-12 h-12"/>
+                                <div className="space-y-1 flex-1 min-w-0">
+                                    <h2 className="text-sm font-semibold truncate text-darkBlue">
+                                        {user.accountType}
+                                    </h2>
+                                    <p className="text-xs text-orange-950 truncate">{formatName(user.firstName, user.lastName)}</p>
+                                    <p className="text-xs text-orange-800">{user.email}</p>
+                                    <p className="text-xs text-orange-700">{user.googleEmail}</p>
+                                </div>
+                            </div>
+                            <Accordion type="single" collapsible className="w-full">
+                                <AccordionItem value="languages">
+                                    <AccordionTrigger>Languages</AccordionTrigger>
+                                    <AccordionContent>
+                                        <div className="flex flex-wrap gap-2">
+                                            {user.languages?.map((language, index) => (
+                                                <span
+                                                    key={index}
+                                                    className="bg-white text-orange-800 px-2 py-1 rounded-full text-xs"
+                                                >
+                                                    {language}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </AccordionContent>
+                                </AccordionItem>
+                                <AccordionItem value="countries">
+                                    <AccordionTrigger>Countries</AccordionTrigger>
+                                    <AccordionContent>
+                                        <div className="flex flex-wrap gap-2">
+                                            {user.countries?.map((country, index) => (
+                                                <span
+                                                    key={index}
+                                                    className="bg-white text-orange-800 px-2 py-1 rounded-full text-xs"
+                                                >
+                                                    {country}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </AccordionContent>
+                                </AccordionItem>
+                            </Accordion>
+                        </CardContent>
+                    </Card>
+
+                    <nav className="space-y-2 mb-4 mt-4">
+                        {menuItems.map((item) => (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                onClick={handleItemClick}
+                                className="w-full flex items-center justify-start p-2 text-sm rounded-md hover:bg-white hover:text-orange-500 transition-colors border-white border-2"
+                            >
+                                <item.icon className="mr-2 h-5 w-5 flex-shrink-0"/>
+                                <span className="flex-grow text-center">{item.label}</span>
+                            </Link>
+                        ))}
+                    </nav>
+
                     {user.isAdmin && (
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => setIsCardVisible(!isCardVisible)}
-                            className="absolute top-4 left-4"
+                            className="w-full justify-start text-sm mb-4"
+                            onClick={() => setIsDialogOpen(true)}
                         >
-                            <ArrowRightLeft className="mr-2 h-4 w-4" />
+                            <ArrowRightLeft className="mr-2 h-4 w-4"/>
                             Change Account Type
                         </Button>
                     )}
-                    <div className="flex flex-col items-start">
-                        <DrawerTitle className="text-2xl font-bold">{`${user.firstName} ${user.lastName}`}</DrawerTitle>
-                        <DrawerDescription className="text-darkBlue/70">
-                            Manage your account and settings
-                        </DrawerDescription>
-                    </div>
-                </DrawerHeader>
-                <ScrollArea className="flex-grow">
-                    <div className="p-4 space-y-6">
-                        <div className="flex items-center space-x-4">
-                            {user.image ? (
-                                <Image
-                                    src={user.image}
-                                    width={60}
-                                    height={60}
-                                    className="rounded-full w-15 h-15 object-cover"
-                                    alt="profile"
-                                />
-                            ) : (
-                                <div className="w-15 h-15 rounded-full bg-orange-200 flex items-center justify-center text-darkBlue text-2xl font-semibold">
-                                    {getInitials(user.firstName, user.lastName)}
-                                </div>
-                            )}
-                            <div>
-                                <p className="font-semibold text-lg">{user.name}</p>
-                                <p className="text-sm text-darkBlue/70">{user.email}</p>
-                            </div>
-                        </div>
-                        <hr className="border-darkBlue/20" />
-                        <Link href="/patient-info/dashboard" className="flex items-center space-x-3 p-2 hover:bg-orange-100 rounded-md" onClick={handleItemClick}>
-                            <Grid3X3 size={22} />
-                            <span className="text-lg">Patient Dashboard</span>
-                        </Link>
-                        <Link href="/my-profile" className="flex items-center space-x-3 p-2 hover:bg-orange-100 rounded-md" onClick={handleItemClick}>
-                            <Settings size={22} />
-                            <span className="text-lg">My Profile</span>
-                        </Link>
-                        {user.isAdmin && (
-                            <Link href="/admin" className="flex items-center space-x-3 p-2 hover:bg-orange-100 rounded-md" onClick={handleItemClick}>
-                                <ClipboardList size={22} />
-                                <span className="text-lg">Admin Dashboard</span>
-                            </Link>
-                        )}
-                        <button
-                            onClick={() => {
-                                signOut();
-                                handleItemClick();
-                            }}
-                            className="flex items-center space-x-3 p-2 hover:bg-orange-100 rounded-md text-orange-600 w-full text-left"
-                        >
-                            <LogOut size={22} />
-                            <span className="text-lg">Sign Out</span>
-                        </button>
-                    </div>
-                </ScrollArea>
 
-                {/* Card for Changing Account Type */}
-                {isCardVisible && (
-                    <div className="absolute inset-0 flex items-center justify-center z-50 bg-black/30">
-                        <Card className="w-96 max-w-full border border-gray-200 shadow-lg bg-white">
-                            <CardHeader>
-                                <CardTitle>Change Account Type</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <ChangeAccountTypeView />
-                            </CardContent>
-                            <CardFooter className="flex justify-end">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => setIsCardVisible(false)}
-                                >
-                                    Close
-                                </Button>
-                            </CardFooter>
-                        </Card>
-                    </div>
-                )}
-            </DrawerContent>
-        </Drawer>
-    );
+                    <Button
+                        variant="orange"
+                        size="sm"
+                        className="w-full justify-start text-sm"
+                        onClick={() => {
+                            signOut()
+                            handleItemClick()
+                        }}
+                    >
+                        <LogOut className="mr-2 h-4 w-4"/>
+                        Sign Out
+                    </Button>
+                </ScrollArea>
+            </SheetContent>
+
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Change Account Type</DialogTitle>
+                        <DialogDescription>
+                            Update the account type for this user.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <ChangeAccountTypeView/>
+                    <DialogClose asChild>
+                        <Button type="button" variant="secondary">
+                            Close
+                        </Button>
+                    </DialogClose>
+                </DialogContent>
+            </Dialog>
+        </Sheet>
+    )
 }

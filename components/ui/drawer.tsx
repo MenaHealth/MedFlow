@@ -7,7 +7,7 @@ import { Drawer as DrawerPrimitive } from "vaul"
 import { X } from "lucide-react"
 
 import { cn } from "../../utils/classNames";
-import { ScrollArea } from "./ScrollArea";
+import { ScrollArea } from "./scroll-area";
 
 type DrawerDirection = 'left' | 'right' | 'top' | 'bottom';
 
@@ -33,7 +33,7 @@ const Drawer = React.forwardRef<
         setActiveSnapPoint,
     } = props;
 
-    const { fadeFromIndex, ...restProps } = props; // Explicitly destructure `fadeFromIndex` to remove it
+    const { fadeFromIndex, ...restProps } = props;
 
     return (
         <DrawerPrimitive.Root

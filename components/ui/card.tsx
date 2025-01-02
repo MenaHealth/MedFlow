@@ -3,18 +3,49 @@ import React from 'react'
 import { cn } from "../../utils/classNames"
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
-    children: React.ReactNode
+    children: React.ReactNode;
+    backgroundColor?: string;
+    backgroundOpacity?: number;
+    blurAmount?: number;
+    borderColor?: string;
+    borderSize?: number;
+    shadowSize?: 'sm' | 'md' | 'lg';
 }
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
-    ({ className, children, ...props }, ref) => {
+    ({
+         className,
+         children,
+         backgroundColor = 'bg-white',
+         backgroundOpacity = 100,
+         blurAmount = 0,
+         borderColor = 'border-transparent',
+         borderSize = 0,
+         shadowSize = 'sm',
+         ...props
+     }, ref) => {
+        const opacityClass = `bg-opacity-${backgroundOpacity}`;
+        const blurClass = blurAmount > 0 ? `backdrop-blur-[${blurAmount}px]` : '';
+        const borderClass = borderSize > 0 ? `border-${borderSize}` : '';
+        const shadowClass = `shadow-${shadowSize}`;
+
         return (
             <div
                 ref={ref}
                 className={cn(
-                    "relative rounded-lg border border-gray-200 bg-white backdrop-filter backdrop-blur-md text-gray-950 shadow-sm",
+                    "relative rounded-lg",
+                    backgroundColor,
+                    opacityClass,
+                    blurClass,
+                    borderClass,
+                    borderColor,
+                    shadowClass,
+                    "text-gray-950",
                     className
                 )}
+                style={{
+                    backgroundColor: `rgba(255, 255, 255, ${backgroundOpacity / 100})`,
+                }}
                 {...props}
             >
                 {children}

@@ -23,6 +23,8 @@ if (!global.mongoose) {
   global.mongoose = cached;
 }
 
+mongoose.set('strictPopulate', false); //coordinator
+
 async function dbConnect(): Promise<typeof mongoose> {
   if (cached.conn) {
     return cached.conn;

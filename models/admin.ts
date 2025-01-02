@@ -3,6 +3,7 @@ import mongoose, {model, Model, models} from 'mongoose';
 import {IMedOrder, medOrderSchema} from "@/models/medOrder";
 
 export interface IAdmin extends Document {
+    _id: mongoose.Types.ObjectId;
     userId: mongoose.Types.ObjectId;
     firstName: string;
     lastName: string;

@@ -2,14 +2,14 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Minus, Loader2, Edit, Search, X, Download } from 'lucide-react';
+import { Minus, Edit, Search, X, Download } from 'lucide-react';
 import InfiniteScroll from '@/components/ui/infiniteScroll';
-import { ScrollArea, ScrollBar } from "@/components/ui/ScrollArea";
 import { Button } from "@/components/ui/button";
 import { Table, TableColumn } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { useExistingDoctorsAndTriageViewModel, User } from './ExistingDoctorsAndTriageViewModel';
-import { EditUserModal } from './EditUserModalView';
+import {Dialog, DialogContent, DialogTitle} from "@/components/ui/dialog";
+import { UserProfileView } from "@/components/user-profile/UserProfileView";
 
 export default function ExistingDoctorsAndTriageView() {
     const {
@@ -25,6 +25,7 @@ export default function ExistingDoctorsAndTriageView() {
         handleEditUser,
         searchTerm,
         setSearchTerm,
+        exportToCSV,
     } = useExistingDoctorsAndTriageViewModel();
 
     const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -101,58 +102,6 @@ export default function ExistingDoctorsAndTriageView() {
         }
     ];
 
-    const exportToCSV = async () => {
-        // Include all columns except the 'actions' column
-        const visibleColumns = columns.filter(column => column.key !== 'actions');
-        const headers = visibleColumns.map(column => column.header);
-        const authorizedUsers = await fetch('/api/user/authorized').then(res => res.json());
-
-        const csvContent = [
-            headers.join(','),
-            ...authorizedUsers.map((user: User) =>
-                visibleColumns.map(column => {
-                    // Check if a render function is defined
-                    if (column.render) {
-                        // Extract plain text from rendered content with null checks
-                        const renderedValue = column.render(user[column.key as keyof User], user);
-                        if (typeof renderedValue === 'string') {
-                            return renderedValue;
-                        } else if (renderedValue && typeof renderedValue === 'object' && 'props' in renderedValue) {
-                            const children = renderedValue.props.children;
-                            if (Array.isArray(children)) {
-                                return children
-                                    .map(child =>
-                                        typeof child === 'string' ? child : (child as any).props?.children || ''
-                                    )
-                                    .join('');
-                            }
-                            return renderedValue.props.children || '';
-                        }
-                    }
-
-                    // Handle direct user property values, such as specialty and country fields
-                    const value = user[column.key as keyof User];
-                    if (Array.isArray(value)) {
-                        // For array values like countries, join them with commas
-                        return value.join(', ');
-                    }
-                    return value?.toString() || '';
-                }).join(',')
-            )
-        ].join('\n');
-
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        if (link.download !== undefined) {
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', 'existing_users.csv');
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-    };
 
     return (
         <div className="container mx-auto px-4 py-8 h-screen flex flex-col">
@@ -206,69 +155,56 @@ export default function ExistingDoctorsAndTriageView() {
                 </div>
             </div>
 
-            <div className="flex-grow overflow-hidden">
-                <ScrollArea className="w-full h-full rounded-md border border-orange-300">
-                    <div className="w-max min-w-full h-full">
-                        <InfiniteScroll
-                            dataLength={filteredUsers.length}
-                            next={nextExistingUsers}
-                            hasMore={!!hasMoreExistingUsers}
-                            isLoading={loadingExistingUsers}
-                            height="100vh"
-                            className="overflow-auto"
-                            loader={
-                                <div className="flex justify-center items-center py-4">
-                                    <Loader2 className="h-8 w-8 animate-spin"/>
-                                </div>
-                            }
-                        >
-                            <Table
-                                data={filteredUsers}
-                                columns={columns}
-                                backgroundColor="bg-orange-100"
-                                textColor="text-orange-950"
-                                borderColor="border-orange-500"
-                                headerBackgroundColor="bg-orange-200"
-                                headerTextColor="text-orange-950"
-                                hoverBackgroundColor="hover:bg-white"
-                                hoverTextColor="hover:text-darkBlue"
-                            />
-                            {!hasMoreExistingUsers && filteredUsers.length > 0 && (
-                                <div
-                                    className="text-center py-4 text-orange-950 bg-orange-100 border-t border-orange-300">
-                                    No more existing users to load.
-                                </div>
-                            )}
-                            {filteredUsers.length === 0 && !loadingExistingUsers && (
-                                <div className="text-center py-4 text-orange-950 bg-orange-100">
-                                    No existing users found.
-                                </div>
-                            )}
-                        </InfiniteScroll>
-                    </div>
-                    <ScrollBar orientation="horizontal"/>
-                </ScrollArea>
-            </div>
-
-
-            <div className="space-y-4 pb-8">
-                {loadingExistingUsers && (
-                    <div className="flex justify-center items-center py-4">
-                        <Loader2 className="h-8 w-8 animate-spin"/>
+            <InfiniteScroll
+                dataLength={filteredUsers.length}
+                next={nextExistingUsers}
+                hasMore={!!hasMoreExistingUsers}
+                isLoading={loadingExistingUsers}
+                className="bg-white rounded-md border border-orange-300"
+            >
+                <div className="w-full overflow-x-auto">
+                    <Table
+                        data={filteredUsers}
+                        columns={columns}
+                        backgroundColor="bg-orange-100"
+                        textColor="text-orange-950"
+                        borderColor="border-orange-500"
+                        headerBackgroundColor="bg-orange-200"
+                        headerTextColor="text-orange-950"
+                        hoverBackgroundColor="hover:bg-white"
+                        hoverTextColor="hover:text-darkBlue"
+                    />
+                </div>
+                {!hasMoreExistingUsers && filteredUsers.length > 0 && (
+                    <div className="text-center py-4 text-orange-950 bg-orange-100 border-t border-orange-300">
+                        No more existing users to load.
                     </div>
                 )}
                 {filteredUsers.length === 0 && !loadingExistingUsers && (
-                    <p className="text-center py-4 text-orange-950">
+                    <div className="text-center py-4 text-orange-950 bg-orange-100">
                         No existing users found.
-                    </p>
+                    </div>
                 )}
-            </div>
+            </InfiniteScroll>
 
             {editingUser && (
-                <EditUserModal
-                    user={editingUser}
-                    onClose={() => setEditingUser(null)}
-                />
+                <Dialog
+                    open={!!editingUser}
+                    onOpenChange={(open) => {
+                        if (!open) setEditingUser(null);
+                    }}
+                >
+                    <DialogContent className={'bg-gradient-to-t from-white to-orange-100'}>
+                        <DialogTitle className={'text-center text-darkBlue'}>
+                            {`Admin Edit: ${editingUser.firstName} ${editingUser.lastName}`}
+                        </DialogTitle>
+                        <UserProfileView
+                            isAdmin={true}
+                            userId={editingUser._id}
+                            key={editingUser._id}
+                        />
+                    </DialogContent>
+                </Dialog>
             )}
         </div>
     );

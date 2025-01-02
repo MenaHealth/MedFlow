@@ -1,4 +1,5 @@
-    import React, { useEffect } from "react";
+// components/auth/DoctorSignupForm.tsx
+import React, { useEffect } from "react";
     import { useForm, FormProvider } from "react-hook-form";
     import { zodResolver } from "@hookform/resolvers/zod";
     import { z } from "zod";

@@ -2,7 +2,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import Image from "next/image";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/ScrollArea";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { OggOpusDecoder } from "ogg-opus-decoder";
 import { AudioNotePlayer } from "./AudioNotePlayer";
@@ -11,13 +11,17 @@ import ReactMarkdown from 'react-markdown';
 import { MessageInput } from "@/components/patientViewModels/telegram-messages/MessageInput";
 import { TelegramMessage } from "@/components/patientViewModels/telegram-messages/TelegramMessagesViewModel";
 import { Loader2 } from 'lucide-react';
-import { Maximize2, Minimize2 } from 'lucide-react';
+import { Maximize2, AudioLines, Minimize2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { FullScreenTelegramMessages } from "./FullScreenTelegramMessages";
+import { convertAudio } from "@/components/patientViewModels/telegram-messages/audio-conversion";
+import { useToast } from '@/components/hooks/useToast';
+
 
 interface TelegramMessagesViewProps {
     messages: TelegramMessage[];
     newMessage: string;
+    setMessages: React.Dispatch<React.SetStateAction<TelegramMessage[]>>;
     setNewMessage: (message: string) => void;
     sendMessage: (telegramChatId: string) => void;
     sendImage: (file: File) => void;
@@ -31,6 +35,7 @@ interface TelegramMessagesViewProps {
 export const TelegramMessagesView: React.FC<TelegramMessagesViewProps> = ({
                                                                               messages,
                                                                               newMessage,
+                                                                              setMessages,
                                                                               setNewMessage,
                                                                               sendMessage,
                                                                               sendImage,
@@ -44,6 +49,9 @@ export const TelegramMessagesView: React.FC<TelegramMessagesViewProps> = ({
     const [decryptedImages, setDecryptedImages] = useState<{ [key: string]: string }>({});
     const [signedUrls, setSignedUrls] = useState<{ [key: string]: string }>({});
     const [isFullScreen, setIsFullScreen] = useState(false);
+    const [isBatchConverting, setIsBatchConverting] = useState(false);
+    const [convertedUrls, setConvertedUrls] = useState<{ [key: string]: string | null }>({});
+    const { toast, setToast } = useToast();
 
     useEffect(() => {
         if (scrollAreaRef.current) {
@@ -84,32 +92,71 @@ export const TelegramMessagesView: React.FC<TelegramMessagesViewProps> = ({
         });
     }, [messages]);
 
-    // const decodeAudio = async (mediaUrl: string, messageId: string) => {
-    //     try {
-    //         const response = await fetch(mediaUrl);
-    //         if (!response.ok) throw new Error("Failed to fetch audio file");
-    //
-    //         const oggData = new Uint8Array(await response.arrayBuffer());
-    //         const decoder = new OggOpusDecoder();
-    //         await decoder.ready;
-    //
-    //         const decoded = await decoder.decode(oggData);
-    //         const audioCtx = new AudioContext();
-    //         const audioBuffer = audioCtx.createBuffer(
-    //             decoded.channelData.length,
-    //             decoded.samplesDecoded,
-    //             decoded.sampleRate
-    //         );
-    //
-    //         decoded.channelData.forEach((channel, index) => {
-    //             audioBuffer.copyToChannel(channel, index);
-    //         });
-    //
-    //         setAudioBuffers((prev) => ({ ...prev, [messageId]: audioBuffer }));
-    //     } catch (error) {
-    //         console.error("Error decoding audio file:", error);
-    //     }
-    // };
+    useEffect(() => {
+        if (scrollAreaRef.current) {
+            scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+        }
+    }, [messages]);
+
+    const convertAllAudioNotes = async () => {
+        setIsBatchConverting(true);
+
+        const audioMessages = messages.filter((message) => message.type === "audio");
+        const updatedMessages = [...messages];
+
+        try {
+            const conversionPromises = audioMessages.map(async (message) => {
+                const signedUrl = signedUrls[message._id];
+                if (!signedUrl) {
+                    console.error("Missing signed URL for message:", message._id);
+                    return null;
+                }
+
+                const response = await fetch(signedUrl);
+                if (!response.ok) {
+                    console.error(`Failed to fetch audio for message ${message._id}:`, response.statusText);
+                    return null;
+                }
+
+                const audioBlob = await response.blob();
+                const convertedBlob = await convertAudio(audioBlob, { outputFormat: "mp4" });
+                const convertedUrl = URL.createObjectURL(convertedBlob);
+
+                const messageIndex = updatedMessages.findIndex((m) => m._id === message._id);
+                if (messageIndex !== -1) {
+                    updatedMessages[messageIndex] = {
+                        ...updatedMessages[messageIndex],
+                        signedUrl: convertedUrl,
+                        format: "mp4", // new field to indicate it's now MP4
+                    };
+                }
+
+                return convertedUrl;
+            });
+
+            await Promise.all(conversionPromises);
+
+            setMessages(updatedMessages);
+            setIsBatchConverting(false);
+
+            // Show a success toast using setToast
+            setToast({
+                title: "Success",
+                description: "All audio notes converted successfully!",
+                variant: "success",
+            });
+        } catch (error) {
+            console.error("Error converting audio notes:", error);
+            setIsBatchConverting(false);
+
+            // Show an error toast using setToast
+            setToast({
+                title: "Error",
+                description: "Failed to convert audio notes.",
+                variant: "error",
+            });
+        }
+    };
 
     const renderAudioPlayer = (message: TelegramMessage) => {
         if (!message.signedUrl) {
@@ -118,7 +165,7 @@ export const TelegramMessagesView: React.FC<TelegramMessagesViewProps> = ({
 
         return (
             <div className="w-full p-0">
-                <AudioNotePlayer mediaUrl={message.signedUrl} />
+                <AudioNotePlayer mediaUrl={message.signedUrl} format={message.format} />
             </div>
         );
     };
@@ -185,11 +232,19 @@ export const TelegramMessagesView: React.FC<TelegramMessagesViewProps> = ({
                 />
             ) : (
                 <Card className="w-full max-w-md mx-auto h-[600px] flex flex-col bg-background shadow-lg">
-                    <CardHeader className="border-b p-4 flex flex-row items-center">
-                        <Button variant="ghost" size="icon" onClick={toggleFullScreen} className="mr-2">
+                    <CardHeader className="border-b p-4 flex flex-row items-center justify-between">
+                        <CardTitle className="text-xl font-bold">
+                            <Button variant={'darkBlueOutline'} onClick={convertAllAudioNotes} disabled={isBatchConverting} className="p-2">
+                                {isBatchConverting ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                    <AudioLines className="h-5 w-5" />
+                                )}
+                            </Button>
+                            Telegram Messages
+                        <Button className={'ml-3'} variant="orangeOutline" size="icon" onClick={toggleFullScreen}>
                             <Maximize2 className="h-4 w-4" />
-                        </Button>
-                        <CardTitle className="text-xl font-bold">Telegram Messages</CardTitle>
+                        </Button></CardTitle>
                     </CardHeader>
                     <CardContent className="flex-grow p-0 overflow-hidden">
                         <ScrollArea className="h-full w-full" ref={scrollAreaRef}>

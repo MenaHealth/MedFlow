@@ -1,4 +1,4 @@
-// app/patient-info/dashboard/page.jsx
+// app/patient-info/dashboard/page.tsx
 "use client";
 
 import * as React from 'react';
@@ -18,14 +18,16 @@ import EditIcon from "@mui/icons-material/Edit";
 import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 import InfoIcon from '@mui/icons-material/Info';
+import { DoctorSpecialtyList } from '@/data/doctorSpecialty.enum';
 
-import { Button } from '@/components/ui/button';
+
+import { Button } from '../../../components/ui/button';
 import Tooltip from '../../../components/form/Tooltip';
 import './dashboard.css';
-import TableCellWithTooltip from '@/components/TableCellWithTooltip';
+import TableCellWithTooltip from './../../../components/triageDashboard/TableCellWithTooltip';
 import * as Toast from '@radix-ui/react-toast';
 
-import NotesCell from '@/components/NotesCell';
+import NotesCell from './../../../components/triageDashboard/NotesCell';
 
 
 import {
@@ -39,7 +41,6 @@ import {
 
 import { PRIORITIES, STATUS } from '@/data/data';
 import { DoctorSpecialties as DOCTOR_SPECIALTIES } from '@/data/doctorSpecialty.enum';
-import Link from 'next/link';
 
 export default function PatientTriage() {
   const { data: session } = useSession();
@@ -98,6 +99,13 @@ export default function PatientTriage() {
 
     let filteredRows = [...allData];
 
+        // For Gaza Evac Coordinators
+        if (session?.user?.accountType === "Evac") {
+          filteredRows = filteredRows.filter(
+              (row) => row.specialty === DoctorSpecialtyList.GAZA_MED_EVACUATIONS
+          );
+      }
+
     // Apply filters
     if (priorityFilter !== "all") {
       filteredRows = filteredRows.filter(
@@ -131,9 +139,7 @@ export default function PatientTriage() {
 
     if (session?.user?.accountType === "Doctor") {
       filteredRows = filteredRows.filter(
-        (row) => row.doctor?.email 
-                ? row.doctor?.email === session.user.email 
-                : row.triagedBy
+        (row) => row.triagedBy
                   && Object.keys(row.triagedBy).length !== 0
                   && session.user.languages?.includes(row.language) 
                   && session.user.doctorSpecialty === row.specialty
@@ -159,13 +165,14 @@ export default function PatientTriage() {
       doctor = {};
       triagedBy = {};
     } else if (value === 'Triaged') {
-      if (session.user.accountType !== 'Triage') {
+      if (session.user.accountType !== 'Triage' || session.user.accountType === 'Evac') {
         triggerToast('You do not have the correct permissions to triage patients');
         return;
       }
       triagedBy = { firstName: session.user?.firstName, lastName: session.user?.lastName, email: session.user?.email };
+      doctor = {};
     } else if (value === 'In-Progress') {
-      if (session.user.accountType === 'Triage') {
+      if (session.user.accountType === 'Triage' || session.user.accountType === 'Evac') {
         triggerToast('You must be a doctor to take this patient.');
         return;
       }
@@ -281,7 +288,13 @@ export default function PatientTriage() {
     // This ensures the component has mounted before using the router
   }, [router]);
 
-  const handlePatientClick = (patientId) => {
+  const handlePatientClick = (patientId, doctor) => {
+    console.log(doctor)
+    if (doctor && Object.keys(doctor).length > 0) {
+      if (doctor.email !== session.user.email) {
+        return;
+      }
+    }
     if (router) {
       router.push(`/patient/${patientId}`);
     }
@@ -289,15 +302,24 @@ export default function PatientTriage() {
 
   return (
     <>
-      <div className="w-full relative dashboard-page">
-        <div className="flex items-center py-3">
-          <h2
-            className="flex-1 text-center font-bold"
-            style={{ fontSize: "24px" }}
-          >
-            <span className="blue_gradient">Patient List</span>
-          </h2>
-        </div>  
+<div className="w-full relative dashboard-page" style={{ paddingTop: "4rem" }}>
+  <div className="flex items-center justify-between py-3">
+    <h2
+      className="flex-1 text-center font-bold"
+      style={{ fontSize: "24px" }}
+    >
+      <span className="blue_gradient">Patient List</span>
+    </h2>
+    {/* Render the button only if the user is an Evac */}
+    {session?.user?.accountType === "Evac" && (
+      <Button
+        onClick={() => router.push('/create-patient')} 
+        className="bg-orange-500 text-white px-4 py-2 rounded-md"
+      >
+        Create Patient
+      </Button>
+    )}
+  </div>
         <div className="flex flex-wrap gap-2 mb-4">
           {priorityFilter !== "all" && (
             <div className="bg-green-100 text-green-800 px-2 py-1 rounded flex items-center">
@@ -467,7 +489,7 @@ export default function PatientTriage() {
                   <TableCell align="center">Dr. Pref</TableCell>
                   <TableCell align="center">
                     {
-                      session?.user?.accountType === 'Triage' ? 'Doctor' : (
+                      (session?.user?.accountType === 'Triage' || session?.user?.accountType === 'Evac') ? 'Doctor' : (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button
@@ -499,9 +521,9 @@ export default function PatientTriage() {
                         sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                       <TableCellWithTooltip tooltipText={row._id} maxWidth="100px">
                         <div
-                            onClick={() => handlePatientClick(row._id)}
-                            className="block overflow-hidden text-ellipsis text-sm cursor-pointer"
-                            style={{ maxWidth: '100px', whiteSpace: 'nowrap' }}
+                            onClick={() => handlePatientClick(row._id, row.doctor)}
+                            className="block overflow-hidden text-ellipsis text-sm"
+                            style={{ maxWidth: '100px', whiteSpace: 'nowrap', cursor: (session?.user?.accountType === 'Doctor' && (row.doctor && Object.keys(row.doctor).length > 0 && row.doctor?.email !== session.user.email)) ? 'default' : 'pointer' }}
                         >
                           {row._id}
                         </div>

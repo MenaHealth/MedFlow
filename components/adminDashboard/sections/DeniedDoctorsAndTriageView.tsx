@@ -118,11 +118,11 @@ export default function DeniedDoctorsAndTriageView() {
                     columns={columns}
                     onRowClick={(item) => console.log('Clicked user:', item)}
                     backgroundColor="gray-100"
-                    textColor="text-black"
-                    borderColor="border-gray-200"
+                    textColor="text-darkBlue"
+                    borderColor="border-darkBlue"
                     headerBackgroundColor="bg-gray-100"
-                    headerTextColor="text-black"
-                    hoverBackgroundColor="hover:bg-darkBlue"
+                    headerTextColor="text-darkBlue"
+                    hoverBackgroundColor="hover:bg-grey-200"
                     hoverTextColor="hover:text-orange-500"
                 />
             </InfiniteScroll>

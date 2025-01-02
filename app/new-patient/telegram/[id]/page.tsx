@@ -6,8 +6,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { BarLoader } from "react-spinners";
 import { NewPatientFormTelegramView } from "@/components/form/NewPatientFormTelegramView";
-import ConfirmationModal from "@/components/ConfirmationModal";
-import ErrorModal from "@/components/ErrorModal";
+import ConfirmationModal from "@/components/newPatient/intakeForm/ConfirmationModal";
+import ErrorModal from "@/components/newPatient/intakeForm/ErrorModal";
 import { NewPatientFormTelegramValues } from "@/components/form/NewPatientFormTelegramViewModel";
 import { Button } from "@/components/ui/button";
 
@@ -128,7 +128,7 @@ const TelegramPatientForm = ({ params }: TelegramPatientFormProps) => {
     };
 
     return (
-        <div className="w-full max-w-4xl mx-auto">
+        <div className="w-full max-w-4xl mx-auto bg-darkBlue pt-36px mt-36px">
             <h1 className="text-3xl font-bold mb-8 mt-8 text-center">{header[language]}</h1>
             <div className="flex flex-col md:flex-row md:space-x-4 justify-center mb-8">
                 <Button

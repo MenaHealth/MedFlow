@@ -10,7 +10,7 @@ export interface User {
     firstName: string;
     lastName: string;
     email: string;
-    accountType: 'Doctor' | 'Triage';
+    accountType: 'Doctor' | 'Triage' | 'Evac';
     doctorSpecialty?: string;
     countries?: string[];
     denialDate?: string;

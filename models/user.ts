@@ -12,7 +12,7 @@
       firstName: string;
       lastName: string;
       email: string;
-      accountType: 'Doctor' | 'Triage';
+      accountType: 'Doctor' | 'Triage' | 'Evac';
       password: string;
       doctorSpecialty?: DoctorSpecialtyList;
       languages?: string[];
@@ -32,6 +32,9 @@
       adminResetPasswordLink?: string;
       adminResetLinkExpiry?: Date;
       passwordResetCount?: number;
+      googleId?: string;
+      googleEmail?: string;
+      googleImage?: string;
     }
 
     const UserSchema = new Schema<IUser>({
@@ -55,7 +58,7 @@
       accountType: {
         type: String,
         required: [true, 'Account type is required!'],
-        enum: ['Doctor', 'Triage'],
+        enum: ['Doctor','Triage','Evac'],
       },
       doctorSpecialty: {
         type: String,
@@ -121,6 +124,18 @@
       passwordResetCount: {
         type: Number,
         default: 0, // Initialize to zero if not already set
+      },
+      googleId: {
+        type: String,
+        required: false,
+      },
+      googleEmail: {
+        type: String,
+        required: false,
+      },
+      googleImage: {
+        type: String,
+        required: false,
       },
     });
 

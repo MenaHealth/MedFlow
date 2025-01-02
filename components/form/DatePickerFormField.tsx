@@ -249,7 +249,6 @@ export function DatePickerFormField({ name, label, type = 'future', defaultDate,
                             </FormControl>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
-                            <div className="p-3">
                                 <Calendar
                                     mode="single"
                                     selected={selectedDate}
@@ -261,7 +260,6 @@ export function DatePickerFormField({ name, label, type = 'future', defaultDate,
                                         <Send className="mr-2 h-4 w-4" />
                                     </Button>
                                 </div>
-                            </div>
                         </PopoverContent>
                     </Popover>
                     <FormMessage />

@@ -1,5 +1,5 @@
 // app/api/patient/[id]/medications/rx-order/route.ts
-// saving a rx order URL for the patient and a QR code for the pharmacy
+// Creating the RX order + QR code + rx order ID
 
 import { v4 as uuidv4 } from 'uuid';
 import { NextResponse } from 'next/server';
@@ -7,6 +7,7 @@ import QRCode from 'qrcode';
 import sharp from 'sharp';
 import Patient from '../../../../../../models/patient';
 import dbConnect from '../../../../../../utils/database';
+import { Types } from 'mongoose';
 
 export const POST = async (request: Request, { params }: { params: { id: string } }) => {
     try {
@@ -40,6 +41,7 @@ export const POST = async (request: Request, { params }: { params: { id: string 
         const pharmacyQrUrl = `${baseUrl}/rx-order/pharmacy/${uniqueId}`; // Pharmacist URL
 
         const newRxOrder = {
+            rxOrderId: uniqueId,
             doctorSpecialty,
             prescribingDr,
             drEmail,
@@ -55,7 +57,7 @@ export const POST = async (request: Request, { params }: { params: { id: string 
                 frequency: p.frequency,
             })),
             PatientRxUrl: patientRxUrl,
-            PharmacyQrUrl: pharmacyQrUrl, // Save the pharmacy URL
+            PharmacyQrUrl: pharmacyQrUrl,
         };
 
         // Save the new RX order
@@ -69,7 +71,7 @@ export const POST = async (request: Request, { params }: { params: { id: string 
             return new NextResponse('Failed to update patient record', { status: 500 });
         }
 
-        // Find the recently added RX order
+        // Find the recently added RX order using the last element
         const addedRxOrder = updatedPatient.rxOrders[updatedPatient.rxOrders.length - 1];
 
         // Generate QR code as a data URL
@@ -90,11 +92,19 @@ export const POST = async (request: Request, { params }: { params: { id: string 
         // Convert buffer to base64 for storage
         const compressedQrCodeBase64 = `data:image/png;base64,${compressedQrCodeBuffer.toString('base64')}`;
 
-        // Update the RX order with the QR code
+        // Update the RX order with the QR code using the embedded _id
         addedRxOrder.PharmacyQrCode = compressedQrCodeBase64; // Save compressed QR code
         await updatedPatient.save();
 
-        return new NextResponse(JSON.stringify(updatedPatient), { status: 201 });
+        // Optionally, return the added RX order's _id for frontend use
+        return new NextResponse(
+            JSON.stringify({
+                message: 'RX order added successfully.',
+                rxOrderId: addedRxOrder._id, // Send the _id to the client
+                patient: updatedPatient,
+            }),
+            { status: 201 }
+        );
     } catch (error) {
         console.error('Failed to add RX order:', error);
         return new NextResponse('Failed to add RX order', { status: 500 });

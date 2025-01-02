@@ -9,7 +9,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/componen
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useForgotPasswordViewModel } from './ForgotPasswordViewModel'
-import { Search, Loader2, Key } from 'lucide-react'
+import { Search, Loader2, Key, Trash2, LogOut } from 'lucide-react'
 
 export default function ForgotPasswordView() {
     const {
@@ -18,8 +18,15 @@ export default function ForgotPasswordView() {
         selectedUser,
         handleSearch,
         generateResetLink,
+        clearExpiredLinks,
         loading,
+        handleLogout,
     } = useForgotPasswordViewModel()
+
+    const isLinkExpired = React.useCallback(() => {
+        if (!selectedUser?.resetLinkExpiration) return false;
+        return new Date(selectedUser.resetLinkExpiration) < new Date();
+    }, [selectedUser]);
 
     return (
         <div className="container mx-auto px-4 py-8 space-y-8">
@@ -105,10 +112,15 @@ export default function ForgotPasswordView() {
                                     <span className="font-medium">Expires on:</span>{' '}
                                     {new Date(selectedUser.resetLinkExpiration!).toLocaleString()}
                                 </div>
+                                {isLinkExpired() && (
+                                    <div className="text-sm text-red-500 font-medium">
+                                        This link has expired. Please generate a new one.
+                                    </div>
+                                )}
                             </>
                         ) : (
                             <Button
-                                onClick={generateResetLink} // Add this line to call generateResetLink on click
+                                onClick={() => generateResetLink()}
                                 disabled={loading}
                                 className="text-white hover:bg-orange-800"
                             >
@@ -123,6 +135,34 @@ export default function ForgotPasswordView() {
                     </CardFooter>
                 </Card>
             )}
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Maintenance</CardTitle>
+                </CardHeader>
+                <CardContent className="flex justify-between items-center">
+                    <Button
+                        onClick={() => clearExpiredLinks()}
+                        disabled={loading}
+                        className="text-white hover:bg-orange-800"
+                    >
+                        {loading ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                            <Trash2 className="mr-2 h-4 w-4" />
+                        )}
+                        Clear Expired Links
+                    </Button>
+                    <Button
+                        onClick={handleLogout}
+                        className="bg-red-600 hover:bg-red-700 text-white"
+                    >
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Logout
+                    </Button>
+                </CardContent>
+            </Card>
         </div>
     )
 }
+

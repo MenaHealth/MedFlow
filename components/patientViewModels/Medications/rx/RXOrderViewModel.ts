@@ -23,6 +23,7 @@ export function useRXOrderViewModel(
     const { api } = useContext(ToastContext);
 
     const initialRxOrder = useMemo(() => ({
+        rxOrderId: '', // Placeholder value for new orders
         doctorSpecialty: session?.user?.doctorSpecialty || 'Not Selected',
         prescribingDr: `${session?.user?.firstName || ''} ${session?.user?.lastName || ''}`,
         drEmail: session?.user?.email || '',

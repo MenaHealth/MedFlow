@@ -1,22 +1,21 @@
+// components/adminDashboard/sections/AdminManagementViewModel.tsx
 import { useSession } from 'next-auth/react';
 import { useState, useCallback, useEffect } from 'react';
 import { useToast } from '@/components/hooks/useToast';
 import { IAdmin } from "@/models/admin";
-import Fuse from 'fuse.js';
+import { IUser } from "@/models/user";
 
 export function useAdminManagementViewModel() {
-    const [allAdmins, setAllAdmins] = useState<IAdmin[]>([]);
     const [adminsData, setAdminsData] = useState<IAdmin[]>([]);
     const { data: session } = useSession();
     const token = session?.user.token;
     const { setToast } = useToast();
 
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedUser, setSelectedUser] = useState<IAdmin[]>([]);
+    const [searchResults, setSearchResults] = useState<IUser[]>([]);
 
     const fetchAllAdmins = useCallback(async () => {
         try {
-            console.log("Fetching all admins...");
             const res = await fetch('/api/admin/GET/existing-admins', {
                 headers: {
                     'Content-Type': 'application/json',
@@ -25,16 +24,11 @@ export function useAdminManagementViewModel() {
             });
 
             if (!res.ok) {
-                console.error("Failed to fetch admins. Response status:", res.status);
                 throw new Error('Failed to fetch admins');
             }
 
             const data = await res.json();
-            console.log("Raw data fetched from API:", data);
-
             setAdminsData(data.admins || []);
-            setAllAdmins(data.admins || []);
-            console.log("Admins data set in state:", data.admins || []);
         } catch (error) {
             console.error('Error fetching admins:', error);
             setToast?.({
@@ -49,41 +43,33 @@ export function useAdminManagementViewModel() {
         fetchAllAdmins();
     }, [fetchAllAdmins]);
 
-    useEffect(() => {
-        console.log("Admins data in state:", adminsData);
-    }, [adminsData]);
-
-    const fuseOptions = {
-        isCaseSensitive: false,
-        includeScore: true,
-        // shouldSort: true,
-        // includeMatches: true,
-        // findAllMatches: false,
-        minMatchCharLength: 2,
-        // location: 0,
-        threshold: 0.3,
-        // distance: 100,
-        // useExtendedSearch: false,
-        // ignoreLocation: false,
-        // ignoreFieldNorm: false,
-        // fieldNormWeight: 1,
-        keys: [
-            "email",
-            "firstName",
-            "lastName"
-        ]
-    };
-    
-    const fuse = new Fuse(allAdmins, fuseOptions);
-    const handleSearch = useCallback(async () => {
-        if (!searchQuery) {
-            setAdminsData(allAdmins);
+    const searchUsers = async (query: string) => {
+        if (query.length < 3) {
+            setSearchResults([]);
             return;
-        };
+        }
 
-        const searchData = fuse.search(searchQuery);
-        setAdminsData(searchData.map((result) => result.item));
-    }, [allAdmins, searchQuery]);
+        try {
+            const res = await fetch(`/api/admin/GET/search-users?email=${encodeURIComponent(query)}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (!res.ok) throw new Error('Failed to search users');
+
+            const data = await res.json();
+            setSearchResults(data.users);
+        } catch (error) {
+            console.error('Error searching users:', error);
+            setToast?.({
+                title: 'Error',
+                description: 'Failed to search users.',
+                variant: 'destructive',
+            });
+        }
+    };
 
     const handleAddAdmin = async (userId: string) => {
         try {
@@ -104,7 +90,7 @@ export function useAdminManagementViewModel() {
                 variant: 'default',
             });
 
-            await fetchAllAdmins(); // Reload admins after adding
+            await fetchAllAdmins();
         } catch (error) {
             console.error('Error adding admin:', error);
             setToast?.({
@@ -126,7 +112,10 @@ export function useAdminManagementViewModel() {
                 body: JSON.stringify({ adminId }),
             });
 
-            if (!res.ok) throw new Error('Failed to remove admin');
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.message || 'Failed to remove admin');
+            }
 
             setToast?.({
                 title: 'Success',
@@ -134,12 +123,12 @@ export function useAdminManagementViewModel() {
                 variant: 'default',
             });
 
-            await fetchAllAdmins(); // Reload admins after removing
+            await fetchAllAdmins();
         } catch (error) {
             console.error('Error removing admin:', error);
             setToast?.({
                 title: 'Error',
-                description: 'Failed to remove admin.',
+                description: error instanceof Error ? error.message : 'Failed to remove admin.',
                 variant: 'destructive',
             });
         }
@@ -147,14 +136,13 @@ export function useAdminManagementViewModel() {
 
     return {
         adminsData,
-        handleSearch,
         searchQuery,
         setSearchQuery,
-        selectedUser,
-        setSelectedUser,
+        searchResults,
         handleAddAdmin,
         handleRemoveAdmin,
         fetchAllAdmins,
+        searchUsers,
     };
 }
 

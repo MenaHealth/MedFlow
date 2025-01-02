@@ -17,8 +17,8 @@ const UserTypeForm = () => {
         }
     }, [accountType, updateAnsweredQuestions]); // Depend only on accountType
 
-    const handleSelectAccountType = (selectedType: 'Doctor' | 'Triage') => {
-        if (selectedType !== accountType) {  // Avoid re-setting the same value
+    const handleSelectAccountType = (selectedType: 'Doctor' | 'Triage' | 'Evac') => {
+        if (selectedType !== accountType) { // Avoid re-setting the same value
             setAccountType(selectedType);
             setFormData((prevData) => ({ ...prevData, accountType: selectedType }));
         }
@@ -35,6 +35,11 @@ const UserTypeForm = () => {
                 <RadioCard.Item value="Triage" className="flex-grow p-4 h-full">
                     <Flex direction="column" width="100%" className="justify-center items-center h-full">
                         <Text size="sm" weight="normal">Triage</Text>
+                        </Flex>
+                </RadioCard.Item>
+                <RadioCard.Item value="Evac" className="flex-grow p-4 h-full">
+                    <Flex direction="column" width="100%" className="justify-center items-center h-full">
+                        <Text size="sm" weight="normal">Evac</Text>
                     </Flex>
                 </RadioCard.Item>
             </RadioCard.Root>

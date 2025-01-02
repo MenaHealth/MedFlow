@@ -578,3 +578,12 @@ button:disabled {
     max-width: 300px;
   }
 }
+
+.break-words {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.hyphen-auto {
+  hyphens: auto;
+}

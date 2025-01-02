@@ -1,4 +1,5 @@
 // components/rxQrCode/PharmacyView.tsx
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -18,7 +19,7 @@ import { Loader2 } from 'lucide-react'
 
 // Import the IRxOrder interface from your patient model
 import { IRxOrder } from '@/models/patient';
-import {TextFormField} from "@/components/ui/TextFormField";
+import { TextFormField } from "@/components/ui/TextFormField";
 
 const PharmacyView = ({ uuid }: { uuid: string }) => {
     const [rxOrder, setRxOrder] = useState<IRxOrder | null>(null);
@@ -78,20 +79,24 @@ const PharmacyView = ({ uuid }: { uuid: string }) => {
         }
 
         try {
-            const response = await fetch(`/api/patient/${patientId}/medications/rx-order`, {
+            const response = await fetch(`/api/patient/${patientId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ uuid, updatedRxOrder: rxOrder }),
+                body: JSON.stringify({ rxOrderId: uuid, updatedRxOrder: rxOrder }),
             });
 
             if (!response.ok) {
-                throw new Error('Failed to save RX order');
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to save RX order');
             }
 
             const data = await response.json();
-            setRxOrder(data.rxOrder);
-            setInitialStatus(data.rxOrder.rxStatus);
-            setSuccessMessage('RX order updated successfully');
+            if (rxOrder.rxStatus) {
+                setInitialStatus(rxOrder.rxStatus);
+            } else {
+                setInitialStatus(null);
+            }            setSuccessMessage('RX order updated successfully');
+            setError(null); // Clear any previous errors
         } catch (err: any) {
             setError(err.message || 'An unexpected error occurred');
         }
@@ -290,4 +295,3 @@ const PharmacyView = ({ uuid }: { uuid: string }) => {
 };
 
 export default PharmacyView;
-

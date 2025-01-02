@@ -1,5 +1,5 @@
 // components/auth/adminDashboard/sections/ExistingDoctorsAndTriageViewModel.tsx
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useQueryClient, useInfiniteQuery, useMutation } from 'react-query';
 import { useSession } from 'next-auth/react';
 import { useToast } from '@/components/hooks/useToast';
@@ -9,13 +9,16 @@ export interface User {
     firstName: string;
     lastName: string;
     email: string;
-    accountType: 'Doctor' | 'Triage';
+    accountType: 'Doctor' | 'Triage' | 'Evac';
     doctorSpecialty?: string;
     countries?: string[];
     approvalDate?: string;
     gender: 'male' | 'female';
     dob: string;
     languages: string[];
+    googleId?: string;
+    googleEmail?: string;
+    googleImage?: string;
 }
 
 export function useExistingDoctorsAndTriageViewModel() {
@@ -23,6 +26,7 @@ export function useExistingDoctorsAndTriageViewModel() {
     const [isCountryVisible, setIsCountryVisible] = useState(false);
     const [isDoctorSpecialtyVisible, setIsDoctorSpecialtyVisible] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [editingUser, setEditingUser] = useState<User | null>(null);
     const queryClient = useQueryClient();
     const { setToast } = useToast();
 
@@ -53,12 +57,10 @@ export function useExistingDoctorsAndTriageViewModel() {
         }
     );
 
-    // Memoize the `existingUsers` array
     const existingUsers = useMemo(() => {
         return data?.pages.flatMap((page) => page.users) || [];
     }, [data?.pages]);
 
-    // Filter users based on the search term
     const filteredUsers = useMemo(() => {
         return existingUsers.filter((user) =>
             user.email.toLowerCase().includes(searchTerm.toLowerCase())
@@ -97,7 +99,7 @@ export function useExistingDoctorsAndTriageViewModel() {
         }
     );
 
-    const handleMoveToDenied = (userId: string) => {
+    const handleMoveToDenied = useCallback((userId: string) => {
         if (!session?.user?.isAdmin) {
             setToast({
                 title: 'Error',
@@ -107,10 +109,10 @@ export function useExistingDoctorsAndTriageViewModel() {
             return;
         }
         moveToDeniedMutation.mutate(userId);
-    };
+    }, [session?.user?.isAdmin, setToast, moveToDeniedMutation]);
 
-    const toggleCountryVisibility = () => setIsCountryVisible((prev) => !prev);
-    const toggleDoctorSpecialtyVisibility = () => setIsDoctorSpecialtyVisible((prev) => !prev);
+    const toggleCountryVisibility = useCallback(() => setIsCountryVisible((prev) => !prev), []);
+    const toggleDoctorSpecialtyVisibility = useCallback(() => setIsDoctorSpecialtyVisible((prev) => !prev), []);
 
     const editUserMutation = useMutation(
         async ({ userId, data }: { userId: string; data: Partial<User> }) => {
@@ -126,13 +128,14 @@ export function useExistingDoctorsAndTriageViewModel() {
             return res.json();
         },
         {
-            onSuccess: () => {
+            onSuccess: (updatedUser) => {
                 setToast({
                     title: 'Success',
                     description: 'User updated successfully.',
                     variant: 'default',
                 });
                 queryClient.invalidateQueries('existingUsers');
+                setEditingUser(null);
             },
             onError: (error: any) => {
                 setToast({
@@ -144,7 +147,7 @@ export function useExistingDoctorsAndTriageViewModel() {
         }
     );
 
-    const handleEditUser = async (userId: string, data: Partial<User>) => {
+    const handleEditUser = useCallback(async (userId: string, data: Partial<User>) => {
         if (!session?.user?.isAdmin) {
             setToast({
                 title: 'Error',
@@ -154,7 +157,60 @@ export function useExistingDoctorsAndTriageViewModel() {
             return;
         }
         editUserMutation.mutate({ userId, data });
-    };
+    }, [session?.user?.isAdmin, setToast, editUserMutation]);
+
+    const exportToCSV = useCallback(async () => {
+        try {
+            const response = await fetch('/api/admin/user/retrieve-all', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${session?.user.token}`,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error fetching users: ${response.statusText}`);
+            }
+
+            const authorizedUsers: User[] = await response.json();
+
+            if (!Array.isArray(authorizedUsers)) {
+                throw new Error('Invalid data format received from the server.');
+            }
+
+            const headers = ['Name', 'Email', 'User Type', 'Approval Date', 'Doctor Specialty', 'Country'];
+
+            const csvContent = [
+                headers.join(','),
+                ...authorizedUsers.map((user: User) => [
+                    `${user.firstName} ${user.lastName}`,
+                    user.email,
+                    user.accountType,
+                    user.approvalDate ? new Date(user.approvalDate).toLocaleDateString() : 'N/A',
+                    user.doctorSpecialty || 'N/A',
+                    user.countries?.join(', ') || 'N/A'
+                ].map(value => `"${value.replace(/"/g, '""')}"`).join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'existing_users.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (error: any) {
+            console.error('Error exporting CSV:', error);
+            setToast({
+                title: 'Error',
+                description: error.message || 'Failed to export CSV.',
+                variant: 'destructive',
+            });
+        }
+    }, [session?.user.token, setToast]);
 
     return {
         existingUsers: filteredUsers,
@@ -169,5 +225,9 @@ export function useExistingDoctorsAndTriageViewModel() {
         handleEditUser,
         searchTerm,
         setSearchTerm,
+        exportToCSV,
+        editingUser,
+        setEditingUser
     };
 }
+

@@ -110,3 +110,29 @@ export const POST = async (request: Request, { params }: { params: { id: string 
         return new NextResponse('Failed to add RX order', { status: 500 });
     }
 };
+
+
+export const PATCH = async (req: Request, { params }: { params: { id: string } }) => {
+    try {
+        await dbConnect();
+
+        const patientId = params.id;
+        const { uuid, updatedRxOrder } = await req.json();
+
+        // Update the specific RX order within the patient
+        const updatedPatient = await Patient.findOneAndUpdate(
+            { _id: patientId, 'rxOrders.PharmacyQrUrl': { $regex: uuid } },
+            { $set: { 'rxOrders.$': updatedRxOrder } },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedPatient) {
+            return new NextResponse('Failed to update RX order', { status: 500 });
+        }
+
+        return NextResponse.json({ rxOrder: updatedRxOrder });
+    } catch (error) {
+        console.error('Failed to update RX order:', error);
+        return new NextResponse('Failed to update RX order', { status: 500 });
+    }
+};

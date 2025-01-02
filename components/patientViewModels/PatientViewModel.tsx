@@ -129,7 +129,7 @@ const PatientDashboardContent: React.FC = () => {
     ];
 
     return (
-        <div className="container mx-auto px-4 py-8 overflow-hidden">
+        <div className="container mx-auto px-4 py-8 overflow-hidden pt-24">
             <div className="space-y-4">
                 {sections.map((section) => (
                     <div key={section.id} className="bg-white rounded-lg shadow-md overflow-hidden">

@@ -115,11 +115,11 @@ const PatientRxView: React.FC<QRCodeDisplayProps> = ({ uuid }) => {
                 </DropdownMenu>
                 <div className="flex items-center space-x-4">
                     <Image
-                        src="/assets/images/mena_health_logo.jpeg"
+                        src="/assets/images/mena_health_logo.svg"
                         alt="Mena Health Logo"
                         width={80}
                         height={80}
-                        className="rounded-full"
+                        className=""
                     />
                     <CardTitle>{t('prescriptionDetails')}</CardTitle>
                 </div>

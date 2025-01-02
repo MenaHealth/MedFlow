@@ -5,7 +5,7 @@ import AdminDashboardView from '@/components/adminDashboard/AdminDashboardView';
 
 const AdminPage = () => {
     return (
-        <div>
+        <div className={'mt-12'}>
             <AdminDashboardView />
         </div>
     );

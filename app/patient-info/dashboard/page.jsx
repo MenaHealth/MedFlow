@@ -302,7 +302,7 @@ export default function PatientTriage() {
 
   return (
     <>
-      <div className="w-full relative dashboard-page">
+      <div className="w-full relative dashboard-page mt-16">
         <div className="flex items-center py-3">
           <h2
             className="flex-1 text-center font-bold"

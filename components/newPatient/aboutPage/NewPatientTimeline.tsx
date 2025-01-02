@@ -164,7 +164,7 @@ export default function NewPatientTimeline({ initialLanguage }: NewPatientWithTi
                 className="mt-8 text-center"
                 initial={{opacity: 0}}
                 animate={{opacity: 1}}
-                transition={{duration: 0.8, delay: 1.6, ease: "easeOut"}}
+                transition={{duration: 0.8, delay: 1.5, ease: "easeOut"}}
             >
                 <h3 className="text-lg font-semibold text-gray-800">{content.helpText}</h3>
                 <p className="text-sm text-gray-600">{content.contactInfo}</p>

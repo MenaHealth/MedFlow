@@ -12,7 +12,7 @@ export function EditCard() {
             alert("You must be signed in to update your profile");
             return;
           }
-          if (updateAccountType === "Triage") {
+          if (updateAccountType === "Triage" || updateAccountType === "Evac") {
             specialties = [];
           }
           const response = await fetch(`/api/user/${session?.user?.id}`, {

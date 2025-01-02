@@ -16,19 +16,26 @@ interface MessageInputProps {
 }
 
 export const MessageInput: React.FC<MessageInputProps> = ({
-                                                              newMessage,
-                                                              setNewMessage,
-                                                              sendMessage,
-                                                              sendImage,
-                                                              sendAudioMessage,
-                                                              isLoading,
-                                                              telegramChatId,
-                                                          }) => {
+    newMessage,
+    setNewMessage,
+    sendMessage,
+    sendImage,
+    sendAudioMessage,
+    isLoading,
+    telegramChatId,
+}) => {
     const [expanded, setExpanded] = React.useState(false);
+
+    const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB limit for images
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files?.[0]) {
-            sendImage(e.target.files[0]);
+            const file = e.target.files[0];
+            if (file.size > MAX_IMAGE_SIZE) {
+                alert("File size exceeds the limit. Please upload a smaller file.");
+                return;
+            }
+            sendImage(file);
         }
     };
 
@@ -67,16 +74,17 @@ export const MessageInput: React.FC<MessageInputProps> = ({
 
                     {expanded && (
                         <div className="flex gap-2 mt-2 transition-all duration-300">
-                            <Button
-                                type="button"
-                                size="icon"
-                                variant="outline"
-                                onClick={() => document.getElementById("image-upload")?.click()}
-                                className="rounded-full h-10 w-10"
-                            >
-                                <Image className="h-4 w-4" />
-                                <span className="sr-only">Upload Image</span>
-                            </Button>
+                    <Button
+                        type="button"
+                        size="icon"
+                        variant="outline"
+                        onClick={() => document.getElementById("image-upload")?.click()}
+                        className="rounded-full h-10 w-10"
+                    >
+    <Image className="h-4 w-4" aria-label="Upload Image" />
+    <span className="sr-only">Upload Image</span>
+</Button>
+
                             <input
                                 id="image-upload"
                                 type="file"
@@ -87,7 +95,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
                             <AudioRecorder
                                 chatId={telegramChatId}
                                 isUploading={isLoading}
-                                onRecordingComplete={(file: Blob, duration: number) => sendAudioMessage(file, duration)}
+                                onRecordingComplete={(file: Blob, duration: number) => handleRecordingComplete(file, duration)}
                             />
                         </div>
                     )}

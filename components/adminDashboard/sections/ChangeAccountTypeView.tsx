@@ -54,6 +54,14 @@ export default function ChangeAccountTypeView() {
                 >
                     Doctor
                 </Button>
+
+                <Button
+                    variant={accountType === 'Evac' ? 'default' : 'outline'}
+                     style={{ transform: 'scale(1.5)', marginLeft: '5rem' }}
+                     onClick={() => setAccountType('Evac')}
+                 >
+                     Evac
+                 </Button>
             </div>
 
         </div>

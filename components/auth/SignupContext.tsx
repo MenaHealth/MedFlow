@@ -36,8 +36,8 @@ interface SignupContextValue {
     updateAnsweredQuestions: (step: number, count: number) => void;
     stepAnswers: number[];
     // userTypeForm
-    accountType: 'Doctor' | 'Triage' | null;
-    setAccountType: (accountType: 'Doctor' | 'Triage') => void;
+    accountType: 'Doctor' | 'Triage' | 'Evac' | null;
+    setAccountType: React.Dispatch<React.SetStateAction<'Doctor' | 'Triage' | 'Evac' | null>>;
     //PasswordEmailForm
     validEmail: boolean;
     setValidEmail: React.Dispatch<React.SetStateAction<boolean>>;
@@ -54,6 +54,9 @@ interface SignupContextValue {
     // TriageSignupForm
     triageSignupFormCompleted: boolean;
     setTriageSignupFormCompleted: React.Dispatch<React.SetStateAction<boolean>>;
+    //EvacSignup
+    evacSignupFormCompleted: boolean;
+    setEvacSignupFormCompleted: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const SignupContext = createContext<SignupContextValue | null>(null);
@@ -70,7 +73,7 @@ export const SignupProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const [formData, setFormData] = useState<FormData>({});
     const [currentStep, setCurrentStep] = useState(0);
     const [progress, setProgress] = useState(0);
-    const [accountType, setAccountType] = useState<'Doctor' | 'Triage' | null>(null);
+    const [accountType, setAccountType] = useState<'Doctor' | 'Triage' | 'Evac' | null>(null);
     const [answeredQuestions, setAnsweredQuestions] = useState(0);
     const [stepAnswers, setStepAnswers] = useState<number[]>(new Array(4).fill(0));
     // step 1: user type selection, step 2: email password, step 3: security questions, step 4: doctor / triage sign up
@@ -80,6 +83,7 @@ export const SignupProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const [securityQuestionFormCompleted, setSecurityQuestionFormCompleted] = useState(false);
     const [doctorSignupFormCompleted, setDoctorSignupFormCompleted] = useState(false);
     const [triageSignupFormCompleted, setTriageSignupFormCompleted] = useState(false);
+    const [evacSignupFormCompleted, setEvacSignupFormCompleted] = useState(false);
     const totalQuestions = useMemo(() => {
         return accountType === 'Doctor' ? 17 : 13;
     }, [accountType]);
@@ -168,6 +172,8 @@ export const SignupProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                 setDoctorSignupFormCompleted,
                 triageSignupFormCompleted,
                 setTriageSignupFormCompleted,
+                evacSignupFormCompleted,
+                setEvacSignupFormCompleted,
             }}
         >
             {children}

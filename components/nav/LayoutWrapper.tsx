@@ -15,7 +15,7 @@ const LayoutWrapper: React.FC<LayoutWrapperProps> = ({ children }) => {
 
     return (
         <div className="flex flex-col min-h-screen">
-            <Nav />
+            <Nav className={'mb-8'}/>
             <main className={`flex-grow w-full ${isFullWidth ? 'px-2' : 'max-w-6xl mx-auto'} pt-[8px]`}>
                 {children}
             </main>

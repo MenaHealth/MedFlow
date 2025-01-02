@@ -2,6 +2,8 @@
 import { UserProfileView } from '@/components/user-profile/UserProfileView';
 
 export default function MyProfilePage() {
-    return <UserProfileView />;
+    return <div className={'mt-24'}>
+        <UserProfileView />;
+    </div>
 }
 

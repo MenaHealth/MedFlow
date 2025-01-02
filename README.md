@@ -2,9 +2,7 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 ## Getting Started
 
-- To start working on the project, first **fork this repo**, to your own GitHub account.
-
-- then download the repository and install the prereqs:
+- Clone the repository:
 ```bash
 git clone https://github.com/<your github username>/med-flow.git
 cd med-flow
@@ -18,8 +16,6 @@ npm run dev
 yarn dev
 # or
 pnpm dev
-# or
-bun dev
 ```
 - Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 

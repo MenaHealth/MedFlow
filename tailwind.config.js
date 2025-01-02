@@ -1,4 +1,9 @@
 // tailwind.config.js
+
+const {
+  default: flattenColorPalette,
+} = require("tailwindcss/lib/util/flattenColorPalette");
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
@@ -18,6 +23,7 @@ module.exports = {
     extend: {
       colors: {
         darkBlue: "#120f0b",
+        primaryOrange: "#FF5722",
         white: "#ffffff",
         orange: {
           50: '#fff4ed',
@@ -31,6 +37,19 @@ module.exports = {
           800: '#9e1a0e',
           900: '#7f190f',
           950: '#450805',
+        },
+        green: {
+          50: '#E6F3F3',
+          100: '#CCE6E7',
+          200: '#99CDCF',
+          300: '#66B5B7',
+          400: '#339C9F',
+          500: '#008387',
+          600: '#00696C',
+          700: '#056E73',
+          800: '#056e73',
+          900: '#001A1B',
+          950: '#001516',
         },
         yellow: {
           '50': '#fcfee8',
@@ -106,12 +125,31 @@ module.exports = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        aurora: {
+          '0%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
+          '100%': { backgroundPosition: '0% 50%' },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        aurora: 'aurora 35s linear infinite',
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
-} 
+  plugins: [require("tailwindcss-animate"), addVariablesForColors],
+}
+
+function addVariablesForColors({ addBase, theme }) {
+  const flattenColorPalette = require("tailwindcss/lib/util/flattenColorPalette").default;
+
+  const allColors = flattenColorPalette(theme("colors"));
+  const newVars = Object.fromEntries(
+      Object.entries(allColors).map(([key, val]) => [`--${key}`, val])
+  );
+
+  addBase({
+    ":root": newVars,
+  });
+}

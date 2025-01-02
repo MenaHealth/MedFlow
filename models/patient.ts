@@ -132,6 +132,11 @@ const PatientSchema = new Schema<IPatient>({
         phoneNumber: { type: String },
     },
     telegramChatId: { type: String },
+    coordinatorId: {
+        type: Schema.Types.ObjectId,
+        ref: "User", // This must match the model name of your user schema
+        default: null,
+    },    
     telegramAccessHash: { type: String },
     dob: { type: Date },
     city: { type: String },

@@ -18,6 +18,8 @@ import EditIcon from "@mui/icons-material/Edit";
 import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 import InfoIcon from '@mui/icons-material/Info';
+import { DoctorSpecialtyList } from '@/data/doctorSpecialty.enum';
+
 
 import { Button } from '../../../components/ui/button';
 import Tooltip from '../../../components/form/Tooltip';

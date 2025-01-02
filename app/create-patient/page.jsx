@@ -24,7 +24,7 @@ export default function CreatePatientPage() {
     setError(null);
 
     try {
-      const response = await fetch("/api/patient", { // Ensure this matches your backend route
+      const response = await fetch("/api/patient", { 
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -37,7 +37,7 @@ export default function CreatePatientPage() {
         throw new Error(message || "Failed to create patient.");
       }
 
-      router.push("/patient-info/dashboard"); // Redirect to the patient dashboard
+      router.push("/patient-info/dashboard"); 
     } catch (err) {
       console.error("Error creating patient:", err);
       setError(err.message);
@@ -49,11 +49,11 @@ export default function CreatePatientPage() {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Create New Patient</h1>
-      {error && <p className="text-red-500 mb-4">{error}</p>}
-      <form onSubmit={handleSubmit} className="space-y-4">
+return (
+  <div className="p-6" style={{ paddingTop: "4rem" }}>
+    <h1 className="text-2xl font-bold mb-4">Create New Patient</h1>
+    {error && <p className="text-red-500 mb-4">{error}</p>}
+    <form onSubmit={handleSubmit} className="space-y-4">
         <input
           name="firstName"
           value={form.firstName}

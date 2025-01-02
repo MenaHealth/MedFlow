@@ -1,10 +1,12 @@
 // components/ui/NewPatientWithTimeline.tsx
+// components/ui/NewPatientWithTimeline.tsx
 "use client";
 import React, { useRef, useEffect, useState } from "react";
 import { motion, useScroll, useTransform, useInView, useAnimation } from "framer-motion";
 import { FiSend } from "react-icons/fi";
 import { ContainerScroll } from "./container-scroll-animation";
 import Image from "next/image";
+import { Spotlight } from "./Spotlight";
 
 const content = {
     english: {
@@ -35,22 +37,6 @@ const content = {
     },
 };
 
-interface Step {
-    title: string;
-    description: string;
-}
-
-interface NewPatientWithTimelineProps {
-    title: string;
-    subtitle: string;
-    steps: Step[];
-    getStarted: string;
-    buttonText: string;
-    helpText: string;
-    contactInfo: string;
-    telegramLink: string;
-}
-
 export default function NewPatientWithTimeline() {
     const {
         title,
@@ -66,15 +52,31 @@ export default function NewPatientWithTimeline() {
     const containerRef = useRef<HTMLDivElement>(null);
     const [containerHeight, setContainerHeight] = useState(0);
     const controls = useAnimation();
-    const ref = useRef(null);
-    const isInView = useInView(ref, { once: true, amount: 0.3 });
+    const stepsRef = useRef(null);
+    const isStepsInView = useInView(stepsRef, { once: true, amount: 0.3 });
 
+    const getStartedRef = useRef(null);
+    const spotlightRef = useRef(null);
+
+    // Animation controls for Spotlight
+    const spotlightControls = useAnimation();
+
+    // Scroll progress for the entire container (for the timeline line)
     const { scrollYProgress } = useScroll({
         target: containerRef,
         offset: ["start start", "end end"],
     });
 
     const lineHeight = useTransform(scrollYProgress, [0, 1], [0, containerHeight]);
+
+    // Scroll progress for the getStarted section
+    const { scrollYProgress: getStartedScroll } = useScroll({
+        target: getStartedRef,
+        offset: ["start end", "end start"],
+    });
+
+    // Map scroll progress to opacity: fade in and out
+    const spotlightOpacity = useTransform(getStartedScroll, [0, 0.5, 1], [0, 1, 0]);
 
     useEffect(() => {
         if (containerRef.current) {
@@ -83,17 +85,19 @@ export default function NewPatientWithTimeline() {
     }, []);
 
     useEffect(() => {
-        if (isInView) {
+        if (isStepsInView) {
             controls.start("visible");
         }
-    }, [isInView, controls]);
+    }, [isStepsInView, controls]);
 
     return (
-        <div ref={containerRef} className="relative max-w-5xl mx-auto p-6">
+        <div ref={containerRef} className="relative max-w-5xl mx-auto p-6 overflow-x-hidden">
+            {/* Timeline Line */}
             <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200">
                 <motion.div className="w-full bg-[#056E73]" style={{ height: lineHeight }} />
             </div>
 
+            {/* Title */}
             <motion.h1
                 className="text-3xl text-darkBlue font-bold text-center mb-4 pt-36 pb-24"
                 initial={{ opacity: 0, y: -20 }}
@@ -102,6 +106,8 @@ export default function NewPatientWithTimeline() {
             >
                 {title}
             </motion.h1>
+
+            {/* Subtitle */}
             <motion.p
                 className="text-center text-darkBlue pb-12"
                 initial={{ opacity: 0, y: -10 }}
@@ -111,7 +117,8 @@ export default function NewPatientWithTimeline() {
                 {subtitle}
             </motion.p>
 
-            <div className="space-y-6 mt-12" ref={ref}>
+            {/* Steps */}
+            <div className="space-y-6 mt-12" ref={stepsRef}>
                 {steps.map((step, index) => (
                     <motion.div
                         key={index}
@@ -146,9 +153,18 @@ export default function NewPatientWithTimeline() {
                 ))}
             </div>
 
-            <div className="my-16">
+            {/* Get Started Section with Spotlight */}
+            <div className="my-16 relative" ref={getStartedRef}>
+                {/* Spotlight */}
+                <div className="z-0 top-[-50%] right-[-10%] w-full h-full absolute">
+                    <Spotlight fill="#008387"/>
+                </div>
+
+                {/* Get Started Content */}
                 <ContainerScroll
-                    titleComponent={<h2 className="text-2xl font-semibold">{getStarted}</h2>}
+                    titleComponent={
+                        <h2 className="text-2xl font-semibold relative z-10">{getStarted}</h2>
+                    }
                 >
                     <Image
                         src="/assets/images/telegram-chat.svg"
@@ -160,6 +176,7 @@ export default function NewPatientWithTimeline() {
                 </ContainerScroll>
             </div>
 
+            {/* Map Image Section */}
             <div className="relative mt-8">
                 <div className="absolute inset-0 z-0 flex justify-center items-center translate-y-16">
                     <img
@@ -188,6 +205,7 @@ export default function NewPatientWithTimeline() {
                 </motion.div>
             </div>
 
+            {/* Help Section */}
             <motion.div
                 className="mt-8 text-center"
                 initial={{ opacity: 0 }}

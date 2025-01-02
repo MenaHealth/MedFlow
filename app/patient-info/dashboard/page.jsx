@@ -320,7 +320,6 @@ export default function PatientTriage() {
       </Button>
     )}
   </div>
-=======
       <div className="w-full relative dashboard-page mt-16">
         <div className="flex items-center py-3">
           <h2

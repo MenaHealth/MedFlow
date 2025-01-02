@@ -302,15 +302,24 @@ export default function PatientTriage() {
 
   return (
     <>
-      <div className="w-full relative dashboard-page">
-        <div className="flex items-center py-3">
-          <h2
-            className="flex-1 text-center font-bold"
-            style={{ fontSize: "24px" }}
-          >
-            <span className="blue_gradient">Patient List</span>
-          </h2>
-        </div>  
+<div className="w-full relative dashboard-page">
+  <div className="flex items-center justify-between py-3">
+    <h2
+      className="flex-1 text-center font-bold"
+      style={{ fontSize: "24px" }}
+    >
+      <span className="blue_gradient">Patient List</span>
+    </h2>
+    {/* Render the button only if the user is an Evac */}
+    {session?.user?.accountType === "Evac" && (
+      <Button
+        onClick={() => router.push('/create-patient')} 
+        className="bg-orange-500 text-white px-4 py-2 rounded-md"
+      >
+        Create Patient
+      </Button>
+    )}
+  </div>
         <div className="flex flex-wrap gap-2 mb-4">
           {priorityFilter !== "all" && (
             <div className="bg-green-100 text-green-800 px-2 py-1 rounded flex items-center">

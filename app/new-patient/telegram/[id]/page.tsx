@@ -6,8 +6,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { BarLoader } from "react-spinners";
 import { NewPatientFormTelegramView } from "@/components/form/NewPatientFormTelegramView";
-import ConfirmationModal from "@/components/newPatient/ConfirmationModal";
-import ErrorModal from "@/components/newPatient/ErrorModal";
+import ConfirmationModal from "@/components/newPatient/intakeForm/ConfirmationModal";
+import ErrorModal from "@/components/newPatient/intakeForm/ErrorModal";
 import { NewPatientFormTelegramValues } from "@/components/form/NewPatientFormTelegramViewModel";
 import { Button } from "@/components/ui/button";
 

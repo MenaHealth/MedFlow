@@ -519,14 +519,20 @@ export default function PatientTriage() {
                     <TableRow
                         key={index}
                         sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                      <TableCellWithTooltip tooltipText={row._id} maxWidth="100px">
-                        <div
+                      <TableCellWithTooltip tooltipText={row._id}>
+                        <Button
+                            variant="outline"
                             onClick={() => handlePatientClick(row._id, row.doctor)}
-                            className="block overflow-hidden text-ellipsis text-sm"
-                            style={{ maxWidth: '100px', whiteSpace: 'nowrap', cursor: (session?.user?.accountType === 'Doctor' && (row.doctor && Object.keys(row.doctor).length > 0 && row.doctor?.email !== session.user.email)) ? 'default' : 'pointer' }}
-                        >
+                            style={{
+                              maxWidth: '100px',
+                              whiteSpace: 'nowrap',
+                              cursor: (session?.user?.accountType === 'Doctor' && (row.doctor && Object.keys(row.doctor).length > 0 && row.doctor?.email !== session.user.email))
+                                  ? 'default'
+                                  : 'pointer',
+                            }}
+                            >
                           {row._id}
-                        </div>
+                        </Button>
                       </TableCellWithTooltip>
                       <TableCell align="center" style={{ minWidth: '150px' }}>{row.lastName}</TableCell>
                       <TableCell align="center">{row.age || (row.dob ? dobToAge(row.dob) : '')}</TableCell>

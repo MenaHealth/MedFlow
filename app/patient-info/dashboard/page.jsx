@@ -289,8 +289,7 @@ export default function PatientTriage() {
   }, [router]);
 
   const handlePatientClick = (patientId, doctor) => {
-    console.log(doctor)
-    if (doctor && Object.keys(doctor).length > 0) {
+    if (session.user?.accountType === 'Doctor' && doctor && Object.keys(doctor).length > 0) {
       if (doctor.email !== session.user.email) {
         return;
       }
